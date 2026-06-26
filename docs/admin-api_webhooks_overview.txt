@@ -1,0 +1,60 @@
+Source: https://docs.ghost.org/admin-api/webhooks/overview#the-webhook-object
+
+Overview - Ghost Developer Docs
+Documentation Index
+Fetch the complete documentation index at:
+/llms.txt
+Use this file to discover all available pages before exploring further.
+Skip to main content
+Ghost Developer Docs
+home page
+Search...
+⌘
+K
+Search...
+Navigation
+Webhooks
+Overview
+Home
+Documentation
+Migration Guides
+Advanced Tools
+Admin API
+Webhooks
+Overview
+Webhooks allow you to build or set up
+custom integrations
+, which subscribe to certain events in Ghost. When one of such events is triggered, Ghost sends a HTTP POST payload to the webhook’s configured URL. For instance, when a new post is published Ghost can send a notification to configured endpoint to trigger a search index re-build, slack notification, or whole site deploy. For more information about webhooks read
+this webhooks reference
+.
+POST
+/
+admin
+/
+webhooks
+/
+PUT
+/
+admin
+/
+webhooks
+/{
+id
+}/
+DELETE
+/
+admin
+/
+webhooks
+/{
+id
+}/
+​
+The webhook object
+Webhooks can be created, updated, and removed. There is no API to retrieve webhook resources independently.
+Suggest edits
+Raise issue
+Site
+Creating a Webhook
+⌘
+I

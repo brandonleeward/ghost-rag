@@ -1,0 +1,218 @@
+Source: https://docs.ghost.org/faq/node-versions#node-compatibility-matrix
+
+Supported Node Versions - Ghost Developer Docs
+Documentation Index
+Fetch the complete documentation index at:
+/llms.txt
+Use this file to discover all available pages before exploring further.
+Skip to main content
+Ghost Developer Docs
+home page
+Search...
+⌘
+K
+Search...
+Navigation
+Supported Node Versions
+Home
+Documentation
+Migration Guides
+Supported Node Versions
+Ghost’s current required Node version is Node v22 LTS.
+Version
+Support Level
+20.x (Node v20 Iron LTS)
+Unsupported
+21.x
+Unsupported
+22.x (Node v22 Jod LTS)
+Required
+23.x and above
+Unsupported
+We use the recommended version of Node.js in production on Ghost(Pro), which means it’s heavily tested and the Ghost core team actively fixes issues.
+Running Ghost on the latest version of Node.js is not guaranteed to work, and we can’t offer support for any issues. Ghost is a small team so we keep version support to a minimum to give us time to build new features. 🏃‍♀️
+Compatible versions of Node.js can be downloaded from the Node.js releases page. You can also install multiple versions of Node using nave or nvm.
+​
+Upgrade Node.js
+When upgrading Node.js, you need to run the update for Node and then re-install Ghost’s dependencies. This is because Ghost has several binary dependencies that are compiled for the specific Node.js version. Without reinstalling dependencies, Ghost will fail to start with strange error messages.
+To upgrade the steps are:
+Download and import the Nodesource GPG key
+sudo
+apt-get
+update
+sudo
+apt-get
+install
+-y
+ca-certificates
+curl
+gnupg
+sudo
+mkdir
+-p
+/etc/apt/keyrings
+curl
+-fsSL
+https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+|
+sudo
+gpg
+--dearmor
+-o
+/etc/apt/keyrings/nodesource.gpg
+Create deb repository
+NODE_MAJOR
+=
+22
+# Use a supported version
+echo
+"deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_
+$NODE_MAJOR
+.x nodistro main"
+|
+sudo
+tee
+/etc/apt/sources.list.d/nodesource.list
+Run update and install
+sudo
+apt-get
+update
+sudo
+apt-get
+install
+nodejs
+-y
+Run
+ghost version
+to get your current Ghost version
+ghost update [version] --force
+to force Ghost to reinstall your current version of Ghost, to trigger a re-install of dependencies.
+It’s not recommended to update Node and Ghost at the same time. Reinstalling the current version of Ghost ensures that Node is updated correctly first so that you can be sure that Ghost will update smoothly.
+​
+Common Errors
+Script deprecation warning
+: Node changed its distribution method, which requires adjusting configurations in order to upgrade.
+Learn more
+.
+If you attempt to install Ghost with an unsupported version of Node.js, you may encounter the error
+ERROR: Unsupported version of Node
+and/or
+Exit status 231
+. To resolve this, you must install a compatible version of Node.js.
+​
+Why follow LTS?
+We encourage the community to support each other, but more often than not it falls to us to ensure our users have a good experience.
+Ghost is a tiny team with ambitious plans and we need to focus on delivering a useful product. By following LTS we can focus our efforts on meaningful work and keep our time spent on node versioning to a minimum. It also allows us to delay the support impact until later and gives us a chance to grow our team to cope with the support in the meantime.
+If you want to run Ghost on the latest version of Node, you can, however, we can’t offer support for any issues.
+​
+Node compatibility matrix
+Released
+Ghost
+Node.js
+Notes
+2017/12/05
+≥1.18.3
+^4.5.0, ^6.9.0 or ^8.9.0
+2018/04/17
+≥1.22.3
+Bumped Ghost-CLI to ^1.7.0, which requires ^4.5.0, ^6.9.0 or ^8.9.0
+2018/05/04
+≥1.22.5
+^6.9.0 or ^8.9.0
+Removed Node 4
+2018/07/24
+1.25.0
+Final 1.x migrations
+2019/12/18
+1.26.2
+Final 1.x version
+2018/08/16
+2.0.0
+Bumped Ghost-CLI to ^1.9.0, which requires ^6.9.0 or ^8.9.0
+2018/10/30
+≥2.4.0
+^6.9.0, ^8.9.0 or ^10.12.0
+Added Node 10
+2018/11/07
+≥2.5.0
+^6.9.0, ^8.9.0 or ^10.13.0
+Bumped Node 10
+2019/06/04
+≥2.23.2
+^8.9.0 or ^10.13.0
+Removed Node 6
+2019/07/16
+≥2.25.7
+^8.10.0 or ^10.13.0
+Bumped Node 8
+2019/10/14
+2.37.0
+Final 2.x migrations
+2021/01/29
+2.38.3
+Final 2.x version
+2019/10/22
+3.0.0
+^8.16.0, ^10.13.0 or ^12.10.0
+Added Node 12 and bumped Ghost-CLI to ^1.12.0, which requires ^8.16.0, ^10.13.0 or ^12.10.0
+2020/03/02
+≥3.9.0
+^10.13.0 or ^12.10.0
+Removed Node 8
+2020/11/03
+≥3.37.0
+^10.13.0, ^12.10.0 or ^14.15.0
+Added Node 14
+2021/01/26
+3.41.0
+Final 3.x migrations
+2022/01/22
+3.42.9
+Final 3.x version
+2021/03/15
+4.0.0
+Bumped Ghost-CLI to ^1.16.0, which requires ^10.13.0, ^12.10.0 or ^14.15.0
+2021/05/11
+≥4.5.0
+^12.22.1 or ^14.16.1
+Removed Node 10 and bumped Ghost-CLI to ^1.17.0, which requires ^10.13.0, ^12.10.0 or ^14.15.0
+2021/10/29
+≥4.21.0
+^12.22.1, ^14.17.0 or ^16.13.0
+Added Node 16
+2022/04/22
+≥4.45.0
+^14.17.0 or ^16.13.0
+Removed Node 12
+2023/01/05
+≥5.27.0
+^14.18.0 or ^16.13.0 or ^18.12.1
+Added Node 18 and bumped Node 14 minimum
+2023/05/05
+≥5.47.0
+^16.13.0 or ^18.12.1
+Removed Node 14
+2023/10/27
+≥5.71.0
+^18.12.1
+Removed Node 16
+2024/04/19
+≥5.82.3
+^18.12.1 || ^20.11.1
+Added Node 20
+2025/02/21
+≥5.110.0
+^18.12.1 || ^20.11.1 || ^22.13.1
+Added Node 22 and bumped Ghost-CLI to ^1.27.0
+2025/06/18
+≥5.126.0
+^18.18.0 || ^20.11.1 || ^22.13.1
+Bumped Node 18 minimum
+2025/08/04
+≥6.0.0
+^22.13.1
+Removed Node 18 and Node 20
+Suggest edits
+Raise issue
+⌘
+I

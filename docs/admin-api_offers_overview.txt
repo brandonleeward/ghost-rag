@@ -1,0 +1,167 @@
+Source: https://docs.ghost.org/admin-api/offers/overview#the-offer-object
+
+Overview - Ghost Developer Docs
+Documentation Index
+Fetch the complete documentation index at:
+/llms.txt
+Use this file to discover all available pages before exploring further.
+Skip to main content
+Ghost Developer Docs
+home page
+Search...
+⌘
+K
+Search...
+Navigation
+Offers
+Overview
+Home
+Documentation
+Migration Guides
+Advanced Tools
+Admin API
+Offers
+Overview
+Use offers to create a discount or special price for members signing up on a tier.
+​
+The offer object
+When you fetch, create, or edit an offer, the API responds with an array of one or more offer objects. These objects include related
+tier
+data.
+// GET /admin/offers/
+{
+"offers"
+: [
+{
+"id"
+:
+"6230dd69e8bc4d3097caefd3"
+,
+"name"
+:
+"Black friday"
+,
+"code"
+:
+"black-friday"
+,
+"display_title"
+:
+"Black friday sale!"
+,
+"display_description"
+:
+"10% off our yearly price"
+,
+"type"
+:
+"percent"
+,
+"cadence"
+:
+"year"
+,
+"amount"
+:
+10
+,
+"duration"
+:
+"once"
+,
+"duration_in_months"
+:
+null
+,
+"currency_restriction"
+:
+false
+,
+"currency"
+:
+null
+,
+"status"
+:
+"active"
+,
+"redemption_count"
+:
+0
+,
+"tier"
+: {
+"id"
+:
+"62307cc71b4376a976734038"
+,
+"name"
+:
+"Platinum"
+}
+}
+]
+}
+Key
+Description
+display_title
+Name displayed in the offer window
+display_description
+Text displayed in the offer window
+name
+Internal name for an offer, must be unique
+code
+Shortcode for the offer, for example:
+https://yoursite.com/black-friday
+status
+active
+or
+archived
+- denotes if the offer is active or archived
+type
+percent
+or
+fixed
+- whether the amount off is a percentage or fixed
+amount
+Offer discount amount, as a percentage or fixed value as set in
+type
+.
+Amount is always denoted by the smallest currency unit (e.g., 100 cents instead of $1.00 in USD)
+currency
+fixed
+type offers only - specifies tier’s currency as three letter ISO currency code
+currency_restriction
+Denotes whether the offer `currency` is restricted. If so, changing the currency invalidates the offer
+duration
+once
+/
+forever
+/
+repeating
+.
+repeating
+duration is only available when
+cadence
+is
+month
+duration_in_months
+Number of months offer should be repeated when
+duration
+is
+repeating
+redemption_count
+Number of times the offer has been redeemed
+tier
+Tier on which offer is applied
+cadence
+month
+or
+year
+- denotes if offer applies to tier’s monthly or yearly price
+Suggest edits
+Raise issue
+Sender email validation
+Creating an Offer
+⌘
+I

@@ -1,0 +1,231 @@
+Source: https://docs.ghost.org/content-api/authors#content-area
+
+Authors - Ghost Developer Docs
+Documentation Index
+Fetch the complete documentation index at:
+/llms.txt
+Use this file to discover all available pages before exploring further.
+Skip to main content
+Ghost Developer Docs
+home page
+Search...
+⌘
+K
+Search...
+Navigation
+Content API
+Authors
+Home
+Documentation
+Migration Guides
+{
+"authors"
+: [
+{
+"slug"
+:
+"cameron"
+,
+"id"
+:
+"5ddc9b9510d8970038255d02"
+,
+"name"
+:
+"Cameron Almeida"
+,
+"profile_image"
+:
+"https://docs.ghost.io/content/images/2019/03/1c2f492a-a5d0-4d2d-b350-cdcdebc7e413.jpg"
+,
+"cover_image"
+:
+null
+,
+"bio"
+:
+"Editor at large."
+,
+"website"
+:
+"https://example.com"
+,
+"location"
+:
+"Cape Town"
+,
+"facebook"
+:
+"example"
+,
+"twitter"
+:
+"@example"
+,
+"threads"
+:
+null
+,
+"bluesky"
+:
+"ghost.org"
+,
+"mastodon"
+:
+null
+,
+"tiktok"
+:
+null
+,
+"youtube"
+:
+null
+,
+"instagram"
+:
+null
+,
+"linkedin"
+:
+null
+,
+"meta_title"
+:
+null
+,
+"meta_description"
+:
+null
+,
+"url"
+:
+"https://docs.ghost.io/author/cameron/"
+}
+]
+}
+Advanced Tools
+Content API
+Authors
+Authors are a subset of
+users
+who have published posts associated with them.
+GET
+/
+content
+/
+authors
+/
+GET
+/
+content
+/
+authors
+/{
+id
+}/
+GET
+/
+content
+/
+authors
+/
+slug
+/{
+slug
+}/
+Authors that are not associated with a post are not returned. You can supply
+include=count.posts
+to retrieve the number of posts associated with an author.
+{
+"authors"
+: [
+{
+"slug"
+:
+"cameron"
+,
+"id"
+:
+"5ddc9b9510d8970038255d02"
+,
+"name"
+:
+"Cameron Almeida"
+,
+"profile_image"
+:
+"https://docs.ghost.io/content/images/2019/03/1c2f492a-a5d0-4d2d-b350-cdcdebc7e413.jpg"
+,
+"cover_image"
+:
+null
+,
+"bio"
+:
+"Editor at large."
+,
+"website"
+:
+"https://example.com"
+,
+"location"
+:
+"Cape Town"
+,
+"facebook"
+:
+"example"
+,
+"twitter"
+:
+"@example"
+,
+"threads"
+:
+null
+,
+"bluesky"
+:
+"ghost.org"
+,
+"mastodon"
+:
+null
+,
+"tiktok"
+:
+null
+,
+"youtube"
+:
+null
+,
+"instagram"
+:
+null
+,
+"linkedin"
+:
+null
+,
+"meta_title"
+:
+null
+,
+"meta_description"
+:
+null
+,
+"url"
+:
+"https://docs.ghost.io/author/cameron/"
+}
+]
+}
+Suggest edits
+Raise issue
+Tags
+Settings
+⌘
+I

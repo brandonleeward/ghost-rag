@@ -1,0 +1,60 @@
+Source: https://docs.ghost.org/content-api/pages#content-area
+
+Pages - Ghost Developer Docs
+Documentation Index
+Fetch the complete documentation index at:
+/llms.txt
+Use this file to discover all available pages before exploring further.
+Skip to main content
+Ghost Developer Docs
+home page
+Search...
+⌘
+K
+Search...
+Navigation
+Content API
+Pages
+Home
+Documentation
+Migration Guides
+Advanced Tools
+Content API
+Pages
+Pages are static resources that are not included in channels or collections on the Ghost front-end. The API will only return pages that were created as resources and will not contain routes created with
+dynamic routing
+.
+GET
+/
+content
+/
+pages
+/
+GET
+/
+content
+/
+pages
+/{
+id
+}/
+GET
+/
+content
+/
+pages
+/
+slug
+/{
+slug
+}/
+Pages are structured identically to posts. The response object will look the same, only the resource key will be
+pages
+.
+By default, pages are ordered by title when fetching more than one.
+Suggest edits
+Raise issue
+Posts
+Tags
+⌘
+I
