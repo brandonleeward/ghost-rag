@@ -1,0 +1,154 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading/mariadb-community-server-upgrade-paths/upgrading-from-mariadb-11-3-to-mariadb-11-4
+
+Upgrading from MariaDB 11.3 to MariaDB 11.4 | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Platform Specific Upgrade Guides
+MariaDB Community Server Upgrade Paths
+Upgrading from MariaDB 11.8 to MariaDB 12.3
+Upgrading from MariaDB 11.4 to MariaDB 11.8
+Upgrading from MariaDB 11.3 to MariaDB 11.4
+Upgrading from MariaDB 10.11 to MariaDB 11.4
+Upgrading from MariaDB 10.6 to MariaDB 10.11
+Upgrading from MariaDB 10.5 to MariaDB 10.6
+Archived Guides (Unmaintained CS Versions)
+General Upgrade Information
+MariaDB Enterprise Server Upgrade Paths
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Upgrading from MariaDB 11.3 to MariaDB 11.4
+Instructions for upgrading from the rolling release 11.3 to the long-term support release 11.4, detailing package updates and system table upgrades.
+This page includes details for upgrading from
+MariaDB 11.3
+to
+MariaDB 11.4
+. Note that
+MariaDB 11.3
+is a
+rolling release
+, and MariaDB 11.4 is a
+long-term maintenance release
+. After MariaDB 11.4.2, one can continue to the next rolling release, 11.5.2, 11.6.2 and so on, or remain on the long-term series,
+MariaDB 11.4.3
+. MariaDB 11.4.4 etc.
+How to Upgrade
+For Windows, see
+Upgrading MariaDB on Windows
+.
+For MariaDB Galera Cluster, see
+Upgrading from MariaDB 10.6 to MariaDB 10.11 with Galera Cluster
+instead.
+Before you upgrade, it would be best to take a backup of your database. This is always a good idea to do before an upgrade. We would recommend
+mariadb-backup
+.
+The suggested upgrade procedure is:
+Modify the repository configuration, so the system's package manager installs MariaDB 11.4.
+On Debian, Ubuntu, and other similar Linux distributions, see
+Updating the MariaDB APT repository to a New Major Release
+for more information.
+On RHEL, CentOS, Fedora, and other similar Linux distributions, see
+Updating the MariaDB YUM repository to a New Major Release
+for more information.
+On SLES, OpenSUSE, and other similar Linux distributions, see
+Updating the MariaDB ZYpp repository to a New Major Release
+for more information.
+Stop MariaDB
+.
+Uninstall the old version of MariaDB.
+On Debian, Ubuntu, and other similar Linux distributions, execute the following:
+sudo apt-get remove mariadb-server
+On RHEL, CentOS, Fedora, and other similar Linux distributions, execute the following:
+sudo yum remove MariaDB-server
+On SLES, OpenSUSE, and other similar Linux distributions, execute the following:
+sudo zypper remove MariaDB-server
+Install the new version of MariaDB.
+On Debian, Ubuntu, and other similar Linux distributions, see
+Installing MariaDB Packages with APT
+for more information.
+On RHEL, CentOS, Fedora, and other similar Linux distributions, see
+Installing MariaDB Packages with YUM
+for more information.
+On SLES, OpenSUSE, and other similar Linux distributions, see
+Installing MariaDB Packages with ZYpp
+for more information.
+Make any desired changes to configuration options in
+option files
+, such as
+my.cnf
+. This includes removing any options that are no longer supported.
+Start MariaDB
+.
+Run
+mariadb-upgrade
+, to:
+Ensure that the system tables in the
+mysql
+database are fully compatible with the new version.
+Perform a very quick check of all tables and marks them as compatible with the new version of MariaDB.
+Incompatible Changes Between 11.3 and 11.4
+Options That Have Been Removed
+The following options should be removed if you use them in your
+option files
+:
+Option
+Reason
+debug_no_thread_alarm
+Unused code.
+See Also
+Features in MariaDB 11.4
+Features in MariaDB 11.3
+Upgrading from MariaDB 11.2 to MariaDB 11.3
+Upgrading from MariaDB 11.1 to MariaDB 11.2
+Upgrading from MariaDB 10.11 to MariaDB 11.4
+Upgrading from MariaDB 10.6 to MariaDB 10.11 with Galera Cluster
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Upgrading from MariaDB 11.4 to MariaDB 11.8
+Next
+Upgrading from MariaDB 10.11 to MariaDB 11.4
+Last updated
+4 months ago
+Was this helpful?
+How to Upgrade
+Incompatible Changes Between 11.3 and 11.4
+See Also
+Was this helpful?

@@ -1,0 +1,78 @@
+Source: https://www.tinybird.co/docs/v2/commands/tb-dev
+
+tb dev · Tinybird Docs
+Sign In
+Sign Up
+tb dev
+¶
+Copy as MD
+Use
+tb dev
+to build your project and watch for changes. On each datafile change, the project rebuilds automatically.
+For example:
+tb dev
+
+» Building project...
+✓ datasources/user_actions.datasource created
+✓ endpoints/user_actions_line_chart.pipe created
+✓ endpoints/user_actions_total_widget.pipe created
+✓ Rebuild completed in 0.2s
+
+Watching for changes...
+Run SQL queries and other commands in a separate terminal while
+tb dev
+is running:
+tb sql "SELECT * FROM user_actions LIMIT 5"
+tb endpoint ls
+Options
+¶
+Option
+Description
+--with-connections
+Creates data linkers for connection data sources (S3, Kafka, GCS).
+--no-connections
+Disables connector linker creation during
+tb dev
+.
+UI access
+¶
+When
+tb dev
+is running, Tinybird exposes your project in the Tinybird UI:
+tb dev
+
+» Exposing project to Tinybird UI...
+* Access your project at https://cloud.tinybird.co/local/7181/your_workspace/project
+Developing with production data
+¶
+You can develop with production data by pointing to a branch created with the
+--last-partition
+flag:
+tb branch create my_feature_branch --last-partition
+Then run:
+tb --branch=my_feature_branch dev
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✓ Yes (default)
+Starts a dev session in Tinybird Local.
+--cloud
+✗ No
+Dev sessions are not available in Tinybird Cloud.
+--branch=BRANCH_NAME
+✓ Yes
+Starts a dev session in a branch.
+Updated
+3 months ago
+Looking for Classic docs?
+On this page
+tb dev
+Options
+UI access
+Developing with production data
+Environment support
+forward
+Ask AI

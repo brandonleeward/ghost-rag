@@ -1,0 +1,151 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/uniqtheta-functions
+
+UniqTheta Functions reference · Tinybird Docs
+Sign In
+Sign Up
+uniqTheta functions
+¶
+Copy as MD
+UniqTheta functions perform set operations like union, intersection, and difference on two
+uniqThetaSketch
+objects. These functions return a new
+uniqThetaSketch
+object representing the result of the operation.
+A
+uniqThetaSketch
+object is an approximate data structure used to estimate the number of unique elements in a set. It is typically created using the
+uniqThetaState
+aggregate function.
+uniqThetaUnion
+¶
+Combines two
+uniqThetaSketch
+objects to produce a new sketch representing the approximate union of their unique elements.
+Syntax
+¶
+uniqThetaUnion(uniqThetaSketch, uniqThetaSketch)
+Arguments
+¶
+uniqThetaSketch
+:
+uniqThetaSketch
+. The first input sketch.
+uniqThetaSketch
+:
+uniqThetaSketch
+. The second input sketch.
+Returns
+¶
+A new
+uniqThetaSketch
+object containing the approximate union of the input sketches.
+uniqThetaSketch
+.
+Example
+¶
+SELECT
+    finalizeAggregation(uniqThetaUnion(a, b)) AS a_union_b,
+    finalizeAggregation(a) AS a_cardinality,
+    finalizeAggregation(b) AS b_cardinality
+FROM
+(
+    SELECT
+        arrayReduce('uniqThetaState', [1, 2]) AS a,
+        arrayReduce('uniqThetaState', [2, 3, 4]) AS b
+)
+Result:
+┌─a_union_b─┬─a_cardinality─┬─b_cardinality─┐
+│         4 │             2 │             3 │
+└───────────┴───────────────┴───────────────┘
+uniqThetaIntersect
+¶
+Calculates the approximate intersection of unique elements present in two
+uniqThetaSketch
+objects, returning a new sketch.
+Syntax
+¶
+uniqThetaIntersect(uniqThetaSketch, uniqThetaSketch)
+Arguments
+¶
+uniqThetaSketch
+:
+uniqThetaSketch
+. The first input sketch.
+uniqThetaSketch
+:
+uniqThetaSketch
+. The second input sketch.
+Returns
+¶
+A new
+uniqThetaSketch
+object containing the approximate intersection of the input sketches.
+uniqThetaSketch
+.
+Example
+¶
+SELECT
+    finalizeAggregation(uniqThetaIntersect(a, b)) AS a_intersect_b,
+    finalizeAggregation(a) AS a_cardinality,
+    finalizeAggregation(b) AS b_cardinality
+FROM
+(
+    SELECT
+        arrayReduce('uniqThetaState', [1, 2]) AS a,
+        arrayReduce('uniqThetaState', [2, 3, 4]) AS b
+)
+Result:
+┌─a_intersect_b─┬─a_cardinality─┬─b_cardinality─┐
+│             1 │             2 │             3 │
+└───────────────┴───────────────┴───────────────┘
+uniqThetaNot
+¶
+Determines the approximate set difference (elements in the first sketch but not in the second) between two
+uniqThetaSketch
+objects, yielding a new sketch.
+Syntax
+¶
+uniqThetaNot(uniqThetaSketch, uniqThetaSketch)
+Arguments
+¶
+uniqThetaSketch
+:
+uniqThetaSketch
+. The first input sketch (minuend).
+uniqThetaSketch
+:
+uniqThetaSketch
+. The second input sketch (subtrahend).
+Returns
+¶
+A new
+uniqThetaSketch
+object containing the approximate difference of the input sketches.
+uniqThetaSketch
+.
+Example
+¶
+SELECT
+    finalizeAggregation(uniqThetaNot(a, b)) AS a_not_b,
+    finalizeAggregation(a) AS a_cardinality,
+    finalizeAggregation(b) AS b_cardinality
+FROM
+(
+    SELECT
+        arrayReduce('uniqThetaState', [2, 3, 4]) AS a,
+        arrayReduce('uniqThetaState', [1, 2]) AS b
+)
+Result:
+┌─a_not_b─┬─a_cardinality─┬─b_cardinality─┐
+│       2 │             3 │             2 │
+└─────────┴───────────────┴───────────────┘
+Updated
+3 weeks ago
+On this page
+uniqTheta functions
+uniqThetaUnion
+uniqThetaIntersect
+uniqThetaNot
+forward
+classic
+Ask AI

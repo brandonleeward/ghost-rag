@@ -1,0 +1,258 @@
+Source: https://www.tinybird.com/docs/classic/get-data-in/table-functions/postgresql
+
+Classic: PostgreSQL table function · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+PostgreSQL table function
+BETA
+¶
+Copy as MD
+The Tinybird
+postgresql()
+table function is currently in public beta.
+The Tinybird
+postgresql()
+table function allows you to read data from your existing PostgreSQL database into Tinybird, then schedule a regular copy pipe to orchestrate synchronization. You can load full tables, and every run performs a full replace on the data source.
+To use it, define a node using standard SQL and the
+postgresql
+function keyword, then publish the node as a copy pipe that does a sync on every run. See
+Table functions
+for general information and tips.
+Setting secrets
+¶
+Table functions require authentication credentials (such as AWS keys) that must be stored securely. Tinybird provides different methods for managing secrets depending on the version you're using.
+Using the Variables API (Classic)
+¶
+In Tinybird Classic, you must set your credentials using the Environment Variables API:
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  --data-urlencode "name=pg_username" \
+  --data-urlencode "value=postgres" \
+  https://<TB_HOST_URL>/v0/variables/
+For more details, see the
+Environment Variables API
+documentation.
+Using the CLI (Forward)
+¶
+In Tinybird Forward, you manage secrets using the
+tb secret
+command:
+tb secret set pg_username postgres
+tb secret set pg_password your_password
+For more details, see the
+tb secret
+command documentation.
+Once you've set up your secrets, you can reference them in your SQL with the
+tb_secret
+function as shown in the Syntax section below.
+Syntax
+¶
+Create a new copy pipe node. Call the
+postgresql
+table function and pass the hostname and port, database, table, user, and password:
+Example query logic
+SELECT *
+FROM postgresql(
+  'aws-0-eu-central-1.TODO.com:3866',
+  '<YOUR_PG_DB>',
+  '<YOUR_PG_TABLE>',
+  {{tb_secret('pg_username')}},
+  {{tb_secret('pg_password')}}
+)
+
+TYPE COPY
+TARGET_DATASOURCE pg_copy_target_ds
+Publish this node as a copy pipe. You can choose to append only new data or replace all data.
+Type support and inference
+¶
+Here's a detailed conversion table:
+PostgreSQL data type
+Tinybird data type
+BOOLEAN
+UInt8 or Bool
+SMALLINT
+Int16
+INTEGER
+Int32
+BIGINT
+Int64
+REAL
+Float32
+DOUBLE PRECISION
+Float64
+NUMERIC or DECIMAL
+Decimal(p, s)
+CHAR(n)
+FixedString(n)
+VARCHAR (n)
+String
+TEXT
+String
+BYTEA
+String
+TIMESTAMP
+DateTime
+TIMESTAMP WITH TIME ZONE
+DateTime (with appropriate timezone handling)
+DATE
+Date
+TIME
+String (since there is no direct TIME type)
+TIME WITH TIME ZONE
+String
+INTERVAL
+String
+UUID
+UUID
+ARRAY
+Array(T) where T is the array element type
+JSON
+String or JSON
+JSONB
+String
+INET
+String
+CIDR
+String
+MACADDR
+String
+ENUM
+Enum8 or Enum16
+GEOMETRY
+String
+Enabling the PostgreSQL Table Function
+¶
+In Production
+¶
+To enable the PostgreSQL table function in your production workspace, please contact Tinybird support. They will enable the function for your specific workspace.
+For Local Development (Forward only)
+¶
+After the feature is enabled for your Workspace, it becomes available for local development automatically. You do not need to take any extra steps to enable it for local use.
+Using the PostgreSQL Table Function Locally (Forward only)
+¶
+There are two primary scenarios for connecting to a PostgreSQL database from Tinybird Local:
+Connecting to PostgreSQL Running on Your Host Machine
+¶
+When connecting to PostgreSQL running directly on your local machine (not in a container), keep the following considerations in mind:
+Network Connection
+: The connection to your PostgreSQL server originates from within the Tinybird Local container (Docker or where you're running Tinybird Local).
+Server Reachability
+: Ensure your PostgreSQL server is reachable from inside the Docker network.
+Credentials
+: You must set the secrets for your PostgreSQL credentials in your local Tinybird project. See the
+tb secret
+documentation for details. You can provide default values for these credentials, but note that defaults can only be defined inside the pipe SQL itself—not through the CLI. You can set your credentials using:
+tb secret set pg_username <YOUR_PG_USERNAME>
+tb secret set pg_password <YOUR_PG_PASSWORD>
+Server Address
+: Use the container-reachable address in your queries, not
+localhost
+.
+Example query:
+NODE get_ids
+SQL >
+%
+SELECT id
+FROM postgresql(
+ 'host.docker.internal:5432',
+  '<YOUR_PG_DB>',
+  '<YOUR_PG_TABLE>',
+  {{ tb_secret('pg_username', '<YOUR_DEFAULT_USERNAME>') }},
+  {{ tb_secret('pg_password', '<YOUR_DEFAULT_PWD>') }}
+)
+
+TYPE COPY
+TARGET_DATASOURCE pg_copy_target_ds
+Connecting to PostgreSQL Running in a Docker Container
+¶
+When connecting to a PostgreSQL container running in Docker, follow these steps to set up network communication between Tinybird Local and your PostgreSQL container:
+Create a shared Docker network
+for PostgreSQL and Tinybird Local to communicate:
+docker network create tbnet
+Run PostgreSQL container in the shared network
+:
+docker run --name local-postgres \
+  --network tbnet \
+  -e POSTGRES_USER=tb_user \
+  -e POSTGRES_PASSWORD=tb_pass \
+  -e POSTGRES_DB=test_db \
+  -p 5432:5432 \
+  -d postgres:15
+Connect Tinybird Local to the shared network
+:
+docker network connect tbnet tinybird-local
+Verify network connectivity
+by checking that both containers are on the same network. The NetworkID, Gateway, and IPAddress values should match:
+docker inspect tinybird-local --format '{{json .NetworkSettings.Networks}}' | jq
+docker inspect local-postgres --format '{{json .NetworkSettings.Networks}}' | jq
+Set secrets in Tinybird Local
+to match your PostgreSQL container configuration:
+tb secret set pg_username tb_user
+tb secret set pg_password tb_pass
+Update the PostgreSQL host
+in your query to use the container name as the hostname:
+NODE get_ids
+SQL >
+%
+SELECT id
+FROM postgresql(
+  'local-postgres:5432',  -- Use container name as hostname
+  '<YOUR_PG_DB>',
+  '<YOUR_PG_TABLE>',
+  {{ tb_secret('pg_username') }},
+  {{ tb_secret('pg_password') }}
+)
+
+TYPE COPY
+TARGET_DATASOURCE pg_copy_target_ds
+Build and deploy your pipe
+:
+tb build
+tb deploy
+Test that the connection works
+You can run the copy pipe with
+tb copy run <pipe_name>
+to ensure Postgres data lands in the target Data Source.
+Considerations
+¶
+The following considerations apply to the
+postgresql()
+table function:
+Tinybird doesn't support all PostgreSQL types directly, so some types are mapped to String, which is the most flexible type for arbitrary data.
+For the
+NUMERIC
+and
+DECIMAL
+types,
+Decimal(p, s)
+in Tinybird requires specifying precision (p) and scale (s).
+Time zone support in Tinybird's
+DateTime
+can be managed via additional functions or by ensuring consistent storage and retrieval time zones.
+Some types like
+INTERVAL
+don't have a direct equivalent in Tinybird and are usually stored as String or decomposed into separate fields.
+See also
+¶
+Table functions
+Updated
+3 weeks ago
+On this page
+PostgreSQL table function
+BETA
+Setting secrets
+Using the Variables API (Classic)
+Using the CLI (Forward)
+Syntax
+Type support and inference
+Enabling the PostgreSQL Table Function
+In Production
+For Local Development (Forward only)
+Using the PostgreSQL Table Function Locally (Forward only)
+Connecting to PostgreSQL Running on Your Host Machine
+Connecting to PostgreSQL Running in a Docker Container
+Considerations
+See also
+classic
+Ask AI

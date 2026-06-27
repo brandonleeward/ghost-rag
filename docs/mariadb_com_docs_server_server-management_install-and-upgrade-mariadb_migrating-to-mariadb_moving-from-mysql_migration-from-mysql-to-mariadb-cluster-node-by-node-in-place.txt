@@ -1,0 +1,456 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/migrating-to-mariadb/moving-from-mysql/migration-from-mysql-to-mariadb-cluster-node-by-node-in-place
+
+Migrating from MySQL to MariaDB Galera Cluster (Node-by-Node In-Place) | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+Differences Between MariaDB and Other DBMSs
+DDL Export Guide
+Migrating to MariaDB from MySQL
+MySQL to MariaDB Migration: The Master Guide
+MySQL to MariaDB Compatibility Matrix
+Migrating Galera Cluster
+Migrating from MySQL to MariaDB Galera Cluster (Node-by-Node In-Place)
+MySQL to MariaDB Migrator
+Migrating to MariaDB from PostgreSQL
+Migrating to MariaDB from Oracle
+Migrating to MariaDB from SQL Server
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Migrating from MySQL to MariaDB Galera Cluster (Node-by-Node In-Place)
+Instructions for a rolling migration where individual nodes in a MySQL cluster are taken offline, wiped, and replaced with MariaDB nodes, eventually forming a new cluster.
+Version Requirement
+This guide provides instructions for migrating a
+MySQL 8.0 Galera Cluster
+to a
+MariaDB Galera Cluster 11.4
+. Ensure that your systems meet or exceed these version requirements before proceeding. Please refer to the
+Prerequisites
+for detailed version information.
+The
+End-of-Life (EOL)
+date for continued maintenance and regular binary releases of MySQL Galera Cluster will be
+September 30, 2026
+.
+This guide outlines the procedure for migrating a live MySQL Galera Cluster to a MariaDB Galera Cluster. It follows the process for migrating a live MySQL Galera Cluster to a MariaDB Galera Cluster by replacing the binaries on each node sequentially. This "In-Place" method maintains cluster availability during the migration, although the cluster capacity will be reduced while individual nodes are being processed.
+Prerequisites
+Source:
+MySQL Galera Cluster 8.0.43-26.4.24 or later.
+Target:
+MariaDB Community Server 11.4 (LTS) or later.
+Library:
+MariaDB Galera library 26.4.24 or latest stable edition.
+Tools:
+mysqldump
+(installed with the server).
+mariadb-backup
+(installed with MariaDB).
+Access:
+Root access to the operating system and the database.
+Cluster Backup
+This migration involves uninstalling software and wiping data directories on live nodes.
+A full cluster backup (using Xtrabackup or Volume Snapshot) is mandatory before proceeding.
+Incompatibility Check & Data Preparation
+Perform these steps on the running MySQL Cluster BEFORE shutting down any nodes.
+Incompatibilities and Feature Differences
+MariaDB maintains high levels of compatibility with MySQL, but you still need to
+check for incompatibilities and feature differences
+to select the most suitable MariaDB version compatible with your current MySQL server.
+While MariaDB and MySQL share a common history, they have diverged significantly. You must "clean" the schema and configurations to ensure data compatibility before the migration begins.
+1. Authentication Protocol
+MySQL 8.0 defaults to
+caching_sha256_password
+. MariaDB does not support the
+caching_sha256_password
+authentication protocol in all released versions (which is cumbersome and not secure for in-house attacks, since clear-text passwords are available inside the server).
+Support Status:
+Implemented via
+MDEV-9804
+for version 12.1.1.
+Available in the CS release based on
+MDEV-37600
+.
+Already supported in 11.8 Enterprise Server via
+MENT-2359
+.
+Available in 11.4 Enterprise Server with the December 2025 release as a rebase of
+MDEV-37600
+.
+For MySQL 8.4 Users
+Ensure
+mysql_native_password=ON
+is set in your configuration, or you will receive the error:
+Plugin 'mysql_native_password' is not loaded
+.
+You can check which MySQL users are using SHA-256 or caching_sha256_password by executing:
+You can change the user to use a protocol compatible with both MySQL and MariaDB with:
+2. JSON Column Conversion
+MySQL stores JSON as a native binary type. MariaDB stores JSON as an alias for
+LONGTEXT
+with constraint checks. Galera replication may break if you attempt to replicate binary JSON objects from MySQL to MariaDB.
+Check if you have tables that use the MySQL JSON type:
+You can convert the JSON column to text with:
+3. Encryption and Compression
+Encryption and compression table options are very different in MySQL compared to MariaDB. Logical dump will naturally de-encrypt/de-compress table contents but syntax used for creating tables is not supported by MariaDB.
+For example:
+leads to:
+ERROR 1911 (HY000) at line 1174: Unknown option 'COMPRESSION'
+Therefore, encrypted/compressed tables need to be de-encrypted/de-compressed before starting the conversion, and then encrypted/compressed again afterwards using MariaDB syntax.
+Detect encrypted tables:
+Detect compressed tables:
+Action:
+Run
+ALTER TABLE
+to remove the conflicting
+ENCRYPTION
+and
+COMPRESSION
+attributes. They can be re-enabled using MariaDB syntax after the full migration is complete.
+4. General Tablespaces
+MariaDB does not support MySQL general tablespaces. In MySQL, these are used to store tables in specific external files rather than the default data directory. During migration, this
+TABLESPACE
+argument is ignored.
+Example Scenario:
+In MySQL, a user creates a custom tablespace file at a specific path and assigns a table to it:
+If you examine the table definition in MySQL, you will see the tablespace assignment:
+Migration Behavior:
+When this table is migrated to MariaDB (via
+mysqldump
+), the
+TABLESPACE 'ts1'
+attribute is ignored.
+Result:
+The table
+t1
+will be created as a standard file-per-table in the default MariaDB data directory (e.g.,
+/var/lib/mysql/dbname/t1.ibd
+).
+Loss of Path:
+It will
+not
+use the custom path
+/home/jan/galeradb/node1/ts1.ibd
+.sq
+During cluster migration make sure that
+no new tablespaces are created
+and
+no new tables created inside a general tablespaces
+.
+5. XA Transactions
+Ensure no XA transactions are in a
+PREPARED
+state, as these cannot be migrated cleanly.
+Global Cluster Preparation
+Perform these steps on the running MySQL Cluster.
+1. Create the SST User (Crucial)
+The
+mysql.user
+system table structure differs between vendors and
+will not migrate automatically
+. You must create the SST user now so it exists in the data stream before the switch.
+2. Configure InnoDB Settings
+Ensure these settings are active on the MySQL cluster.
+innodb_file_per_table = 1
+This is the default setting for MySQL and MariaDB. If this is not set, you must use
+mysqldump
+for the entire migration, as specific recommendations regarding tablespaces will not work.
+innodb_flush_log_at_trx_commit = 1
+InnoDB writes the log buffer to the log file and flushes it to disk after every transaction commit. This is the safest option, ensuring no data loss in a crash, though it comes at the cost of slower performance due to frequent disk I/O.
+3. Galera Provider Options
+gcache.size
+: Should be large enough to avoid SST (State Snapshot Transfer) when a node is temporarily out of the cluster. A larger cache increases the chance of a faster IST (Incremental State Transfer).
+See: Customizing gcache.size
+Migrating the First Node ("The Bridge")
+This is the most complex step. This node will bridge the gap between the MySQL cluster and the new MariaDB environment.
+1
+Isolate and Shutdown
+Remove from Load Balancer:
+Ensure no application traffic is hitting this node.
+Clean Shutdown Prep:
+Stop the Service:
+2
+Swap Binaries & Wipe Data
+Uninstall MySQL:
+Remove all MySQL server and client packages using your OS package manager (e.g.,
+apt remove
+,
+dnf remove
+).
+Clean Data Directory:
+One way is to move all files under
+datadir
+to a new directory.
+Install MariaDB:
+Install
+mariadb-server
+and
+mariadb-backup
+.
+3
+Configure MariaDB (
+my.cnf
+)
+Update the configuration file to work with both MariaDB and MySQL.
+Verify Configuration:
+Before starting the service, verify that your configuration file does not contain unsupported options (such as
+regexp-time-limit
+).
+Check
+/tmp/log
+for any errors or warnings about unknown variables and adjust your configuration files if needed.
+Required Settings:
+You
+must
+add these specific settings for the first node:
+4
+Start and Join
+Start the MariaDB service:
+When initiated, the node connects to the MySQL cluster and automatically triggers a
+mysqldump
+on a designated MySQL donor node. It then imports the SQL dump stream, effectively reconstructing the database in MariaDB's native format.
+5
+Post-Join Upgrade
+Once the node is
+Synced
+, run
+mariadb-upgrade
+to fix system tables.
+Manually re-create the
+sst_user
+(and other system users) if
+mariadb-upgrade
+reports issues, as the
+mysql.user
+table structure is not fully compatible.
+Migrating Subsequent Nodes
+Once the first node (Node A) is successfully running MariaDB, you can migrate Node B, Node C, etc.
+1
+Shutdown and Replace
+Set Fast Shutdown:
+Required because undo/redo log formats may change between versions.
+Shutdown:
+mysqladmin -u root -p shutdown
+Wipe & Install:
+Uninstall MySQL, Wipe Datadir, Install MariaDB.
+2
+Configure MariaDB
+The configuration differs slightly for subsequent nodes. We switch back to
+Physical Backups
+for speed.
+3
+Start and Join
+Start the service. The node will perform a binary snapshot transfer (
+mariabackup
+) from the first MariaDB node.
+Repeat the above 3 steps for all remaining nodes.
+Finalization
+Once all nodes are running MariaDB:
+Cleanup Config:
+Remove
+gcs.check_appl_proto=0
+and
+wsrep_sst_donor
+from
+my.cnf
+on all nodes. Reset
+wsrep_sst_method
+to
+mariabackup
+on the first node.
+Security:
+Run
+mariadb-secure-installation
+to secure the root account and remove anonymous users.
+Features:
+Re-enable encryption or compression using MariaDB-supported syntax if required.
+Known Issues & Limitations
+1.
+mysql.user
+Migration
+The
+mysql.user
+table structure is not fully compatible and cannot be migrated automatically.
+Impact:
+The administrator must create necessary users for the MariaDB database manually.
+Workaround:
+In testing, using
+--skip-table=mysql.user
+during dump/restore and manually creating the necessary SST user was required.
+Reference:
+MDEV-33486
+2.
+regexp-time-limit
+Parameter
+MariaDB currently does not support the
+regexp-time-limit
+parameter.
+Impact:
+If this variable exists in your configuration or scripts, the server may fail to start or throw errors.
+Reference:
+MySQL Sysvar: regexp_time_limit
+,
+MDEV-37403
+3.
+wsrep_start_position
+Mismatch
+MariaDB does not understand the
+wsrep_start_position
+format provided by MySQL due to GTID formatting differences.
+Example:
+MySQL node will use a set
+wsrep_start_position
+like:
+”60e63a7-734c-11f0-bd90-97669e82ccf4:2284/2281/11/0747b7c5-734c-11f0-a69b-00e04ca2f8fe”
+Reference:
+MGL-57
+4. Replication Direction
+Replication from MariaDB → MySQL is
+not supported
+.
+Impact:
+During migration, there can be
+no load
+directed to the MariaDB nodes until the entire cluster is migrated.
+5. Testing Scope
+Currently, migration from 8.0.x has been verified to work on a simple
+sysbench
+database workload.
+Required Code Changes (References)
+For developers or those compiling from source, the following changes were relevant to this migration path:
+codership-mariadb-server Pull Request #519
+codership-mysql Pull Request #2062
+Previous
+Migrating Galera Cluster
+Next
+MySQL to MariaDB Migrator
+Last updated
+3 months ago
+Was this helpful?
+Prerequisites
+Incompatibility Check & Data Preparation
+Incompatibilities and Feature Differences
+Global Cluster Preparation
+1. Create the SST User (Crucial)
+2. Configure InnoDB Settings
+3. Galera Provider Options
+Migrating the First Node ("The Bridge")
+Migrating Subsequent Nodes
+Finalization
+Known Issues & Limitations
+Was this helpful?
+Copy
+SELECT user, plugin FROM mysql.user WHERE plugin LIKE "%sha%";
+Copy
+ALTER USER user_name IDENTIFIED WITH mysql_native_password BY 'new_password';
+Copy
+SELECT table_schema, table_name FROM information_schema.COLUMNS
+WHERE data_type="JSON";
+Copy
+ALTER TABLE table_name MODIFY json_column LONGTEXT;
+Copy
+CREATE TABLE `t1` (
+`c1` int DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMPRESSION='lz4'
+Copy
+SELECT table_schema, table_name, create_options FROM information_schema.TABLES WHERE
+create_options LIKE "%ENCRYPT%";
+Copy
+SELECT table_schema, table_name, create_options FROM information_schema.TABLES WHERE
+create_options LIKE "%COMP%";
+Copy
+-- MySQL: Creating a tablespace in a custom file location
+mysql> CREATE TABLESPACE `ts1` ADD DATAFILE '/home/jan/galeradb/node1/ts1.ibd' Engine=InnoDB;
+-- MySQL: Creating a table assigned to that tablespace
+mysql> CREATE TABLE t1 (c1 INT PRIMARY KEY) TABLESPACE ts1;
+Copy
+mysql> show create table t1;
+| t1 | CREATE TABLE `t1` (
+`c1` int NOT NULL,
+PRIMARY KEY (`c1`)
+) /*!50100 TABLESPACE `ts1` */ ENGINE=InnoDB ... |
+Copy
+XA RECOVER; -- Should return an empty set
+Copy
+-- Create user compatible with both engines
+CREATE USER 'sst_user'@'localhost' IDENTIFIED WITH mysql_native_password BY 'strong_password';
+GRANT ALL PRIVILEGES ON *.* TO 'sst_user'@'localhost';
+FLUSH PRIVILEGES;
+Requirement: This is required when upgrading between major versions of both MySQL and MariaDB as the format of the undo or redo files can change between major versions.
+Copy
+SET GLOBAL innodb_fast_shutdown = 0;
+Copy
+mysqladmin -u root -p shutdown
+Copy
+mv /var/lib/mysql /var/lib/mysql_backup_timestamp
+mkdir /var/lib/mysql
+chown mysql:mysql /var/lib/mysql
+Copy
+mariadbd --help --verbose > /tmp/log 2>&1
+Copy
+[galera]
+# ... standard galera settings ...
+# 1. IGNORE PROTOCOL MISMATCH
+# Required to avoid application protocol mismatch messages during migration.
+wsrep_provider_options="gcs.check_appl_proto=0;gcache.size=2G"
+# 2. USE LOGICAL SST (First Node Only)
+# wsrep_sst_method should be set to mysqldump for the first MariaDB node
+# to join the MySQL cluster.
+wsrep_sst_method=mysqldump
+# 3. SST AUTHENTICATION
+# Should contain user and password and this user should exist on both
+# MySQL and MariaDB databases with sufficient access rights.
+wsrep_sst_auth=sst_user:strong_password
+Copy
+systemctl start mariadb
+Copy
+SET GLOBAL innodb_fast_shutdown = 0;
+Copy
+[galera]
+# ... standard galera settings ...
+# 1. Point to the MariaDB Donor
+# After the first MariaDB node has successfully joined, this variable
+# should be set on all other nodes to the value of wsrep_node_name
+# on the first MariaDB node.
+wsrep_sst_donor=Name_of_First_MariaDB_Node
+# 2. Use Binary SST
+# For other joining nodes, mariabackup value should be used.
+wsrep_sst_method=mariabackup
+wsrep_sst_auth=sst_user:strong_password
+wsrep_provider_options="gcs.check_appl_proto=0"

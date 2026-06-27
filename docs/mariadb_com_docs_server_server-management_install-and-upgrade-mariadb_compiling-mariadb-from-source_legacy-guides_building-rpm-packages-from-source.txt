@@ -1,0 +1,100 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/compiling-mariadb-from-source/legacy-guides/building-rpm-packages-from-source
+
+Building RPM Packages From Source | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Compiling MariaDB From Source: The Master Guide
+Building MariaDB on Windows
+Cross-compiling MariaDB
+Compiling MariaDB with Extra Modules/Options
+Legacy Guides
+Build Environment Setup for macOS
+Building MariaDB on Gentoo
+Creating a Debian Repository
+Creating the MariaDB Source Tarball
+Build Environment Setup for Linux
+Building MariaDB from a Source RPM
+Building MariaDB From Source Using musl-based GNU/Linux
+Building MariaDB on CentOS
+Building MariaDB on Debian
+Building MariaDB on Fedora
+Building MariaDB on FreeBSD
+Building MariaDB on Solaris and OpenSolaris
+Building MariaDB on Ubuntu
+Building RPM Packages From Source
+Compile and Using MariaDB with Sanitizers (ASAN, UBSAN, TSAN, MSAN)
+Creating the MariaDB Binary Tarball
+Compiling with the InnoDB Plugin from Oracle
+Compiling MariaDB with Vanilla XtraDB
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Building RPM Packages From Source
+Explains how to generate RPM packages from the MariaDB source code using CMake with the `-DRPM` flag.
+To generate RPM packages from the build, supply the
+-DRPM=xxx
+flag to
+CMake
+, where the value
+xxx
+is the name of the distribution you're building for. For example, centos7 or rocky8 or fedora39 or sles15.
+What these do are controlled in the following CMake files:
+cmake/cpack_rpm.cmake
+cmake/build_configurations/mysql_release.cmake
+cmake/mariadb_connector_c.cmake
+To build the packages you should execute:
+Copy
+$ umask 0022
+$ cmake --build . --target package
+See Also
+About the MariaDB RPM Files
+Building MariaDB on CentOS
+Installing MariaDB RPM Files
+MariaDB RPM Packages
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Building MariaDB on Ubuntu
+Next
+Compile and Using MariaDB with Sanitizers (ASAN, UBSAN, TSAN, MSAN)
+Last updated
+11 months ago
+Was this helpful?
+Was this helpful?

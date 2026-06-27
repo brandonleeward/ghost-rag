@@ -1,0 +1,299 @@
+Source: https://www.tinybird.com/docs/forward/development-workflow/cicd
+
+CI/CD · Tinybird Docs
+Sign In
+Sign Up
+Deploying to Tinybird through CI/CD
+¶
+Copy as MD
+After you create your data project in Git, you can implement continuous integration (CI) and continuous deployment (CD) workflows to automate interaction with Tinybird.
+When you initialize a project using
+tb init
+, Tinybird can generate CI/CD templates that you can use in GitHub and GitLab to automate testing and deployment.
+The Tinybird Local container is a key part of the CI workflow. See
+Tinybird Local
+for more information.
+CI workflow
+¶
+As you expand and iterate on your data projects, you can continuously validate your changes. In the same way that you write integration and acceptance tests for source code in a software project, you can write automated tests for your API endpoints to run on each pull or merge request.
+A potential CI workflow could run the following steps when you open a pull request:
+Install Tinybird CLI and Tinybird Local: Sets up dependencies and installs the Tinybird CLI to run the required commands.
+Build project: Checks the syntax and correctness of your datafiles.
+Test project: Runs fixture tests, data quality tests, or both to validate changes.
+Deployment check: Validates the deployment before creating it, similar to a dry run.
+The following templates are available for GitHub and GitLab:
+GitHub
+GitLab
+name: Tinybird - CI Workflow
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+      - master
+    types: [opened, reopened, labeled, unlabeled, synchronize]
+
+concurrency: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+
+env:
+  TINYBIRD_HOST: ${{ secrets.TINYBIRD_HOST }}
+  TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: '.'
+    services:
+      tinybird:
+        image: tinybirdco/tinybird-local:latest
+        ports:
+          - 7181:7181
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Tinybird CLI
+        run: curl https://tinybird.co | sh
+      - name: Build project
+        run: tb --local build
+      - name: Test project
+        run: tb --local test run
+      - name: Deployment check
+        run: tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deploy --check
+Preview deployments
+¶
+You can create an ephemeral
+branch
+for each pull request so you can test your changes with production data before deploying. There are two ways to set up preview deployments: using the TypeScript SDK or the Tinybird CLI.
+Using the TypeScript SDK
+¶
+Requires
+@tinybirdco/sdk
+version
+0.0.53
+or later.
+The
+tinybird preview
+command creates a branch named
+tmp_ci_<git_branch>
+, builds your resources, and deploys them. If a branch with the same name already exists, it is deleted and recreated.
+The TypeScript SDK auto-detects CI environments (Vercel, GitHub Actions, GitLab CI, CircleCI, Azure Pipelines, Bitbucket Pipelines) and resolves the correct branch token at runtime. The host is inferred from the token, so no
+TINYBIRD_HOST
+or additional configuration is needed.
+GitHub
+GitLab
+name: Tinybird - Preview
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+    types: [opened, reopened, synchronize]
+
+concurrency: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npx tinybird preview
+        env:
+          TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
+Using the Tinybird CLI
+¶
+You can also create preview branches using the
+tb
+CLI. This approach gives you more control over branch creation and supports connectors.
+GitHub
+GitLab
+name: Tinybird - Preview
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+    types: [opened, reopened, synchronize]
+
+concurrency: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+
+env:
+  TINYBIRD_HOST: ${{ secrets.TINYBIRD_HOST }}
+  TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Tinybird CLI
+        run: curl https://tinybird.co | sh
+      - name: Create branch
+        run: tb --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} branch create tmp_ci_${{ github.head_ref }} --last-partition
+      - name: Build and deploy
+        run: tb --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} --branch=tmp_ci_${{ github.head_ref }} build
+Preview with connectors
+¶
+When your project uses Kafka, S3, or GCS connectors, preview branches can include them. The
+tinybird preview
+command doesn't create preview branches that ingest data from connectors. To test with connectors, create the branch manually with the
+tb
+CLI. See
+Test with connector data
+.
+tb branch create tmp_ci_my_feature --last-partition --with-connections
+Kafka connections are stopped by default in preview branches. Start them when you're ready to test:
+tb --branch=tmp_ci_my_feature datasource start my_kafka_datasource
+tb --branch=tmp_ci_my_feature datasource stop my_kafka_datasource
+For S3/GCS, import sample data:
+tb --branch=tmp_ci_my_feature datasource sample my_s3_datasource --wait
+Cleanup
+¶
+Preview branches are ephemeral. Delete them when the pull request is closed or merged. You can automate this with a CI workflow:
+GitHub
+GitLab
+name: Tinybird - Cleanup Preview
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+    types: [closed]
+
+concurrency: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npx tinybird branch delete tmp_ci_${{ github.head_ref }}
+        env:
+          TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
+Or delete branches manually using the TypeScript SDK or the Tinybird CLI:
+tinybird branch delete tmp_ci_my_feature
+tb branch rm tmp_ci_my_feature
+Frontend preview integration
+¶
+The TypeScript SDK runtime client (
+@tinybirdco/sdk
+version
+0.0.53
+or later) detects preview environments automatically. When your frontend is deployed to a preview environment, such as a Vercel Preview Deployment, it automatically queries the Tinybird preview branch that matches the frontend's git branch, with no code changes or extra environment variables required.
+import { Tinybird } from '@tinybirdco/sdk'
+
+const tb = new Tinybird({ token: process.env.TINYBIRD_TOKEN })
+
+// In preview environments (e.g., a Vercel Preview Deployment), the SDK
+// automatically resolves the matching branch token.
+// No additional configuration is needed.
+const result = await tb.query('SELECT * FROM my_endpoint')
+Auto-detection works with Vercel, GitHub Actions, GitLab CI, CircleCI, Azure Pipelines, and Bitbucket Pipelines.
+CD workflow
+¶
+Once your changes are validated by the CI pipeline, you can automate the deployment process and let Tinybird handle the migration for you with no downtime.
+A potential CD workflow could run the following steps when you merge a pull request:
+Install Tinybird CLI: Sets up dependencies and installs the Tinybird CLI to run the required commands.
+Deploy project: Creates a staging deployment in Tinybird Cloud, migrates data, promotes to live, and removes previous deployment.
+The following templates are available for GitHub and GitLab:
+GitHub
+GitLab
+name: Tinybird - CD Workflow
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+concurrency: ${{ github.workflow }}-${{ github.event.ref }}
+
+env:
+  TINYBIRD_HOST: ${{ secrets.TINYBIRD_HOST }}
+  TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
+
+jobs:
+  cd:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Tinybird CLI
+        run: curl https://tinybird.co | sh
+      - name: Deploy project
+        run: tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deploy
+Secrets
+¶
+Make sure to provide the values for the following secrets in your CI/CD settings:
+TINYBIRD_HOST
+TINYBIRD_TOKEN
+Run
+tb info
+to get the value for the secret
+TINYBIRD_HOST
+. It is the
+api
+URL in Tinybird Cloud. For example:
+tb info
+
+» Tinybird Cloud:
+--------------------------------------------------------------------------------------------
+user: tinybird@domain.co
+workspace_name: forward
+workspace_id: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX
+token: YOUR-ADMIN-TOKEN
+user_token: YOUR-USER-TOKEN
+api: https://api.tinybird.co
+ui: https://cloud.tinybird.co/gcp/europe-west2/forward
+--------------------------------------------------------------------------------------------
+
+» Tinybird Local:
+--------------------------------------------------------------------------------------------
+user: tinybird@domain.co
+workspace_name: forward
+workspace_id: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX
+token: YOUR-LOCAL-ADMIN-TOKEN
+user_token: YOUR-LOCAL-USER-TOKEN
+api: http://localhost:7181
+ui: http://cloud.tinybird.co/local/7181/forward
+--------------------------------------------------------------------------------------------
+
+» Project:
+---------------------------------------------------
+current: /path/to/your/project
+.tinyb: /path/to/your/project/.tinyb
+project: /path/to/your/project
+---------------------------------------------------
+And run
+tb --cloud token copy "admin <your_email>"
+to get the value of
+TINYBIRD_TOKEN
+.
+tb --cloud token copy "admin your_user@email.com"
+Running against Tinybird Cloud: Workspace forward
+** Token 'admin your_user@email.com' copied to clipboard
+When running
+tb test run
+, Tinybird creates a fresh workspace for each test run. Secrets will not persist between test runs. To avoid test failures, add a default value to your secrets. For example:
+GCS_SERVICE_ACCOUNT_CREDENTIALS_JSON {{ tb_secret("secret_name", "default_value") }}
+tb_secret
+replacements happen at parser time in the server. If a secret is changed after a deployment is done, Tinybird won't detect it automatically and requires a new deployment.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Deploying to Tinybird through CI/CD
+CI workflow
+Preview deployments
+Using the TypeScript SDK
+Using the Tinybird CLI
+Preview with connectors
+Cleanup
+Frontend preview integration
+CD workflow
+Secrets
+forward
+Ask AI

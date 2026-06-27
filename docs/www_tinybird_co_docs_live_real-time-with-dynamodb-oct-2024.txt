@@ -1,0 +1,33 @@
+Source: https://www.tinybird.com/docs/live/real-time-with-dynamodb-oct-2024
+
+Real-time filtering and aggregation with DynamoDB · Tinybird
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+← Back to Live
+Real-time filtering and aggregation with DynamoDB
+A live coding session for developers looking to do more with their DynamoDB data.
+We'll use a real-world example of an airline loyalty program, demonstrating how to track customer miles, spending, and reward progress in real-time.
+Along with learning about when and why to use DynamoDB you'll learn how to:
+Set up and seed a DynamoDB table
+Ingest data from DynamoDB into Tinybird
+Build SQL queries that can dynamically filter and aggregate
+Publish SQL queries as REST APIs to call from the demo app
+Create visualizations with your REST APIs
+By the end of this session, you'll have the knowledge and skills to build your own real-time dashboards with DynamoDB and Tinybird.
+Have questions?
+Join us on Slack
+Start building
+Live coding session
+When:
+October 10, 2024 at 15:00 UTC
+Duration:
+60 minutes
+Who:
+April Schuppel
+Developer Advocate
+Start building
+Ask AI
+Search...

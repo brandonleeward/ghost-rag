@@ -1,0 +1,973 @@
+Source: https://www.tinybird.com/docs/classic/cli/command-ref
+
+Classic: Tinybird CLI command reference · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+CLI command reference
+¶
+Copy as MD
+The following list shows all available commands in the Tinybird command-line interface, their options, and their arguments.
+For examples on how to use them, see the
+Quick start guide
+,
+Data projects
+, and
+Common use cases
+.
+tb auth
+¶
+Configure your Tinybird authentication.
+auth commands
+Command
+Description
+info OPTIONS
+Gets information about the authentication that is currently being used.
+ls OPTIONS
+Lists available regions to authenticate.
+use OPTIONS REGION_NAME_OR_HOST_OR_ID
+Switches to a different region. You can pass the region name, the region host url, or the region index after listing available regions with
+tb auth ls
+.
+The previous commands accept the following options:
+--token INTEGER
+: Use auth Token, defaults to TB_TOKEN envvar, then to the .tinyb file.
+--host TEXT
+: Set custom host if it's different than https://api.tinybird.co. Check
+this page
+for the available list of regions.
+--region TEXT
+: Set region. Run 'tb auth ls' to show available regions.
+--connector  [s3|kafka|gcs]
+: Set credentials for one of the supported connectors.
+--interactive,-i
+: Show available regions and select where to authenticate to.
+tb branch
+¶
+Manage your Workspace branches.
+Branch commands
+Command
+Description
+Options
+create BRANCH_NAME
+Creates a new Branch in the current 'main' Workspace.
+--last-partition
+: Attaches the last modified partition from 'main' to the new Branch.
+-i, --ignore-datasource DATA_SOURCE_NAME
+: Ignore specified Data Source partitions.
+--wait / --no-wait
+: Wait for Branch jobs to finish, showing a progress bar. Disabled by default.
+current
+Shows the Branch you're currently authenticated to.
+data
+Performs a data branch operation to bring data into the current Branch.
+--last-partition
+: Attaches the last modified partition from 'main' to the new Branch.
+-i, --ignore-datasource DATA_SOURCE_NAME
+: Ignore specified Data Source partitions.
+--wait / --no-wait
+: Wait for Branch jobs to finish, showing a progress bar. Disabled by default.
+datasource copy DATA_SOURCE_NAME
+Copies data source from Main.
+--sql SQL
+: Freeform SQL query to select what is copied from Main into the Environment Data Source.
+--sql-from-main
+: SQL query selecting all from the same Data Source in Main.
+--wait / --no-wait
+: Wait for copy job to finish. Disabled by default.
+ls
+Lists all the Branches available.
+--sort / --no-sort
+: Sorts the list of Branches by name. Disabled by default.
+regression-tests
+Regression test commands.
+-f, --filename PATH
+: The yaml file with the regression-tests definition.
+--skip-regression-tests / --no-skip-regression-tests
+: Flag to skip execution of regression tests. This is handy for CI Branches where regression might be flaky.
+--main
+: Runs regression tests in the main Branch. For this flag to work all the resources in the Branch Pipe Endpoints need to exist in the main Branch.
+--wait / --no-wait
+: Waits for regression job to finish, showing a progress bar. Disabled by default.
+regression-tests coverage PIPE_NAME
+Runs regression tests using coverage requests for Branch vs Main Workspace. It creates a regression-tests job. The argument supports regular expressions. Using '.*' if no Pipe name is provided.
+--assert-result / --no-assert-result
+: Whether to perform an assertion on the results returned by the Endpoint. Enabled by default. Use
+--no-assert-result
+if you expect the endpoint output is different from current version.
+--assert-result-no-error / --no-assert-result-no-error
+:  Whether to verify that the Endpoint doesn't return errors. Enabled by default. Use
+--no-assert-result-no-error
+if you expect errors from the endpoint.
+--assert-result-rows-count / --no-assert-result-rows-count
+: Whether to verify that the correct number of elements are returned in the results. Enabled by default. Use
+--assert-result-rows-count
+if you expect the numbers of elements in the endpoint output is different from current version.
+--assert-result-ignore-order / --no-assert-result-ignore-order
+: Whether to ignore the order of the elements in the results. Disabled by default. Use
+--assert-result-ignore-order
+if you expect the endpoint output is returning same elements but in different order.
+--assert-time-increase-percentage INTEGER
+: Allowed percentage increase in Endpoint response time. Default value is 25%. Use -1 to disable assert.
+--assert-bytes-read-increase-percentage INTEGER
+: Allowed percentage increase in the amount of bytes read by the endpoint. Default value is 25%. Use -1 to disable assert.
+--assert-max-time FLOAT
+: Max time allowed for the endpoint response time. If the response time is lower than this value then the
+--assert-time-increase-percentage
+isn't taken into account.
+--ff, --failfast
+: When set, the checker exits as soon one test fails.
+--wait
+: Waits for regression job to finish, showing a progress bar. Disabled by default.
+--skip-regression-tests / --no-skip-regression-tests
+: Flag to skip execution of regression tests. This is handy for CI environments where regression might be flaky.
+--main
+: Runs regression tests in the main Branch. For this flag to work all the resources in the Branch Pipe Endpoints need to exist in the main Branch.
+regression-tests last PIPE_NAME
+Runs regression tests using coverage requests for Branch vs Main Workspace. It creates a regression-tests job. The argument supports regular expressions. Using '.*' if no Pipe name is provided.
+--assert-result / --no-assert-result
+: Whether to perform an assertion on the results returned by the Endpoint. Enabled by default. Use
+--no-assert-result
+if you expect the endpoint output is different from current version.
+--assert-result-no-error / --no-assert-result-no-error
+:  Whether to verify that the Endpoint doesn't return errors. Enabled by default. Use
+--no-assert-result-no-error
+if you expect errors from the endpoint.
+--assert-result-rows-count / --no-assert-result-rows-count
+: Whether to verify that the correct number of elements are returned in the results. Enabled by default. Use
+--assert-result-rows-count
+if you expect the numbers of elements in the endpoint output is different from current version.
+--assert-result-ignore-order / --no-assert-result-ignore-order
+: Whether to ignore the order of the elements in the results. Disabled by default. Use
+--assert-result-ignore-order
+if you expect the endpoint output is returning same elements but in different order.
+--assert-time-increase-percentage INTEGER
+: Allowed percentage increase in Endpoint response time. Default value is 25%. Use -1 to disable assert.
+--assert-bytes-read-increase-percentage INTEGER
+: Allowed percentage increase in the amount of bytes read by the endpoint. Default value is 25%. Use -1 to disable assert.
+--assert-max-time FLOAT
+: Max time allowed for the endpoint response time. If the response time is lower than this value then the
+--assert-time-increase-percentage
+isn't taken into account.
+--ff, --failfast
+: When set, the checker exits as soon one test fails.
+--wait
+: Waits for regression job to finish, showing a progress bar. Disabled by default.
+--skip-regression-tests / --no-skip-regression-tests
+: Flag to skip execution of regression tests. This is handy for CI environments where regression might be flaky.
+regression-tests manual PIPE_NAME
+Runs regression tests using coverage requests for Branch vs Main Workspace. It creates a regression-tests job. The argument supports regular expressions. Using '.*' if no Pipe name is provided.
+--assert-result / --no-assert-result
+: Whether to perform an assertion on the results returned by the Endpoint. Enabled by default. Use
+--no-assert-result
+if you expect the endpoint output is different from current version.
+--assert-result-no-error / --no-assert-result-no-error
+:  Whether to verify that the Endpoint doesn't return errors. Enabled by default. Use
+--no-assert-result-no-error
+if you expect errors from the endpoint.
+--assert-result-rows-count / --no-assert-result-rows-count
+: Whether to verify that the correct number of elements are returned in the results. Enabled by default. Use
+--assert-result-rows-count
+if you expect the numbers of elements in the endpoint output is different from current version.
+--assert-result-ignore-order / --no-assert-result-ignore-order
+: Whether to ignore the order of the elements in the results. Disabled by default. Use
+--assert-result-ignore-order
+if you expect the endpoint output is returning same elements but in different order.
+--assert-time-increase-percentage INTEGER
+: Allowed percentage increase in Endpoint response time. Default value is 25%. Use -1 to disable assert.
+--assert-bytes-read-increase-percentage INTEGER
+: Allowed percentage increase in the amount of bytes read by the endpoint. Default value is 25%. Use -1 to disable assert.
+--assert-max-time FLOAT
+: Max time allowed for the endpoint response time. If the response time is lower than this value then the
+--assert-time-increase-percentage
+isn't taken into account.
+--ff, --failfast
+: When set, the checker exits as soon one test fails.
+--wait
+: Waits for regression job to finish, showing a progress bar. Disabled by default.
+--skip-regression-tests / --no-skip-regression-tests
+: Flag to skip execution of regression tests. This is handy for CI Branches where regression might be flaky.
+rm [BRANCH_NAME_OR_ID]
+Removes a Branch from the Workspace (not Main). It can't be recovered.
+--yes
+: Don't ask for confirmation.
+use [BRANCH_NAME_OR_ID]
+Switches to another Branch.
+tb check
+¶
+Checks file syntax in your project.
+By default, in Classic Workspaces,
+tb check
+only checks the default folders:
+datasources
+,
+pipes
+, and
+endpoints
+.
+If you need to check additional folders or files, you must specify the path explicitly:
+tb check path/to/your/folder
+It only allows one option,
+--debug
+, which prints the internal representation.
+tb connection
+¶
+Connection commands.
+Command
+Description
+Options
+create COMMAND [ARGS]
+Creates a connection. Available subcommands or types are
+gcs
+,
+kafka
+,
+s3_iamrole
+.
+See the next table.
+ls [OPTIONS]
+Lists connections.
+--connector TYPE
+: Filters by connector. Available types are
+gcs
+,
+kafka
+,
+s3_iamrole
+.
+rm [OPTIONS] CONNECTION_ID_OR_NAME
+Removes a connection.
+--force BOOLEAN
+: Forces connection removal even if there are Data Sources using it.
+tb connection create
+¶
+The following subcommands and settings are available for each
+tb connection create
+subcommand:
+Command
+Description
+Options
+create kafka [OPTIONS]
+Creates a Kafka connection.
+--bootstrap-servers TEXT
+: Kafka Bootstrap Server in the form mykafka.mycloud.com:9092.
+--key TEXT
+: Key.
+--secret TEXT
+: Secret.
+--connection-name TEXT
+: Name of your Kafka connection. If not provided, it's set as the bootstrap server.
+--auto-offset-reset TEXT
+: Offset reset, can be 'latest' or 'earliest'. Defaults to 'latest'.
+--schema-registry-url TEXT
+: Avro Confluent Schema Registry URL.
+--sasl-mechanism TEXT
+: Authentication method for connection-based protocols. Defaults to 'PLAIN'.
+--ssl-ca-pem TEXT
+: Path or content of the CA Certificate file in PEM format.
+create s3_iamrole [OPTIONS]
+Creates an S3 connection (IAM role).
+--connection-name TEXT
+: Name of the connection to identify it in Tinybird.
+--role-arn TEXT
+: The ARN of the IAM role to use for the connection.
+--region TEXT
+: The Amazon S3 region where the bucket is located.
+--policy TEXT
+: The Amazon S3 access policy: write or read.
+--no-validate
+: Don't validate S3 permissions during connection creation.
+tb datasource
+¶
+Data Sources commands.
+Command
+Description
+Options
+analyze OPTIONS URL_OR_FILE
+Analyzes a URL or a file before creating a new data source.
+append OPTIONS DATASOURCE_NAME URL
+Appends data to an existing Data Source from URL, local file or a connector.
+connect OPTIONS CONNECTION DATASOURCE_NAME
+Deprecated. Use
+tb connection create
+instead.
+--kafka-topic TEXT
+: For Kafka connections: topic.
+--kafka-group TEXT
+: For Kafka connections: group ID.
+--kafka-auto-offset-reset [latest|earliest]
+: Kafka auto.offset.reset config. Valid values are: ["latest", "earliest"].
+--kafka-sasl-mechanism [PLAIN|SCRAM-SHA-256|SCRAM-SHA-512]
+: Kafka SASL mechanism. Valid values are: ["PLAIN", "SCRAM-SHA-256", "SCRAM-SHA-512"]. Default: "PLAIN".
+copy OPTIONS DATASOURCE_NAME
+Copies data source from Main.
+--sql TEXT
+: Freeform SQL query to select what is copied from Main into the Branch Data Source.
+--sql-from-main
+: SQL query selecting * from the same Data Source in Main.
+--wait
+: Wait for copy job to finish, disabled by default.
+delete OPTIONS DATASOURCE_NAME
+Deletes rows from a Data Source.
+--yes
+: Doesn't ask for confirmation.
+--wait
+: Wait for delete job to finish, disabled by default.
+--dry-run
+: Run the command without deleting anything.
+--sql-condition
+: Delete rows with SQL condition.
+generate OPTIONS FILENAMES
+Generates a Data Source file based on a sample CSV file from local disk or URL.
+--force
+: Overrides existing files.
+ls OPTIONS
+Lists Data Sources.
+--match TEXT
+: Retrieves any resources matching the pattern. eg
+--match _test
+.
+--format [json]
+: Force a type of the output.
+--dry-run
+: Run the command without deleting anything.
+replace OPTIONS DATASOURCE_NAME URL
+Replaces the data in a Data Source from a URL, local file or a connector.
+--sql
+: The SQL to extract from.
+--connector
+: Connector name.
+--sql-condition
+: Delete rows with SQL condition.
+rm OPTIONS DATASOURCE_NAME
+Deletes a Data Source.
+--yes
+: Doesn't ask for confirmation.
+share OPTIONS DATASOURCE_NAME WORKSPACE_NAME_OR_ID
+Shares a Data Source.
+--user_token TEXT
+: User token.
+--yes
+: Don't ask for confirmation.
+sync OPTIONS DATASOURCE_NAME
+Syncs from connector defined in .datasource file.
+--yes
+: Doesn't ask for confirmation.
+truncate OPTIONS DATASOURCE_NAME
+Truncates a Data Source.
+--yes
+: Doesn't ask for confirmation.
+--cascade
+: Truncate dependent Data Source attached in cascade to the given Data Source.
+unshare OPTIONS DATASOURCE_NAME WORKSPACE_NAME_OR_ID
+Unshares a Data Source.
+--user_token TEXT
+: When passed, Tinybird won't prompt asking for it.
+--yes
+: Don't ask for confirmation.
+scheduling resume DATASOURCE_NAME
+Resumes the scheduling of a Data Source.
+scheduling pause DATASOURCE_NAME
+Pauses the scheduling of a Data Source.
+scheduling status DATASOURCE_NAME
+Gets the scheduling status of a Data Source (paused or running).
+tb dependencies
+¶
+Prints all Data Sources dependencies.
+Its options:
+--no-deps
+: Prints only Data Sources with no Pipes using them.
+--match TEXT
+: Retrieves any resource matching the pattern.
+--pipe TEXT
+: Retrieves any resource used by Pipe.
+--datasource TEXT
+: Retrieves resources depending on this Data Source.
+--check-for-partial-replace
+: Retrieves dependant Data Sources that have their data replaced if a partial replace is executed in the Data Source selected.
+--recursive
+: Calculates recursive dependencies.
+tb deploy
+¶
+Deploys in Tinybird pushing resources changed from previous release using Git.
+These are the options available for the
+deploy
+command:
+--dry-run
+: Runs the command with static checks, without creating resources on the Tinybird account or any side effect. Doesn't check for runtime errors.
+-f, --force
+: Overrides Pipes when they already exist.
+--override-datasource
+: When pushing a Pipe with a materialized node if the target Data Source exists it tries to override it.
+--populate
+: Populate materialized nodes when pushing them.
+--subset FLOAT
+: Populates with a subset percent of the data (limited to a maximum of 2M rows), this is useful to quickly test a materialized node with some data. The subset must be greater than 0 and lower than 0.1. A subset of 0.1 means a 10% of the data in the source Data Source is used to populate the Materialized View. Use it together with
+--populate
+, it has precedence over
+--sql-condition
+.
+--sql-condition TEXT
+: Populates with a SQL condition to be applied to the trigger Data Source of the Materialized View. For instance,
+--sql-condition='date == toYYYYMM(now())'
+it populates taking all the rows from the trigger Data Source which
+date
+is the current month. Use it together with
+--populate
+.
+--sql-condition
+isn't taken into account if the
+--subset
+param is present. Including in the
+sql_condition
+any column present in the Data Source
+engine_sorting_key
+makes the populate job process less data.
+--unlink-on-populate-error
+: If the populate job fails the Materialized View is unlinked and new data isn't ingested there. First time a populate job fails, the Materialized View is always unlinked.
+--wait
+: To be used along with
+--populate
+command. Waits for populate jobs to finish, showing a progress bar. Disabled by default.
+--yes
+: Doesn't ask for confirmation.
+--workspace_map TEXT..., --workspace TEXT...
+: Adds a Workspace path to the list of external Workspaces, usage:
+--workspace name path/to/folder
+.
+--timeout FLOAT
+: Timeout you want to use for the job populate.
+--user_token TOKEN
+: The user Token is required for sharing a Data Source that contains the SHARED_WITH entry.
+tb diff
+¶
+Diffs local datafiles to the corresponding remote files in the Workspace.
+It works as a regular
+diff
+command, useful to know if the remote resources have been changed. Some caveats:
+Resources in the Workspace might mismatch due to having slightly different SQL syntax, for instance: A parenthesis mismatch,
+INTERVAL
+expressions or changes in the schema definitions.
+If you didn't specify an
+ENGINE_PARTITION_KEY
+and
+ENGINE_SORTING_KEY
+, resources in the Workspace might have default ones.
+The recommendation in these cases is use
+tb pull
+to keep your local files in sync.
+Remote files are downloaded and stored locally in a
+.diff_tmp
+directory, if working with git you can add it to
+.gitignore
+.
+The options for this command:
+--fmt / --no-fmt
+: Format files before doing the diff, default is True so both files match the format.
+--no-color
+: Don't colorize diff.
+--no-verbose
+: List the resources changed not the content of the diff.
+tb fmt
+¶
+Formats a .datasource, .pipe or .incl file.
+These are the options available for the
+fmt
+command:
+--line-length INTEGER
+: A number indicating the maximum characters per line in the node SQL, lines split based on the SQL syntax and the number of characters passed as a parameter.
+--dry-run
+: Don't ask to override the local file.
+--yes
+: Don't ask for confirmation to overwrite the local file.
+--diff
+: Outputs correctly formatted block (if differs from local file) and prompts to apply correction to local file.
+This command removes comments starting with # from the file, so use DESCRIPTION or a comment block instead:
+Example comment block
+%
+{% comment this is a comment and fmt keeps it %}
+
+SELECT
+  {% comment this is another comment and fmt keeps it %}
+  count() c
+FROM stock_prices_1m
+You can add
+tb fmt
+to your git
+pre-commit
+hook to have your files properly formatted. If the SQL formatting results aren't the ones expected to you, you can disable it just for the blocks needed. Read
+how to disable fmt
+.
+tb init
+¶
+Initializes folder layout.
+It comes with these options:
+--generate-datasources
+: Generates Data Sources based on CSV, NDJSON and Parquet files in this folder.
+--folder DIRECTORY
+: Folder where datafiles are placed.
+-f, --force
+: Overrides existing files.
+-ir, --ignore-remote
+: Ignores remote files not present in the local data project on
+tb init --git
+.
+--git
+: Initializes Workspace with Git commits.
+--override-commit TEXT
+: Use this option to manually override the reference commit of your Workspace. This is useful if a commit isn't recognized in your Git log, such as after a force push (
+git push -f
+).
+tb job
+¶
+Jobs commands.
+Command
+Description
+Options
+cancel JOB_ID
+Tries to cancel a job.
+None
+details JOB_ID
+Gets details for any job created in the last 48h.
+None
+ls [OPTIONS]
+Lists jobs.
+--status [waiting|working|done|error]
+or
+-s
+: Shows results with the desired status.
+tb materialize
+¶
+Analyzes the
+node_name
+SQL query to generate the .datasource and .pipe files needed to push a new materialize view.
+This command guides you to generate the Materialized View with name TARGET_DATASOURCE, the only requirement is having a valid Pipe datafile locally. Use
+tb pull
+to download resources from your Workspace when needed.
+It allows to use these options:
+-
+--push-deps
+: Push dependencies, disabled by default.
+--workspace TEXT...
+: Add a Workspace path to the list of external Workspaces, usage:
+--workspace name path/to/folder
+.
+--no-versions
+: When set, resource dependency versions aren't used, it pushes the dependencies as-is.
+--verbose
+: Prints more log.
+--unlink-on-populate-error
+: If the populate job fails the Materialized View is unlinked and new data isn't ingested in the Materialized View. First time a populate job fails, the Materialized View is always unlinked.
+tb pipe
+¶
+Use the following commands to manage Pipes.
+Command
+Description
+Options
+append OPTIONS PIPE_NAME_OR_UID SQL
+Appends a node to a Pipe.
+copy pause OPTIONS PIPE_NAME_OR_UID
+Pauses a running Copy Pipe.
+copy resume OPTIONS PIPE_NAME_OR_UID
+Resumes a paused Copy Pipe.
+copy run OPTIONS PIPE_NAME_OR_UID
+Runs an on-demand copy job.
+--wait
+: Waits for the copy job to finish.
+--yes
+: Doesn't ask for confirmation.
+--param TEXT
+: Key and value of the params you want the Copy Pipe to be called with. For example:
+tb pipe copy run <my_copy_pipe> --param foo=bar
+.
+--on-demand-compute
+: Runs the copy job on a dedicated on-demand compute instance, isolated from your main workspace infrastructure. See
+on-demand compute for Copy Pipes
+.
+data OPTIONS PIPE_NAME_OR_UID PARAMETERS
+Prints data returned by a Pipe. You can pass query parameters to the command, for example
+--param_name value
+.
+--query TEXT
+: Runs SQL over Pipe results.
+--format [json|csv]
+: Return format (CSV, JSON).
+--<param_name> value
+: Query parameter. You can define multiple parameters and their value. For example,
+--paramOne value --paramTwo value2
+.
+generate OPTIONS NAME QUERY
+Generates a Pipe file based on a sql query. Example:
+tb pipe generate my_pipe 'select * from existing_datasource'
+.
+--force
+: Overrides existing files.
+ls OPTIONS
+Lists Pipes.
+--match TEXT
+: Retrieves any resourcing matching the pattern. For example
+--match _test
+.
+--format [json|csv]
+: Force a type of the output.
+populate OPTIONS PIPE_NAME
+Populates the result of a Materialized node into the target Materialized View.
+--node TEXT
+: Name of the materialized Node. Required.
+--sql-condition TEXT
+: Filter which rows from the source Data Source are used to populate the Materialized View. Applied as a WHERE clause on the trigger Data Source. For example,
+--sql-condition='date >= today() - 7'
+populates the Materialized View with only the last 7 days of data. Must be used with
+--populate
+. Ignored if
+--subset
+parameter is present. For better performance, filter on columns in the Data Source's
+ENGINE_SORTING_KEY
+.
+--truncate
+: Truncates the materialized Data Source before populating it.
+--unlink-on-populate-error
+: If the populate job fails the Materialized View is unlinked and new data isn't ingested in the Materialized View. First time a populate job fails, the Materialized View is always unlinked.
+--wait
+: Waits for populate jobs to finish, showing a progress bar. Disabled by default.
+publish OPTIONS PIPE_NAME_OR_ID NODE_UID
+Changes the published node of a Pipe.
+regression-test OPTIONS FILENAMES
+Runs regression tests using last requests.
+--debug
+: Prints internal representation, can be combined with any command to get more information.
+--only-response-times
+: Checks only response times.
+--workspace_map TEXT..., --workspace TEXT...
+: Add a Workspace path to the list of external Workspaces, usage:
+--workspace name path/to/folder
+.
+--no-versions
+: When set, resource dependency versions aren't used, it pushes the dependencies as-is.
+-l, --limit INTEGER RANGE
+: Number of requests to validate  [0<=x<=100].
+--sample-by-params INTEGER RANGE
+: When set, aggregates the pipe_stats_rt requests by
+extractURLParameterNames(assumeNotNull(url))
+and for each combination takes a sample of N requests  [1<=x<=100].
+-m, --match TEXT
+: Filters the checker requests by specific parameter. You can pass multiple parameters -m foo -m bar.
+-ff, --failfast
+: When set, the checker exits as soon as one test fails.
+--ignore-order
+: When set, the checker ignores the order of list properties.
+--validate-processed-bytes
+: When set, the checker validates that the new version doesn't process more than 25% than the current version.
+--relative-change FLOAT
+: When set, the checker validates the new version has less than this distance with the current version.
+rm OPTIONS PIPE_NAME_OR_ID
+Deletes a Pipe. PIPE_NAME_OR_ID can be either a Pipe name or id in the Workspace or a local path to a .pipe file.
+--yes
+: Doesn't ask for confirmation.
+set_endpoint OPTIONS PIPE_NAME_OR_ID NODE_UID
+Same as 'publish', changes the published node of a Pipe.
+sink run OPTIONS PIPE_NAME_OR_UID
+Runs an on-demand sink job.
+--wait
+: Waits for the sink job to finish.
+--yes
+: Don't ask for confirmation.
+--dry-run
+: Run the command without executing the sink job.
+--param TEXT
+: Key and value of the params you want the Sink Pipe to be called with. For example:
+tb pipe sink run <my_sink_pipe> --param foo=bar
+.
+stats OPTIONS PIPES
+Prints Pipe stats for the last 7 days.
+--format [json]
+: Forces a type of the output. To parse the output, keep in mind to use
+tb --no-version-warning pipe stats
+option.
+token_read OPTIONS PIPE_NAME
+Retrieves a Token to read a Pipe.
+unlink OPTIONS PIPE_NAME NODE_UID
+Unlinks the output of a Pipe, whatever its type: Materialized Views, Copy Pipes, or Sinks.
+unpublish OPTIONS PIPE_NAME NODE_UID
+Unpublishes the endpoint of a Pipe.
+tb prompt
+¶
+Provides instructions to configure the shell prompt for Tinybird CLI. See
+Configure your shell prompt
+.
+tb pull
+¶
+Retrieves the latest version for project files from your Workspace.
+With these options:
+--folder DIRECTORY
+: Folder where files are placed.
+--auto / --no-auto
+: Saves datafiles automatically into their default directories (/datasources or /pipes). Default is True.
+--match TEXT
+: Retrieve any resourcing matching the pattern. eg
+--match _test
+.
+-f, --force
+: Override existing files.
+--fmt
+: Format files, following the same format as
+tb fmt
+.
+tb push
+¶
+Push files to your Workspace.
+You can use this command with these options:
+--dry-run
+: Runs the command with static checks, without creating resources on the Tinybird account or any side effect. Doesn't check for runtime errors.
+--check / --no-check
+: Enables/disables output checking, enabled by default.
+--push-deps
+: Pushes dependencies, disabled by default.
+--only-changes
+: Pushes only the resources that have changed compared to the destination Workspace.
+--debug
+: Prints internal representation, can be combined with any command to get more information.
+-f, --force
+: Overrides Pipes when they already exist.
+--override-datasource
+: When pushing a Pipe with a materialized node if the target Data Source exists it tries to override it.
+--populate
+: Populates materialized nodes when pushing them.
+--subset FLOAT
+: Populates with a subset percent of the data (limited to a maximum of 2M rows), this is useful to quickly test a materialized node with some data. The subset must be greater than 0 and lower than 0.1. A subset of 0.1 means a 10 percent of the data in the source Data Source is used to populate the Materialized View. Use it together with
+--populate
+, it has precedence over
+--sql-condition
+.
+--sql-condition TEXT
+: Populates with a SQL condition to be applied to the trigger Data Source of the Materialized View. For instance,
+--sql-condition='date == toYYYYMM(now())'
+it populates taking all the rows from the trigger Data Source which
+date
+is the current month. Use it together with
+--populate
+.
+--sql-condition
+isn't taken into account if the
+--subset
+param is present. Including in the
+sql_condition
+any column present in the Data Source
+engine_sorting_key
+makes the populate job process less data.
+--unlink-on-populate-error
+: If the populate job fails the Materialized View is unlinked and new data isn't ingested in the Materialized View. First time a populate job fails, the Materialized View is always unlinked.
+--fixtures
+: Appends fixtures to Data Sources.
+--wait
+: To be used along with
+--populate
+command. Waits for populate jobs to finish, showing a progress bar. Disabled by default.
+--yes
+: Doesn't ask for confirmation.
+--only-response-times
+: Checks only response times, when --force push a Pipe.
+--workspace TEXT..., --workspace_map TEXT...
+: Add a Workspace path to the list of external Workspaces, usage:
+--workspace name path/to/folder
+.
+--no-versions
+: When set, resource dependency versions aren't used, it pushes the dependencies as-is.
+--timeout FLOAT
+: Timeout you want to use for the populate job.
+-l, --limit INTEGER RANGE
+: Number of requests to validate  [0<=x<=100].
+--sample-by-params INTEGER RANGE
+: When set, aggregates the
+pipe_stats_rt
+requests by
+extractURLParameterNames(assumeNotNull(url))
+and for each combination takes a sample of N requests  [1<=x<=100].
+-ff, --failfast
+: When set, the checker exits as soon one test fails.
+--ignore-order
+: When set, the checker ignores the order of list properties.
+--validate-processed-bytes
+: When set, the checker validates that the new version doesn't process more than 25% than the current version.
+--user_token TEXT
+: The User Token is required for sharing a Data Source that contains the SHARED_WITH entry.
+tb sql
+¶
+Runs SQL queries over Data Sources and Pipes.
+--rows_limit INTEGER
+: Max number of rows retrieved.
+--pipeline TEXT
+: The name of the Pipe to run the SQL Query.
+--pipe TEXT
+: The path to the .pipe file to run the SQL Query of a specific NODE.
+--node TEXT
+: The NODE name.
+--format [json|csv|human]
+: Output format.
+--stats / --no-stats
+: Shows query stats.
+tb test
+¶
+Test commands.
+Command
+Description
+Options
+init
+Initializes a file list with a simple test suite.
+--force
+: Overrides existing files.
+parse [OPTIONS] [FILES]
+Reads the contents of a test file list.
+run [OPTIONS] [FILES]
+Runs the test suite, a file, or a test.
+--verbose
+or
+-v
+: Shows results.
+--fail
+: Show only failed/error tests.
+--concurrency [INTEGER RANGE]
+or
+-c [INTEGER RANGE]
+: How many tests to run concurrently.
+tb token
+¶
+Manage your Workspace Tokens.
+Command
+Description
+Options
+copy OPTIONS TOKEN_ID
+Copies a Token.
+ls OPTIONS
+Lists Tokens.
+--match TEXT
+: Retrieves any Token matching the pattern. eg
+--match _test
+.
+refresh OPTIONS TOKEN_ID
+Refreshes a Token.
+--yes
+: Doesn't ask for confirmation.
+rm OPTIONS TOKEN_ID
+Removes a Token.
+--yes
+: Doesn't ask for confirmation.
+scopes OPTIONS TOKEN_ID
+Lists Token scopes.
+create static OPTIONS TOKEN_NAME
+Creates a static Token that lasts forever.
+--scope
+: Scope for the Token (e.g.,
+DATASOURCES:READ
+). Required.
+--resource
+: Resource you want to associate the scope with.
+--filter
+: SQL condition used to filter the values when calling with this token (eg.
+--filter=value > 0
+).
+create jwt OPTIONS TOKEN_NAME
+Creates a JWT Token with a fixed expiration time.
+--ttl
+: Time to live (e.g., '1h', '30min', '1d'). Required.
+--scope
+: Scope for the token (only
+PIPES:READ
+is allowed for JWT tokens).Required.
+--resource
+: Resource associated with the scope. Required.
+--fixed-params
+: Fixed parameters in key=value format, multiple values separated by commas.
+tb workspace
+¶
+Manage your Workspaces.
+Command
+Description
+Options
+clear OPTIONS
+Drop all the resources inside a project. This command is dangerous because it removes everything, use with care.
+--yes
+: Don't ask for confirmation.
+--dry-run
+: Run the command without removing anything.
+create OPTIONS WORKSPACE_NAME
+Creates a new Workspace for your Tinybird user.
+--starter_kit TEXT
+: Uses a Tinybird starter kit as a template.
+--user_token TEXT
+: When passed, Tinybird won't prompt asking for it.
+--fork
+: When enabled, Tinybird shares all Data Sources from the current Workspace to the new created one.
+current OPTIONS
+Shows the Workspace you're currently authenticated to.
+delete OPTIONS WORKSPACE_NAME_OR_ID
+Deletes a Workspace where you are an admin.
+--user_token TEXT
+: When passed, Tinybird won't prompt asking for it.
+--yes
+: Don't ask for confirmation.
+ls OPTIONS
+Lists all the Workspaces you have access to in the account you're currently authenticated to.
+members add OPTIONS MEMBERS_EMAILS
+Adds members to the current Workspace.
+--user_token TEXT
+: When passed, Tinybird won't prompt asking for it.
+members ls OPTIONS
+Lists members in the current Workspace.
+members rm OPTIONS
+Removes members from the current Workspace.
+--user_token TEXT
+: When passed, Tinybird won't prompt asking for it.
+members set-role OPTIONS [guest|viewer|admin] MEMBERS_EMAILS
+Sets the role for existing Workspace members.
+--user_token TEXT
+: When passed, Tinybird won't prompt asking for it.
+use OPTIONS WORKSPACE_NAME_OR_ID
+Switches to another workspace. Use
+tb workspace ls
+to list the workspaces you have access to.
+tb tag
+¶
+Manage your Workspace tags.
+Command
+Description
+Options
+create TAG_NAME
+Creates a tag in the current Workspace.
+ls
+List all the tags of the current Workspace.
+ls TAG_NAME
+List all the resources tagged with the given tag.
+rm TAG_NAME
+Removes a tag from the current Workspace. All resources aren't tagged by the given tag anymore.
+--yes
+: Don't ask for confirmation.
+Updated
+3 weeks ago
+On this page
+CLI command reference
+tb auth
+tb branch
+tb check
+tb connection
+tb connection create
+tb datasource
+tb dependencies
+tb deploy
+tb diff
+tb fmt
+tb init
+tb job
+tb materialize
+tb pipe
+tb prompt
+tb pull
+tb push
+tb sql
+tb test
+tb token
+tb workspace
+tb tag
+classic
+Ask AI

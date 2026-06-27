@@ -1,0 +1,143 @@
+Source: https://www.tinybird.com/docs/forward/work-with-data/publish-data/endpoints
+
+API Endpoints · Tinybird Docs
+Sign In
+Sign Up
+API Endpoints
+¶
+Copy as MD
+API Endpoints
+publish the result of a Pipe as a REST API. Use them when an application, dashboard, agent, or external service needs a stable query contract with predictable inputs and outputs.
+Use API Endpoints when the query belongs to your Tinybird project and callers should only provide request parameters. Use the
+Query API
+when the caller owns the SQL, such as an internal tool, notebook, script, or debugging workflow.
+Call an API Endpoint
+¶
+Call an Endpoint by name and include a Token with read permissions for the Endpoint. Use a
+static Token
+for backend services and trusted internal tools. Use a
+JWT
+for browser, user-facing, or multi-tenant access where each user or tenant needs scoped access, fixed parameters, filters, expiration, or rate limits.
+curl \
+  -H "Authorization: Bearer <PIPE:READ token or JWT>" \
+  "https://api.tinybird.co/v0/pipes/top_pages.json"
+You can also pass the Token or JWT as a
+token
+query parameter when needed:
+curl "https://api.tinybird.co/v0/pipes/top_pages.json?token=<PIPE:READ token or JWT>"
+Use query parameters
+¶
+API Endpoints can use Tinybird's
+templating language
+to receive typed, validated request parameters. Use parameters for filters, date ranges, pagination, tenant IDs, sorting, and limits.
+curl \
+  -H "Authorization: Bearer <PIPE:READ token>" \
+  "https://api.tinybird.co/v0/pipes/top_pages.json?start_date=2026-01-01%2000:00:00&limit=20"
+For parameter syntax, defaults, helper functions, pagination, and advanced patterns, see
+Query parameters
+.
+Choose a response format
+¶
+Choose the response format by appending the format extension to the Endpoint URL.
+curl \
+  -H "Authorization: Bearer <PIPE:READ token>" \
+  "https://api.tinybird.co/v0/pipes/top_pages.ndjson"
+Supported formats include:
+.json
+: JSON response. This is the default format.
+.csv
+: CSV response.
+.csvwithnames
+: CSV response with column names.
+.ndjson
+: Newline-delimited JSON response.
+.parquet
+: Parquet response.
+.prometheus
+: Prometheus metrics response.
+See
+API Endpoint response formats
+and the
+Pipe API reference
+for more details.
+Errors and retries
+¶
+API Endpoints return standard HTTP success or error codes. Error responses include extra information about what went wrong, encoded as JSON.
+Error codes
+¶
+API Endpoints might return the following HTTP error codes:
+Code
+Description
+400
+Bad request. A
+HTTP400
+can be returned in several scenarios and typically represents a malformed request, such as errors in your SQL queries or missing query parameters.
+403
+Forbidden. The auth Token doesn't have the correct scopes.
+404
+Not found. This usually occurs when the name of the Endpoint is wrong or hasn't been published.
+405
+HTTP method not allowed. The request method isn't allowed for this Endpoint.
+408
+Request timeout. This occurs when the query takes too long to complete. By default, this is 10 seconds.
+414
+Request-URI Too Large. Not all APIs have the same limit, but it's usually 2KB for GET requests. Reduce the URI length or use a POST request to avoid the limit.
+429
+Too many requests. Usually occurs when an Endpoint hits rate limits.
+499
+Connection closed. This occurs if the client closes the connection after 1 second. If this is unexpected, increase the connection timeout on your end.
+500
+Internal Server Error. Usually an unexpected transient service error.
+Errors when running a query are usually reported as
+400 Bad request
+or
+500 Internal Server Error
+, depending on whether the caller can fix the error.
+In those cases, the API response includes an additional
+X-DB-Exception-Code
+HTTP header with the internal database error as a stringified number.
+Retries
+¶
+When you call an API Endpoint from an API Gateway, backend service, or job, handle potential errors and implement retry strategies where appropriate.
+Implement automatic retries for the following errors:
+HTTP 429: Too many requests
+HTTP 500: Internal Server Error
+Use exponential backoff when retrying requests that return these errors.
+Track API Endpoint usage
+¶
+API Endpoint requests are logged in Service Data Sources. Add metadata as request parameters when you want to group requests by application, customer, workflow, or agent.
+curl \
+  -H "Authorization: Bearer <PIPE:READ token>" \
+  "https://api.tinybird.co/v0/pipes/top_pages.json?tenant_id=acme&app_name=dashboard"
+See
+Endpoint performance
+for monitoring examples.
+Next steps
+¶
+Learn the
+API Endpoints concept
+.
+Add dynamic inputs with
+Query parameters
+.
+Use the
+Query API
+for caller-owned SQL.
+Review the
+Pipe API reference
+.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+API Endpoints
+Call an API Endpoint
+Use query parameters
+Choose a response format
+Errors and retries
+Error codes
+Retries
+Track API Endpoint usage
+Next steps
+forward
+Ask AI

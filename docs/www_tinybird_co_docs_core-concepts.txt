@@ -1,0 +1,178 @@
+Source: https://www.tinybird.co/docs/core-concepts
+
+Core concepts of Tinybird · Tinybird Docs
+Sign In
+Sign Up
+Core concepts of Tinybird
+¶
+Copy as MD
+Tinybird gives you the tooling and infrastructure you need to ship analytics features in your application:
+An OLAP database (ClickHouse®)
+An API gateway
+A real-time ingestion system
+An auth system
+Tooling to build, iterate, and deploy data projects
+Tinybird is built around several core concepts that abstract the underlying infrastructure and data storage. To make the most of Tinybird, it's important to understand these core concepts.
+Develop anywhere, deploy to Tinybird Cloud
+¶
+Tinybird is a platform for building analytics features in your application. You can build with:
+Tinybird CLI (datafiles)
+TypeScript SDK (typed resources)
+Python SDK (typed resources)
+There are three main environments: Tinybird Cloud for production workloads, Tinybird Local for local development, and Tinybird Branches for shared preview environments.
+Tinybird Cloud is the hosted platform (see available
+regions
+) where your production workspace lives.
+Tinybird Local
+is a local runtime for development and testing.
+Tinybird Branches are cloud environments for development, collaboration, and pre-production validation.
+The typical workflow is as follows:
+Define your resources using
+datafiles
+or the TypeScript SDK.
+Iterate and test
+locally
+or in
+Cloud Branches
+.
+Deploy your data project
+to Tinybird Cloud so your endpoints and ingest pipelines are live. Strongly recommended via
+CI/CD
+.
+Use
+Tinybird Cloud
+to inspect data, manage deployments, and monitor usage.
+The following diagram illustrates the development and usage flow, from local development or branches to deployment in Tinybird Cloud.
+Your projects live in workspaces
+¶
+A
+workspace
+contains the resources, data, and state of your Tinybird project. You can have as many workspaces as you need and invite users to collaborate.
+At a minimum, a workspace contains a data source (a database table). You write data to it and read data from it. The following diagram illustrates the relationship between resources in a workspace.
+Data enters through data sources
+¶
+Data Sources
+are where you ingest and store data in Tinybird. All your data lives inside a data source, and you write SQL queries against data sources. You can bulk upload or stream data into a data source.
+You can bring data in from the following sources:
+Events sent to the
+Events API
+.
+Events streamed from Kafka. See
+Ingest data from Kafka
+.
+Files in your local file system. See
+Ingest data from files
+.
+Files in your cloud storage bucket. See
+Connections
+.
+Data sources can be defined in datafiles or with the SDKs. See
+Data Sources
+for more information.
+Use pipes to process your data
+¶
+Pipes
+are how you write SQL logic in Tinybird. They're a collection of one or more SQL queries chained together, or nodes. Pipes let you break larger queries down into smaller queries that are easier to read.
+With pipes you can:
+Publish API Endpoints.
+Create optimized Data Sources with Materialized Views or Copy Pipes.
+Send data to Cloud Storage via Sinks.
+Create Views.
+Pipes
+can be defined in datafiles or with the SDKs. See
+Pipes
+for more information.
+Query your data
+¶
+When your data is ready to be consumed, expose it through API Endpoints or query it directly from Tinybird Cloud, SQL clients, BI tools, and agents.
+To query from outside Tinybird:
+API endpoints
+, which you can call using custom parameters from any application.
+Query API
+for running SQL directly against Data Sources and Pipes over HTTP.
+ClickHouse interface
+for SQL clients and BI tools.
+MCP server
+for agent and tool integrations.
+To query inside Tinybird Cloud:
+Playgrounds
+for writing and testing SQL interactively.
+Explorations
+for AI-assisted data exploration.
+Time Series
+for visualizing time-based metrics.
+Tokens protect your data
+¶
+Tokens
+are how you authenticate and control access to your Tinybird resources. Without tokens, nobody can send data to your data sources or query your endpoints.
+There are two types of tokens:
+Static tokens
+: Permanent tokens for backend integrations. Use them to send data, manage resources via CLI, or read data directly from your backend applications.
+JSON Web Tokens, JWTs
+: Short-lived tokens. Use them for browser access and multi-tenant applications where each user or tenant needs scoped endpoint access, optional filtering, and per-user rate limits.
+When you create a workspace, Tinybird automatically creates default tokens for you, including:
+Workspace admin token
+: Full access to everything in your workspace
+Your personal admin token
+: Stored in your
+.tinyb
+file when you run
+tb login
+For development, you can use these admin tokens. For production, create specific tokens with limited permissions (scopes) for security.
+Token workflow
+¶
+Development
+: Use admin tokens to build and test your project locally
+Production
+: Create resource-specific tokens with minimal required permissions
+Frontend access
+: Generate JWTs from your backend for browser-based queries
+See
+Tokens
+for detailed token management.
+Templates make resources dynamic
+¶
+The
+templating language
+lets you add typed parameters, conditional SQL, settings, and secrets to resources defined as code. Use templates to create parameterized API Endpoints, run Copy Pipes with runtime values, and keep connector credentials out of source control.
+To go live, create and promote a deployment
+¶
+After you develop your project, you can deploy it to Tinybird Cloud. This creates a deployment, which is a version of your project resources and data running on local or cloud infrastructure.
+When you're ready to go live, you can promote your deployment in Tinybird Cloud. This makes your deployment available to your users. In other words, the deployment is live.
+See
+Deployments
+for more information.
+Monitor with service data sources
+¶
+Tinybird exposes built-in data sources for monitoring usage and performance:
+tinybird.*
+service data sources
+for workspace-level metrics and logs.
+system.*
+tables
+for ClickHouse system-level insights.
+organization.*
+service data sources
+for org-wide usage and billing signals.
+See
+Service data sources
+and
+Organizations
+for details.
+Updated
+6 days ago
+Looking for Classic docs?
+On this page
+Core concepts of Tinybird
+Develop anywhere, deploy to Tinybird Cloud
+Your projects live in workspaces
+Data enters through data sources
+Use pipes to process your data
+Query your data
+Tokens protect your data
+Token workflow
+Templates make resources dynamic
+To go live, create and promote a deployment
+Monitor with service data sources
+forward
+Ask AI

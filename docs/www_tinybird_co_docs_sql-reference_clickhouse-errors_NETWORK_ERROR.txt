@@ -1,0 +1,459 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/NETWORK_ERROR
+
+NETWORK_ERROR ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+NETWORK_ERROR ClickHouse error
+¶
+Copy as MD
+This error occurs when there are network connectivity issues between the client and ClickHouse server. It's common with connection timeouts, network interruptions, or server unavailability.
+The
+NETWORK_ERROR
+in ClickHouse (and Tinybird) happens when there are network connectivity issues between the client application and the ClickHouse server. This can occur due to various reasons including connection timeouts, network interruptions, server unavailability, firewall issues, or DNS resolution problems.
+What causes this error
+¶
+You'll typically see it when:
+Network connection is interrupted during query execution
+Server is unreachable due to network issues
+Connection timeout occurs
+Firewall blocks the connection
+DNS resolution fails
+Server is down or restarting
+Network latency exceeds timeout limits
+Connection pool is exhausted
+SSL/TLS handshake fails
+Network errors are often transient. Implement retry logic with exponential backoff for better reliability.
+Example errors
+¶
+Fails: connection timeout
+SELECT * FROM events WHERE timestamp > '2024-01-01'
+-- Error: Network error: Connection timeout
+Fails: server unreachable
+INSERT INTO events (user_id, event_type, timestamp) VALUES
+(123, 'click', '2024-01-01 10:00:00')
+-- Error: Network error: Connection refused
+Fails: DNS resolution failure
+-- When trying to connect to hostname that can't be resolved
+SELECT COUNT(*) FROM events
+-- Error: Network error: Name or service not known
+Fails: SSL handshake failure
+-- When SSL/TLS connection fails
+SELECT * FROM users LIMIT 10
+-- Error: Network error: SSL handshake failed
+How to fix it
+¶
+Check network connectivity
+¶
+Verify basic network connectivity:
+Check network connectivity
+-- Test basic connectivity from your client
+-- Example for Python:
+-- import socket
+-- try:
+--     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+--     sock.settimeout(5)
+--     result = sock.connect_ex(('your-host', 9000))
+--     sock.close()
+--     if result == 0:
+--         print("Port is open")
+--     else:
+--         print("Port is closed")
+-- except Exception as e:
+--     print(f"Connection failed: {e}")
+Verify server status
+¶
+Check if the ClickHouse server is running:
+Check server status
+-- From another client or server, test connection
+-- ping your-clickhouse-host
+-- telnet your-clickhouse-host 9000
+Check firewall settings
+¶
+Verify firewall configurations:
+Firewall check
+-- Check if port 9000 is open
+-- Example for Linux:
+-- sudo ufw status
+-- sudo iptables -L
+--
+-- Example for Windows:
+-- netsh advfirewall firewall show rule name=all
+Review connection settings
+¶
+Check client connection configurations:
+Connection settings
+-- In your client application, verify settings
+-- Example for Python clickhouse-driver:
+from clickhouse_driver import Client
+
+client = Client(
+    host='your-host',
+    port=9000,
+    database='your_database',
+    settings={
+        'connect_timeout': 10,  -- 10 seconds
+        'send_receive_timeout': 300,  -- 5 minutes
+        'sync_request_timeout': 300  -- 5 minutes
+    }
+)
+Common patterns and solutions
+¶
+Connection retry logic
+¶
+Implement retry mechanisms for network errors:
+Retry logic
+-- In your application, implement retry logic
+-- Example pseudo-code:
+--
+-- import time
+-- from clickhouse_driver.errors import NetworkError
+--
+-- def execute_with_retry(query, max_retries=3, base_delay=1):
+--     for attempt in range(max_retries):
+--         try:
+--             result = client.execute(query)
+--             return result
+--         except NetworkError as e:
+--             if attempt < max_retries - 1:
+--                 delay = base_delay * (2 ** attempt)
+--                 time.sleep(delay)
+--                 continue
+--             else:
+--                 raise
+Connection pooling
+¶
+Use connection pooling to manage connections:
+Connection pooling
+-- Implement connection pooling in your application
+-- Example pseudo-code:
+--
+-- class ConnectionPool:
+--     def __init__(self, max_connections=10):
+--         self.max_connections = max_connections
+--         self.connections = []
+--         self.lock = threading.Lock()
+--
+--     def get_connection(self):
+--         with self.lock:
+--             if self.connections:
+--                 return self.connections.pop()
+--             return self._create_connection()
+--
+--     def return_connection(self, conn):
+--         with self.lock:
+--             if len(self.connections) < self.max_connections:
+--                 self.connections.append(conn)
+--             else:
+--                 conn.close()
+Health checking
+¶
+Implement connection health monitoring:
+Health checking
+-- Add health checks to your connection management
+-- Example pseudo-code:
+--
+-- def check_connection_health(connection):
+--     try:
+--         # Simple health check query
+--         connection.execute("SELECT 1")
+--         return True
+--     except Exception:
+--         return False
+--
+-- def get_healthy_connection():
+--     for conn in connection_pool:
+--         if check_connection_health(conn):
+--             return conn
+--     return create_new_connection()
+Timeout management
+¶
+Set appropriate timeout values:
+Timeout management
+-- Configure appropriate timeouts for different scenarios
+-- Example for Python clickhouse-driver:
+client = Client(
+    host='your-host',
+    port=9000,
+    settings={
+        'connect_timeout': 10,  -- Connection timeout
+        'send_receive_timeout': 300,  -- Query timeout
+        'sync_request_timeout': 300,  -- Request timeout
+        'keep_alive_timeout': 60  -- Keep-alive timeout
+    }
+)
+Tinybird-specific notes
+¶
+In Tinybird, NETWORK_ERROR errors often occur when:
+API endpoints are unreachable
+Network issues between client and Tinybird
+Rate limiting causes connection drops
+Workspace maintenance affects connectivity
+API token authentication fails
+To debug in Tinybird:
+Check your network connectivity to Tinybird
+Verify API token validity
+Check Tinybird status page for service issues
+Review rate limiting and API usage
+In Tinybird, use the status page to check for known service issues before troubleshooting network problems.
+Best practices
+¶
+Network resilience
+¶
+Implement retry logic with exponential backoff
+Use connection pooling to manage connections
+Set appropriate timeout values
+Monitor network performance metrics
+Error handling
+¶
+Handle network errors gracefully
+Implement circuit breaker patterns
+Log network issues for debugging
+Provide user feedback for connection problems
+Monitoring
+¶
+Monitor connection success rates
+Track network latency and timeouts
+Alert on connection failures
+Monitor server availability
+Configuration options
+¶
+Network settings
+¶
+Network configuration
+-- Check current network settings
+SELECT
+    name,
+    value,
+    description
+FROM system.settings
+WHERE name LIKE '%timeout%' OR name LIKE '%network%'
+Connection settings
+¶
+Connection configuration
+-- Configure connection parameters
+-- Example for Python clickhouse-driver:
+client = Client(
+    host='your-host',
+    port=9000,
+    database='your_database',
+    user='your_user',
+    password='your_password',
+    settings={
+        'connect_timeout': 10,
+        'send_receive_timeout': 300,
+        'sync_request_timeout': 300,
+        'keep_alive_timeout': 60
+    }
+)
+SSL/TLS configuration
+¶
+SSL configuration
+-- Configure SSL/TLS for secure connections
+-- Example for Python clickhouse-driver:
+client = Client(
+    host='your-host',
+    port=9440,  -- SSL port
+    database='your_database',
+    user='your_user',
+    password='your_password',
+    secure=True,
+    verify=False  # Set to True for production
+)
+Alternative solutions
+¶
+Use connection proxies
+¶
+Implement connection proxying:
+Connection proxy
+-- Use a connection proxy for better reliability
+-- Example pseudo-code:
+--
+-- class ConnectionProxy:
+--     def __init__(self, primary_host, backup_hosts):
+--         self.primary_host = primary_host
+--         self.backup_hosts = backup_hosts
+--         self.current_host = primary_host
+--
+--     def get_connection(self):
+--         try:
+--             return Client(host=self.current_host)
+--         except NetworkError:
+--             self._switch_to_backup()
+--             return Client(host=self.current_host)
+--
+--     def _switch_to_backup(self):
+--         if self.current_host == self.primary_host:
+--             self.current_host = self.backup_hosts[0]
+--         else:
+--             # Try next backup host
+--             current_index = self.backup_hosts.index(self.current_host)
+--             next_index = (current_index + 1) % len(self.backup_hosts)
+--             self.current_host = self.backup_hosts[next_index]
+Implement circuit breaker
+¶
+Add circuit breaker pattern:
+Circuit breaker
+-- Implement circuit breaker for network operations
+-- Example pseudo-code:
+--
+-- class CircuitBreaker:
+--     def __init__(self, failure_threshold=5, recovery_timeout=60):
+--         self.failure_threshold = failure_threshold
+--         self.recovery_timeout = recovery_timeout
+--         self.failure_count = 0
+--         self.last_failure_time = 0
+--         self.state = 'CLOSED'  # CLOSED, OPEN, HALF_OPEN
+--
+--     def call(self, func, *args, **kwargs):
+--         if self.state == 'OPEN':
+--             if time.time() - self.last_failure_time > self.recovery_timeout:
+--                 self.state = 'HALF_OPEN'
+--             else:
+--                 raise Exception("Circuit breaker is OPEN")
+--
+--         try:
+--             result = func(*args, **kwargs)
+--             self._on_success()
+--             return result
+--         except NetworkError:
+--             self._on_failure()
+--             raise
+--
+--     def _on_success(self):
+--         self.failure_count = 0
+--         self.state = 'CLOSED'
+--
+--     def _on_failure(self):
+--         self.failure_count += 1
+--         self.last_failure_time = time.time()
+--
+--         if self.failure_count >= self.failure_threshold:
+--             self.state = 'OPEN'
+Asynchronous connections
+¶
+Use async patterns for better performance:
+Async connections
+-- Use async/await patterns for network operations
+-- Example pseudo-code:
+--
+-- import asyncio
+--
+-- async def execute_query_async(query):
+--     loop = asyncio.get_event_loop()
+--     return await loop.run_in_executor(None, execute_query, query)
+--
+-- async def main():
+--     tasks = []
+--     for query in queries:
+--         task = asyncio.create_task(execute_query_async(query))
+--         tasks.append(task)
+--
+--     results = await asyncio.gather(*tasks, return_exceptions=True)
+--     return results
+Monitoring and prevention
+¶
+Network performance tracking
+¶
+Performance monitoring
+-- Track network performance metrics
+-- Example pseudo-code:
+--
+-- import time
+--
+-- def track_network_performance(operation):
+--     start_time = time.time()
+--     try:
+--         result = execute_query(operation)
+--         duration = time.time() - start_time
+--         log_metric('network_success', duration)
+--         return result
+--     except NetworkError:
+--         duration = time.time() - start_time
+--         log_metric('network_error', duration)
+--         raise
+Connection monitoring
+¶
+Connection monitoring
+-- Monitor connection health and performance
+-- Example pseudo-code:
+--
+-- class ConnectionMonitor:
+--     def __init__(self):
+--         self.connection_attempts = 0
+--         self.connection_successes = 0
+--         self.connection_failures = 0
+--         self.avg_connection_time = 0
+--
+--     def track_connection_attempt(self, success, duration):
+--         self.connection_attempts += 1
+--         if success:
+--             self.connection_successes += 1
+--         else:
+--             self.connection_failures += 1
+--
+--         # Update average connection time
+--         self.avg_connection_time = (
+--             (self.avg_connection_time * (self.connection_attempts - 1) + duration)
+--             / self.connection_attempts
+--         )
+--
+--     def get_success_rate(self):
+--         if self.connection_attempts == 0:
+--             return 0
+--         return self.connection_successes / self.connection_attempts
+Alerting
+¶
+Network alerting
+-- Set up alerts for network issues
+-- Example pseudo-code:
+--
+-- def check_network_health():
+--     success_rate = connection_monitor.get_success_rate()
+--     if success_rate < 0.95:  # 95% success rate threshold
+--         send_alert(f"Network health degraded: {success_rate:.2%} success rate")
+--
+--     if connection_monitor.avg_connection_time > 5:  # 5 second threshold
+--         send_alert(f"Network latency high: {connection_monitor.avg_connection_time:.2f}s")
+See also
+¶
+Connection Management
+Performance Monitoring
+Error Handling
+Client Configuration
+Updated
+3 weeks ago
+On this page
+NETWORK_ERROR ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Check network connectivity
+Verify server status
+Check firewall settings
+Review connection settings
+Common patterns and solutions
+Connection retry logic
+Connection pooling
+Health checking
+Timeout management
+Tinybird-specific notes
+Best practices
+Network resilience
+Error handling
+Monitoring
+Configuration options
+Network settings
+Connection settings
+SSL/TLS configuration
+Alternative solutions
+Use connection proxies
+Implement circuit breaker
+Asynchronous connections
+Monitoring and prevention
+Network performance tracking
+Connection monitoring
+Alerting
+See also
+forward
+classic
+Ask AI

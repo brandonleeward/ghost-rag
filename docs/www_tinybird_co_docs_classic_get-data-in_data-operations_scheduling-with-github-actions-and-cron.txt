@@ -1,0 +1,261 @@
+Source: https://www.tinybird.com/docs/classic/get-data-in/data-operations/scheduling-with-github-actions-and-cron
+
+Classic: Schedule data ingestion · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Schedule data ingestion with cron and GitHub Actions
+¶
+Copy as MD
+Cronjobs are the universal way of scheduling tasks. In this guide, you'll learn how to keep your data in sync with cronjobs or GitHub actions and the Tinybird REST API.
+Overview
+¶
+For this example, let's assume you've already imported a Data Source to your Tinybird account and that you have properly defined its schema and partition key. Once everything is set, you can easily perform some operations using the
+Data Sources API
+to
+periodically append to or replace data
+in your Data Sources. This guide shows you some examples.
+About crontab
+¶
+Crontab is a native Unix tool that schedules command execution at a specified time or time interval. It works by defining the schedule, and the command to execute, in a text file. This can be achieved using
+sudo crontab -e
+. You can learn more about using crontab using many online resources like
+crontab.guru
+and
+the man page for crontab
+.
+The cron table format
+¶
+Cron follows a table format like the following (note that you can also use
+external tools like crontab.guru
+to help you define the cron job schedule):
+Cron syntax explanation
+*   *   *   *   *  Command_to_execute
+|   |   |   |   |       
+|   |   |   |   Day of the Week ( 0 - 6 ) ( Sunday = 0 )
+|   |   |   |
+|   |   |   Month ( 1 - 12 )
+|   |   |
+|   |   Day of Month ( 1 - 31 )
+|   |
+|   Hour ( 0 - 23 )
+|
+Min ( 0 - 59 )
+Using this format, the following would be typical cron schedules to execute commands at different times:
+Every five minutes:
+0/5 \* \* \* \*
+Every day at midnight:
+0 0 \* \* \*
+Every first day of month:
+\* \* 1 \* \*
+Every Sunday at midnight:
+0 0 \* \* 0
+Be sure you save your scripts in the right location. Save your shell scripts in the
+/opt/cronjobs/
+folder.
+Append data periodically
+¶
+It's very common to have a Data Source that grows over time. There is often is also an ETL process extracting this data from the transactional database and generating CSV files with the last X hours or days of data, therefore you might want to append those recently-generated rows to your Tinybird Data Source.
+For this example, imagine you generate new CSV files every day at 00:00 that you want to append to Tinybird everyday at 00:10.
+Option 1: With a shell script
+¶
+First, you need to create a shell script file containing the Tinybird API request operation:
+Contents of append.sh
+#!/bin/bash
+TOKEN=your_token
+CSV_URL="http://your_url.com"
+
+curl \
+  -H "Authorization: Bearer $TOKEN" \
+  -X POST \
+  -d url=$CSV_URL \
+  -d mode='append' \
+  -d name='events' \
+  https://<your_host>/v0/datasources
+Then, add a new line to your crontab file (using
+sudo crontab -e
+):
+10 0 * * * sh -c /opt/cronjobs/append.sh
+Option 2: Using GitHub Actions
+¶
+If your project is hosted on GitHub, you can also use GitHub Actions to schedule periodic jobs. Create a new file called
+.github/workflows/append.yml
+with the following code to append data from a CSV given its URL every day at 00:10.
+Contents of .github/workflows/append.yml
+name: Append data data every day at 00:10
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron:  '10 0 * * *'
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out this repo
+      uses: actions/checkout@v2
+    - name: Append new data
+      run: |-
+        curl \
+          -H "Authorization: Bearer $TOKEN" \
+          -X POST \
+            -d url=$CSV_URL \
+            -d mode='append' \
+            -d name='events' \
+            https://<your_host>/v0/datasources
+Replace data periodically
+¶
+Let's use another example. With this new fictional Data Source, imagine a scenario where you want to replace the whole Data Source with a CSV file sitting in a publicly-accessible URL every first day of the month.
+Option 1: With a shell script
+¶
+Contents of replace.sh
+#!/bin/bash
+TOKEN=your_token
+CSV_URL="http://your_url.com"
+
+curl \
+  -H "Authorization: Bearer $TOKEN" \
+  -X POST \
+  -d url=$CSV_URL \
+  -d mode='replace' \
+  -d name='events' \
+  https://<your_host>/v0/datasources
+Then edit the crontab file which takes care of periodically executing your script. Run
+sudo crontab -e
+:
+Setting up a crontab to run a script periodically
+* * 1 * * sh -c /opt/cronjobs/replace.sh
+Option 2: With GitHub Actions
+¶
+Create a new file called
+.github/workflows/replace.yml
+with the following code to replace all your data with given the URL of the CSV with the new data every day at 00:10.
+Contents of .github/workflows/replace.yml
+name: Replace all data every day at 00:10
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron:  '10 0 * * *'
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out this repo
+      uses: actions/checkout@v2
+    - name: Replace all data
+      run: |-
+        curl \
+          -H "Authorization: Bearer $TOKEN" \
+          -X POST \
+            -d url=$CSV_URL \  
+            -d mode='replace' \
+            -d name='events' \
+            https://<your_host>/v0/datasources
+Replace just one month of data
+¶
+Having your API call inside a shell script allows you to script more complex ingestion processes. For example, imagine you want to replace the last month of events data, every day. Then each day, you would export a CSV file to a publicly accessible URL and name it something like
+events_YYYY-MM-DD.csv
+.
+Option 1: With a shell script
+¶
+You could script a process that would do a conditional data replacement as follows:
+Script to replace data selectively on Tinybird
+#!/bin/bash
+
+TODAY=`date +"%Y-%m-%d"`
+ONE_MONTH_AGO=`date -v -1m +%Y-%m-%d`
+TOKEN=your_token
+DATASOURCE=events
+CSV_URL="http://your_url.com"
+
+curl \
+  -H "Authorization: Bearer $TOKEN" \
+  -X POST \
+  -d url=$CSV_URL \  
+  -d mode='replace' \
+  -d replace_condition=(created_at+BETWEEN+'${ONE_MONTH_AGO}'+AND+'${TODAY}')" \
+  -d name=$DATASOURCE \
+  https://<your_host>/v0/datasources
+Then, after saving that file to
+/opt/cronjobs/daily_replace.sh
+, add the following line to
+crontab
+to run it every day at midnight:
+Setting up a crontab to run a script periodically
+0 0 * * * sh -c /opt/cronjobs/daily_replace.sh
+Option 2: With GitHub Actions
+¶
+Create a new file called
+.github/workflows/replace_last_month.yml
+with the following code to replace all the data for the last month every day at 00:10.
+Contents of .github/workflows/replace.yml
+name: Replace all data every day at 00:10
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron:  '10 0 * * *'
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out this repo
+      uses: actions/checkout@v2
+    - name: Replace all data
+      run: |-
+        TODAY=`date +"%Y-%m-%d"`                                 
+        ONE_MONTH_AGO=`date -v -1m +%Y-%m-%d`
+        DATASOURCE=events # could also be set via github secrets
+        CSV_URL="http://your_url.com" # could also be set via github secrets
+        curl \
+          -H "Authorization: Bearer $TOKEN" \
+          -X POST \
+          -d url=$CSV_URL \  
+          -d mode='replace' \
+          -d replace_condition=(created_at+BETWEEN+'${ONE_MONTH_AGO}'+AND+'${TODAY}')" \
+          -d name=$DATASOURCE \
+          https://<your_host>/v0/datasources
+Use GitHub secrets: Store
+TOKEN
+as an
+encrypted secret
+to avoid hardcoding secret keys in your repositories, and replace
+DATASOURCE
+and
+CSV_URL
+by their values or save them as secrets as well.
+Next steps
+¶
+Learn more about
+GitHub Actions and CI/CD processes on Tinybird
+.
+Understand how to
+work with time
+.
+Updated
+3 weeks ago
+On this page
+Schedule data ingestion with cron and GitHub Actions
+Overview
+About crontab
+The cron table format
+Append data periodically
+Option 1: With a shell script
+Option 2: Using GitHub Actions
+Replace data periodically
+Option 1: With a shell script
+Option 2: With GitHub Actions
+Replace just one month of data
+Option 1: With a shell script
+Option 2: With GitHub Actions
+Next steps
+classic
+Ask AI

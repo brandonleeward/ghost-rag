@@ -1,0 +1,38 @@
+Source: https://docs.docker.com/reference/cli/docker/compose/alpha/scale/
+
+docker compose alpha scale | Docker Docs
+Gordon
+Gordon, your AI assistant for Docker docs
+Search
+Start a new chat
+When enabled, Gordon considers the current page you're viewing
+to provide more relevant answers.
+Share feedback
+Answers are generated based on the documentation.
+Back
+Reference
+Get started
+Guides
+Manuals
+docker compose alpha scale
+Ask Gordon
+Copy Markdown
+View Markdown
+Description
+Scale services
+Usage
+docker compose alpha scale [SERVICE=REPLICAS...]
+Experimental
+This command is experimental.
+Experimental features are intended for testing and feedback as their
+functionality or design may change between releases without warning or
+can be removed entirely in a future release.
+Description
+Scale services
+Options
+Option
+Default
+Description
+--no-deps
+Don't start linked services.
+Table of contents

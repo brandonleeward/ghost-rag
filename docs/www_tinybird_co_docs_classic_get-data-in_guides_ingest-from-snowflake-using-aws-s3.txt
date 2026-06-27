@@ -1,0 +1,147 @@
+Source: https://www.tinybird.com/docs/classic/get-data-in/guides/ingest-from-snowflake-using-aws-s3
+
+Classic: Ingest from Snowflake using AWS S3 · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Ingest data from Snowflake using AWS S3
+¶
+Copy as MD
+Read on to learn how to send data from Snowflake to Tinybird, for example when you need to periodically run full replaces of a table or do a one-off ingest.
+This process relies on
+unloading
+, or bulk exporting, data as gzipped CSVs and then ingesting them using the Data Sources API. Data is then ingested using the
+S3 Connector
+.
+Prerequisites
+¶
+To follow these steps you need a Tinybird account and access to Snowflake and AWS S3.
+1
+Unload the Snowflake table
+¶
+The first step consists in unloading the Snowflake table to a gzipped CSV file.
+Grant the required permissions in AWS IAM Console
+Make sure the S3 bucket allows Snowflake to write files by setting up an appropriate IAM role or policy. You can use this template to create the policy and attach it to the AWS role:
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": ["s3:PutObject", "s3:AbortMultipartUpload"],
+            "Resource": "arn:aws:s3:::your-bucket-name/path/*"
+        }
+    ]
+}
+Replace
+your-bucket-name/path/*
+with your bucket name, and optionally the path you want to grant access to. Attach the policy to the role you want use to unload the data from Snowflake.
+Create the storage integration
+Run the following SQL statement to create the storage integration:
+/* Create the S3 integration.
+ */
+CREATE or replace STORAGE INTEGRATION tinybird_integration
+  TYPE = EXTERNAL_STAGE
+  STORAGE_PROVIDER = 'S3'
+  ENABLED = TRUE
+  STORAGE_AWS_ROLE_ARN = '<arn_role>'
+  STORAGE_ALLOWED_LOCATIONS = ('*');
+
+-- describe integration tinybird_integration;
+Replace
+<arn_role>
+with the ARN of the role created in the previous step.
+Create the file format
+Run the following SQL statement to create the file format:
+/* Create the file format for the output files generated.
+ */
+CREATE OR REPLACE FILE FORMAT csv_unload_format
+  TYPE = 'CSV';
+Create the stage
+Run the following SQL statement to create the stage:
+/* And finally the stage we'll use to unload the data to.
+ */
+CREATE or replace STAGE tinybird_stage
+  STORAGE_INTEGRATION = tinybird_integration
+  URL = 's3://your-bucket-name/path/'
+  FILE_FORMAT = csv_unload_format;
+Replace
+your-bucket-name
+and
+path
+with your S3 bucket details.
+Unload the data
+Run the following SQL statement to unload the data:
+COPY INTO @tinybird_stage/orders/ from (
+    select
+        O_ORDERKEY, O_CUSTKEY, O_ORDERSTATUS, O_TOTALPRICE, O_ORDERDATE,
+        O_ORDERPRIORITY, O_CLERK
+    from my_database.my_schema.orders
+)
+To automate the unloading, you can create a Snowflake task that runs the
+COPY INTO
+on a schedule. For example:
+CREATE or replace TASK export_order_deltas
+    WAREHOUSE = compute_wh
+    SCHEDULE = 'USING CRON 05 * * * * UTC'
+AS
+COPY INTO @tinybird_stage/orders from (
+    select
+        O_ORDERKEY, O_CUSTKEY, O_ORDERSTATUS, O_TOTALPRICE, O_ORDERDATE,
+        O_ORDERPRIORITY, O_CLERK
+    from my_database.my_schema.orders
+) max_file_size=1000000000
+2
+Ingest data into Tinybird
+¶
+Before ingesting your Snowflake data from the S3 bucket, you need to create the S3 connection. See
+S3 Connector
+.
+You can use the following schema for the data source:
+SCHEMA >
+    `O_ORDERKEY` Int64,
+    `O_CUSTKEY` Int64,
+    `O_ORDERSTATUS` String,
+    `O_TOTALPRICE` Float32,
+    `O_ORDERDATE` DateTime64(3),
+    `O_ORDERPRIORITY` String,
+    `O_CLERK` String
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYear(O_ORDERDATE)"
+ENGINE_SORTING_KEY "O_ORDERDATE, O_ORDERPRIORITY, O_CLERK"
+
+IMPORT_CONNECTION_NAME 'tb-s3'
+IMPORT_BUCKET_URI 's3://tb/snowflake/csv/orders/*.csv.gz'
+IMPORT_SCHEDULE '@auto'
+Deploy the data source. The new files Snowflake writes to the bucket are automatically ingested by Tinybird.
+Each file is appended to the Tinybird data source. As records might be duplicated, consider using a materialized view to consolidate a stateful set of your Snowflake table.
+Limits
+¶
+Because you're using the data sources API, its
+limits
+apply.
+You might need to adjust your
+COPY INTO <location>
+expression adding
+PARTITION
+or
+MAX_FILE_SIZE = 5000000000
+.
+Next steps
+¶
+See the following resources:
+Ingest from Snowflake using Azure Blob Storage
+Ingest from Snowflake using incremental updates
+GCS Connector
+Updated
+3 weeks ago
+On this page
+Ingest data from Snowflake using AWS S3
+Prerequisites
+Unload the Snowflake table
+Ingest data into Tinybird
+Limits
+Next steps
+classic
+Ask AI

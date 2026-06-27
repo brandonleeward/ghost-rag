@@ -1,0 +1,193 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/connect/using-connect/using-connect-exporting-data-from-mariadb
+
+Using CONNECT - Exporting Data From MariaDB | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+Introduction to the CONNECT Engine
+Using CONNECT
+Using CONNECT - Condition Pushdown
+Using CONNECT - Exporting Data From MariaDB
+Using CONNECT - General Information
+Using CONNECT - Importing File Data Into MariaDB Tables
+Using CONNECT - Indexing
+Using CONNECT - Partitioning and Sharding
+Using CONNECT - Virtual and Special Columns
+Installing CONNECT
+CONNECT Create Table Options
+CONNECT Data Types
+CONNECT Table Types
+CONNECT Security
+CONNECT System Variables
+Adding the REST Feature as a Library Called by an OEM Table
+Compiling JSON UDFs in a Separate Library
+Making the GetRest Library
+OEM Table Example
+Current Status of the CONNECT Handler
+JSON Sample Files
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Using CONNECT - Exporting Data From MariaDB
+The CONNECT storage engine.
+Exporting data from MariaDB is obviously possible with CONNECT in particular for all formats not supported by the
+SELECT INTO OUTFILE
+statement. Let us consider the query:
+Copy
+SELECT
+plugin_name
+AS
+handler,
+plugin_version
+AS
+version
+,
+plugin_author
+AS
+author,
+plugin_description
+AS
+description
+,
+plugin_maturity
+AS
+maturity
+FROM
+information_schema
+.
+plugins
+WHERE
+plugin_type
+=
+'
+STORAGE ENGINE
+'
+;
+Supposing you want to get the result of this query into a file handlers.htm in XML/HTML format, allowing displaying it on an Internet browser, this is how you can do it:
+Just create the CONNECT table that are used to make the file:
+Copy
+CREATE
+TABLE
+handout
+ENGINE
+=
+CONNECT
+table_type
+=
+XML
+file_name
+=
+'
+handout.htm
+'
+header
+=
+yes
+option_list
+=
+'
+name=TABLE,coltype=HTML,attribute=border=1;cellpadding=5,headattr=bgcolor=yellow
+'
+AS
+SELECT
+plugin_name
+AS
+handler,
+plugin_version
+AS
+version
+,
+plugin_author
+AS
+author,
+plugin_description
+AS
+description
+,
+plugin_maturity
+AS
+maturity
+FROM
+information_schema
+.
+plugins
+WHERE
+plugin_type
+=
+'
+STORAGE ENGINE
+'
+;
+Here the column definition is not given and will come from the Select statement following the Create. The CONNECT options are the same we have seen previously. This will do both actions, creating the matching
+handlers
+CONNECT table and 'filling' it with the query result.
+Note 1:
+This could not be done in only one statement if the table type had required using explicit CONNECT column options. In this case, firstly create the table, and then populate it with an Insert statement.
+Note 2:
+The source “plugins” table column “description” is a long text column, data type not supported for CONNECT tables. It has been silently internally replaced by varchar(256).
+This page is licensed: GPLv2
+spinner
+Previous
+Using CONNECT - Condition Pushdown
+Next
+Using CONNECT - General Information
+Last updated
+4 months ago
+Was this helpful?
+Was this helpful?

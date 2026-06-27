@@ -1,0 +1,365 @@
+Source: https://www.tinybird.com/docs/sql-reference/data-types/json
+
+JSON Data Type reference · Tinybird Docs
+Sign In
+Sign Up
+JSON data type
+BETA
+¶
+Copy as MD
+The
+JSON
+data type is in private beta. If you are interested in using this type, contact Tinybird at
+support@tinybird.co
+or in the
+Community Slack
+.
+The
+JSON
+data type stores JavaScript Object Notation (JSON) documents within a single column. It allows for flexible schema-on-read operations, where individual fields can be accessed as subcolumns.
+Syntax
+¶
+To declare a column of
+JSON
+type, use the following syntax:
+<column_name> JSON([max_dynamic_paths=N, max_dynamic_types=M, some.path TypeName, SKIP path.to.skip, SKIP REGEXP 'paths_regexp']) [jsonPath]
+Arguments
+¶
+max_dynamic_paths
+: Optional. An integer indicating the maximum number of distinct paths that can be stored separately as subcolumns within a single data block (e.g., a single data part for a MergeTree table). If this limit is exceeded, additional paths will be grouped together in a single structure. Default value is
+16
+.
+max_dynamic_types
+: Optional. An integer between
+1
+and
+255
+indicating the maximum number of different data types that can be stored within a single path column with a
+Dynamic
+type across a single data block. If this limit is exceeded, any new types will be converted to
+String
+. Default value is
+2
+.
+some.path TypeName
+: Optional. A type hint for a specific path within the JSON document. Paths specified with a type hint will always be stored as subcolumns with the given
+TypeName
+.
+SKIP path.to.skip
+: Optional. A hint for a specific path that should be ignored during JSON parsing. Such paths will not be stored in the
+JSON
+column. If the specified path is a nested JSON object, the entire nested object will be skipped.
+SKIP REGEXP 'paths_regexp'
+: Optional. A regular expression hint used to skip paths during JSON parsing. Any path matching this regular expression will not be stored in the
+JSON
+column.
+Returns
+¶
+A column capable of storing JSON documents, allowing access to its fields as subcolumns.
+Creating a Data Source with JSON columns
+¶
+You can create a data source with JSON columns by using the
+JSON
+data type in your schema definition.
+test.datasource
+SCHEMA >
+    `json` JSON `json:$`
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "tuple()"
+tb push datasources/test.datasource
+echo '{"a" : {"b" : 42}, "c" : [1, 2, 3]}\n{"f" : "Hello, World!"}\n{"a" : {"b" : 43, "e" : 10}, "c" : [4, 5, 6]}' > test.ndjson
+tb datasource append test test.ndjson
+tb sql 'select * from test'
+Result:
+---------------------------------------------
+| json                                      |
+---------------------------------------------
+| {'a': {'b': 42}, 'c': [1, 2, 3]}          |
+| {'f': 'Hello, World!'}                    |
+| {'a': {'b': 43, 'e': 10}, 'c': [4, 5, 6]} |
+---------------------------------------------
+You can also specify type hints and paths to skip directly in the data source schema:
+test.datasource
+SCHEMA >
+    `json` JSON(a.b UInt32, SKIP a.e) `json:$`
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "tuple()"
+tb push datasources/test.datasource
+echo '{"a" : {"b" : 42}, "c" : [1, 2, 3]}\n{"f" : "Hello, World!"}\n{"a" : {"b" : 43, "e" : 10}, "c" : [4, 5, 6]}' > test.ndjson
+tb datasource append test test.ndjson
+tb sql 'select * from test'
+Result:
+-----------------------------------------
+| json                                  |
+-----------------------------------------
+| {'a': {'b': 42}, 'c': [1, 2, 3]}      |
+| {'a': {'b': 0}, 'f': 'Hello, World!'} |
+| {'a': {'b': 43}, 'c': [4, 5, 6]}      |
+-----------------------------------------
+Creating JSON in a Query
+¶
+You can create a
+JSON
+value directly in a query by casting a
+String
+literal.
+Example
+¶
+SELECT '{"a" : {"b" : 42},"c" : [1, 2, 3], "d" : "Hello, World!"}'::JSON AS json
+Result:
+┌─json───────────────────────────────────────────┐
+│ {"a":{"b":42},"c":[1,2,3],"d":"Hello, World!"} │
+└────────────────────────────────────────────────┘
+To cast from
+Tuple
+or
+Map
+to
+JSON
+, you first need to cast the column to a
+String
+containing the JSON object, and then deserialize it back to the
+JSON
+type.
+Reading JSON paths as subcolumns
+¶
+The
+JSON
+type allows you to access individual fields as subcolumns using dot notation. If a path's type was not explicitly specified in the
+JSON
+type declaration, its subcolumn will have a
+Dynamic
+type.
+First, create and populate a data source for the examples:
+test.datasource
+SCHEMA >
+    `json` JSON(a.b UInt32, SKIP a.e) `json:$`
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "tuple()"
+tb push datasources/test.datasource
+echo '{"a" : {"b" : 42, "g" : 42.42}, "c" : [1, 2, 3], "d" : "2020-01-01"}\n{"f" : "Hello, World!", "d" : "2020-01-02"}\n{"a" : {"b" : 43, "e" : 10, "g" : 43.43}, "c" : [4, 5, 6]}' > test.ndjson
+tb datasource append test test.ndjson
+Example: Accessing subcolumns with dot notation
+¶
+SELECT json.a.b, json.a.g, json.c, json.d FROM test
+Result:
+┌─json.a.b─┬─json.a.g─┬─json.c──┬─json.d─────┐
+│       42 │ 42.42    │ [1,2,3] │ 2020-01-01 │
+│        0 │ ᴺᵁᴸᴸ     │ ᴺᵁᴸᴸ    │ 2020-01-02 │
+│       43 │ 43.43    │ [4,5,6] │ ᴺᵁᴸᴸ       │
+└──────────┴──────────┴─────────┴────────────┘
+If you encounter issues with dot notation, you can use the
+getSubcolumn(json,'path')
+syntax as an alternative.
+Example: Accessing subcolumns with
+getSubcolumn()
+¶
+SELECT getSubcolumn(json, 'a.b'), getSubcolumn(json, 'a.g'), getSubcolumn(json, 'c'), getSubcolumn(json, 'd') FROM test
+Result:
+┌─getSubcolumn(json, 'a.b')─┬─getSubcolumn(json, 'a.g')─┬─getSubcolumn(json, 'c')─┬─getSubcolumn(json, 'd')─────┐
+│                        42 │                     42.42 │                 [1,2,3] │                  2020-01-01 │
+│                         0 │                  ᴺᵁᴸᴸ     │                 ᴺᵁᴸᴸ    │                  2020-01-02 │
+│                        43 │                  43.43    │                 [4,5,6] │                  ᴺᵁᴸᴸ       │
+└───────────────────────────┴───────────────────────────┴─────────────────────────┴─────────────────────────────┘
+If a requested path is not found in the data, it will be filled with
+NULL
+values.
+Example: Accessing a non-existent path
+¶
+SELECT json.non.existing.path FROM test
+Result:
+┌─json.non.existing.path─┐
+│ ᴺᵁᴸᴸ                   │
+│ ᴺᵁᴸᴸ                   │
+│ ᴺᵁᴸᴸ                   │
+└────────────────────────┘
+You can inspect the data types of the returned subcolumns.
+Example: Checking subcolumn types
+¶
+SELECT toTypeName(json.a.b), toTypeName(json.a.g), toTypeName(json.c), toTypeName(json.d) FROM test
+Result:
+┌─toTypeName(json.a.b)─┬─toTypeName(json.a.g)─┬─toTypeName(json.c)─┬─toTypeName(json.d)─┐
+│ UInt32               │ Dynamic              │ Dynamic            │ Dynamic            │
+│ UInt32               │ Dynamic              │ Dynamic            │ Dynamic            │
+│ UInt32               │ Dynamic              │ Dynamic            │ Dynamic            │
+└──────────────────────┴──────────────────────┴────────────────────┴────────────────────┘
+In this example,
+json.a.b
+has type
+UInt32
+as specified in the
+JSON
+type declaration, while other subcolumns are
+Dynamic
+.
+You can also read
+Dynamic
+subcolumns by explicitly specifying a target type using the
+.:TypeName
+syntax.
+Example: Reading
+Dynamic
+subcolumns with type hints
+¶
+SELECT json.a.g.:Float64, dynamicType(json.a.g), json.d.:Date, dynamicType(json.d) FROM test
+Result:
+┌─json.a.g.:`Float64`─┬─dynamicType(json.a.g)─┬─json.d.:`Date`─┬─dynamicType(json.d)─┐
+│               42.42 │ Float64               │     2020-01-01 │ Date                │
+│                ᴺᵁᴸᴸ │ None                  │     2020-01-02 │ Date                │
+│               43.43 │ Float64               │           ᴺᵁᴸᴸ │ None                │
+└─────────────────────┴───────────────────────┴────────────────┴─────────────────────┘
+Dynamic
+subcolumns can be cast to any data type. An exception will be thrown if the internal type within
+Dynamic
+cannot be cast to the requested type.
+Example: Casting a
+Dynamic
+subcolumn
+¶
+SELECT json.a.g::UInt64 as uint FROM test
+Result:
+┌─uint─┐
+│   42 │
+│    0 │
+│   43 │
+└──────┘
+Reading JSON sub-objects as subcolumns
+¶
+The
+JSON
+type supports reading nested objects as subcolumns of type
+JSON
+using the special syntax
+json.^some.path
+.
+First, create and populate a data source for the examples:
+test.datasource
+SCHEMA >
+    `json` JSON `json:$`
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "tuple()"
+tb push datasources/test.datasource
+echo '{"a" : {"b" : {"c" : 42, "g" : 42.42}}, "c" : [1, 2, 3], "d" : {"e" : {"f" : {"g" : "Hello, World", "h" : [1, 2, 3]}}}}\n{"f" : "Hello, World!", "d" : {"e" : {"f" : {"h" : [4, 5, 6]}}}}\n{"a" : {"b" : {"c" : 43, "e" : 10, "g" : 43.43}}, "c" : [4, 5, 6]}' > test.ndjson
+tb datasource append test test.ndjson
+Example
+¶
+SELECT json.^a.b, json.^d.e.f FROM test
+Result:
+┌─json.^`a`.b───────────────┬─json.^`d`.e.f────────────────────┐
+│ {"c":42,"g":42.42}        │ {"g":"Hello, World","h":[1,2,3]} │
+│ {}                        │ {"h":[4,5,6]}                    │
+│ {"c":43,"e":10,"g":43.43} │ {}                               │
+└───────────────────────────┴──────────────────────────────────┘
+Reading sub-objects as subcolumns can be less efficient, as it may require a near-full scan of the JSON data.
+Handling arrays of JSON objects
+¶
+JSON paths containing an array of objects are parsed as type
+Array(JSON)
+and inserted into a
+Dynamic
+column for that path. To read an array of objects, you can extract it from the
+Dynamic
+column as a subcolumn.
+First, create and populate a data source for the examples:
+test.datasource
+SCHEMA >
+    `json` JSON `json:$`
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "tuple()"
+tb push datasources/test.datasource
+echo '{"a" : {"b" : [{"c" : 42, "d" : "Hello", "f" : [[{"g" : 42.42}]], "k" : {"j" : 1000}}, {"c" : 43}, {"e" : [1, 2, 3], "d" : "My", "f" : [[{"g" : 43.43, "h" : "2020-01-01"}]],  "k" : {"j" : 2000}}]}}\n{"a" : {"b" : [1, 2, 3]}}\n{"a" : {"b" : [{"c" : 44, "f" : [[{"h" : "2020-01-02"}]]}, {"e" : [4, 5, 6], "d" : "World", "f" : [[{"g" : 44.44}]],  "k" : {"j" : 3000}}]}}' > test.ndjson
+tb datasource append test test.ndjson
+Example: Reading an array of JSON objects
+¶
+SELECT json.a.b, dynamicType(json.a.b) FROM test
+Result:
+┌─json.a.b──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─dynamicType(json.a.b)────────────────────────────────────┐
+│ ['{"c":"42","d":"Hello","f":[[{"g":42.42}]],"k":{"j":"1000"}}','{"c":"43"}','{"d":"My","e":["1","2","3"],"f":[[{"g":43.43,"h":"2020-01-01"}]],"k":{"j":"2000"}}'] │ Array(JSON(max_dynamic_types=16, max_dynamic_paths=256)) │
+│ [1,2,3]                                                                                                                                                           │ Array(Nullable(Int64))                                   │
+│ ['{"c":"44","f":[[{"h":"2020-01-02"}]]}','{"d":"World","e":["4","5","6"],"f":[[{"g":44.44}]],"k":{"j":"3000"}}']                                                  │ Array(JSON(max_dynamic_types=16, max_dynamic_paths=256)) │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────┘
+Note that the
+max_dynamic_types
+and
+max_dynamic_paths
+parameters for nested
+JSON
+types are reduced from their default values to prevent an uncontrolled growth in the number of subcolumns for nested arrays of JSON objects.
+Example: Reading subcolumns from a nested
+JSON
+array
+¶
+SELECT json.a.b.:`Array(JSON)`.c, json.a.b.:`Array(JSON)`.f, json.a.b.:`Array(JSON)`.d FROM test
+Result:
+┌─json.a.b.:`Array(JSON)`.c─┬─json.a.b.:`Array(JSON)`.f───────────────────────────────────┬─json.a.b.:`Array(JSON)`.d─┐
+│ [42,43,NULL]              │ [[['{"g":42.42}']],NULL,[['{"g":43.43,"h":"2020-01-01"}']]] │ ['Hello',NULL,'My']       │
+│ []                        │ []                                                          │ []                        │
+│ [44,NULL]                 │ [[['{"h":"2020-01-02"}']],[['{"g":44.44}']]]                │ [NULL,'World']            │
+└───────────────────────────┴─────────────────────────────────────────────────────────────┴───────────────────────────┘
+You can simplify the syntax by using
+[]
+after the path to indicate an array level, avoiding the explicit
+Array(JSON)
+subcolumn name.
+Example: Simplified syntax for nested
+JSON
+arrays
+¶
+SELECT json.a.b[].c, json.a.b[].f, json.a.b[].d FROM test
+Result:
+┌─json.a.b.:`Array(JSON)`.c─┬─json.a.b.:`Array(JSON)`.f───────────────────────────────────┬─json.a.b.:`Array(JSON)`.d─┐
+│ [42,43,NULL]              │ [[['{"g":42.42}']],NULL,[['{"g":43.43,"h":"2020-01-01"}']]] │ ['Hello',NULL,'My']       │
+│ []                        │ []                                                          │ []                        │
+│ [44,NULL]                 │ [[['{"h":"2020-01-02"}']],[['{"g":44.44}']]]                │ [NULL,'World']            │
+└───────────────────────────┴─────────────────────────────────────────────────────────────┴───────────────────────────┘
+The number of
+[]
+after a path indicates the array level. For instance,
+json.path[][]
+is transformed to
+json.path.:Array(Array(JSON))
+.
+Example: Reading subcolumns from deeply nested
+JSON
+arrays
+¶
+SELECT json.a.b[].c.:Int64, json.a.b[].f[][].g.:Float64, json.a.b[].f[][].h.:Date FROM test
+Result:
+┌─json.a.b.:`Array(JSON)`.c.:`Int64`─┬─json.a.b.:`Array(JSON)`.f.:`Array(Array(JSON))`.g.:`Float64`─┬─json.a.b.:`Array(JSON)`.f.:`Array(Array(JSON))`.h.:`Date`─┐
+│ [42,43,NULL]                       │ [[[42.42]],[],[[43.43]]]                                     │ [[[NULL]],[],[['2020-01-01']]]                            │
+│ []                                 │ []                                                           │ []                                                        │
+│ [44,NULL]                          │ [[[NULL]],[[44.44]]]                                         │ [[['2020-01-02']],[[NULL]]]                               │
+└────────────────────────────────────┴──────────────────────────────────────────────────────────────┴───────────────────────────────────────────────────────────┘
+You can also read sub-object subcolumns from a nested
+JSON
+array.
+Example: Reading sub-objects from a nested
+JSON
+array
+¶
+SELECT json.a.b[].^k FROM test
+Result:
+┌─json.a.b.:`Array(JSON)`.^`k`─────────┐
+│ ['{"j":"1000"}','{}','{"j":"2000"}'] │
+│ []                                   │
+│ ['{}','{"j":"3000"}']                │
+└──────────────────────────────────────┘
+Updated
+3 weeks ago
+On this page
+JSON data type
+BETA
+Syntax
+Creating a Data Source with JSON columns
+Creating JSON in a Query
+Reading JSON paths as subcolumns
+Reading JSON sub-objects as subcolumns
+Handling arrays of JSON objects
+forward
+classic
+Ask AI

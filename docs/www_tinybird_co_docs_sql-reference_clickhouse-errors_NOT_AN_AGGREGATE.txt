@@ -1,0 +1,138 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/NOT_AN_AGGREGATE
+
+NOT_AN_AGGREGATE ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+NOT_AN_AGGREGATE ClickHouse error
+¶
+Copy as MD
+This error usually means you're trying to use a non-aggregate column in a SELECT clause without including it in GROUP BY, or you're mixing aggregate and non-aggregate columns incorrectly.
+The
+NOT_AN_AGGREGATE
+error in ClickHouse (and Tinybird) happens when you try to use a non-aggregate column in a query that contains aggregate functions, but the column isn't included in the GROUP BY clause. This is a common SQL error that occurs when mixing aggregate and non-aggregate columns.
+What causes this error
+¶
+You'll typically see it when:
+Using non-aggregate columns in SELECT with aggregate functions without GROUP BY
+Mixing aggregate and non-aggregate columns incorrectly
+Using window functions incorrectly
+Forgetting to include columns in GROUP BY clause
+Example errors
+¶
+Fails: non-aggregate column without GROUP BY
+SELECT user_id, COUNT(*) FROM events
+Fails: mixing aggregate and non-aggregate
+SELECT user_id, email, COUNT(*) FROM events GROUP BY user_id
+Fails: non-aggregate column with aggregate without GROUP BY
+SELECT user_id, COUNT(*) FROM events WHERE user_id > 0
+Fails: aggregate in HAVING without GROUP BY
+SELECT user_id, COUNT(*) FROM events HAVING COUNT(*) > 10
+How to fix it
+¶
+Add missing GROUP BY
+¶
+Include all non-aggregate columns in the GROUP BY clause:
+Fix: add user_id to GROUP BY
+SELECT user_id, COUNT(*) FROM events GROUP BY user_id
+Use subqueries for complex aggregations
+¶
+When you need to filter on aggregates, use subqueries:
+Fix: use subquery for aggregate filtering
+SELECT user_id, COUNT(*) as count
+FROM events
+GROUP BY user_id
+HAVING COUNT(*) > 10
+Use window functions instead
+¶
+For row-level calculations with aggregates, consider window functions:
+Fix: use window function
+SELECT user_id, COUNT(*) OVER (PARTITION BY user_id) as user_count
+FROM events
+Common patterns and solutions
+¶
+Simple aggregation
+¶
+When you want to aggregate the entire table:
+Correct: aggregate entire table
+SELECT COUNT(*) as total_events FROM events
+Grouped aggregation
+¶
+When you want to aggregate by groups:
+Correct: group by user_id
+SELECT user_id, COUNT(*) as event_count
+FROM events
+GROUP BY user_id
+Multiple columns in GROUP BY
+¶
+Include all non-aggregate columns:
+Correct: multiple columns in GROUP BY
+SELECT user_id, event_type, COUNT(*) as count
+FROM events
+GROUP BY user_id, event_type
+Using HAVING correctly
+¶
+HAVING filters on aggregate results:
+Correct: HAVING with GROUP BY
+SELECT user_id, COUNT(*) as count
+FROM events
+GROUP BY user_id
+HAVING COUNT(*) > 5
+Advanced solutions
+¶
+Conditional aggregation
+¶
+Use CASE statements within aggregate functions:
+Conditional aggregation
+SELECT user_id,
+       COUNT(*) as total_events,
+       COUNT(CASE WHEN event_type = 'click' THEN 1 END) as clicks
+FROM events
+GROUP BY user_id
+Multiple aggregates
+¶
+You can use multiple aggregate functions in the same query:
+Multiple aggregates
+SELECT user_id,
+       COUNT(*) as total_events,
+       SUM(value) as total_value,
+       AVG(value) as avg_value
+FROM events
+GROUP BY user_id
+Tinybird-specific notes
+¶
+In Tinybird Pipes, this error often occurs when:
+Building Pipes that mix aggregate and non-aggregate operations
+Using Materialized Views incorrectly
+Forgetting to group by all non-aggregate columns in Pipe nodes
+To debug in Tinybird:
+Check each Pipe node for proper GROUP BY clauses
+Verify that Materialized Views have correct aggregation logic
+Use the Pipe validation to catch these errors early
+See also
+¶
+ClickHouse Aggregate Functions
+Working with Pipes
+Common function errors
+Updated
+4 weeks ago
+On this page
+NOT_AN_AGGREGATE ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Add missing GROUP BY
+Use subqueries for complex aggregations
+Use window functions instead
+Common patterns and solutions
+Simple aggregation
+Grouped aggregation
+Multiple columns in GROUP BY
+Using HAVING correctly
+Advanced solutions
+Conditional aggregation
+Multiple aggregates
+Tinybird-specific notes
+See also
+forward
+classic
+Ask AI

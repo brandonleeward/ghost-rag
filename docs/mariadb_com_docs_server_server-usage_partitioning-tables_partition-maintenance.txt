@@ -1,0 +1,176 @@
+Source: https://mariadb.com/docs/server/server-usage/partitioning-tables/partition-maintenance
+
+Partition Maintenance | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Partitioning Overview
+Partition Pruning and Selection
+Partition Maintenance
+Partitioning Types
+Partitioning Limitations
+Partitions Files
+Partitions Metadata
+Stored Routines
+Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Partition Maintenance
+Learn to maintain MariaDB partitions using ALTER TABLE. Includes syntax for optimizing and repairing partitions, plus best practices for managing time-series data and performance.
+Maintenance Instructions
+You can perform several maintenance tasks on partitioned tables using standard SQL statements or specific
+ALTER TABLE
+extensions.
+Table-Level Maintenance
+For general maintenance, MariaDB supports the following statements on partitioned tables just as it does for non-partitioned tables:
+CHECK TABLE
+OPTIMIZE TABLE
+ANALYZE TABLE
+REPAIR TABLE
+Partition-Specific Operations
+To target one or more specific partitions rather than the entire table, use the
+ALTER TABLE
+extensions listed below. In the SQL syntaxes below,
+partition_names
+is a comma-separated list of partitions, like
+p0, p1, p2
+.
+For an operation to be performed on all partitions, you can use the
+ALL
+keyword instead of specifying all the partitions in a comma-separated list. Example:
+Copy
+ALTER
+TABLE
+table_name
+REBUILD
+PARTITION
+ALL
+Rebuilding Partitions
+Use this to defragment a partition. This operation drops all records in the partition and re-inserts them:
+Optimizing Partitions
+If you have deleted many rows or modified variable-length columns (such as
+VARCHAR
+,
+BLOB
+, or
+TEXT
+), use this statement to reclaim unused space and defragment the data file:
+Some storage engines, including
+InnoDB
+, do not support per-partition optimization. When you run
+OPTIMIZE PARTITION
+on an
+InnoDB
+table, MariaDB rebuilds and analyzes the entire table instead.
+Analyzing Partitions
+Use this to read and store the key distributions for specific partitions:
+Repairing Partitions
+Use this to fix corrupted partitions:
+Checking Partitions
+You can verify the integrity of data and indexes within a partition:
+Truncating Partitions
+To remove all rows from specific partitions while keeping the table structure, use the
+TRUNCATE PARTITION
+clause:
+Reorganizing Partitions
+Reorganizing partitions isn't just maintenance, but it can help with making future maintenance easier. Use the following statement to change the structure of existing partitions without losing data. This is particularly useful for splitting a partition that contains a
+MAXVALUE
+range into a new specific range and a new
+MAXVALUE
+partition. Use the following syntax:
+Example: If you have a partition
+p_future
+defined as
+VALUES LESS THAN MAXVALUE
+, you can split it to add a specific range for the year 2026:
+Best Practices and Considerations
+When managing partitioned tables, follow these guidelines to ensure optimal performance and maintainability.
+Managing Time-Series Data
+Partitioning is most effective for tables containing time-series data where you periodically remove old records.
+Efficient Deletion: Use
+DROP PARTITION
+instead of
+DELETE
+to remove expired data. This is a metadata operation and is significantly faster than row-by-row deletion.
+The Future Partition: When using
+RANGE
+partitioning, define a "future" partition using
+VALUES LESS THAN MAXVALUE
+. To add a new specific range, use
+REORGANIZE PARTITION
+to split the "future" partition into a new range and a new
+MAXVALUE
+partition. See
+this section
+for the syntax.
+The Start Partition: Consider creating a small, empty "start" partition (for example,
+VALUES LESS THAN (0)
+) to catch
+NULL
+values or invalid data. Because the partition pruner often scans the first partition by default, keeping it empty improves query efficiency.
+Performance and Scale
+Table Size: Partitioning generally provides noticeable benefits only for tables with more than one million rows.
+Partition Limits: Aim to keep the number of partitions below 50. While MariaDB supports up to 8192 partitions, high partition counts can increase the time required for the server to open the table or perform status checks.
+Index Efficiency: Partitioning is not a substitute for proper indexing. Point queries (finding a single row) are often just as fast with a proper index on a non-partitioned table.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Partition Pruning and Selection
+Next
+Partitioning Types
+Last updated
+2 months ago
+Was this helpful?
+Maintenance Instructions
+Table-Level Maintenance
+Partition-Specific Operations
+Best Practices and Considerations
+Managing Time-Series Data
+Performance and Scale
+Was this helpful?
+Copy
+ALTER TABLE table_name REBUILD PARTITION partition_names
+Copy
+ALTER TABLE table_name OPTIMIZE PARTITION partition_names
+Copy
+ALTER TABLE table_name ANALYZE PARTITION partition_names
+Copy
+ALTER TABLE table_name REPAIR PARTITION partition_names
+Copy
+ALTER TABLE table_name CHECK PARTITION partition_names
+Copy
+ALTER TABLE table_name TRUNCATE PARTITION partition_names
+Copy
+ALTER TABLE table_name REORGANIZE PARTITION partition_names INTO (PARTITION partition_definition, ...)
+Copy
+ALTER TABLE tbl REORGANIZE PARTITION p_future INTO (PARTITION p_2026 VALUES LESS THAN (2027), PARTITION p_future VALUES LESS THAN MAXVALUE)

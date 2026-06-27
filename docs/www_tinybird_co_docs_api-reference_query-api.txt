@@ -1,0 +1,652 @@
+Source: https://www.tinybird.com/docs/api-reference/query-api
+
+Query API Reference · Tinybird Docs
+Sign In
+Sign Up
+Query API
+¶
+Copy as MD
+The API host in the following examples must match your Workspace's region. See the full list of
+regions and hosts
+The Query API allows you to query your Pipes and Data Sources inside
+Tinybird
+as if you were running SQL statements against a standard database.
+Using the Query API
+curl \
+    -H "Authorization: Bearer <PIPE:READ token>" \
+    --data "q=SELECT * FROM <pipe> FORMAT JSON" \
+    https://<your_host>/v0/sql
+# or 
+curl \
+    -H "Authorization: Bearer <PIPE:READ token>" \
+    --data "q=select count() from _" \
+    https://<your_host>/v0/pipes/<pipe>.json
+Every resource in
+Tinybird
+is secured so to use the Query API you must provide a
+Token
+with Pipe read permissions.
+GET
+/v0/sql
+¶
+Executes a SQL query using the engine.
+Running sql queries against your data
+¶
+curl
+--data
+"q=SELECT * FROM <pipe> FORMAT JSON"
+https://<your_host>
+/v0/sql
+As a response, it gives you the query metadata, the resulting data and some performance statistics.
+Successful response
+¶
+{
+"meta"
+:
+[
+{
+"name"
+:
+"VendorID"
+,
+"type"
+:
+"Int32"
+},
+{
+"name"
+:
+"tpep_pickup_datetime"
+,
+"type"
+:
+"DateTime"
+}
+],
+"data"
+:
+[
+{
+"VendorID"
+:
+2
+,
+"tpep_pickup_datetime"
+:
+"2001-01-05 11:45:23"
+,
+"tpep_dropoff_datetime"
+:
+"2001-01-05 11:52:05"
+,
+"passenger_count"
+:
+5
+,
+"trip_distance"
+:
+1.53
+,
+"RatecodeID"
+:
+1
+,
+"store_and_fwd_flag"
+:
+"N"
+,
+"PULocationID"
+:
+71
+,
+"DOLocationID"
+:
+89
+,
+"payment_type"
+:
+2
+,
+"fare_amount"
+:
+7.5
+,
+"extra"
+:
+0.5
+,
+"mta_tax"
+:
+0.5
+,
+"tip_amount"
+:
+0
+,
+"tolls_amount"
+:
+0
+,
+"improvement_surcharge"
+:
+0.3
+,
+"total_amount"
+:
+8.8
+},
+{
+"VendorID"
+:
+2
+,
+"tpep_pickup_datetime"
+:
+"2002-12-31 23:01:55"
+,
+"tpep_dropoff_datetime"
+:
+"2003-01-01 14:59:11"
+}
+],
+"rows"
+:
+3
+,
+"rows_before_limit_at_least"
+:
+4
+,
+"statistics"
+:
+{
+"elapsed"
+:
+0.00091042
+,
+"rows_read"
+:
+4
+,
+"bytes_read"
+:
+296
+}
+}
+Data can be fetched in different formats. Just append
+FORMAT
+<format_name>
+to your SQL query:
+Requesting different formats with SQL
+¶
+SELECT
+count
+()
+from
+<
+pipe
+>
+FORMAT
+JSON
+Request parameters
+¶
+Key
+Type
+Description
+q
+String
+The SQL query
+pipeline
+String
+(Optional) The name of the pipe. It allows writing a query like ‘SELECT * FROM _’ where ‘_’ is a placeholder for the ‘pipeline’ parameter
+explain
+String
+(Optional) When set to ‘true’, returns EXPLAIN output for the query instead of executing it. Default value is ‘false’
+explain_settings
+String
+(Optional) Comma-separated key=value pairs controlling EXPLAIN output. Allowed keys: actions, column_structure, description, distributed, header, indexes, input_headers, json, projections. Each value is 0 or 1. Example: indexes=1,actions=1. When empty, defaults to indexes=1
+output_format_json_quote_64bit_integers
+int
+(Optional) Controls quoting of 64-bit or bigger integers (like UInt64 or Int128) when they are output in a JSON format. Such integers are enclosed in quotes by default. This behavior is compatible with most JavaScript implementations. Possible values: 0 — Integers are output without quotes. 1 — Integers are enclosed in quotes. Default value is 0
+output_format_json_quote_denormals
+int
+(Optional) Controls representation of inf and nan on the UI instead of null e.g when dividing by 0 - inf and when there is no representation of a number in Javascript - nan. Possible values: 0 - disabled, 1 - enabled. Default value is 0
+output_format_parquet_string_as_string
+int
+(Optional) Use Parquet String type instead of Binary for String columns. Possible values: 0 - disabled, 1 - enabled. Default value is 0
+Available formats
+¶
+format
+Description
+CSV
+CSV without header
+CSVWithNames
+CSV with header
+JSON
+JSON including data, statistics and schema information
+TSV
+TSV without header
+TSVWithNames
+TSV with header
+PrettyCompact
+Formatted table
+JSONEachRow
+Newline-delimited JSON values (NDJSON)
+Parquet
+Apache Parquet
+Prometheus
+Prometheus text-based format
+As you can see in the example above, timestamps do not include a time
+zone in their serialization. Let’s see how that relates to timestamps
+ingested from your original data:
+If the original timestamp had no time zone associated, you’ll read
+back the same date and time verbatim.
+If you ingested the timestamp
+2022-11-14
+11:08:46
+, for example,
+Tinybird sends
+"2022-11-14
+11:08:46"
+back. This is so regardless
+of the time zone of the column in ClickHouse.
+If the original timestamp had a time zone associated, you’ll read back
+the corresponding date and time in the time zone of the destination
+column in ClickHouse, which is UTC by default.
+If you ingested
+2022-11-14
+12:08:46.574295
++0100
+, for instance,
+Tinybird sends
+"2022-11-14
+11:08:46"
+back for a
+DateTime
+, and
+"2022-11-14
+06:08:46"
+for a
+DateTime('America/New_York')
+.
+POST
+/v0/sql
+¶
+Executes a SQL query using the engine, while providing a templated or non templated query
+string and the custom parameters that will be translated into the query.
+The custom parameters provided should not have the same name as the request parameters
+for this endpoint (outlined below), as they are reserved in order to get accurate results
+for your query.
+Running sql queries against your data
+¶
+For
+example:
+1
+.
+Providing
+the
+value
+to
+the
+query
+via
+the
+POST
+body:
+
+curl
+-X
+POST
+\
+-H
+"Authorization: Bearer <PIPE:READ token>"
+\
+-H
+"Content-Type: application/json"
+\
+"
+https://<your_host>
+/v0/sql"
+-d
+\
+'{
+"q":"% SELECT * FROM <pipe> where column_name = {{String(column_name)}}",
+"column_name": "column_name_value"
+}'
+2
+.
+Providing
+a
+new
+value
+to
+the
+query
+from
+the
+one
+defined
+within
+the
+pipe
+in
+the
+POST
+body:
+
+curl
+-X
+POST
+\
+-H
+"Authorization: Bearer <PIPE:READ token>"
+\
+-H
+"Content-Type: application/json"
+\
+"
+https://<your_host>
+/v0/sql"
+-d
+\
+'{
+"q":"% SELECT * FROM <pipe> where column_name = {{String(column_name, "column_name_value")}}",
+"column_name": "new_column_name_value"
+}'
+3
+.
+Providing
+a
+non
+template
+query
+in
+the
+POST
+body:
+
+curl
+-X
+POST
+\
+-H
+"Authorization: Bearer <PIPE:READ token>"
+\
+-H
+"Content-Type: application/json"
+\
+"
+https://<your_host>
+/v0/sql"
+-d
+\
+'{
+"q":"SELECT * FROM <pipe>"
+}'
+4
+.
+Providing
+a
+non
+template
+query
+as
+a
+string
+in
+the
+POST
+body
+with
+a
+content
+type
+of
+"text/plain"
+:
+
+curl
+-X
+POST
+\
+-H
+"Authorization: Bearer <PIPE:READ token>"
+\
+-H
+"Content-Type: text/plain"
+\
+"
+https://<your_host>
+/v0/sql"
+-d
+"SELECT * FROM <pipe>"
+Request parameters
+¶
+Key
+Type
+Description
+pipeline
+String
+(Optional) The name of the pipe. It allows writing a query like ‘SELECT * FROM _’ where ‘_’ is a placeholder for the ‘pipeline’ parameter
+output_format_json_quote_64bit_integers
+int
+(Optional) Controls quoting of 64-bit or bigger integers (like UInt64 or Int128) when they are output in a JSON format. Such integers are enclosed in quotes by default. This behavior is compatible with most JavaScript implementations. Possible values: 0 — Integers are output without quotes. 1 — Integers are enclosed in quotes. Default value is 0
+output_format_json_quote_denormals
+int
+(Optional) Controls representation of inf and nan on the UI instead of null e.g when dividing by 0 - inf and when there is no representation of a number in Javascript - nan. Possible values: 0 - disabled, 1 - enabled. Default value is 0
+output_format_parquet_string_as_string
+int
+(Optional) Use Parquet String type instead of Binary for String columns. Possible values: 0 - disabled, 1 - enabled. Default value is 0
+As a response, it gives you the query metadata, the resulting data and some performance statistics.
+Successful response
+¶
+{
+"meta"
+:
+[
+{
+"name"
+:
+"VendorID"
+,
+"type"
+:
+"Int32"
+},
+{
+"name"
+:
+"tpep_pickup_datetime"
+,
+"type"
+:
+"DateTime"
+}
+],
+"data"
+:
+[
+{
+"VendorID"
+:
+2
+,
+"tpep_pickup_datetime"
+:
+"2001-01-05 11:45:23"
+,
+"tpep_dropoff_datetime"
+:
+"2001-01-05 11:52:05"
+,
+"passenger_count"
+:
+5
+,
+"trip_distance"
+:
+1.53
+,
+"RatecodeID"
+:
+1
+,
+"store_and_fwd_flag"
+:
+"N"
+,
+"PULocationID"
+:
+71
+,
+"DOLocationID"
+:
+89
+,
+"payment_type"
+:
+2
+,
+"fare_amount"
+:
+7.5
+,
+"extra"
+:
+0.5
+,
+"mta_tax"
+:
+0.5
+,
+"tip_amount"
+:
+0
+,
+"tolls_amount"
+:
+0
+,
+"improvement_surcharge"
+:
+0.3
+,
+"total_amount"
+:
+8.8
+},
+{
+"VendorID"
+:
+2
+,
+"tpep_pickup_datetime"
+:
+"2002-12-31 23:01:55"
+,
+"tpep_dropoff_datetime"
+:
+"2003-01-01 14:59:11"
+}
+],
+"rows"
+:
+3
+,
+"rows_before_limit_at_least"
+:
+4
+,
+"statistics"
+:
+{
+"elapsed"
+:
+0.00091042
+,
+"rows_read"
+:
+4
+,
+"bytes_read"
+:
+296
+}
+}
+Data can be fetched in different formats. Just append
+FORMAT
+<format_name>
+to your SQL query:
+Requesting different formats with SQL
+¶
+SELECT
+count
+()
+from
+<
+pipe
+>
+FORMAT
+JSON
+Available formats
+¶
+format
+Description
+CSV
+CSV without header
+CSVWithNames
+CSV with header
+JSON
+JSON including data, statistics and schema information
+TSV
+TSV without header
+TSVWithNames
+TSV with header
+PrettyCompact
+Formatted table
+JSONEachRow
+Newline-delimited JSON values (NDJSON)
+Parquet
+Apache Parquet
+As you can see in the example above, timestamps do not include a time
+zone in their serialization. Let’s see how that relates to timestamps
+ingested from your original data:
+If the original timestamp had no time zone associated, you’ll read
+back the same date and time verbatim.
+If you ingested the timestamp
+2022-11-14
+11:08:46
+, for example,
+Tinybird sends
+"2022-11-14
+11:08:46"
+back. This is so regardless
+of the time zone of the column in ClickHouse.
+If the original timestamp had a time zone associated, you’ll read back
+the corresponding date and time in the time zone of the destination
+column in ClickHouse, which is UTC by default.
+If you ingested
+2022-11-14
+12:08:46.574295
++0100
+, for instance,
+Tinybird sends
+"2022-11-14
+11:08:46"
+back for a
+DateTime
+, and
+"2022-11-14
+06:08:46"
+for a
+DateTime('America/New_York')
+.
+Updated
+6 months ago
+On this page
+Query API
+GET /v0/sql
+POST /v0/sql
+forward
+classic
+Ask AI

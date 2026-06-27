@@ -1,0 +1,951 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/configuring-mariadb/configuring-mariadb-with-option-files
+
+Configuring MariaDB with Option Files | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Configuring MariaDB with Option Files
+MariaDB Environment Variables
+Advanced Configuration
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Configuring MariaDB with Option Files
+Complete guide to MariaDB option files. Complete my.cnf reference with configuration groups, parameter syntax, and file hierarchy for production use.
+You can configure MariaDB to run the way you want by configuring the server with MariaDB's option files. The default MariaDB option file is called
+my.cnf
+on Unix-like operating systems and
+my.ini
+on Windows. Depending on how you've
+installed
+MariaDB, the default option file may be in a number of places, or it may not exist at all.
+MariaDB Enterprise Server
+users should also refer to the
+Enterprise Server-Specific
+section for additional configuration files like
+mariadb-enterprise.cnf
+.
+Global Options Related to Option Files
+The following options relate to how MariaDB handles option files. These options can be used with most of MariaDB's command-line tools, not just
+mariadbd
+. They must be given as the first argument on the command-line:
+Option
+Description
+--print-defaults
+Read options from option files, print all option values, and then exit the program.
+--no-defaults
+Don't read options from any option file.
+--defaults-file
+=path
+Only read options from the given option file.
+--defaults-extra-file
+=path
+Read this extra option file after all other option files are read.
+--defaults-group-suffix
+=suffix
+In addition to the default option groups, also read option groups with the given suffix.
+Default Option File Locations
+MariaDB reads option files from many different directories by default. See the sections below to find out which directories are checked for which system.
+For an exact list of option files read on your system by a specific program, you can execute a command like this (
+$program
+stands for any MariaDB program, including the Server):
+Copy
+$program
+--help --verbose
+For example:
+Copy
+$
+mariadbd
+--help
+--verbose
+mariadbd
+Ver
+10.11.2-MariaDB
+for
+linux-systemd
+on
+x86_64
+(MariaDB
+Server
+)
+Copyright
+(c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+Starts
+the
+MariaDB
+database
+server.
+Usage:
+mariadbd
+[OPTIONS]
+Default
+options
+are
+read
+from
+the
+following
+files
+in
+the
+given
+order:
+/etc/my.cnf
+~/.my.cnf
+The
+following
+groups
+are
+read:
+mysqld
+server
+mysqld-10.11
+mariadb
+mariadb-10.11
+mariadbd
+mariadbd-10.11
+client-server
+galera
+....
+The option files are each scanned once, in the order given by
+--help --verbose
+. The effect of the configuration options is the same as if they would have been given as command-line options in the order they are found.
+Default Option File Locations on Linux and Unix
+On Linux and Unix operating systems, the default option file is called
+my.cnf
+. MariaDB looks for the MariaDB option file in the locations and orders listed below.
+The locations are dependent on whether the
+DEFAULT_SYSCONFDIR
+cmake
+option was defined when MariaDB was built. This option is usually defined as
+/etc
+when building
+RPM packages
+, but it is usually not defined when building
+DEB packages
+or
+binary tarballs
+.
+If the
+DEFAULT_SYSCONFDIR
+cmake
+option is
+undefined
+, MariaDB looks for the MariaDB option file in the following locations, and in the following order:
+Location
+Scope
+/etc/my.cnf
+Global
+/etc/mysql/my.cnf
+Global
+$MARIADB_HOME/my.cnf
+Server (from MariaDB 10.6)
+$MYSQL_HOME/my.cnf
+Server (before MariaDB 10.6)
+defaults-extra-file
+File specified with
+--defaults-extra-file
+, if any
+~/.my.cnf
+User
+If the
+DEFAULT_SYSCONFDIR
+cmake
+option is
+defined
+, MariaDB looks for the MariaDB option file in the following locations in the following order:
+Location
+Scope
+DEFAULT_SYSCONFDIR/my.cnf
+Global
+$MARIADB_HOME/my.cnf
+Server (from MariaDB 10.6)
+$MYSQL_HOME/my.cnf
+Server (before MariaDB 10.6)
+defaults-extra-file
+File specified with
+--defaults-extra-file
+, if any
+~/.my.cnf
+User
+MARIADB_HOME
+or
+MYSQL_HOME
+is the
+environment variable
+containing the path to the directory holding the server-specific
+my.cnf
+file. If
+MYSQL_HOME
+is not set, and the server is started with
+mysqld_safe
+,
+MYSQL_HOME
+is set as follows:
+If there is a
+my.cnf
+file in the MariaDB data directory, but not in the MariaDB base directory,
+MYSQL_HOME
+is set to the MariaDB data directory.
+Else,
+MYSQL_HOME
+is set to the MariaDB base directory.
+Note that if
+MARIADB_HOME
+is set,
+MYSQL_HOME
+is not used, even if set.
+Default Option File Locations on Windows
+On Windows, the option file can be called either
+my.ini
+or
+my.cnf
+. Depending on the distribution, MariaDB Enterprise Server for Windows may include additional configuration files. These files comply with the load order rules described in the following section.
+
+MariaDB looks for option files in the following locations, and in the following order:
+Location
+Scope
+System Windows Directory\my.ini
+Global
+System Windows Directory\my.cnf
+Global
+Windows Directory\my.ini
+Global
+Windows Directory\my.cnf
+Global
+c:\my.ini
+Global
+c:\my.cnf
+Global
+installdir\my.ini
+Server
+installdir\my.cnf
+Server
+installdir\data\my.ini
+Server
+installdir\data\my.cnf
+Server
+%mariadb_home%\my.ini
+Server (from MariaDB 10.6)
+%mariadb_home%\my.cnf
+Server (from MariaDB 10.6)
+%mysql_home%\my.ini
+Server
+%mysql_home%\my.cnf
+Server
+defaults-extra-file
+File specified with
+--defaults-extra-file
+, if any
+The
+System Windows Directory
+is the directory returned by the
+GetSystemWindowsDirectory
+function. The value is usually
+C:\Windows
+. To find its specific value on your system, open
+cmd.exe
+and execute:
+The
+Windows Directory
+is the directory returned by the
+GetWindowsDirectory
+function. The value may be a private
+Windows Directory
+for the application, or it may be the same as the
+System Windows Directory
+returned by the
+GetSystemWindowsDirectory
+function.
+INSTALLDIR
+is the parent directory of the directory where
+mysqld.exe
+is located. For example, if
+mysqld.exe
+is in
+C:\Program Files\
+,
+INSTALLDIR
+is
+C:\Program Files\
+.
+MARIADB_HOME
+or
+MYSQL_HOME
+is the
+environment variable
+containing the path to the directory holding the server-specific
+my.cnf
+file.
+Note that if
+MARIADB_HOME
+is set,
+MYSQL_HOME
+is not used, even if set.
+MariaDB Enterprise Server Option File Locations
+MariaDB Enterprise Server includes additional configuration files that are installed with the Enterprise Server packages. Specifically, the file
+mariadb-enterprise.cnf
+is typically placed in a configuration include directory and enables Enterprise-specific features by default (for example, loading the
+Enterprise Audit
+plugins with
+plugin-load-add
+,
+server_audit
+and other enterprise plugins):
+The configuration values defined in these files can be validated at runtime. See
+Verifying Option File Sources in Enterprise Server
+.
+Default Option File Hierarchy
+MariaDB looks in all of the above locations, in order, even if it has already found an option file, and it's possible for more than one option file to exist. For example, you could have an option file in
+/etc/my.cnf
+with global settings for all servers, and another option file in
+~/.my.cnf
+(that is, your user account's home directory) which specifies additional settings (or override previously specified settings) that are specific only to that user.
+Option files are usually optional. However, if the
+--defaults-file
+option is set, but the file does not exist, MariaDB raises an error. If the
+--defaults-file
+option is set, MariaDB
+only
+reads the option file referred to by this option.
+If an option or system variable is not explicitly set, then it will be set to its default value. See
+Server System Variables
+for a full list of all server system variables and their default values.
+If an option is set multiple times, the later setting will override the earlier setting.
+If
+--log-basename
+is set, there are various other log file naming options that, if set, should be placed
+later
+in the configuration file hierarchy. Later settings override earlier settings, so
+log-basename
+overrides any earlier log file name settings. See
+--log-basename
+for details.
+Custom Option File Locations
+MariaDB can be configured to read options from custom options files with the following command-line arguments. These command-line arguments can be used with most of MariaDB's command-line tools, not just
+mariadbd
+. They must be given as the first argument on the command line:
+Option
+Description
+--defaults-file
+=path
+Only read options from the given option file.
+--defaults-extra-file
+=path
+Read this extra option file after all other option files are read.
+Option File Syntax
+The syntax of MariaDB option files is as follows:
+Lines starting with
+#
+are comments.
+Empty lines are ignored.
+Option groups use the syntax
+[group-name]
+. See the
+Option Groups
+section below for more information on available option groups.
+The same option group can appear multiple times.
+The
+!include
+directive can be used to include other option files. See the
+Including Option Files
+section below for more information on this syntax.
+The
+!includedir
+directive can be used to include all
+.cnf
+files (and potentially
+.ini
+files) in a given directory. The option files within the directory are read in alphabetical order. See the
+Including Option File Directories
+section below for more information on this syntax.
+The
+?includedir
+(introduced in MariaDB 11.4.10 and 11.8.6) directive works like
+!includedir
+but skips unreadable files, instead of failing with an error.
+Dashes (
+-
+) and underscores (
+_
+) in options are interchangeable.
+Double quotes can be used to quote values
+\n
+,
+\r
+,
+\t
+,
+\b
+,
+\s
+,
+\"
+,
+\'
+, and
+\\
+are recognized as character escapes for new line, carriage return, tab, backspace, space, double quote, single quote, and backslash respectively.
+Certain option prefixes are supported. See the
+Option Prefixes
+section below for information about available option prefixes.
+See the
+Options
+section below for information about available options.
+Option Groups
+A MariaDB program can read options from one or many option groups. For an exact list of option groups read on your system by a specific program, you can execute (
+$program
+is a placeholder for any MariaDB program):
+For example:
+Server Option Groups
+MariaDB programs reads server options from the following server option groups:
+Group
+Description
+[client-server]
+Options read by all MariaDB
+client programs
+and the MariaDB Server. This is useful for options like socket and port, which is common between the server and the clients.
+[server]
+Options read by MariaDB Server.
+[mysqld]
+Options read by mysqld, including both MariaDB Server and MySQL Server.
+[mysqld-X.Y]
+Options read by a specific version of mysqld, including both MariaDB Server and MySQL Server. For example,
+[mariadb-11.4]
+.
+[mariadb]
+Options read by MariaDB Server.
+[mariadb-X.Y]
+Options read by a specific version of MariaDB Server. For example,
+[mariadb-11.4]
+.
+[mariadbd]
+Options read by MariaDB Server.
+[mariadbd-X.Y]
+Options read by a specific version of MariaDB Server. For example,
+[mariadbd-11.4]
+.
+[galera]
+Options read by MariaDB Server, but only if it is compiled with
+Galera Cluster
+support. All builds on Linux are compiled with Galera Cluster support. When using one of these builds, options from this option group are read even if the Galera Cluster functionality is not enabled.
+X.Y
+in the examples above refer to the base (major.minor) version of the server. For example, MariaDB 11.4 would read from
+[mariadb-11.4]
+. By using the
+mariadb-X.Y
+syntax, you can create option files that have MariaDB-only options in the MariaDB-specific option groups. That would allow the option file to work for both MariaDB and MySQL.
+Client Option Groups
+MariaDB programs reads client options from the following option groups:
+Group
+Description
+[client]
+Options read by all MariaDB and MySQL
+client programs
+, including both MariaDB and MySQL clients. For example, mariadb-dump.
+[client-server]
+Options read by all MariaDB client programs and the MariaDB Server. This is useful for options like socket and port, which is common between the server and the clients.
+[client-mariadb]
+Options read by all MariaDB client programs.
+Tool-Specific Option Groups
+Many MariaDB tools reads options from their own option groups as well:
+Group
+Description
+[mysqld_safe]
+Options read by
+mysqld_safe
+, including both MariaDB Server and MySQL Server.
+[safe_mysqld]
+Options read by
+mysqld_safe
+, including both MariaDB Server and MySQL Server.
+[mariadbd-safe]
+Options read by
+mysqld_safe
+from MariaDB Server.
+[mariadb_safe]
+Options read by
+mysqld_safe
+from MariaDB Server. Deprecated, please avoid using this.
+[mariadb-backup]
+Options read by
+mariadb-backup
+.
+[xtrabackup]
+Options read by
+mariadb-backup
+and Percona XtraBackup.
+[mysql_upgrade]
+Options read by
+mysql_upgrade
+, including both MariaDB Server and MySQL Server.
+[mariadb-upgrade]
+Options read by
+mariadb-upgrade
+.
+[sst]
+Specific options read by the
+mariadb-backup SST method
+and the xtrabackup-v2 SST method.
+[mysql]
+Options read by
+mysql
+, including both MariaDB Server and MySQL Server.
+[mariadb-client]
+Options read by
+mariadb
+.
+[mysqldump]
+Options read by
+mysqldump
+, including both MariaDB Server and MySQL Server.
+[mariadb-dump]
+Options read by
+mariadb-dump
+.
+[mysqlimport]
+Options read by
+mysqlimport
+, including both MariaDB Server and MySQL Server.
+[mariadb-import]
+Options read by
+mariadb-import
+.
+[mysqlbinlog]
+Options read by
+mysqlbinlog
+, including both MariaDB Server and MySQL Server.
+[mariadb-binlog]
+Options read by
+mariadb-binlog
+.
+[mysqladmin]
+Options read by
+mysqladmin
+, including both MariaDB Server and MySQL Server.
+[mariadb-admin]
+Options read by
+mariadb-admin
+.
+[mysqlshow]
+Options read by
+mysqlshow
+, including both MariaDB Server and MySQL Server.
+[mariadb-show]
+Options read by
+mariadb-show
+. Note that this program reads
+[client]
+group options, too.
+[mysqlcheck]
+Options read by
+mariadb-check
+, including both MariaDB Server and MySQL Server.
+[mariadb-check]
+Options read by
+mariadb-check
+.
+[mysqlslap]
+Options read by
+mysqlslap
+, including both MariaDB Server and MySQL Server.
+[mariadb-slap]
+Options read by
+mariadb-slap
+.
+[odbc]
+Options read by
+MariaDB Connector/ODBC
+, but only if the
+USE_MYCNF
+parameter is set.
+Custom Option Group Suffixes
+MariaDB can be configured to read options from option groups with a custom suffix by providing the following command-line argument. This command-line argument can be used with most of MariaDB's command-line tools, not just
+mariadbd
+. It must be given as the first argument on the command line:
+Option
+Description
+--defaults-group-suffix
+=suffix
+In addition to the default option groups, also read option groups with the given suffix.
+The default group suffix can also be specified via the
+MYSQL_GROUP_SUFFIX
+environment variable
+.
+Example:
+To create a custom prompt for the
+mariadb
+command-line client via a custom group, add this to the option file (for instance,
+/etc/my.cnf
+):
+Then, launch
+mariadb
+like this:
+Including Option Files
+It is possible to include additional option files from another option file. For example, to include
+/etc/mysql/dbserver1.cnf
+, an option file could contain:
+Including Option File Directories
+It is also possible to include all option files in a directory from another option file. For example, to include all option files in
+/etc/my.cnf.d/
+, an option file could contain:
+The option files within the directory are read in alphabetical order.
+All option file names must end in
+.cnf
+on Unix-like operating systems. On Windows, all option file names must end in
+.cnf
+or
+.ini
+.
+Current
+< 11.4.10, < 11.8.6
+If a
+.cnf
+file cannot be read an executable (a MariaDB server or a client tool) will exit with an error. One can use
+?includedir
+to skip unreadable files without failing out.
+If a
+.cnf
+file cannot be read an executable (a MariaDB server or a client tool) will exit with an error.
+Checking Program Options
+You can check which options a given program is going to use by using the
+--print-defaults
+command-line argument:
+Option
+Description
+--print-defaults
+Read options from option files, print all option values, and then exit the program.
+This command-line argument can be used with most of MariaDB's command-line tools, not just
+mariadbd
+. It must be given as the first argument on the command-line:
+You can also check which options a given program is going to use by using the
+my_print_defaults
+utility, and providing the names of the option groups that the program reads:
+The
+my_print_defaults
+utility's
+--mariadbd
+command-line option provides a shortcut to refer to all of the
+server option groups
+:
+Verifying Option File Sources in Enterprise Server
+After modifying a configuration file in Enterprise Server, you can determine the source of a system variable by querying the
+INFORMATION_SCHEMA.SYSTEM_VARIABLES
+table.
+Check a specific variable
+Explanation of columns:
+GLOBAL_VALUE_PATH
+: Full path to the configuration file that set this value (e.g.
+/etc/my.cnf.d/mariadb-enterprise.cnf
+). Returns
+NULL
+if not set in any config file.
+GLOBAL_VALUE_ORIGIN
+: Shows the origin (config file, a compile-time default, or a command line, etc.).
+The
+global_value_path
+column, introduced in
+MariaDB 10.5.0
+, shows the full path to the configuration file from which the variable's value was loaded. This is especially helpful in environments with multiple option files as it enables you to determine which configuration file is currently in effect for a given system setting.
+Note
+: The
+global_value_path
+column requires MariaDB ES Server 10.5.0 or later. On previous versions, this column doesn't exist.
+View all variable set from configuration files
+To view all system variables that were set from configuration files, you can run the following:
+This query returns all variables with values loaded from option files, along with their file paths.
+Obfuscated Authentication Credential Option File
+MySQL supports an obfuscated authentication credential option file called
+.mylogin.cnf
+that is created with
+mysql_config_editor
+.
+MariaDB and MariaDB Enterprise Server do not support this feature. The passwords in MySQL's
+.mylogin.cnf
+are only obfuscated, rather than encrypted, so the feature does not really add much from a security perspective. It is more likely to give users a false sense of security, rather than to seriously protect them.
+Option Prefixes
+MariaDB supports certain prefixes that can be used with options. The supported option prefixes are:
+Option Prefix
+Description
+autoset
+Sets the option value automatically. Only supported for certain options.
+disable
+For all boolean options, disables the setting (equivalent to setting it to 0). Same as skip.
+enable
+For all boolean options, enables the setting (equivalent to setting it to 1).
+loose
+Don't produce an error if the option doesn't exist.
+maximum
+Sets the maximum value for the option.
+skip
+For all boolean options, disables the setting (equivalent to setting it to 0). Same as disable.
+For example:
+Dashes and Underscores
+Dashes (
+-
+) and underscores (
+_
+)
+in option names
+are interchangeable. Both variants can be used, for example:
+The same is true for specifying
+options on the command line
+, for example:
+In option files, however, you must omit the leading double-dash (
+--
+).
+This is only different when referring to system variables at runtime. Here, only underscores can be used, for example:
+If an option is not explicitly set, the server or client uses the default value for that option.
+MariaDB Server Options
+MariaDB Server options can be set in
+server option groups
+.
+For a list of options that can be set for MariaDB Server, see the list of options available for
+mariadbd
+.
+Most of the
+server system variables
+can also be set in MariaDB's option file.
+MariaDB Client Options
+MariaDB client options can be set in
+client option groups
+.
+See the specific page for each
+client program
+to determine what options are available for that program.
+Example Option Files
+Most MariaDB installations include a sample MariaDB option file called
+my-default.cnf
+.
+In source distributions, the sample option files are usually found in the
+support-files
+directory, and in other distributions, in the
+share/mysql
+directory that is relative to the MariaDB base installation directory.
+You can copy one of these sample MariaDB option files and use it as the basis for building your server's primary MariaDB option file.
+Example Minimal Option File
+Minimal
+my.cnf
+file that you can use to test MariaDB:
+Example Hybrid Option File
+The following is an extract of an option file that one can use if one wants to work with both MySQL and MariaDB.
+See Also
+Configuring MariaDB Connector/C with Option Files
+Troubleshooting Connection Issues
+MariaDB Enterprise Audit
+Information_schema.SYSTEM_VARIABLES Table
+Configuring MariaDB for Remote Client Access
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Configuring MariaDB
+Next
+MariaDB Environment Variables
+Last updated
+1 month ago
+Was this helpful?
+Global Options Related to Option Files
+Default Option File Locations
+Default Option File Locations on Linux and Unix
+Default Option File Locations on Windows
+MariaDB Enterprise Server Option File Locations
+Default Option File Hierarchy
+Custom Option File Locations
+Option File Syntax
+Option Groups
+Server Option Groups
+Client Option Groups
+Tool-Specific Option Groups
+Custom Option Group Suffixes
+Including Option Files
+Including Option File Directories
+Checking Program Options
+Verifying Option File Sources in Enterprise Server
+Obfuscated Authentication Credential Option File
+Option Prefixes
+Dashes and Underscores
+MariaDB Server Options
+MariaDB Client Options
+Example Option Files
+Example Minimal Option File
+Example Hybrid Option File
+See Also
+Was this helpful?
+Copy
+echo %WINDIR%
+Copy
+/etc/my.cnf.d/mariadb-enterprise.cnf
+Copy
+$program --help --verbose
+Copy
+$ mariadbd --help --verbose
+mariadbd  Ver 10.11.2-MariaDB for linux-systemd on x86_64 (MariaDB Server)
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+Starts the MariaDB database server.
+Usage: mariadbd [OPTIONS]
+Default options are read from the following files in the given order:
+/etc/my.cnf ~/.my.cnf
+The following groups are read: mysqld server mysqld-10.11 mariadb mariadb-10.11 mariadbd mariadbd-10.11 client-server galera
+....
+Copy
+[client_custom_group]
+prompt='(custom prompt for mariadb client)'
+Copy
+mariadb --defaults-group-suffix=_custom_group
+Copy
+[mariadb]
+...
+!include /etc/mysql/dbserver1.cnf
+Copy
+[mariadb]
+...
+!includedir /etc/my.cnf.d/
+Copy
+$ mariadb-dump --print-defaults
+mariadb-dump would have been started with the following arguments:
+--ssl_cert=/etc/my.cnf.d/certificates/client-cert.pem --ssl_key=/etc/my.cnf.d/certificates/client-key.pem --ssl_ca=/etc/my.cnf.d/certificates/ca.pem --ssl-verify-server-cert --max_allowed_packet=1G
+Copy
+$ my_print_defaults mariadb-dump client client-server client-mariadb
+--ssl_cert=/etc/my.cnf.d/certificates/client-cert.pem
+--ssl_key=/etc/my.cnf.d/certificates/client-key.pem
+--ssl_ca=/etc/my.cnf.d/certificates/ca.pem
+--ssl-verify-server-cert
+--max_allowed_packet=1GB
+Copy
+$ my_print_defaults --mysqld
+--log_bin=mariadb-bin
+--log_slave_updates=ON
+--ssl_cert=/etc/my.cnf.d/certificates/server-cert.pem
+--ssl_key=/etc/my.cnf.d/certificates/server-key.pem
+--ssl_ca=/etc/my.cnf.d/certificates/ca.pem
+Copy
+SELECT VARIABLE_NAME, GLOBAL_VALUE, GLOBAL_VALUE_PATH
+FROM INFORMATION_SCHEMA.SYSTEM_VARIABLES
+WHERE VARIABLE_NAME = 'innodb_buffer_pool_size';   -- replace with your variable
+Copy
+SELECT VARIABLE_NAME, GLOBAL_VALUE, GLOBAL_VALUE_PATH
+FROM INFORMATION_SCHEMA.SYSTEM_VARIABLES
+WHERE GLOBAL_VALUE_PATH IS NOT NULL;
+Copy
+[mariadb]
+...
+# determine a good value for open_files_limit automatically
+autoset_open_files_limit
+# disable the unix socket plugin
+disable_unix_socket
+# enable the slow query log
+enable_slow_query_log
+# don't produce an error if these options don't exist
+loose_file_key_management_filename = /etc/mysql/encryption/keyfile.enc
+loose_file_key_management_filekey = FILE:/etc/mysql/encryption/keyfile.key
+loose_file_key_management_encryption_algorithm = AES_CTR
+# set max_allowed_packet to maximum value
+maximum_max_allowed_packet
+# disable external locking for MyISAM
+skip_external_locking
+Copy
+[mariadbd]
+debug-no-sync
+debug_no_sync
+Copy
+mariadbd --debug-no-sync
+mariadbd --debug_no_sync
+Copy
+MariaDB [(none)]> SELECT @debug_no_sync;
++----------------+
+| @debug_no_sync |
++----------------+
+| NULL           |
++----------------+
+1 row in set (0.002 sec)
+MariaDB [(none)]> SELECT @debug-no-sync;
+ERROR 1054 (42S22): Unknown column 'no' in 'SELECT'
+Copy
+[client-server]
+# Uncomment these if you want to use a nonstandard connection to MariaDB
+#socket=/tmp/mysql.sock
+#port=3306
+# This will be passed to all MariaDB clients
+[client]
+#password=my_password
+# The MariaDB server
+[mysqld]
+# Directory where you want to put your data
+data=/usr/local/mysql/var
+# Directory for the errmsg.sys file in the language you want to use
+language=/usr/local/share/mysql/english
+# This is the prefix name to be used for all log, error and replication files
+log-basename=mysqld
+# Enable logging by default to help find problems
+general-log
+log-slow-queries
+Copy
+# Example mysql config file.
+[client-server]
+socket=/tmp/mysql-dbug.sock
+port=3307
+# This will be passed to all mariadb clients
+[client]
+password=my_password
+# Here are entries for some specific programs
+# The following values assume you have at least 32M ram
+# The MariaDB server
+[mysqld]
+temp-pool
+key_buffer_size=16M
+datadir=/my/mysqldata
+loose-innodb_file_per_table
+[mariadb]
+datadir=/my/data
+default-storage-engine=aria
+loose-mutex-deadlock-detector
+max-connections=20
+[mariadb-5.5]
+language=/my/maria-5.5/sql/share/english/
+socket=/tmp/mysql-dbug.sock
+port=3307
+[mariadb-10.1]
+language=/my/maria-10.1/sql/share/english/
+socket=/tmp/mysql2-dbug.sock
+[mysqldump]
+quick
+max_allowed_packet=16M
+[mysql]
+no-auto-rehash
+loose-abort-source-on-error

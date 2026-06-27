@@ -1,0 +1,23 @@
+Source: https://www.tinybird.com/docs/use-cases/content-recommendation
+
+Content recommendation · Tinybird Docs
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+Content recommendation
+¶
+Copy as MD
+Content recommendation systems can use real-time analytics or vector search approaches to show a web visitor or platform user content their likely to enjoy based on similar content.
+Learn more about content recommendation systems and how to build them with Tinybird.
+Tutorials
+¶
+Updated
+2 months ago
+On this page
+Content recommendation
+Tutorials
+forward
+classic
+Ask AI

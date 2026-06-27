@@ -1,0 +1,117 @@
+Source: https://www.tinybird.com/docs/classic/work-with-data/query/bi-connector
+
+Classic: BI Connector · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+BI Connector (Deprecated)
+¶
+Copy as MD
+The BI Connector is a PostgreSQL-compatible interface to data in Tinybird. You can connect many of your favorite tools to Tinybird, such as Tableau, Apache SuperSet, or Grafana.
+All Data Sources and published Pipes created in Tinybird are available as standard PostgreSQL tables. You can query using standard PostgreSQL syntax and use any tool that implements the PostgreSQL protocol.
+Tinybird uses TLS 1.2 and higher for BI Connector connections.
+We recommend using the
+ClickHouse Interface
+to connect BI tools to Tinybird. It is available by default and includes dedicated setup guides.
+Compatibility
+¶
+The BI Connector has been successfully tested on the following solutions:
+DBeaver
+PowerBI
+Tableau
+Grafana
+Metabase
+Superset
+Klipfolio
+Anodot
+Connect to Tinybird
+¶
+You can connect and access your database as you would with regular PostgreSQL. You can use your command-line tool, any graphical interface
+such as DBbeaver, or any other SQL client such as, for example, your favorite BI tool.
+For example:
+psql -U <user> --host bi.us-east.tinybird.co --port 5432 -d <database>
+After connecting to your database, in the public schema, if you list all the available views you get all the available Data Sources and endpoints. If you're using the PostgreSQL command line you can type
+\dv
+to get the list of views.
+If you list all the tables, a table per Data Source appears. The name of the table is the identifier of the Data Source. Don't use those IDs. Instead, find your tables with their user-friendly names in the views space.
+Best practices
+¶
+1. Avoid queries on exposed Pipes
+¶
+Both your Pipes and Data Sources are exposed in the BI Connector as tables. Query against Data Sources tables only, and avoid using any Pipes tables. In general, queries on Data Sources tables are much faster & easier to optimize.
+2. Use Materialized Views
+¶
+With Tinybird you can build Pipes that materialize the result as a
+Materialized View
+. Materialized Views appear in the BI Connector as tables.
+Rather than querying the raw data via the BI Connector, build your transformations, filters, aggregations, or joins in standard Tinybird Pipes to create a Materialized View. You can then use the BI Connector to read the pre-prepared Materialized View.
+For example, if your dashboard shows events aggregated by day, create a Materialized View with pre-aggregated data by day, and have your BI chart read this.
+3. Use dedicated Materialized Views for different charts
+¶
+If you have multiple charts or widgets consuming data, try to use Materialized Views that are specifically built for that chart or widget. This helps to avoid additional transformation operations.
+4. Use efficient sorting keys
+¶
+Data stored in Tinybird is sorted using a sorting key. This helps to efficiently find data that is relevant to your query. Use the appropriate sorting keys for your data according to the needs of your dashboard.
+For example, if your dashboard is filtering by time, you should have time in the table's sorting key.
+5. Avoid column mappings
+¶
+Avoid using column mappings. Filtering by a mapped column can mean that the index (sorting key) isn't being used.
+6. Avoid JOINs
+¶
+Don't do JOINs over the BI Connector where possible. Instead, do any JOINs inside a Pipe and materialize the result as a Materialized View, then query the already-JOINed data.
+7. Monitor usage with bi_stats_rt
+¶
+The
+bi_stats_rt
+table contains observability data about your usage of the BI Connector.
+Limits
+¶
+The following limits apply:
+Tinybird query timeout is 10 seconds.
+PostgreSQL statement timeout is 5 minutes.
+Resources are limited to 1 thread per query.
+Concurrent queries are limited to 100 per cluster.
+Queries over the BI Connector are only allocated 1 CPU core per query. This only applies to the BI Connector, not to standard Tinybird Pipes.
+Single queries mustn't return more than 1 GB of data at a time.
+The total amount of data returned by all queries executed within a 5-minute period must not exceed 6 GB. This is to prevent overloading the system with too much data in a short period of time.
+Some settings can be adjusted on request. Contact Tinybird support (
+support@tinybird.co
+) to discuss if your use case can be supported.
+Limitations
+¶
+The following limitations apply:
+You can't use parameters in your endpoints. However, you can still filter your data using SQL
+WHERE
+clauses.
+Some widgets of BI tools create SQL queries that aren't compatible with the BI connector.
+Some JOIN operations run in Postgres and not Tinybird, which means they might run much, much more slowly. Avoid JOINs over the BI Connector.
+Sometimes, PostgreSQL might rewrite the query so that filters might end up not using sorting keys. Sorting keys allow you to run faster queries, and therefore those resulting queries might be slower and more expensive since they would require full table scans.
+Querying large datasets can result in a timeout. Large generally means many millions of rows, but this is also affected by how many columns and how large the values are.
+Next steps
+¶
+Read up on
+Materialized View
+and getting the most from your data.
+Understand how to use and query Tinybird's
+Service Data Sources
+.
+Updated
+5 months ago
+On this page
+BI Connector (Deprecated)
+Compatibility
+Connect to Tinybird
+Best practices
+1. Avoid queries on exposed Pipes
+2. Use Materialized Views
+3. Use dedicated Materialized Views for different charts
+4. Use efficient sorting keys
+5. Avoid column mappings
+6. Avoid JOINs
+7. Monitor usage with bi_stats_rt
+Limits
+Limitations
+Next steps
+classic
+Ask AI

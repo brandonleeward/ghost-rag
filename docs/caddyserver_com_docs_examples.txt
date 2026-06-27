@@ -1,0 +1,18 @@
+Source: https://caddyserver.com/docs/examples
+
+examples — Caddy Documentation
+A
+Project
+Store
+Forum
+GitHub
+Theme:
+System
+Download
+Sponsor
+Examples
+This page may soon be developed into a community-maintained set of exmaples. For now, please refer to the examples posted in the
+wiki on our community forum
+. Feel free to
+search the wiki category
+for something specific.

@@ -1,0 +1,711 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/tuple-functions
+
+Tuple Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Tuple functions
+¶
+Copy as MD
+The following functions are available for working with tuples.
+tuple
+¶
+Creates a tuple from a list of values. This function groups multiple expressions or column values into a single tuple, which can be named or unnamed.
+Syntax
+¶
+tuple(x, y, ...)
+Arguments
+¶
+x, y, ...
+: Any type. The values to include in the tuple.
+Returns
+¶
+A tuple containing the input values.
+Tuple
+.
+Example
+¶
+SELECT tuple(1, 'hello', 3.14) AS my_tuple
+Result:
+┌─my_tuple───────────┐
+│ (1,'hello',3.14)   │
+└────────────────────┘
+tupleElement
+¶
+Extracts a specific element from a tuple by its 1-based index or by its name. An optional default value can be provided to avoid errors if the element is not found.
+Syntax
+¶
+tupleElement(tuple, index [, default_value])
+tupleElement(tuple, name [, default_value])
+Arguments
+¶
+tuple
+:
+Tuple
+. The tuple to extract an element from.
+index
+:
+UInt
+. The 1-based index of the element to retrieve.
+name
+:
+String
+. The name of the element to retrieve (for named tuples).
+default_value
+: Any. An optional value to return if the element is not found.
+Returns
+¶
+The value of the specified element. Type of the element.
+Example
+¶
+SELECT
+    tupleElement(('apple', 'banana', 'cherry'), 2) AS by_index,
+    tupleElement((1 AS id, 'Alice' AS name), 'name') AS by_name,
+    tupleElement(('a', 'b'), 3, 'default') AS with_default
+Result:
+┌─by_index─┬─by_name─┬─with_default─┐
+│ banana   │ Alice   │ default      │
+└──────────┴─────────┴──────────────┘
+untuple
+¶
+Expands the elements of a tuple into separate columns in the query result. The resulting column names are generated automatically and should not be relied upon for stability.
+Syntax
+¶
+untuple(x)
+You can use the
+EXCEPT
+expression to skip columns as a result of the query.
+Arguments
+¶
+x
+:
+Tuple
+. The tuple to expand.
+Returns
+¶
+None (syntactic substitution, effectively returns multiple columns).
+Examples
+¶
+Example of using a
+Tuple
+-type column as the
+untuple
+function parameter:
+-- Assuming a Data Source `kv` with a column `v6` of type Tuple(Int, String)
+SELECT untuple(v6) FROM kv LIMIT 1
+Result:
+┌─_ut_1─┬─_ut_2─┐
+│    33 │ ab    │
+└───────┴───────┘
+Example of using an
+EXCEPT
+expression:
+-- Assuming a Data Source `kv` with columns key, v1, v2, v3, v4, v5, v6
+SELECT untuple((* EXCEPT (v2, v3),)) FROM kv LIMIT 1
+Result:
+┌─key─┬─v1─┬─v4─┬─v5─┬─v6────────┐
+│   1 │ 10 │ 30 │ 15 │ (33,'ab') │
+└─────┴────┴────┴────┴───────────┘
+tupleHammingDistance
+¶
+Calculates the Hamming distance between two tuples of identical structure and size. The Hamming distance is the number of positions at which the corresponding elements are different.
+Syntax
+¶
+tupleHammingDistance(tuple1, tuple2)
+Arguments
+¶
+tuple1
+:
+Tuple
+. The first tuple.
+tuple2
+:
+Tuple
+. The second tuple.
+Tuples should have the same type of the elements.
+Returns
+¶
+The Hamming distance as an integer.
+UInt8
+,
+UInt16
+,
+UInt32
+, or
+UInt64
+depending on tuple size.
+The result type is calculated the same way it's for Arithmetic functions, based on the number of elements in the input tuples.
+SELECT
+    toTypeName(tupleHammingDistance(tuple(0), tuple(0))) AS t1,
+    toTypeName(tupleHammingDistance((0, 0), (0, 0))) AS t2,
+    toTypeName(tupleHammingDistance((0, 0, 0), (0, 0, 0))) AS t3,
+    toTypeName(tupleHammingDistance((0, 0, 0, 0), (0, 0, 0, 0))) AS t4,
+    toTypeName(tupleHammingDistance((0, 0, 0, 0, 0), (0, 0, 0, 0, 0))) AS t5
+Result:
+┌─t1────┬─t2─────┬─t3─────┬─t4─────┬─t5─────┐
+│ UInt8 │ UInt16 │ UInt32 │ UInt64 │ UInt64 │
+└───────┴────────┴────────┴────────┴────────┘
+Example
+¶
+SELECT tupleHammingDistance((1, 2, 3), (3, 2, 1)) AS HammingDistance
+Result:
+┌─HammingDistance─┐
+│               2 │
+└─────────────────┘
+Can be used with MinHash functions for detection of semi-duplicate strings:
+SELECT tupleHammingDistance(wordShingleMinHash(string), wordShingleMinHashCaseInsensitive(string)) AS HammingDistance
+FROM (SELECT 'Bazinga is a column-oriented database management system for online analytical processing of queries.' AS string)
+Result:
+┌─HammingDistance─┐
+│               2 │
+└─────────────────┘
+tupleToNameValuePairs
+¶
+Converts a named tuple into an array of
+(name, value)
+pairs. Each pair consists of the field's name as a string and its corresponding value. If the tuple is unnamed, element indices are used as names.
+Syntax
+¶
+tupleToNameValuePairs(tuple)
+Arguments
+¶
+tuple
+:
+Tuple
+. The tuple to convert.
+Returns
+¶
+An array of
+Tuple(String, Any)
+pairs.
+Array
+(
+Tuple
+(
+String
+, ...)).
+Example
+¶
+SELECT tupleToNameValuePairs(col) FROM
+(select (c1,c2)::Tuple(user_ID UInt64, session_ID UInt64) as col from values((100, 2502), (1, 100)))
+Result:
+┌─tupleToNameValuePairs(col)────────────┐
+│ [('user_ID',100),('session_ID',2502)] │
+│ [('user_ID',1),('session_ID',100)]    │
+└───────────────────────────────────────┘
+It is possible to transform columns to rows using this function:
+SELECT arrayJoin(tupleToNameValuePairs(col)) FROM
+(select (c1,c2,c3)::Tuple(CPU Float64, Memory Float64, Disk Float64) as col from values((tuple(3.3, 5.5, 6.6))))
+Result:
+┌─arrayJoin(tupleToNameValuePairs(col))─┐
+│ ('CPU',3.3)                           │
+│ ('Memory',5.5)                        │
+│ ('Disk',6.6)                          │
+└───────────────────────────────────────┘
+If you pass a simple tuple to the function, Tinybird uses the indexes of the values as their names:
+SELECT tupleToNameValuePairs(tuple(3, 2, 1))
+Result:
+┌─tupleToNameValuePairs(tuple(3, 2, 1))─┐
+│ [('1',3),('2',2),('3',1)]             │
+└───────────────────────────────────────┘
+tupleNames
+¶
+Extracts the names of elements from a tuple and returns them as an array of strings. For unnamed tuples, it uses the 1-based indices as names.
+Syntax
+¶
+tupleNames(tuple)
+Arguments
+¶
+tuple
+:
+Tuple
+. The tuple to extract names from.
+Returns
+¶
+An array of strings representing the element names.
+Array
+(
+String
+).
+Example
+¶
+SELECT tupleNames(col) FROM (select (c1,c2)::Tuple(user_ID UInt64, session_ID UInt64) as col from values((1, 2)))
+Result:
+┌─tupleNames(col)──────────┐
+│ ['user_ID','session_ID'] │
+└──────────────────────────┘
+If you pass a simple tuple to the function, Tinybird uses the indexes of the columns as their names:
+SELECT tupleNames(tuple(3, 2, 1))
+Result:
+┌─tupleNames((3, 2, 1))─┐
+│ ['1','2','3']         │
+└───────────────────────┘
+tuplePlus
+¶
+Adds corresponding elements of two tuples of the same size, returning a new tuple with the sums.
+Syntax
+¶
+tuplePlus(tuple1, tuple2)
+Alias:
+vectorSum
+.
+Arguments
+¶
+tuple1
+:
+Tuple
+. The first tuple.
+tuple2
+:
+Tuple
+. The second tuple.
+Returns
+¶
+A tuple containing the sums of corresponding elements.
+Tuple
+.
+Example
+¶
+SELECT tuplePlus((1, 2), (2, 3))
+Result:
+┌─tuplePlus((1, 2), (2, 3))─┐
+│ (3,5)                     │
+└───────────────────────────┘
+tupleMinus
+¶
+Subtracts corresponding elements of the second tuple from the first tuple, returning a new tuple with the differences. Both tuples must be of the same size.
+Syntax
+¶
+tupleMinus(tuple1, tuple2)
+Alias:
+vectorDifference
+.
+Arguments
+¶
+tuple1
+:
+Tuple
+. The first tuple.
+tuple2
+:
+Tuple
+. The second tuple.
+Returns
+¶
+A tuple containing the differences of corresponding elements.
+Tuple
+.
+Example
+¶
+SELECT tupleMinus((1, 2), (2, 3))
+Result:
+┌─tupleMinus((1, 2), (2, 3))─┐
+│ (-1,-1)                    │
+└────────────────────────────┘
+tupleMultiply
+¶
+Multiplies corresponding elements of two tuples of the same size, returning a new tuple with the products.
+Syntax
+¶
+tupleMultiply(tuple1, tuple2)
+Arguments
+¶
+tuple1
+:
+Tuple
+. The first tuple.
+tuple2
+:
+Tuple
+. The second tuple.
+Returns
+¶
+A tuple containing the products of corresponding elements.
+Tuple
+.
+Example
+¶
+SELECT tupleMultiply((1, 2), (2, 3))
+Result:
+┌─tupleMultiply((1, 2), (2, 3))─┐
+│ (2,6)                         │
+└───────────────────────────────┘
+tupleDivide
+¶
+Divides corresponding elements of the first tuple by those of the second tuple, returning a new tuple with the quotients. Both tuples must be of the same size. Division by zero results in
+inf
+.
+Syntax
+¶
+tupleDivide(tuple1, tuple2)
+Arguments
+¶
+tuple1
+:
+Tuple
+. The first tuple (numerators).
+tuple2
+:
+Tuple
+. The second tuple (denominators).
+Returns
+¶
+A tuple containing the quotients of corresponding elements.
+Tuple
+.
+Example
+¶
+SELECT tupleDivide((1, 2), (2, 3))
+Result:
+┌─tupleDivide((1, 2), (2, 3))─┐
+│ (0.5,0.6666666666666666)    │
+└─────────────────────────────┘
+tupleNegate
+¶
+Returns a new tuple where each numeric element of the input tuple has its sign inverted.
+Syntax
+¶
+tupleNegate(tuple)
+Arguments
+¶
+tuple
+:
+Tuple
+. The input tuple.
+Returns
+¶
+A tuple with negated numeric values.
+Tuple
+.
+Example
+¶
+SELECT tupleNegate((1,  2))
+Result:
+┌─tupleNegate((1, 2))─┐
+│ (-1,-2)             │
+└─────────────────────┘
+tupleMultiplyByNumber
+¶
+Multiplies each numeric element within a tuple by a given scalar number, returning a new tuple with the results.
+Syntax
+¶
+tupleMultiplyByNumber(tuple, number)
+Arguments
+¶
+tuple
+:
+Tuple
+. The input tuple.
+number
+:
+Int/UInt
+,
+Float
+or
+Decimal
+. The scalar multiplier.
+Returns
+¶
+A tuple with each element multiplied by the number.
+Tuple
+.
+Example
+¶
+SELECT tupleMultiplyByNumber((1, 2), -2.1)
+Result:
+┌─tupleMultiplyByNumber((1, 2), -2.1)─┐
+│ (-2.1,-4.2)                         │
+└─────────────────────────────────────┘
+tupleDivideByNumber
+¶
+Divides each numeric element within a tuple by a given scalar number, returning a new tuple with the quotients. Division by zero results in
+inf
+.
+Syntax
+¶
+tupleDivideByNumber(tuple, number)
+Arguments
+¶
+tuple
+:
+Tuple
+. The input tuple.
+number
+:
+Int/UInt
+,
+Float
+or
+Decimal
+. The scalar divisor.
+Returns
+¶
+A tuple with each element divided by the number.
+Tuple
+.
+Example
+¶
+SELECT tupleDivideByNumber((1, 2), 0.5)
+Result:
+┌─tupleDivideByNumber((1, 2), 0.5)─┐
+│ (2,4)                            │
+└──────────────────────────────────┘
+tupleConcat
+¶
+Concatenates multiple tuples into a single new tuple, combining all elements in order.
+Syntax
+¶
+tupleConcat(tuples)
+Arguments
+¶
+tuples
+:
+Tuple
+. An arbitrary number of tuple arguments to concatenate.
+Returns
+¶
+A single tuple containing all elements from the input tuples.
+Tuple
+.
+Example
+¶
+SELECT tupleConcat((1, 2), (3, 4), (true, false)) AS res
+Result:
+┌─res──────────────────┐
+│ (1,2,3,4,true,false) │
+└──────────────────────┘
+tupleIntDiv
+¶
+Performs element-wise integer division between two tuples of the same size. It returns a new tuple containing the integer quotients.
+Syntax
+¶
+tupleIntDiv(tuple_num, tuple_div)
+Arguments
+¶
+tuple_num
+:
+Tuple
+. A tuple of numeric numerator values.
+tuple_div
+:
+Tuple
+. A tuple of numeric divisor values.
+Returns
+¶
+A tuple of integer quotients.
+Tuple
+.
+Example
+¶
+SELECT tupleIntDiv((15, 10, 5), (5, 5, 5))
+Result:
+┌─tupleIntDiv((15, 10, 5), (5, 5, 5))─┐
+│ (3,2,1)                             │
+└─────────────────────────────────────┘
+SELECT tupleIntDiv((15, 10, 5), (5.5, 5.5, 5.5))
+Result:
+┌─tupleIntDiv((15, 10, 5), (5.5, 5.5, 5.5))─┐
+│ (2,1,0)                                   │
+└───────────────────────────────────────────┘
+tupleIntDivOrZero
+¶
+Performs element-wise integer division between two tuples. If any divisor is zero, the corresponding quotient in the result tuple will be zero instead of throwing an error.
+Syntax
+¶
+tupleIntDivOrZero(tuple_num, tuple_div)
+Arguments
+¶
+tuple_num
+:
+Tuple
+. A tuple of numeric numerator values.
+tuple_div
+:
+Tuple
+. A tuple of numeric divisor values.
+Returns
+¶
+A tuple of integer quotients.
+Tuple
+.
+Example
+¶
+SELECT tupleIntDivOrZero((5, 10, 15), (0, 0, 0))
+Result:
+┌─tupleIntDivOrZero((5, 10, 15), (0, 0, 0))─┐
+│ (0,0,0)                                   │
+└───────────────────────────────────────────┘
+tupleIntDivByNumber
+¶
+Divides each numeric element in a tuple by a single scalar number, returning a new tuple with the integer quotients.
+Syntax
+¶
+tupleIntDivByNumber(tuple_num, div)
+Arguments
+¶
+tuple_num
+:
+Tuple
+. A tuple of numeric numerator values.
+div
+: Numeric. The scalar divisor.
+Returns
+¶
+A tuple of integer quotients.
+Tuple
+.
+Example
+¶
+SELECT tupleIntDivByNumber((15, 10, 5), 5)
+Result:
+┌─tupleIntDivByNumber((15, 10, 5), 5)─┐
+│ (3,2,1)                             │
+└─────────────────────────────────────┘
+SELECT tupleIntDivByNumber((15.2, 10.7, 5.5), 5.8)
+Result:
+┌─tupleIntDivByNumber((15.2, 10.7, 5.5), 5.8)─┐
+│ (2,1,0)                                     │
+└─────────────────────────────────────────────┘
+tupleIntDivOrZeroByNumber
+¶
+Divides each numeric element in a tuple by a single scalar number. If the divisor is zero, the corresponding quotient in the result tuple will be zero instead of throwing an error.
+Syntax
+¶
+tupleIntDivOrZeroByNumber(tuple_num, div)
+Arguments
+¶
+tuple_num
+:
+Tuple
+. A tuple of numeric numerator values.
+div
+: Numeric. The scalar divisor.
+Returns
+¶
+A tuple of integer quotients.
+Tuple
+.
+Example
+¶
+SELECT tupleIntDivOrZeroByNumber((15, 10, 5), 5)
+Result:
+┌─tupleIntDivOrZeroByNumber((15, 10, 5), 5)─┐
+│ (3,2,1)                                   │
+└───────────────────────────────────────────┘
+SELECT tupleIntDivOrZeroByNumber((15, 10, 5), 0)
+Result:
+┌─tupleIntDivOrZeroByNumber((15, 10, 5), 0)─┐
+│ (0,0,0)                                   │
+└───────────────────────────────────────────┘
+tupleModulo
+¶
+Calculates the remainder of element-wise division between two tuples of the same size, returning a new tuple with the moduli.
+Syntax
+¶
+tupleModulo(tuple_num, tuple_mod)
+Arguments
+¶
+tuple_num
+:
+Tuple
+. A tuple of numeric numerator values.
+tuple_mod
+:
+Tuple
+. A tuple of numeric modulus values (divisors).
+Returns
+¶
+A tuple of integer remainders.
+Tuple
+.
+Example
+¶
+SELECT tupleModulo((15, 10, 5), (5, 3, 2))
+Result:
+┌─tupleModulo((15, 10, 5), (5, 3, 2))─┐
+│ (0,1,1)                             │
+└─────────────────────────────────────┘
+tupleModuloByNumber
+¶
+Calculates the remainder of dividing each numeric element in a tuple by a single scalar number, returning a new tuple with the moduli.
+Syntax
+¶
+tupleModuloByNumber(tuple_num, div)
+Arguments
+¶
+tuple_num
+:
+Tuple
+. A tuple of numeric numerator values.
+div
+: Numeric. The scalar divisor.
+Returns
+¶
+A tuple of integer remainders.
+Tuple
+.
+Example
+¶
+SELECT tupleModuloByNumber((15, 10, 5), 2)
+Result:
+┌─tupleModuloByNumber((15, 10, 5), 2)─┐
+│ (1,0,1)                             │
+└─────────────────────────────────────┘
+flattenTuple
+¶
+Transforms a nested tuple into a single-level tuple by extracting all elements, including those from inner tuples. This is useful for simplifying complex tuple structures.
+Syntax
+¶
+flattenTuple(input)
+Arguments
+¶
+input
+:
+Tuple
+. The nested tuple to flatten.
+Returns
+¶
+A flattened tuple.
+Tuple
+.
+Example
+¶
+SELECT flattenTuple(t) FROM
+(select (c1,c2,c3)::Tuple(t1 Nested(a UInt32, s String), b UInt32, t2 Tuple(k String, v UInt32)) as t from values((([(1, 'a'), (2, 'b')], 3, ('c', 4)))))
+Result:
+┌─flattenTuple(t)───────────┐
+│ ([1,2],['a','b'],3,'c',4) │
+└───────────────────────────┘
+Distance functions
+¶
+All supported functions are described in
+distance functions documentation
+.
+Updated
+3 weeks ago
+On this page
+Tuple functions
+tuple
+tupleElement
+untuple
+tupleHammingDistance
+tupleToNameValuePairs
+tupleNames
+tuplePlus
+tupleMinus
+tupleMultiply
+tupleDivide
+tupleNegate
+tupleMultiplyByNumber
+tupleDivideByNumber
+tupleConcat
+tupleIntDiv
+tupleIntDivOrZero
+tupleIntDivByNumber
+tupleIntDivOrZeroByNumber
+tupleModulo
+tupleModuloByNumber
+flattenTuple
+Distance functions
+forward
+classic
+Ask AI

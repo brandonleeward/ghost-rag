@@ -1,0 +1,92 @@
+Source: https://www.tinybird.com/docs/classic/get-data-in/guides/ingest-from-mailgun
+
+Classic: Send Mailgun Events to Tinybird · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Send Mailgun events to Tinybird
+¶
+Copy as MD
+Mailgun
+is a platform for sending email, and it provides a way to send events to Tinybird using webhooks.
+Read on to learn how to send events from Mailgun to Tinybird.
+Before you start
+¶
+Before you connect Mailgun to Tinybird, ensure:
+You have a Mailgun account.
+You have a Tinybird workspace.
+Connect Mailgun to Tinybird
+¶
+Mailgun provides a variety of
+webhook event types
+that you can use to send events to Tinybird.
+This guide covers the base case for sending Mailgun events to Tinybird.
+In Mailgun, go to
+Send
+>
+Sending
+>
+Webhooks
+.
+Select
+Domain
+and
+Add webhook
+.
+In your Tinybird project, create a data source called
+mailgun
+. You can follow this
+schema
+:
+SCHEMA >
+  `event_time` DateTime `json:$.tinybirdIngestTime` DEFAULT now(),
+  `event_type` String `json:$.event-data.event` DEFAULT 'unknown',
+  `event` JSON `json:$` DEFAULT '{}'
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(event_time)"
+ENGINE_SORTING_KEY "event_time"
+Using the
+JSON Data Type
+you can store the semi-structured data you receive from Mailgun in a single column. You can later retrieve various events and their metadata as needed in your pipes.
+The
+JSON
+data type is in private beta. If you are interested in using this type, contact Tinybird at
+support@tinybird.co
+or in the
+Community Slack
+.
+From Tinybird Cloud, copy a token with privileges to append to the data source you created. You can use the admin token or create one with the required scope.
+Back in Mailgun, paste the Events API URL in your Webhook Endpoint URL. Use the query parameter
+name
+to match the name of the data source you created in Tinybird.
+https://<your_host>/v0/events?name=mailgun&format=json&token=<your user token>
+Make sure to use the
+format=json
+query parameter.
+The API host in the following examples must match your Workspace's region. See the full list of
+regions and hosts
+Select
+Event type
+and choose the event you want to send to Tinybird. You can use the same Tinybird data source for multiple events.
+Select
+Create webhook
+abd you're done.
+Check the status of the integration from the
+Log
+tab in the Tinybird
+mailgun
+data source.
+See also
+¶
+Mailgun Events
+Updated
+3 weeks ago
+On this page
+Send Mailgun events to Tinybird
+Before you start
+Connect Mailgun to Tinybird
+See also
+classic
+Ask AI

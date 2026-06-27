@@ -1,0 +1,41 @@
+Source: https://docs.docker.com:443/reference/cli/docker/compose/publish/
+
+docker compose publish | Docker Docs
+Gordon
+Gordon, your AI assistant for Docker docs
+Search
+Start a new chat
+When enabled, Gordon considers the current page you're viewing
+to provide more relevant answers.
+Share feedback
+Answers are generated based on the documentation.
+Back
+Reference
+Get started
+Guides
+Manuals
+docker compose publish
+Ask Gordon
+Copy Markdown
+View Markdown
+Description
+Publish compose application
+Usage
+docker compose publish [OPTIONS] REPOSITORY[:TAG]
+Description
+Publish compose application
+Options
+Option
+Default
+Description
+--app
+Published compose application (includes referenced images)
+--oci-version
+OCI image/artifact specification version (automatically determined by default)
+--resolve-image-digests
+Pin image tags to digests
+--with-env
+Include environment variables in the published OCI artifact
+-y, --yes
+Assume "yes" as answer to all prompts
+Table of contents

@@ -1,0 +1,920 @@
+Source: https://www.tinybird.com/docs/api-reference/pipe-api/copy-pipes-api
+
+Pipes API Copy Pipes reference · Tinybird Docs
+Sign In
+Sign Up
+Pipes API Copy Pipes service
+¶
+Copy as MD
+The API host in the following examples must match your Workspace's region. See the full list of
+regions and hosts
+The Pipes API helps you interact with your Pipes. Several services are included under Pipes:
+Pipes
+: List, create, update, or delete your Tinybird Pipes.
+API Endpoints
+: Publish or unpublish your Pipes as API Endpoints.
+Materialized Views and Populates
+: Create, delete, or populate Materialized Views.
+Scheduled Copy (Copy Pipes API)
+: Create, delete, schedule, and trigger Copy jobs.
+Adding or modifying pipes or data sources in
+Tinybird Local
+and
+Tinybird Forward
+can only be done through deployments.
+Copy Pipes API
+¶
+The Copy Pipes API helps you create, delete, schedule and trigger
+Copy Pipes
+.
+POST
+/v0/pipes/(.+)/nodes/(.+)/copy
+¶
+Calling this endpoint sets the pipe as a Copy one with the given settings. Scheduling is optional.
+To run the actual copy after you set the pipe as a Copy one, you must call the POST
+/v0/pipes/:pipe/copy
+endpoint.
+If you need to change the target Data Source or the scheduling configuration, you can call PUT endpoint.
+Restrictions:
+You can set only one schedule per Copy pipe.
+You can’t set a Copy pipe if the pipe is already materializing. You must unlink the Materialization first.
+You can’t set a Copy pipe if the pipe is already an endpoint. You must unpublish the endpoint first.
+Setting the pipe as a Copy pipe
+¶
+curl
+-X
+POST
+\
+-H
+"Authorization: Bearer <PIPE:CREATE and DATASOURCE:APPEND token>"
+\
+"
+https://<your_host>
+/v0/pipes/:pipe/nodes/:node/copy"
+\
+-d
+"target_datasource=my_destination_datasource"
+\
+-d
+"schedule_cron=*/15 * * * *"
+Request parameters
+¶
+Key
+Type
+Description
+token
+String
+Auth token. Ensure it has the
+PIPE:CREATE
+and
+DATASOURCE:APPEND
+scopes on it
+target_datasource
+String
+Name or the id of the target Data Source.
+schedule_cron
+String
+Optional. A crontab expression.
+Successful response
+¶
+{
+"id"
+:
+"t_3aa11a5cabd1482c905bc8dfc551a84d"
+,
+"name"
+:
+"my_copy_pipe"
+,
+"description"
+:
+"This is a pipe to copy"
+,
+"type"
+:
+"copy"
+,
+"endpoint"
+:
+null
+,
+"created_at"
+:
+"2023-03-01 10:14:04.497505"
+,
+"updated_at"
+:
+"2023-03-01 10:34:19.113518"
+,
+"parent"
+:
+null
+,
+"copy_node"
+:
+"t_33ec8ac3c3324a53822fded61a83dbbd"
+,
+"copy_target_datasource"
+:
+"t_0be6161a5b7b4f6180b10325643e0b7b"
+,
+"copy_target_workspace"
+:
+"5a70f2f5-9635-47bf-96a9-7b50362d4e2f"
+,
+"nodes"
+:
+[{
+"id"
+:
+"t_33ec8ac3c3324a53822fded61a83dbbd"
+,
+"name"
+:
+"emps"
+,
+"sql"
+:
+"SELECT * FROM employees WHERE starting_date > '2016-01-01 00:00:00'"
+,
+"description"
+:
+null
+,
+"materialized"
+:
+null
+,
+"mode"
+:
+"append"
+,
+"tags"
+:
+{
+"copy_target_datasource"
+:
+"t_0be6161a5b7b4f6180b10325643e0b7b"
+,
+"copy_target_workspace"
+:
+"5a70f2f5-9635-47bf-96a9-7b50362d4e2f"
+},
+"created_at"
+:
+"2023-03-01 10:14:04.497547"
+,
+"updated_at"
+:
+"2023-03-01 10:14:04.497547"
+,
+"version"
+:
+0
+,
+"project"
+:
+null
+,
+"result"
+:
+null
+,
+"ignore_sql_errors"
+:
+false
+,
+"dependencies"
+:
+[
+"employees"
+],
+"params"
+:
+[]
+}]
+}
+DELETE
+/v0/pipes/(.+)/nodes/(.+)/copy
+¶
+Removes the Copy type of the pipe.
+By removing the Copy type, nor the node nor the pipe are deleted.
+The pipe will still be present, but will stop any scheduled and copy settings.
+Unsetting the pipe as a Copy pipe
+¶
+curl
+-X
+DELETE
+\
+-H
+"Authorization: Bearer <PIPE:CREATE token>"
+\
+"
+https://<your_host>
+/v0/pipes/:pipe/nodes/:node/copy"
+Response codes
+¶
+Code
+Description
+204
+No error
+400
+Wrong node id
+403
+Forbidden. Provided token doesn’t have permissions to publish a pipe, it needs
+ADMIN
+or
+PIPE:CREATE
+404
+Pipe not found
+PUT
+/v0/pipes/(.+)/nodes/(.+)/copy
+¶
+Calling this endpoint will update a Copy pipe with the given settings: you can change its target Data Source, as well as adding or modifying its schedule.
+Updating a Copy Pipe
+¶
+curl
+-X
+PUT
+\
+-H
+"Authorization: Bearer <PIPE:CREATE token>"
+\
+"
+https://<your_host>
+/v0/pipes/:pipe/nodes/:node/copy"
+\
+-d
+"target_datasource=other_destination_datasource"
+\
+-d
+"schedule_cron=*/15 * * * *"
+Request parameters
+¶
+Key
+Type
+Description
+token
+String
+Auth token. Ensure it has the
+PIPE:CREATE
+scope on it
+target_datasource
+String
+Optional. Name or the id of the target Data Source.
+schedule_cron
+String
+Optional. A crontab expression. If schedule_cron=’None’ the schedule will be removed from the copy pipe, if it was defined
+mode
+String
+Optional. The mode to use for the copy pipe. Can be ‘append’ or ‘replace’. Default is ‘append’.
+Successful response
+¶
+{
+"id"
+:
+"t_3aa11a5cabd1482c905bc8dfc551a84d"
+,
+"name"
+:
+"my_copy_pipe"
+,
+"description"
+:
+"This is a pipe to copy"
+,
+"type"
+:
+"copy"
+,
+"endpoint"
+:
+null
+,
+"created_at"
+:
+"2023-03-01 10:14:04.497505"
+,
+"updated_at"
+:
+"2023-03-01 10:34:19.113518"
+,
+"parent"
+:
+null
+,
+"copy_node"
+:
+"t_33ec8ac3c3324a53822fded61a83dbbd"
+,
+"copy_target_datasource"
+:
+"t_2f046a4b2cc44137834a35420a533465"
+,
+"copy_target_workspace"
+:
+"5a70f2f5-9635-47bf-96a9-7b50362d4e2f"
+,
+"nodes"
+:
+[{
+"id"
+:
+"t_33ec8ac3c3324a53822fded61a83dbbd"
+,
+"name"
+:
+"emps"
+,
+"sql"
+:
+"SELECT * FROM employees WHERE starting_date > '2016-01-01 00:00:00'"
+,
+"description"
+:
+null
+,
+"materialized"
+:
+null
+,
+"mode"
+:
+"append"
+,
+"tags"
+:
+{
+"copy_target_datasource"
+:
+"t_2f046a4b2cc44137834a35420a533465"
+,
+"copy_target_workspace"
+:
+"5a70f2f5-9635-47bf-96a9-7b50362d4e2f"
+},
+"created_at"
+:
+"2023-03-01 10:14:04.497547"
+,
+"updated_at"
+:
+"2023-03-07 09:08:34.206123"
+,
+"version"
+:
+0
+,
+"project"
+:
+null
+,
+"result"
+:
+null
+,
+"ignore_sql_errors"
+:
+false
+,
+"dependencies"
+:
+[
+"employees"
+],
+"params"
+:
+[]
+}]
+}
+POST
+/v0/pipes/(.+)/copy
+¶
+Runs a copy job, using the settings previously set in the pipe.
+You can use this URL to do an on-demand copy.
+This URL is also used by the scheduler to make the programmed calls.
+This URL accepts parameters, just like in a regular endpoint.
+This operation is asynchronous and will copy the output of the endpoint to an existing datasource.
+Runs a copy job on a Copy pipe
+¶
+curl
+-H
+"Authorization: Bearer <PIPE:READ token>"
+\
+-X
+POST
+"
+https://<your_host>
+/v0/pipes/:pipe/copy?param1=test&param2=test2"
+Request parameters
+¶
+Key
+Type
+Description
+token
+String
+Auth token. Ensure it has the
+PIPE:READ
+scope on it
+parameters
+String
+Optional. The value of the parameters to run the Copy with. They are regular URL query parameters.
+_mode
+String
+Optional. One of ‘append’ or ‘replace’. Default is ‘append’.
+Response codes
+¶
+Code
+Description
+200
+No error
+400
+Pipe is not a Copy pipe or there is a problem with the SQL query
+400
+The columns in the SQL query don’t match the columns in the target Data Source
+403
+Forbidden. The provided token doesn’t have permissions to append a node to the pipe (
+ADMIN
+or
+PIPE:READ
+and
+DATASOURCE:APPEND
+)
+403
+Job limits exceeded. Tried to copy more than 100M rows, or there are too many active (working and waiting) Copy jobs.
+404
+Pipe not found, Node not found or Target Data Source not found
+The response will not be the final result of the copy but a Job. You can check the job status and progress using the
+Jobs API
+.
+Successful response
+¶
+{
+"id"
+:
+"t_33ec8ac3c3324a53822fded61a83dbbd"
+,
+"name"
+:
+"emps"
+,
+"sql"
+:
+"SELECT * FROM employees WHERE starting_date > '2016-01-01 00:00:00'"
+,
+"description"
+:
+null
+,
+"materialized"
+:
+null
+,
+"tags"
+:
+{
+"copy_target_datasource"
+:
+"t_0be6161a5b7b4f6180b10325643e0b7b"
+,
+"copy_target_workspace"
+:
+"5a70f2f5-9635-47bf-96a9-7b50362d4e2f"
+},
+"created_at"
+:
+"2023-03-01 10:14:04.497547"
+,
+"updated_at"
+:
+"2023-03-01 10:14:04.497547"
+,
+"version"
+:
+0
+,
+"project"
+:
+null
+,
+"result"
+:
+null
+,
+"ignore_sql_errors"
+:
+false
+,
+"dependencies"
+:
+[
+"employees"
+],
+"params"
+:
+[],
+"job"
+:
+{
+"kind"
+:
+"copy"
+,
+"id"
+:
+"f0b2f107-0af8-4c28-a83b-53053cb45f0f"
+,
+"job_id"
+:
+"f0b2f107-0af8-4c28-a83b-53053cb45f0f"
+,
+"status"
+:
+"waiting"
+,
+"created_at"
+:
+"2023-03-01 10:41:07.398102"
+,
+"updated_at"
+:
+"2023-03-01 10:41:07.398128"
+,
+"started_at"
+:
+null
+,
+"is_cancellable"
+:
+true
+,
+"datasource"
+:
+{
+"id"
+:
+"t_0be6161a5b7b4f6180b10325643e0b7b"
+},
+"query_id"
+:
+"19a8d613-b424-4afd-95f1-39cfbd87e827"
+,
+"query_sql"
+:
+"SELECT * FROM d_b0ca70.t_25f928e33bcb40bd8e8999e69cb02f94 AS employees WHERE starting_date > '2016-01-01 00:00:00'"
+,
+"pipe_id"
+:
+"t_3aa11a5cabd1482c905bc8dfc551a84d"
+,
+"pipe_name"
+:
+"copy_emp"
+,
+"job_url"
+:
+"
+https://<your_host>
+/v0/jobs/f0b2f107-0af8-4c28-a83b-53053cb45f0f"
+}
+}
+POST
+/v0/pipes/(.+)/copy/pause
+¶
+Pauses the scheduling. This affects any future scheduled Copy job. Any copy operation currently copying data will be completed.
+Pauses a scheduled copy
+¶
+curl
+-X
+POST
+\
+-H
+"Authorization: Bearer <PIPE:CREATE token>"
+\
+"
+https://<your_host>
+/v0/pipes/:pipe/copy/pause"
+Response codes
+¶
+Code
+Description
+200
+Scheduled copy paused correctly
+400
+Pipe is not copy
+404
+Pipe not found, Scheduled copy for pipe not found
+POST
+/v0/pipes/(.+)/copy/resume
+¶
+Resumes a previously paused scheduled copy.
+Resumes a Scheduled copy
+¶
+curl
+-X
+POST
+\
+-H
+"Authorization: Bearer <PIPE:CREATE token>"
+\
+"
+https://<your_host>
+/v0/pipes/:pipe/copy/resume"
+Response codes
+¶
+Code
+Description
+200
+Scheduled copy resumed correctly
+400
+Pipe is not copy
+404
+Pipe not found, Scheduled copy for pipe not found
+POST
+/v0/pipes/(.+)/copy/cancel
+¶
+Cancels jobs that are working or waiting that are tied to the pipe and pauses the scheduling of copy jobs for this pipe.
+To allow scheduled copy jobs to run for the pipe, the copy pipe must be resumed and the already cancelled jobs will not be resumed.
+Cancels scheduled copy jobs tied to the pipe
+¶
+curl
+-X
+POST
+\
+-H
+"Authorization: Bearer <PIPE:CREATE token>"
+\
+"
+https://<your_host>
+/v0/pipes/:pipe/copy/cancel"
+Response codes
+¶
+Code
+Description
+200
+Scheduled copy pipe cancelled correctly
+400
+Pipe is not copy
+400
+Job is not in cancellable status
+400
+Job is already being cancelled
+404
+Pipe not found, Scheduled copy for pipe not found
+Successful response
+¶
+{
+"id"
+:
+"t_fb56a87a520441189a5a6d61f8d968f4"
+,
+"name"
+:
+"scheduled_copy_pipe"
+,
+"description"
+:
+"none"
+,
+"endpoint"
+:
+"none"
+,
+"created_at"
+:
+"2023-06-09 10:54:21.847433"
+,
+"updated_at"
+:
+"2023-06-09 10:54:21.897854"
+,
+"parent"
+:
+"none"
+,
+"type"
+:
+"copy"
+,
+"copy_node"
+:
+"t_bb96e50cb1b94ffe9e598f870d88ad1b"
+,
+"copy_target_datasource"
+:
+"t_3f7e6534733f425fb1add6229ca8be4b"
+,
+"copy_target_workspace"
+:
+"8119d519-80b2-454a-a114-b092aea3b9b0"
+,
+"schedule"
+:
+{
+"timezone"
+:
+"Etc/UTC"
+,
+"cron"
+:
+"0 * * * *"
+,
+"status"
+:
+"paused"
+},
+"nodes"
+:
+[
+{
+"id"
+:
+"t_bb96e50cb1b94ffe9e598f870d88ad1b"
+,
+"name"
+:
+"scheduled_copy_pipe_0"
+,
+"sql"
+:
+"SELECT * FROM landing_ds"
+,
+"description"
+:
+"none"
+,
+"materialized"
+:
+"none"
+,
+"tags"
+:
+{
+"copy_target_datasource"
+:
+"t_3f7e6534733f425fb1add6229ca8be4b"
+,
+"copy_target_workspace"
+:
+"8119d519-80b2-454a-a114-b092aea3b9b0"
+},
+"created_at"
+:
+"2023-06-09 10:54:21.847451"
+,
+"updated_at"
+:
+"2023-06-09 10:54:21.847451"
+,
+"version"
+:
+0
+,
+"project"
+:
+"none"
+,
+"result"
+:
+"none"
+,
+"ignore_sql_errors"
+:
+"false"
+,
+"node_type"
+:
+"copy"
+,
+"dependencies"
+:
+[
+"landing_ds"
+],
+"params"
+:
+[]
+}
+],
+"cancelled_jobs"
+:
+[
+{
+"id"
+:
+"ced3534f-8b5e-4fe0-8dcc-4369aa256b11"
+,
+"kind"
+:
+"copy"
+,
+"status"
+:
+"cancelled"
+,
+"created_at"
+:
+"2023-06-09 07:54:21.921446"
+,
+"updated_at"
+:
+"2023-06-09 10:54:22.043272"
+,
+"job_url"
+:
+"
+https://<your_host>
+/v0/jobsjobs/ced3534f-8b5e-4fe0-8dcc-4369aa256b11"
+,
+"is_cancellable"
+:
+"false"
+,
+"pipe_id"
+:
+"t_fb56a87a520441189a5a6d61f8d968f4"
+,
+"pipe_name"
+:
+"pipe_test_scheduled_copy_pipe_cancel_multiple_jobs"
+,
+"datasource"
+:
+{
+"id"
+:
+"t_3f7e6534733f425fb1add6229ca8be4b"
+,
+"name"
+:
+"target_ds_test_scheduled_copy_pipe_cancel_multiple_jobs"
+}
+},
+{
+"id"
+:
+"b507ded9-9862-43ae-8863-b6de17c3f914"
+,
+"kind"
+:
+"copy"
+,
+"status"
+:
+"cancelling"
+,
+"created_at"
+:
+"2023-06-09 07:54:21.903036"
+,
+"updated_at"
+:
+"2023-06-09 10:54:22.044837"
+,
+"job_url"
+:
+"
+https://<your_host>
+/v0/jobsb507ded9-9862-43ae-8863-b6de17c3f914"
+,
+"is_cancellable"
+:
+"false"
+,
+"pipe_id"
+:
+"t_fb56a87a520441189a5a6d61f8d968f4"
+,
+"pipe_name"
+:
+"pipe_test_scheduled_copy_pipe_cancel_multiple_jobs"
+,
+"datasource"
+:
+{
+"id"
+:
+"t_3f7e6534733f425fb1add6229ca8be4b"
+,
+"name"
+:
+"target_ds_test_scheduled_copy_pipe_cancel_multiple_jobs"
+}
+}
+]
+}
+Updated
+1 month ago
+On this page
+Pipes API Copy Pipes service
+Copy Pipes API
+POST /v0/pipes/(.+)/nodes/(.+)/copy
+DELETE /v0/pipes/(.+)/nodes/(.+)/copy
+PUT /v0/pipes/(.+)/nodes/(.+)/copy
+POST /v0/pipes/(.+)/copy
+POST /v0/pipes/(.+)/copy/pause
+POST /v0/pipes/(.+)/copy/resume
+POST /v0/pipes/(.+)/copy/cancel
+forward
+classic
+Ask AI

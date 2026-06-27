@@ -1,0 +1,352 @@
+Source: https://www.tinybird.com/docs/forward/monitoring/query-log
+
+How to debug queries using system.query_log · Tinybird Docs
+Sign In
+Sign Up
+How to debug queries using system.query_log
+¶
+Copy as MD
+When troubleshooting performance issues or investigating query failures, you often need execution details beyond what standard monitoring provides.  The
+system.query_log
+table is a native ClickHouse system table that records query execution at the database engine level beneath Tinybird.
+It stores detailed information for every query executed in your Workspace, including execution time, memory usage, error codes, and failure reasons. For a complete description of available columns and data types, see the ClickHouse documentation on the
+system.query_log
+table.
+When should I use system.query_log?
+Use
+system.query_log
+when you need to:
+Debug queries that are slower than expected
+Investigate why specific queries are failing
+Analyze memory consumption patterns
+Track which Endpoints consume the most resources
+Correlate query execution with Endpoint performance metrics
+For routine monitoring of Endpoint performance, use
+tinybird.pipe_stats_rt
+instead.
+Read on to learn how to safely query
+system.query_log
+and use it to solve real-world debugging challenges.
+Before you start
+¶
+The
+system.query_log
+table is a ClickHouse system table that contains extensive historical data. Before querying it, understand:
+How to
+analyze Endpoint performance
+using
+tinybird.pipe_stats_rt
+Basic SQL query patterns in Tinybird
+The
+system.query_log
+table contains all historical query data.
+Always filter by
+event_time
+to avoid slow queries or timeouts. Queries without time filters can take hundreds of seconds or timeout completely.
+Never run
+SELECT * FROM system.query_log
+without filtering by time.
+Safe query pattern with 1-hour lookback
+SELECT *
+FROM system.query_log
+WHERE event_time >= now() - INTERVAL 1 HOUR
+Start with a 1-hour window (typically 1-2 seconds to execute) and expand the time range only if needed.
+Understand query lifecycle
+¶
+Every query in Tinybird generates two entries in
+system.query_log
+:
+QueryStart
+- Logged when query execution begins
+QueryFinish
+- Logged when the query completes successfully
+If a query fails, you'll see a different type instead of
+QueryFinish
+:
+ExceptionBeforeStart
+- Query failed before execution started (usually syntax errors)
+ExceptionWhileProcessing
+- Query failed during execution (timeouts, memory exceeded, runtime errors)
+Here's how the query lifecycle flows:
+┌─────────────────┐
+│  Query Begins   │
+└────────┬────────┘
+         │
+         ▼
+    QueryStart ──────────────────┐
+         │                       │
+         │                       │
+         ▼                       ▼
+┌─────────────────┐     ┌──────────────────────┐
+│ Query Executes  │     │  Syntax/Init Error   │
+└────────┬────────┘     └──────────┬───────────┘
+         │                         │
+         │                         ▼
+         │              ExceptionBeforeStart
+         │
+    ┌────┴────┐
+    │         │
+    ▼         ▼
+ Success   Runtime Error
+    │         │
+    ▼         ▼
+QueryFinish   ExceptionWhileProcessing
+This two-entry pattern helps you distinguish between queries that are still running and those that have finished or failed.
+Common debugging scenarios
+¶
+Find slow queries
+¶
+Identify queries taking longer than expected:
+Queries taking more than 5 seconds
+SELECT
+    event_time,
+    query_id,
+    JSONExtractString(log_comment, 'pipe') as pipe_name,
+    query_duration_ms / 1000.0 as duration_seconds,
+    formatReadableSize(memory_usage) as peak_memory,
+    substring(query, 1, 100) as query_preview
+FROM system.query_log
+WHERE event_time >= now() - INTERVAL 1 HOUR
+    AND type = 'QueryFinish'
+    AND query_duration_ms > 5000
+ORDER BY query_duration_ms DESC
+LIMIT 20
+This helps you identify performance bottlenecks in your Endpoints or scheduled operations.
+Investigate query failures
+¶
+Track which queries are failing and why:
+Failed queries in the last hour
+SELECT
+    event_time,
+    query_id,
+    type,
+    JSONExtractString(log_comment, 'pipe') as pipe_name,
+    exception
+FROM system.query_log
+WHERE event_time >= now() - INTERVAL 1 HOUR
+    AND type IN ('ExceptionBeforeStart', 'ExceptionWhileProcessing')
+ORDER BY event_time DESC
+The
+exception
+column contains the error message, helping you quickly identify syntax errors, timeouts, or resource limits.
+Analyze memory consumption
+¶
+Find queries consuming the most memory:
+Memory-intensive queries
+SELECT
+    event_time,
+    query_id,
+    JSONExtractString(log_comment, 'pipe') as pipe_name,
+    formatReadableSize(memory_usage) as peak_memory,
+    query_duration_ms / 1000.0 as duration_seconds
+FROM system.query_log
+WHERE event_time >= now() - INTERVAL 1 HOUR
+    AND type = 'QueryFinish'
+ORDER BY memory_usage DESC
+LIMIT 20
+The
+memory_usage
+column shows peak memory in bytes. High memory usage may indicate opportunities for query optimization.
+Track query failure rates
+¶
+Monitor how often queries are failing over time:
+Query failures by hour
+SELECT
+    toStartOfHour(event_time) as hour,
+    type,
+    count() as failure_count
+FROM system.query_log
+WHERE event_time >= now() - INTERVAL 24 HOUR
+    AND type IN ('ExceptionBeforeStart', 'ExceptionWhileProcessing')
+GROUP BY hour, type
+ORDER BY hour DESC
+Connect query_log with Endpoint stats
+¶
+The
+query_id
+in
+system.query_log
+matches the
+request_id
+from
+tinybird.pipe_stats_rt
+. This lets you combine high-level request metrics with detailed query execution data.
+Combine endpoint stats with query details
+SELECT
+    ps.pipe_name,
+    ps.start_datetime,
+    ps.duration as request_duration,
+    formatReadableSize(ql.memory_usage) as query_memory,
+    ql.type as execution_status
+FROM tinybird.pipe_stats_rt ps
+JOIN system.query_log ql ON ps.request_id = ql.query_id
+WHERE ps.start_datetime >= now() - INTERVAL 1 HOUR
+    AND ql.type = 'QueryFinish'
+ORDER BY ps.start_datetime DESC
+LIMIT 100
+The
+event_time
+from
+system.query_log
+and
+start_datetime
+from
+pipe_stats_rt
+may differ by a few milliseconds. Always join using
+query_id
+and
+request_id
+for accurate matching.
+Extract pipe names from log_comment
+¶
+Endpoint queries include metadata in the
+log_comment
+column as JSON. Extract the pipe name to filter by specific Endpoints:
+Filter by Endpoint name
+SELECT
+    event_time,
+    query_id,
+    JSONExtractString(log_comment, 'pipe') as pipe_name,
+    JSONExtractString(log_comment, 'workspace') as workspace,
+    formatReadableSize(memory_usage) as memory_usage,
+    query_duration_ms / 1000.0 as duration_seconds
+FROM system.query_log
+WHERE event_time >= now() - INTERVAL 1 HOUR
+    AND log_comment != ''
+    AND JSONExtractString(log_comment, 'pipe') = 'your_pipe_name'
+    AND type = 'QueryFinish'
+ORDER BY event_time DESC
+The
+log_comment
+JSON structure looks like:
+{"workspace":"prod","pipe":"last_impressions__v7"}
+Find memory-intensive endpoints
+¶
+Identify which Endpoints consistently use the most memory:
+Average memory by Endpoint
+SELECT
+    JSONExtractString(log_comment, 'pipe') as pipe_name,
+    formatReadableSize(avg(memory_usage)) as avg_memory,
+    formatReadableSize(max(memory_usage)) as max_memory,
+    formatReadableSize(quantile(0.9)(memory_usage)) as p90_memory,
+    count() as query_count
+FROM system.query_log
+WHERE event_time >= now() - INTERVAL 24 HOUR
+    AND type = 'QueryFinish'
+    AND log_comment != ''
+GROUP BY pipe_name
+ORDER BY avg(memory_usage) DESC
+LIMIT 20
+Common mistakes
+¶
+Avoid these common pitfalls when working with
+system.query_log
+:
+Running queries without time filters
+¶
+Never do this:
+SELECT * FROM system.query_log
+WHERE query LIKE '%my_datasource_id%'
+This scans the entire table history and will timeout or take hundreds of seconds.
+Always include time filters:
+SELECT * FROM system.query_log
+WHERE event_time >= now() - INTERVAL 1 HOUR
+  AND query LIKE '%my_datasource_id%'
+Selecting all columns with SELECT *
+¶
+Avoid
+SELECT *
+in production queries. The
+query
+column can be very large, and many columns aren't needed for most debugging tasks.
+Instead, select only what you need:
+SELECT
+    event_time,
+    query_id,
+    type,
+    query_duration_ms,
+    memory_usage,
+    exception
+FROM system.query_log
+WHERE event_time >= now() - INTERVAL 1 HOUR
+Forgetting to filter by query type
+¶
+When analyzing completed queries, include
+type = 'QueryFinish'
+to exclude
+QueryStart
+entries and avoid counting queries twice:
+-- Without type filter: counts each query twice (Start + Finish)
+SELECT count(*) FROM system.query_log
+WHERE event_time >= now() - INTERVAL 1 HOUR
+
+-- With type filter: accurate count
+SELECT count(*) FROM system.query_log
+WHERE event_time >= now() - INTERVAL 1 HOUR
+  AND type = 'QueryFinish'
+Using overly broad time windows
+¶
+Start with 1-hour windows and expand only if needed. A 24-hour query takes significantly longer than a 1-hour query:
+1 hour
+: ~1-2 seconds
+24 hours
+: ~15-30 seconds
+7 days
+: May timeout or take minutes
+Best practices
+¶
+When querying
+system.query_log
+, follow these guidelines:
+Always filter by time
+- Use
+event_time >= now() - INTERVAL X HOUR
+in every query
+Filter by query type
+- Add
+AND type = 'QueryFinish'
+if you only need completed queries
+Limit your results
+- Use
+LIMIT
+to avoid processing unnecessary data
+Start small
+- Begin with 1-hour windows, then expand as needed
+Create monitoring Pipes
+- Turn useful debug queries into Endpoints for dashboards
+Convert your most useful
+system.query_log
+queries into Pipes and expose them as Endpoints. This makes it easy to build real-time monitoring dashboards or set up alerts.
+Next steps
+¶
+Learn how to
+analyze Endpoint performance
+using
+tinybird.pipe_stats_rt
+Monitor
+Jobs
+in your Workspace
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+How to debug queries using system.query_log
+Before you start
+Understand query lifecycle
+Common debugging scenarios
+Find slow queries
+Investigate query failures
+Analyze memory consumption
+Track query failure rates
+Connect query_log with Endpoint stats
+Extract pipe names from log_comment
+Find memory-intensive endpoints
+Common mistakes
+Running queries without time filters
+Selecting all columns with SELECT *
+Forgetting to filter by query type
+Using overly broad time windows
+Best practices
+Next steps
+forward
+Ask AI

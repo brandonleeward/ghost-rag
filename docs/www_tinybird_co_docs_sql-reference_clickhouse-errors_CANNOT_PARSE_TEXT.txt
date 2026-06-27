@@ -1,0 +1,221 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/CANNOT_PARSE_TEXT
+
+CANNOT_PARSE_TEXT ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+CANNOT_PARSE_TEXT ClickHouse error
+¶
+Copy as MD
+This error usually means ClickHouse can't parse a text value into the expected data type. Check the format of your text data and make sure it matches the expected type.
+The
+CANNOT_PARSE_TEXT
+error in ClickHouse (and Tinybird) happens when you try to convert a text value to a specific data type, but the text format doesn't match what ClickHouse expects. This commonly occurs when importing data or using type conversion functions.
+What causes this error
+¶
+You'll typically see it when:
+Converting text to numeric types with invalid formats
+Parsing date/time strings with wrong formats
+Converting text to boolean values incorrectly
+Using type conversion functions on malformed text
+Importing data with inconsistent text formats
+Example errors
+¶
+Fails: invalid number format
+SELECT toInt32('not a number')
+Fails: invalid number format
+SELECT toInt32('not a number')
+Fails: invalid integer format
+SELECT toInt64('not an integer')
+Fails: invalid integer format
+SELECT toInt64('not an integer')
+How to fix it
+¶
+Use proper data formats
+¶
+Ensure your text data matches the expected format:
+Fix: valid number format
+SELECT toInt32('123')
+Fix: valid date format
+SELECT toDate('2023-01-01')  -- Works with YYYY-MM-DD format
+Fix: valid boolean format
+SELECT toBool('true')
+Use try functions for error handling
+¶
+Use
+try
+functions to handle parsing errors gracefully:
+Fix: use try function
+SELECT toInt32OrZero(text_column) as parsed_number FROM events
+Validate data before conversion
+¶
+Check data format before conversion:
+Fix: validate before conversion
+SELECT CASE
+    WHEN text_column REGEXP '^[0-9]+$' THEN toInt32(text_column)
+    ELSE NULL
+END as parsed_number FROM events
+Common patterns and solutions
+¶
+Numeric parsing
+¶
+Common numeric parsing patterns:
+Integer parsing
+SELECT toInt32('123')  -- Valid integer
+SELECT toInt32OrZero('abc')  -- Returns 0 for invalid
+SELECT toInt32OrNull('abc')  -- Returns NULL for invalid
+Float parsing
+SELECT toFloat64('123.45')  -- Valid float
+SELECT toFloat64OrZero('abc')  -- Returns 0.0 for invalid
+SELECT toFloat64OrNull('abc')  -- Returns NULL for invalid
+Date and time parsing
+¶
+Date parsing with proper formats:
+Date parsing
+SELECT toDate('2023-01-01')  -- YYYY-MM-DD format
+SELECT toDateTime('2023-01-01 12:00:00')  -- YYYY-MM-DD HH:MM:SS
+SELECT parseDateTime('01/01/2023', '%m/%d/%Y')  -- Custom format
+Boolean parsing
+¶
+Boolean value parsing:
+Boolean parsing
+SELECT toBool('true')  -- Valid boolean (expects 'true'/'false' exactly)
+SELECT toBool('false')  -- Valid boolean
+SELECT toBool('1')  -- Valid boolean (1 = true)
+SELECT toBool('0')  -- Valid boolean (0 = false)
+UUID parsing
+¶
+UUID format parsing:
+UUID parsing
+SELECT toUUID('123e4567-e89b-12d3-a456-426614174000')  -- Valid UUID
+Advanced solutions
+¶
+Handling mixed data types
+¶
+When dealing with columns that might contain different data types:
+Mixed type handling
+SELECT
+    CASE
+        WHEN text_column REGEXP '^[0-9]+$' THEN toInt32(text_column)
+        WHEN text_column REGEXP '^[0-9]+\\.[0-9]+$' THEN toFloat64(text_column)
+        WHEN text_column IN ('true', 'false', '1', '0') THEN toBool(text_column)
+        ELSE text_column
+    END as parsed_value
+FROM events
+Working with JSON text
+¶
+Parsing text from JSON data:
+JSON text parsing
+SELECT
+    toInt32(JSONExtractString(data, 'user_id')) as user_id,
+    toDateTime(JSONExtractString(data, 'timestamp')) as event_time,
+    toBool(JSONExtractString(data, 'active')) as is_active
+FROM events
+Extracting numbers from text
+¶
+Use extract functions to parse numbers from text:
+Extract numbers from text
+SELECT extractAllInt64('abc123def456')  -- Returns [123, 456]
+SELECT extractAllFloat64('price: 12.34, tax: 5.67')  -- Returns [12.34, 5.67]
+Error handling with try functions
+¶
+Comprehensive error handling:
+Comprehensive error handling
+SELECT
+    try(toInt32(text_column)) as safe_int,
+    try(toFloat64(text_column)) as safe_float,
+    try(toDate(text_column)) as safe_date,
+    try(toBool(text_column)) as safe_bool
+FROM events
+Data validation patterns
+¶
+Numeric validation
+¶
+Validate numeric data before parsing:
+Numeric validation
+SELECT
+    CASE
+        WHEN text_column REGEXP '^[0-9]+$' THEN toInt32(text_column)
+        WHEN text_column REGEXP '^[0-9]+\\.[0-9]+$' THEN toFloat64(text_column)
+        ELSE NULL
+    END as validated_number
+FROM events
+Date validation
+¶
+Validate date formats:
+Date validation
+SELECT
+    CASE
+        WHEN text_column REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN toDate(text_column)
+        WHEN text_column REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$' THEN toDateTime(text_column)
+        ELSE NULL
+    END as validated_date
+FROM events
+Tinybird-specific notes
+¶
+In Tinybird, this error often occurs when:
+Ingesting data with inconsistent text formats
+Using Schema Hints with mismatched data types
+Processing JSON data with embedded text values
+Working with Data Sources that have mixed data types
+To debug in Tinybird:
+Check your Data Source schema for type consistency
+Use Schema Hints to enforce proper types
+Validate incoming data formats
+Use try functions in your Pipes for robust parsing
+Best practices
+¶
+Data validation
+¶
+Validate data formats before conversion
+Use try functions for robust error handling
+Implement data quality checks
+Log parsing errors for debugging
+Type conversion
+¶
+Use appropriate conversion functions
+Handle NULL values properly
+Provide fallback values for invalid data
+Test conversion functions with sample data
+Error handling
+¶
+Implement comprehensive error handling
+Use try functions for potentially problematic conversions
+Log conversion errors for analysis
+Provide meaningful error messages
+See also
+¶
+ClickHouse Type Conversion Functions
+Working with Data Sources
+Common function errors
+Updated
+4 weeks ago
+On this page
+CANNOT_PARSE_TEXT ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Use proper data formats
+Use try functions for error handling
+Validate data before conversion
+Common patterns and solutions
+Numeric parsing
+Date and time parsing
+Boolean parsing
+UUID parsing
+Advanced solutions
+Handling mixed data types
+Working with JSON text
+Extracting numbers from text
+Error handling with try functions
+Data validation patterns
+Numeric validation
+Date validation
+Tinybird-specific notes
+Best practices
+Data validation
+Type conversion
+Error handling
+See also
+forward
+classic
+Ask AI

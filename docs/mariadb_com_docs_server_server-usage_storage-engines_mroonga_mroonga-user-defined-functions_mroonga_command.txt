@@ -1,0 +1,197 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/mroonga/mroonga-user-defined-functions/mroonga_command
+
+mroonga_command | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+Mroonga Overview
+About Mroonga
+Mroonga Status Variables
+Mroonga System Variables
+Mroonga User-Defined Functions
+Creating Mroonga User-Defined Functions
+last_insert_grn_id
+mroonga_command
+mroonga_escape
+mroonga_highlight_html
+mroonga_normalize
+mroonga_snippet
+mroonga_snippet_html
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+mroonga_command
+Execute raw Groonga commands directly from MariaDB using this UDF, allowing for advanced administration and inspection of the Groonga database.
+Syntax
+Copy
+mroonga_command (command)
+Description
+mroonga_command
+is a
+user-defined function
+(UDF) included with the
+Mroonga storage engine
+. It passes a command to Groonga for execution. See
+Creating Mroonga User-Defined Functions
+for details on creating this UDF if required.
+command
+- string, required parameter specifying the command to pass that are executed by Groonga. See
+the Groonga reference
+for a list of commands.
+Returns the result of the Groonga command.
+Example
+Copy
+SELECT
+mroonga_command(
+'
+status
+'
+);
++
+--
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| mroonga_command(
+'
+status
+'
+)                                                                                                                                                                                      |
++
+--
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| {
+"
+alloc_count
+"
+:
+593
+,
+"
+starttime
+"
+:
+1512022368
+,
+"
+start_time
+"
+:
+1512022368
+,
+"
+uptime
+"
+:
+13510
+,
+"
+version
+"
+:
+"
+7.0.7
+"
+,
+"
+n_queries
+"
+:
+0
+,
+"
+cache_hit_rate
+"
+:
+0
+.
+0
+,
+"
+command_version
+"
+:
+1
+,
+"
+default_command_version
+"
+:
+1
+,
+"
+max_command_version
+"
+:
+3
+} |
+See Also
+Creating Mroonga User-Defined Functions
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+last_insert_grn_id
+Next
+mroonga_escape
+Last updated
+11 months ago
+Was this helpful?
+Syntax
+Description
+Example
+See Also
+Was this helpful?

@@ -1,0 +1,171 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/migrating-to-mariadb/migrating-to-mariadb-from-sql-server/sql-server-features-not-available-in-mariadb
+
+SQL Server Features Not Available in MariaDB | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+Differences Between MariaDB and Other DBMSs
+DDL Export Guide
+Migrating to MariaDB from MySQL
+Migrating to MariaDB from PostgreSQL
+Migrating to MariaDB from Oracle
+Migrating to MariaDB from SQL Server
+MariaDB Backups Overview for SQL Server Users
+Understanding MariaDB Architecture
+MariaDB Features Not Available in SQL Server
+SQL Server Features Not Available in MariaDB
+SQL Server Features Implemented Differently in MariaDB
+SQL Server and MariaDB Types Comparison
+Syntax Differences between MariaDB and SQL Server
+MariaDB Authorization and Permissions for SQL Server Users
+MariaDB Replication Overview for SQL Server Users
+MariaDB Transactions and Isolation Levels for SQL Server Users
+Moving Data Between SQL Server and MariaDB
+Repairing MariaDB Tables for SQL Server Users
+Setting Up MariaDB for Testing for SQL Server Users
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+SQL Server Features Not Available in MariaDB
+Features available in Microsoft SQL Server that aren't available in MariaDB.
+Migrating from SQL Server?
+Contact our Migration Experts
+When planning a migration between different DBMSs, one of the most important aspects to consider is that the new database system will probably miss some features supported by the old one. This is not relevant for all users. The most widely used features are supported by most DBMSs. However, it is important to make a list of unsupported features and check which of them are currently used by applications. In most cases it is possible to implement such features on the application side, or simply stop using them.
+This page has a list of SQL Server features that are not supported in MariaDB. The list is not exhaustive.
+Introduced in SQL Server versions older than 2016
+Full outer joins.
+GROUP BY CUBE
+syntax.
+MERGE
+statement.
+In MariaDB, indexes are always ascending. Defining them as
+ASC
+or
+DESC
+has no effect.
+For single-column indexes, the performance difference between an
+ORDER BY ... ASC
+and
+DESC
+is negligible.
+For multiple-column indexes, an index may be unusable for certain queries because
+DESC
+is not supported. In some cases, a
+generated column
+can be used to invert the order of an index (for example, the expression
+0 - price
+can be indexed to index the prices in a descending order).
+The
+WITH
+syntax is currently only supported for the
+SELECT
+statement.
+Filtered indexes (
+CREATE INDEX ... WHERE
+).
+Autonomous transactions.
+User-defined types.
+Rules.
+Triggers
+don't support the following features:
+Triggers on DDL and login.
+INSTEAD OF
+triggers.
+The
+DISABLE TRIGGER
+syntax.
+Cursors
+advanced features.
+Global cursors.
+DELETE ... CURRENT OF
+,
+UPDATE ... CURRENT OF
+statements: MariaDB cursors are read-only.
+Specifying a direction (MariaDB cursors can only advance by one row).
+Synonyms.
+Table variables.
+Queues.
+XML indexes, XML schema collection, XQuery.
+User access to system functionalities, for example:
+Running system commands (
+xp_cmdshell()
+).
+Sending emails (
+sp_send_dbmail()
+).
+Sending HTTP requests.
+External languages, external libraries (MariaDB only supports procedural SQL and PL/SQL).
+Negative permissions (the
+DENY
+command).
+Snapshot replication. See
+Provisioning a Slave
+.
+Introduced in SQL Server 2016
+Native data masking
+PolyBase (however,
+MariaDB 10.5
+supports accessing Amazon S3 via the
+S3 storage engine
+and several DBMSs via
+CONNECT
+)
+R and Python services
+ColumnStore indexes. MariaDB has a storage engine called
+ColumnStore
+, but this is a completely different feature.
+Introduced in SQL Server 2017
+Adaptive joins
+Graph SQL
+See Also
+SQL Server Features Implemented Differently in MariaDB
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+MariaDB Features Not Available in SQL Server
+Next
+SQL Server Features Implemented Differently in MariaDB
+Last updated
+11 months ago
+Was this helpful?
+Introduced in SQL Server versions older than 2016
+Introduced in SQL Server 2016
+Introduced in SQL Server 2017
+See Also
+Was this helpful?

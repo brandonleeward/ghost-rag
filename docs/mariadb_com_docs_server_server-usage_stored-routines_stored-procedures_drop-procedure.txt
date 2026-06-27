@@ -1,0 +1,161 @@
+Source: https://mariadb.com/docs/server/server-usage/stored-routines/stored-procedures/drop-procedure
+
+DROP PROCEDURE | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Stored Procedures
+Stored Procedure Overview
+CREATE PROCEDURE
+ALTER PROCEDURE
+DROP PROCEDURE
+Stored Functions
+Binary Logging of Stored Routines
+Stored Routine Limitations
+DBMS_OUTPUT
+Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+DROP PROCEDURE
+The DROP PROCEDURE statement permanently removes a stored procedure and its associated privileges from the database.
+Syntax
+Copy
+DROP PROCEDURE [IF EXISTS] sp_name
+Description
+This statement is used to drop a
+stored procedure
+. That is, the specified routine is removed from the server along with all privileges specific to the
+procedure
+. You must have the
+ALTER ROUTINE
+privilege for the routine. If the
+automatic_sp_privileges
+server system variable is set, that privilege and
+EXECUTE
+are granted automatically to the routine creator - see
+Stored Routine Privileges
+.
+The
+IF EXISTS
+clause is a MySQL/MariaDB extension. It prevents an error from occurring if the procedure or function does not exist. A
+NOTE
+is produced that can be viewed with
+SHOW WARNINGS
+.
+While this statement takes effect immediately, threads which are executing a procedure can continue execution.
+Examples
+Copy
+DROP
+PROCEDURE
+simpleproc;
+IF EXISTS:
+Copy
+DROP
+PROCEDURE
+simpleproc;
+ERROR
+1305
+(
+42000
+):
+PROCEDURE
+test
+.
+simpleproc
+does
+not
+exist
+DROP
+PROCEDURE
+IF
+EXISTS
+simpleproc;
+Query OK,
+0
+rows
+affected,
+1
+warning (
+0
+.
+00
+sec)
+SHOW WARNINGS;
++
+--
+-----+------+------------------------------------------+
+|
+Level
+| Code |
+Message
+|
++
+--
+-----+------+------------------------------------------+
+| Note  |
+1305
+|
+PROCEDURE
+test
+.
+simpleproc
+does
+not
+exist |
++
+--
+-----+------+------------------------------------------+
+See Also
+DROP FUNCTION
+Stored Procedure Overview
+CREATE PROCEDURE
+ALTER PROCEDURE
+SHOW CREATE PROCEDURE
+SHOW PROCEDURE STATUS
+Information Schema ROUTINES Table
+This page is licensed: GPLv2, originally from
+fill_help_tables.sql
+spinner
+Previous
+ALTER PROCEDURE
+Next
+Stored Functions
+Last updated
+22 days ago
+Was this helpful?
+Syntax
+Description
+Examples
+See Also
+Was this helpful?

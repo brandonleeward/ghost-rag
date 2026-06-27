@@ -1,0 +1,160 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/sphinx-storage-engine/configuring-sphinx
+
+Configuring Sphinx | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+About SphinxSE
+Installing Sphinx
+Installing and Testing SphinxSE with MariaDB
+Configuring Sphinx
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Configuring Sphinx
+A guide to configuring the Sphinx daemon (`searchd`) to index data from MariaDB, including setting up `sphinx.conf` and creating necessary users.
+Before you can get Sphinx working with the Sphinx Storage Engine on MariaDB, you need to configure it.
+The default configuration file is called
+sphinx.conf
+, usually located in
+/etc/sphinxsearch
+(Debian/Ubuntu),
+/etc/sphinx/sphinx.conf.
+(Red Hat/CentOS) or
+C:\Sphinx\sphinx.conf
+(Windows).
+If it doesn't already exist, you can use the sample configuration file,
+sphinx.conf.dist
+. There is also sample data supplied that we can use for testing. Load the sample data (which creates two tables,
+documents
+and
+tags
+in the
+test
+database), for example:
+mysql -u test < /usr/local/sphinx/etc/example.sql
+(Red Hat, CentOS)
+mysql -u test < /usr/share/doc/sphinxsearch/example-conf/example.sql
+(Debian/Ubuntu)
+The sample configuration file documents the available options. You will need to make at least a few changes. A MariaDB user with permission to access the database must be created:
+Copy
+CREATE
+USER
+'
+sphinx
+'@localhost
+IDENTIFIED
+BY
+'
+sphinx_password
+'
+;
+GRANT
+SELECT
+ON
+test.
+*
+TO
+'
+sphinx
+'
+@localhost;
+Add these details to the
+mysql
+section of the config file:
+Copy
+sql_host
+=
+localhost
+sql_user
+=
+sphinx
+sql_pass
+=
+sphinx_password
+sql_db
+=
+test
+sql_port
+=
+3306
+On Windows, the
+path
+and
+pid
+lines will need to be changed to reflect a valid path, usually as follows:
+Copy
+path = C:\Sphinx\docsidx
+...
+pid_file = C:\Sphinx\sphinx.pid
+The query in the configuration files is the query that are used for building the index. In the sample data, this is:
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Installing and Testing SphinxSE with MariaDB
+Next
+Spider
+Last updated
+11 months ago
+Was this helpful?
+Was this helpful?
+Copy
+sql_query = \
+SELECT id, group_id, UNIX_TIMESTAMP(date_added) AS date_added, title, content \
+FROM documents

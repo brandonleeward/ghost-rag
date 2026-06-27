@@ -1,0 +1,34 @@
+Source: https://www.tinybird.com/docs/live/kafka-to-apis-with-aws-confluent
+
+From Kafka to APIs in minutes · Tinybird
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+← Back to Live
+From Kafka to APIs in minutes
+Ever faced challenges building applications over Kafka or similar streaming data platforms? You're not alone. Join this live stream and learn how to build powerful experiences using fresh data with Amazon Web Services (AWS), Confluent, and Tinybird. This session will be filled with live demos with ample opportunities for Q&A.
+Learn how to unlock the power of real-time data with Amazon Web Services (AWS), Confluent, and Tinybird.
+Seamlessly merge streaming and batch data. Instantly publish data streams as APIs.
+Build real-time use cases, including in-product analytics, real-time personalization, and much more.
+Hear directly from Marc Gonzalez at Factorial on how they built delightful customer experiences using real-time data.
+Discover how Factorial’s technology stack serves as a model for implementing real-time capabilities effectively.
+Have questions?
+Join us on Slack
+Start building
+Live coding session
+When:
+November 14, 2023 at 14:00 UTC
+Duration:
+1 hour
+Who:
+Joe Karlsson
+Developer Advocate
+Marc Gonzalez
+Director of Data | Factorial
+Diego Rama
+B2B SaaS, Startup EMEA South | AWS
+Start building
+Ask AI
+Search...

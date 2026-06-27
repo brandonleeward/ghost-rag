@@ -1,0 +1,66 @@
+Source: https://mariadb.com/docs/server/server-management/starting-and-stopping-mariadb/mariadbd
+
+mariadbd | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+Starting & Stopping
+Starting and Stopping Overview
+launchd (macOS)
+systemd (Linux)
+sysVinit
+mariadbd-safe
+mariadbd-multi
+mariadbd Options
+mariadbd
+mysql.server
+Running MariaDB From the Build Directory
+Running Multiple MariaDB Server Processes
+Specifying Permissions for Schema (Data) Directories and Tables
+Switching Between Different Installed MariaDB Versions
+What to Do if MariaDB Doesn't Start
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+mariadbd
+Describes the `mariadbd` binary (formerly `mysqld`), which is the core database server executable.
+Previously, the client was called
+mysqld
+. It can still be accessed under this name, via a symlink in Linux, or an alternate binary in Windows.
+See
+mariadbd-options
+for details.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+mariadbd Options
+Next
+mysql.server
+Last updated
+6 months ago
+Was this helpful?
+Was this helpful?

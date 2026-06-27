@@ -1,0 +1,143 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/spider/spider-functions/spider_copy_tables
+
+SPIDER_COPY_TABLES | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+Spider Storage Engine Overview
+Spider Storage Engine Introduction
+Spider Differences Between SpiderForMySQL and MariaDB
+Spider Feature Matrix
+Spider Use Cases
+Spider Installation
+Spider Cluster Management
+Spider Case Studies
+Spider Benchmarks
+Information Schema SPIDER_WRAPPER_PROTOCOLS Table
+Spider Storage Engine Core Concepts
+Spider System Variables
+Spider Table Parameters
+Spider Functions
+SPIDER_BG_DIRECT_SQL
+SPIDER_COPY_TABLES
+SPIDER_DIRECT_SQL
+SPIDER_FLUSH_TABLE_MON_CACHE
+Spider FAQ
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+SPIDER_COPY_TABLES
+Learn how to use this function to copy table data from one Spider link ID to another, useful for migrating data or rebalancing shards without stopping the service.
+Syntax
+Copy
+SPIDER_COPY_TABLES(spider_table_name,
+source_link_id, destination_link_id_list [,parameters])
+Description
+A
+UDF
+installed with the
+Spider Storage Engine
+, this function copies table data from
+source_link_id
+to
+destination_link_id_list
+. The service does not need to be stopped in order to copy.
+If the Spider table is partitioned, the name must be of the format
+table_name#P#partition_name
+. The partition name can be viewed in the
+mysql.spider_tables
+table, for example:
+Copy
+SELECT
+table_name
+FROM
+mysql
+.
+spider_tables
+;
++
+--
+-----------+
+| table_name  |
++
+--
+-----------+
+| spt_a#P#pt1 |
+| spt_a#P#pt2 |
+| spt_a#P#pt3 |
++
+--
+-----------+
+Returns
+1
+if the data was copied successfully, or
+0
+if copying the data failed.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+SPIDER_BG_DIRECT_SQL
+Next
+SPIDER_DIRECT_SQL
+Last updated
+1 year ago
+Was this helpful?
+Syntax
+Description
+Was this helpful?

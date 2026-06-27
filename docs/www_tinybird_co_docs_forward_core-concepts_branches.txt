@@ -1,0 +1,165 @@
+Source: https://www.tinybird.com/docs/forward/core-concepts/branches
+
+Branches · Tinybird Docs
+Sign In
+Sign Up
+Tinybird Cloud Branches
+¶
+Copy as MD
+Tinybird Cloud Branches let you develop and test your project in ephemeral cloud environments without affecting your main workspace. They give you a full Tinybird project for development: its own ClickHouse® database, token namespace, API surface, and resource definitions.
+A branch is a copy of your Workspace resources, such as Data Sources, Pipes, Endpoints, Tokens, and Connections. When you create a branch manually with
+tb branch create
+, it copies the workspace structure, not the workspace data. When
+tb build
+auto-creates a branch with
+dev_mode=branch
+, it attaches the latest production partition by default, as configured in
+branch_data_mode
+. This gives you an isolated environment where you can change schemas, queries, and APIs safely. When you need a branch without production data, create it manually without
+--last-partition
+.
+Branches are designed for short-lived development and validation loops. Use them to test schema changes against real production values, run preview environments for pull requests, let coding agents iterate safely, or validate connector-based pipelines before deploying. You can truncate tables, redefine schemas, create endpoints, or start connector ingestion in a branch without changing production.
+When to use Cloud Branches
+¶
+Branches are the default way to develop your project, optionally testing against real production data. You should use them in the following scenarios:
+You want to test your changes with real production data.
+You work with preview environments in your CI/CD pipeline before deploying to production.
+You don't use Docker and you want to test your changes without affecting production.
+Data in branches
+¶
+When you create a branch with
+--last-partition
+, Tinybird attaches the latest production partition without copying the underlying data. The branch gets an isolated snapshot backed by immutable ClickHouse parts, so writes, deletes, and schema changes in the branch stay in the branch. Connector data is isolated too: Kafka starts stopped with its own consumer group, and S3/GCS connectors can import samples for validation.
+Branches in the development workflow
+¶
+Branches are not promoted to production. You use a branch to validate your project, then deploy the project to your main Tinybird Cloud Workspace with
+tb deploy
+, the SDK deployment flow, or CI/CD.
+If your Tinybird project is in a Git repository, you usually don't need to create branches manually. Check out a Git branch and run
+tb build
+; Tinybird automatically creates or uses a Cloud Branch with the same name as your Git branch and attaches the latest production partition by default.
+git checkout -b preview_1
+tb build
+Manually create a branch
+¶
+You can also create a branch manually with the Tinybird CLI.
+tb branch create preview_1
+If you want to use production data, use the
+--last-partition
+flag to bring the last partition of production data into the branch.
+tb branch create preview_1 --last-partition
+Start a branch
+¶
+After you create a branch manually, start a development session against it:
+tb --branch=preview_1 dev
+If the branch was created automatically with
+tb build
+, start the development session by passing the same branch name.
+tb dev
+without
+--branch
+starts Tinybird Local.
+tb --branch=preview_1 dev
+Keep this terminal running while you are working in the branch.
+tb dev
+will watch for changes in your project and rebuild it automatically.
+» Building project...
+✓ datasources/user_actions.datasource created
+✓ endpoints/user_actions_line_chart.pipe created
+✓ Rebuild completed in 0.2s
+If you stop the process with
+Ctrl+C
+, you will stop the branch.
+» Received shutdown signal, stopping...
+✓ Branch 'preview_1' session stopped
+Make changes to your project
+¶
+While
+tb --branch=preview_1 dev
+is running, you can edit files in your project and see the changes automatically applied in your branch.
+Using your editor
+¶
+Open your editor of choice and start editing your project. The branch will automatically detect the change and rebuild your project:
+» Building project...
+✓ datasources/user_actions.datasource updated
+✓ Rebuild completed in 0.3s
+Using Tinybird UI
+¶
+You can also use Tinybird UI to edit your project. Run the following command to open the Tinybird UI pointing to your branch.
+tb --branch=preview_1 open
+tb dev
+exposes your project as API, so you can edit it directly in the browser and see changes applied automatically.
+Test with connector data
+¶
+When your project uses connector data sources (Kafka, S3, or GCS), you can test them in branches using the
+--with-connections
+flag and dedicated CLI commands. This lets you validate schema changes, test pipelines, and verify data transformations against real production data without affecting your production environment.
+Enable connectors in branches
+¶
+Use
+--with-connections
+when building or starting a branch:
+tb --branch=preview_1 dev --with-connections
+Or when building directly:
+tb --branch=preview_1 build --with-connections
+This creates data linkers for your connector data sources (S3, Kafka, GCS) in the branch.
+Kafka: Pause and resume ingestion
+¶
+By default, Kafka ingestion is stopped in branches. Use
+tb datasource start
+to begin ingesting and
+tb datasource stop
+to pause.
+Each time you start ingestion, a new consumer group is created with a unique ID for the branch. This means ingestion starts from the latest offset, not from where it previously left off. Consumer group IDs are unique and don't collide with production or other branches. This is by design. Branches are ephemeral testing environments, not production replicas.
+Because each start creates a new consumer group, previous consumer groups become orphaned. Depending on your Kafka cluster's consumer group TTL (
+offsets.retention.minutes
+), these orphan groups may persist until they expire. Keep this in mind if you start and stop ingestion frequently across multiple branches.
+tb --branch=preview_1 datasource start my_kafka_datasource
+# ... observe data flowing in, test your pipelines ...
+tb --branch=preview_1 datasource stop my_kafka_datasource
+S3/GCS: Import sample data
+¶
+Instead of syncing all files from the bucket (as in production), you can import a small sample to validate your schemas and pipelines. The sample import runs as a separate job. It doesn't affect production sync state or offsets.
+You can trigger a sample import using the CLI or the API:
+Using the CLI
+tb --branch=preview_1 datasource sample my_datasource --wait
+Using the API
+curl -X POST "https://api.tinybird.co/v0/datasources/my_datasource/sample" \
+  -H "Authorization: Bearer <your-admin-token>"
+The response includes a
+job_id
+to track progress via
+GET /v0/jobs/{job_id}
+. You can import up to 10 files per request.
+This is useful for:
+Validating that your schema matches the data format.
+Testing downstream pipes and endpoints.
+Verifying data transformations.
+Connectors in branches are meant for testing and validation, not for replicating production workloads.
+Alternative: Tinybird Local
+¶
+If you don't need a shared Cloud environment or production data, you can use
+Tinybird Local
+instead. Tinybird Local runs on your machine and is useful for fast, isolated development and CI checks before you deploy to Tinybird Cloud. For the Local workflow, see
+Local development
+.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Tinybird Cloud Branches
+When to use Cloud Branches
+Data in branches
+Branches in the development workflow
+Manually create a branch
+Start a branch
+Make changes to your project
+Using your editor
+Using Tinybird UI
+Test with connector data
+Enable connectors in branches
+Kafka: Pause and resume ingestion
+S3/GCS: Import sample data
+Alternative: Tinybird Local
+forward
+Ask AI

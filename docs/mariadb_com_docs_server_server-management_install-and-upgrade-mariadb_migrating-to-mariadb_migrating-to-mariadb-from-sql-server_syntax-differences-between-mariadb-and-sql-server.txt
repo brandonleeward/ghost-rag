@@ -1,0 +1,484 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/migrating-to-mariadb/migrating-to-mariadb-from-sql-server/syntax-differences-between-mariadb-and-sql-server
+
+Syntax Differences between MariaDB and SQL Server | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+Differences Between MariaDB and Other DBMSs
+DDL Export Guide
+Migrating to MariaDB from MySQL
+Migrating to MariaDB from PostgreSQL
+Migrating to MariaDB from Oracle
+Migrating to MariaDB from SQL Server
+MariaDB Backups Overview for SQL Server Users
+Understanding MariaDB Architecture
+MariaDB Features Not Available in SQL Server
+SQL Server Features Not Available in MariaDB
+SQL Server Features Implemented Differently in MariaDB
+SQL Server and MariaDB Types Comparison
+Syntax Differences between MariaDB and SQL Server
+MariaDB Authorization and Permissions for SQL Server Users
+MariaDB Replication Overview for SQL Server Users
+MariaDB Transactions and Isolation Levels for SQL Server Users
+Moving Data Between SQL Server and MariaDB
+Repairing MariaDB Tables for SQL Server Users
+Setting Up MariaDB for Testing for SQL Server Users
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Syntax Differences between MariaDB and SQL Server
+Details syntax variations between the two systems, such as string quoting, NULL handling, and DDL statement differences, with advice on using `sql_mode='MSSQL'`.
+Migrating from SQL Server?
+Contact our Migration Experts
+This article contains a non-exhaustive list of syntax differences between MariaDB and SQL Server and is written for SQL Server users who are unfamiliar with MariaDB.
+Compatibility Features
+Some features are meant to improve syntax and semantics compatibility between MariaDB versions, between MariaDB and MySQL, and between MariaDB and other DBMSs. This section focuses on compatibility between MariaDB and SQL Server.
+sql_mode and old_mode
+SQL semantics and syntax, in MariaDB, are affected by the
+sql_mode
+variable. Its value is a comma-separated list of flags, and each of them, if specified, affects a different aspect of SQL syntax and semantics.
+A particularly important flag for users familiar with SQL Server is
+MSSQL
+.
+sql_mode can be changed locally, in which case it only affects the current session; or globally, in which case it will affect all new connections (but not the connections already established). sql_mode must be assigned a comma-separated list of flags.
+A usage example:
+Copy
+# check the current global and local sql_mode values
+SELECT @@global.sql_mode;
+SELECT @@session.sql_mode;
+# empty sql_mode for all users
+SET GLOBAL sql_mode = '';
+# add MSSQL flag to the sql_mode for the current session
+SET SESSION sql_mode = CONCAT(sql_mode, ',MSSQL');
+old_mode
+is very similar to sql_mode, but its purpose is to provide compatibility with older MariaDB versions. Its flags shouldn't affect compatibility with SQL Server (though it is theoretically possible that some of them do, as a side effect).
+Executable Comments
+MariaDB supports
+executable comments
+. These are designed to write generic queries that are only executed by MariaDB, and optionally only certain versions.
+The following examples show how to insert SQL code that will be ignored by SQL Server but executed by MariaDB, or some of its versions.
+Executed by MariaDB and MySQL (see below):
+Executed by MariaDB only:
+Executed by MariaDB starting from version 10.0.5:
+As explained in the
+Understanding MariaDB Architecture
+page, MariaDB was initially forked from MySQL. At that time, executable comments were already supported by MySQL. This is why the
+/*! ... */
+syntax is supported by both MariaDB and MySQL. But because MariaDB also supports specific syntax not supported by MySQL, it added the
+/*M! ... */
+syntax.
+Generic Syntax
+Here we discuss some differences between MariaDB and SQL Server syntax that may affect any user, as well as some hints to make queries compatible with a reasonable amount of work.
+Delimiters
+SQL Server uses two different terminators:
+The batch terminator is the
+go
+command. It tells Microsoft clients to send the text we typed to SQL Server.
+The query terminator is a semicolon (
+;
+) and it tells SQL Server where a query ends.
+It is rarely necessary to use
+;
+in SQL Server. It is required for certain common table expressions, for example.
+But the same doesn't apply to MariaDB.
+Normally, with MariaDB
+,
+you only use
+;
+.
+However, MariaDB also has some situations where you want to use a
+;
+but you don't want the
+mariadb
+command-line client to send the query yet. This can be done in any situation, but it is particularly useful when creating
+stored routines
+or using
+BEGIN NOT ATOMIC
+.
+The reason is better explained with an example:
+If we enter this procedure in this way in the
+mariadb
+client, as soon as we type the first
+;
+(after the first
+SELECT
+) and press enter, the statement will be sent. MariaDB will try to parse it and will return an error.
+To avoid this,
+mariadb
+implements the
+DELIMITER
+statement. This client statement is never sent to MariaDB. Instead, the client uses it to find out when the typed query should be sent. Let's correct the above example:
+Names
+In MariaDB, most
+names
+have a maximum length of 64 characters. When migrating an SQL Server database to MariaDB, check if some names exceed this limit (SQL Server maximum length is 128).
+By default, MariaDB names are case-sensitive if the operating system has case-sensitive file names (Linux), and case-insensitive if the operating system is case-insensitive (Windows). SQL Server is case-insensitive by default on all operating systems.
+When migrating a SQL Server database to MariaDB on Linux, to avoid problems, you may want to set the
+lower_case_table_names
+system variable to 1, making table names, database names, and aliases case-insensitive.
+Names can be quoted inside backtick characters (```). This character can be used in names, in which case it should be doubled. By default, this is the only way to quote names.
+To also enable the use of double quotes (
+"
+), modify sql_mode by adding the
+ANSI_QUOTES
+flag. This is the equivalent of setting
+QUOTED_IDENTIFIER
+ON in SQL Server.
+To also enable the use of SQL Server style quotes (
+[
+and
+]
+), modify sql_mode by adding the
+MSSQL
+flag.
+The case-sensitivity of stored procedures and functions is never a problem, as they are case-insensitive in SQL Server.
+Quoting Strings
+In SQL Server, by default, strings can only be quoted with single-quotes (
+'
+), and to use a double quote in a string, it should be doubled (
+''
+). This also works by default in MariaDB.
+SQL Server also allows to use of double quotes (
+"
+) to quote strings. This works by default in MariaDB, but as mentioned before, it won't work if sql_mode contains the
+ANSI_QUOTES
+flag.
+NULL
+The default semantics of
+NULL
+in SQL Server and MariaDB are the same, by default.
+However, SQL Server allows one to change it globally with
+SET ANSI_NULLS OFF
+, or at the database level with
+ALTER DATABASE
+.
+There is no way to achieve exactly the same result in MariaDB. To perform NULL-safe comparisons in MariaDB, one should replace the
+=
+operator with the
+<=>
+operator.
+Also, note that MariaDB doesn't support the
+UNKNOWN
+pseudo-value. An expression like
+NULL OR 0
+returns
+NULL
+in MariaDB.
+LIKE
+In MariaDB,
+LIKE
+expressions only have two characters with special meanings:
+%
+and
+_
+. These two characters have the same meanings they have in SQL Server.
+The additional characters recognized by SQL Server (
+[
+,
+]
+and
+^
+) are part of regular expressions. MariaDB supports the
+REGEXP
+operator that supports the full regular expression syntax.
+Data Definition Language
+Here we discuss some DDL differences that database administrators will want to be aware of.
+While this section is meant to highlight the most noticeable DDL differences between MariaDB and SQL Server, there are many others, both in the syntax and in the semantics. See the
+ALTER
+statement documentation.
+Altering Tables Online
+Altering tables online can be a problem, especially when the tables are big and we don't want to cause a disruption.
+MariaDB offers the following solutions to help:
+The
+ALTER TABLE ... ALGORITHM
+clause allows one to specify which algorithm should be used to run a certain operation. For example,
+INPLACE
+tells MariaDB not to create a table copy (perhaps because we don't have enough disk space), and
+INSTANT
+tells MariaDB to execute the operation instantaneously. Not all algorithms are supported for certain operations. If the algorithm we've chosen cannot be used, the
+ALTER TABLE
+statement will fail with an error.
+The
+ALTER TABLE ... LOCK
+clause allows one to specify which lock type should be used. For example,
+NONE
+tells MariaDB to avoid any lock on the table and
+SHARED
+only allows one to acquire a share lock. If the operation requires a lock that is more strict than the one, we are requesting, the
+ALTER TABLE
+statement will fail with an error. Sometimes this happens because the
+LOCK
+level we want is not available for the specified
+ALGORITHM
+.
+To find out which operations require a table copy and which lock levels are necessary, see
+InnoDB Online DDL Overview
+.
+An
+ALTER TABLE
+can be queued because a long-running statement (even a
+SELECT
+) requires a
+metadata lock
+. Since this may cause trouble, sometimes we want the operation to simply fail if the wait is too long. This can be achieved with the
+WAIT and NOWAIT
+clauses, whose syntax is a bit different from SQL Server.
+SQL Server
+WITH ONLINE = ON
+is equivalent to MariaDB
+LOCK = NONE
+. However, note that
+most ALTER TABLE statements
+support
+ALGORITHM = INSTANT
+, which is non-blocking and much faster (almost instantaneous, as the syntax suggests).
+IF EXISTS, IF NOT EXISTS, OR REPLACE
+Most DDL statements, including
+ALTER TABLE
+, support the following syntax:
+DROP IF EXISTS
+: A warning (not an error) is produced if the object does not exist.
+OR REPLACE
+: If the object exists, it is dropped and recreated; otherwise, it is created. This operation is atomic, so at no point in time does the object not exist.
+CREATE IF NOT EXISTS
+: If the object already exists, a warning (not an error) is produced. The object will not be replaced.
+These statements are functionally similar (but less verbose) than SQL Server snippets similar to the following:
+Altering Columns
+With SQL Server, the only syntax to alter a table column is
+ALTER TABLE ... ALTER COLUMN
+. MariaDB provides more
+ALTER TABLE
+commands to obtain the same result:
+CHANGE COLUMN
+allows one to perform any change by specifying a new column definition, including the name.
+MODIFY COLUMN
+allows any change, except renaming the column. This is a slightly simpler syntax that we can use when we don't want to change a column name.
+ALTER COLUMN
+allows one to change or drop the
+DEFAULT
+value.
+RENAME COLUMN
+allows one to only change the column name.
+Using a more specific syntax is less error-prone. For example, by using
+ALTER TABLE ... ALTER COLUMN
+,we will not accidentally change the data type.
+The word
+COLUMN
+is usually optional, except in the case of
+RENAME COLUMN
+.
+SHOW Statements
+MariaDB supports
+SHOW
+statements to quickly list all objects of a certain type (tables, views, triggers...). Most
+SHOW
+statements support a
+LIKE
+clause to filter data. For example, to list the tables in the current database whose name begins with 'wp_':
+This is the equivalent of this query, which would work on both MariaDB and SQL Server:
+SHOW CREATE Statements
+In general, for each
+CREATE
+statement, MariaDB also supports a
+SHOW CREATE
+statement. For example, there is a
+SHOW CREATE TABLE
+that returns the
+CREATE TABLE
+statement that can be used to recreate a table.
+Though SQL Server has no way to show the DDL statement to recreate an object,
+SHOW CREATE
+statements are functionally similar to
+sp_helptext()
+.
+Database Comments
+MariaDB does not support extended properties. Instead, it supports a
+COMMENT
+clause for most
+CREATE
+and
+ALTER
+statements.
+For example, to create and then change a table comment:
+Comments can be seen with
+SHOW CREATE
+statements or by querying
+information_schema
+tables. For example:
+Error Handling
+MariaDB
+SHOW ERRORS
+and
+SHOW WARNINGS
+statements can be used to show errors, or warnings and errors. This is convenient for clients, but stored procedures cannot work with the output of these commands.
+Instead, inside stored procedures, you can:
+Use the
+GET DIAGNOSTICS
+command to assign error properties to variables. This is the equivalent of using SQL Server functions like
+ERROR_NUMBER()
+or
+ERROR_STATE()
+.
+Add a
+DECLARE HANDLER
+block to handle all errors, a class of errors, or a specific error. This is the equivalent of SQL Server
+TRY ... CATCH
+.
+An error or warning can be generated on purpose using
+SIGNAL
+. Inside a
+DECLARE HANDLER
+block,
+RESIGNAL
+can be used to issue the error again and interrupt the execution of the block. These are the equivalents of SQL Server
+RAISERROR()
+.
+Administration
+Administration and maintenance commands in MariaDB use a different syntax from SQL Server.
+OPTIMIZE TABLE
+rebuilds table data and indexes. It can be considered as the MariaDB equivalent of SQL Server's
+ALTER INDEX REBUILD
+. See
+Defragmenting InnoDB Tablespaces
+for more information. This statement is always locked. It supports
+WAIT and NOWAIT
+syntax,
+MariaDB has an
+ANALYZE TABLE
+command, which is equivalent to
+UPDATE STATISTICS
+.
+BULK INSERT
+MariaDB has no
+BULK INSERT
+statement. Instead, it supports:
+LOAD DATA INFILE
+to load data from files in CSV or similar formats;
+LOAD XML INFILE
+to load data from XML files.
+See also
+How to Quickly Insert Data Into MariaDB
+.
+See Also
+SQL Server and MariaDB Types Comparison
+MariaDB Transactions and Isolation Levels for SQL Server Users
+SQL_MODE=MSSQL
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+SQL Server and MariaDB Types Comparison
+Next
+MariaDB Authorization and Permissions for SQL Server Users
+Last updated
+7 months ago
+Was this helpful?
+Compatibility Features
+sql_mode and old_mode
+Executable Comments
+Generic Syntax
+Delimiters
+Names
+Quoting Strings
+NULL
+LIKE
+Data Definition Language
+Altering Tables Online
+IF EXISTS, IF NOT EXISTS, OR REPLACE
+Altering Columns
+SHOW Statements
+SHOW CREATE Statements
+Database Comments
+Error Handling
+Administration
+BULK INSERT
+See Also
+Was this helpful?
+Copy
+SELECT * FROM tab /*! FORCE INDEX (idx_a) */ WHERE a = 1 OR b = 2;
+Copy
+SELECT * /*M! , @in_transaction */ FROM tab;
+Copy
+DELETE FROM user WHERE id = 100 /*!M100005 RETURNING email */;
+Copy
+CREATE PROCEDURE p()
+BEGIN
+SELECT * FROM t1;
+SELECT * FROM t2;
+END;
+Copy
+DELIMITER ||
+CREATE PROCEDURE p()
+BEGIN
+SELECT * FROM t1;
+SELECT * FROM t2;
+END;
+DELIMITER ;
+Copy
+IF NOT EXISTS (
+SELECT name
+FROM sysobjects
+WHERE name = 'my_table' AND xtype = 'U'
+)
+CREATE TABLE my_table (
+...
+)
+go
+Copy
+SHOW TABLES LIKE 'wp\_%';
+Copy
+SELECT TABLE_SCHEMA, TABLE_NAME
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_NAME LIKE 'wp\_';
+Copy
+CREATE TABLE counter (
+c INT UNSIGNED AUTO_INCREMENT PRIMARY KEY
+)
+COMMENT 'Monotonic counter'
+;
+ALTER TABLE counter COMMENT
+'Counter. It can contain many values, we only care about the max';
+Copy
+SELECT TABLE_COMMENT
+FROM information_schema.TABLES
+WHERE TABLE_SCHEMA = 'test' AND TABLE_NAME = 'counter';
++-----------------------------------------------------------------+
+| TABLE_COMMENT                                                   |
++-----------------------------------------------------------------+
+| Counter. It can contain many values, we only care about the max |
++-----------------------------------------------------------------+

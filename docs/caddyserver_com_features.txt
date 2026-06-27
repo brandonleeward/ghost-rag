@@ -1,0 +1,745 @@
+Source: https://caddyserver.com/features
+
+All features of the Caddy Web Server
+A
+Project
+Store
+Forum
+GitHub
+Theme:
+System
+Download
+Sponsor
+All features
+You might want to sit down for this.
+Features in
+this color
+are provided by optional plugins.
+Overview
+Caddy is essentially a configuration management system that can run various apps like an HTTP server, TLS certificate manager, PKI facilities, and more. It can be extended with plugins known as config modules.
+Caddy sports a flexible and powerful HTTP reverse proxy, on-line configuration API, and a robust, production-ready static file server, and serves all sites over HTTPS by default with automagic TLS certificates.
+Overall program technical specifications
+Language
+The language choice is crucial for a web server. Language impacts development speed and ease, performance, testing, deployment complexity, ecosystem reliability, dependencies, tooling, error handling and reliability, and much, much more. Go offers strong advantages in all these areas, allowing for rapid development, robust production performance, and high scalability.
+Go
+Memory safety guarantees
+Most servers (NGINX, Apache, HAProxy, etc.) and their dependencies are written in C, which are vulnerable to catastrophic memory safety bugs (such as buffer overflows) like Heartbleed. Go programs like Caddy are impervious to a whole class of security vulnerabilities.
+Strong
+Build artifacts
+Caddy compiles directly to native CPU instructions. There is no interpreter required; and many instructions are architecture-optimized. Static binaries are also
+more secure
+because there is no dynamic linking.
+Platform-native static binary
+Runtime dependencies
+Caddy is statically compiled. Dynamically-linked applications can easily break in production and
+may be less secure
+as shared executable resources are loaded from various places around the system. Generally, Caddy binaries do not necessarily require external libraries — not even libc.
+None
+Compile time
+On consumer hardware, standard Caddy builds compile in just a few seconds. This is crucial for rapid iteration, plugin development, and low-cost deployments. Other servers written in C/C++ can take several minutes.
+~30 seconds cold build,
+~2 seconds hot
+Deployment environments
+Caddy can go practically anywhere and be deployed a variety of ways. In general, upgrading is as simple as replacing the binary.
+Command line interface
+System service
+Containers
+Kubernetes
+Embedded
+Supply chain and releases
+Go modules verify the integrity of our dependencies and we cryptographically sign our release artifacts so you know what you can trust.
+Cryptographically verified
+Operating systems
+Caddy runs on every major platform for which Go compiles.
+Linux
+Windows
+macOS
+FreeBSD
+OpenBSD
+NetBSD
+Android
+Microarchitectures
+Run Caddy with native code on numerous CPU platforms.
+x86 (i386, i686)
+x86-64 (AMD64)
+ARM
+ARM 64 (AArch64)
+MIPS
+MIPS64[LE]
+PPC64[LE]
+RISCV64
+S390X
+Apple Silicon (Apple ARM; M1, M2, etc.)
+Regular expression engine
+Caddy's regular expression language is
+based on the Thompson NFA and has numerous performance improvements over PCRE
+used by other web servers. It guarantees the runtime cost increases linearly instead of exponentially. This is ideal when evaluating untrusted input.
+RE2 Syntax
+RE2
+Concurrency model
+Go's runtime optimizes scheduled CPU time in smarter ways than the operating system can using lightweight user-space threads called goroutines. Caddy utilizes all CPU cores and easily handles hundreds of thousands of requests per second.
+Goroutines (epoll + kqueue)
+Plugin model
+Caddy can be extended by compile-time plugins, which compile as native code, in a way that cannot be broken during deployments or by system upgrades. With no IPC or RPC calls, Caddy extensions perform equally well with native code.
+Compile-time static
+High-level capabilities
+Configuration changes
+With zero-downtime graceful reloads, Caddy's configuration can be changed while it is running. It's programmable/scriptable for powerful automation.
+RESTful HTTP API
+Config files
+Secure remote access
+App modules
+Top-level configuration structures are called app modules, or Caddy apps. They provide the bulk of Caddy's functionality. Anyone can write app modules, and Caddy comes with several standard apps built-in.
+HTTP
+TLS
+PKI
+Events
+Raw TCP & UDP
+SSH
+PHP
+Dynamic DNS
+Security
+Process supervision
+Profiling
+Logs
+All Caddy modules use Caddy's centralized logging facilities. Caddy's logging can be configured as to format, verbosity, output, and more.
+Leveled
+Structured
+High efficiency, zero-allocation
+Extensible
+Delete, filter, redact, and censor fields
+IP masking
+Hash values
+Regex replacement
+Storage
+Assets and state, including certificates and OCSP staples, are stored in configurable storage backends. In fact, multiple instances of Caddy configured with the same storage are considered part of a cluster and can coordinate automatically.
+File system
+Embedded (in-memory)
+Postgres
+Redis
+Vault
+Consul
+Command line interface
+Caddy's CLI is not only useful—it's
+helpful
+. While most server CLIs merely run the process and reload config, Caddy's CLI goes the extra lightyear to help make administering your modern web server a breeze.
+Plugins can register their own subcommands to extend Caddy's CLI.
+Command help
+If you misspell a command or flag, miss an argument, or don't know the subcommand, help text is automatically printed. You can also access overall command help or subcommand help with
+caddy help
+or
+-h
+.
+Built-in, automatic (
+man
+pages can also be generated)
+Admin API wrappers
+Several subcommands use administration API endpoints for use with the CLI to help you perform common tasks like loading config from files or stopping the server.
+Adapt config to JSON
+Start the server, optionally with config
+Gracefully reload configuration
+Stop the server
+Binary utilities
+Since custom builds of Caddy are so common, several commands exist to help you manage and get detailed information about your build.
+Detailed build metadata
+List installed config modules
+List dependencies
+Add and remove plugin packages
+Print the version
+Upgrade the Caddy binary
+Configuration utilities
+If you choose to use configuration files, Caddy's CLI helps you manage them.
+Format Caddyfile
+Validate configuration
+List dependencies
+Add and remove plugin packages
+Print the version
+Module utilities
+Modules may register their own subcommands to provide common functionality that can be utilized without a config document.
+Static file server
+HTTP reverse proxy
+Static HTTP responses (templateable)
+Storage import/export (backup/restore)
+Hash password for use with HTTP basic auth
+Export file browse template
+Integration utilities
+Several subcommands can help you integrate Caddy into your shell environment.
+Generate shell completion script
+Print the environment
+Generate
+man
+pages
+Install Caddy-managed root CA into trust stores
+Remove Caddy-managed root CA from trust stores
+System signals
+Caddy has support for common operating system signals/interrupts, with subtle differences in behavior for each one.
+Signal documentation
+INT (graceful stop)
+USR1 (reload configuration, if loaded via config file)
+QUIT
+TERM
+Exit codes
+Whether Caddy exits successfully or with an error, the
+exit code
+can give a hint to your process supervisor or script how to handle that.
+Configuration
+We've designed Caddy so that its configuration not only provides access to features, but
+it IS a feature
+in and of itself.
+No more quibbling over which config file format is the best: use whatever you want! Caddy's
+config adapters
+allow you to use whatever config format you prefer.
+Native config format
+Caddy's native configuration format is ubiquitous: it has tooling in nearly every operating system, platform, programming language, and API ecosystem. Almost all other formats can be translated down into JSON, which balances human readability and programmability. You'll find it a powerful ally of your web server.
+JSON
+Config adapters
+You can always write your config in another format and with config adapters, Caddy will implicitly translate it into JSON for you so you can work with what you like.
+Caddyfile
+JSON 5
+JSON-C
+NGINX Conf
+YAML
+CUE
+TOML
+HCL
+Dhall
+MySQL
+Human-friendly config
+The Caddyfile is most users' favorite way to write their web server config by hand because its syntax is forgiving while also being designed with a structure that makes it easy to read and write. It is translated to JSON automatically.
+Caddyfile
+Export
+Caddy's administration API allows you to have runtime access to the current configuration in JSON format with a simple GET request.
+Config API
+Caddy receives its configuration through an API endpoint, which can accept JSON or any other format it has a config adapter for.
+Config files
+If you prefer normal shell commands for managing configuration, Caddy's CLI wraps the API endpoints for you.
+Automatic HTTPS
+Our flagship feature, powered by
+CertMagic
+. Caddy is the first and only major server that enables HTTPS by default, and automatically procures and renews certificates for all your sites.
+Fully-native, integrated auto-HTTPS is far superior to any solution that requires external tooling or cron jobs. Caddy's certificate maintenance is the best in the industry because it is more robust, reliable, and scalable than any other solution. Caddy simplifies your infrastructure instead of complexifying it.
+Sure, you can try deploying 100,000 sites with Certbot and a cron job—but if that doesn't fall over by itself, the web server will. Only Caddy is designed to massively scale TLS certificates both horizontally and vertically.
+Never manually generate a CSR again. Never click a link in an email to download a certificate. Never (mis)configure your web server to use them. Never miss reminders to renew your certificates, one-by-one, every few months before they expire. You won't even have to think about certificates or TLS.
+It's truly automagic.
+Compliance
+Caddy's TLS
+defaults
+are secure without any additional configuration, and passes compliance tests across various industries.
+PCI DSS compliant
+NIST compliant
+HIPAA compliant
+Industry best practices
+On-Demand TLS
+Serving domains that aren't yours? Or have lots of them? No problem! With just a few lines of config, On-Demand TLS gets certificates dynamically during TLS handshakes, scaling your deployments to tens of thousands of certs. This functionality is exclusive to Caddy.
+Certificate issuers
+Get certificates from any issuing authority in a way compatible with them. Certificate issuers take a CSR and return a certificate resource. Most sites will simply use ACME to get certificates. But Caddy can also issue its own self-signed certificates for internal use, testing, or development. Caddy's issuer sources are pluggable, so Caddy can automate certificates from any issuer modules.
+ACME
+Internal (self-signed)
+Microsoft Active Directory Certificate Services
+Certificate managers
+Unlike issuers, which take a CSR and return a certificate that Caddy has to manage, certificate managers are modules that can return always-valid certificates on-demand; that is, they are managing the certificates for us. Caddy can get interface with HTTP endpoints or Tailscale to get certificates in this manner, with other ways available through plugins.
+HTTP
+Tailscale
+Cluster coordination
+Across all Caddy instances configured with the same storage, Caddy automatically coordinates and shares resources across the cluster. This includes certificate operations and the certificates themselves, OCSP staples, and session ticket keys. This results in reduced latency for your clients and higher scalability.
+Obtaining & renewing certificates
+Loading existing certificates
+OCSP staples
+Session ticket keys (STEKs)
+Redirect HTTP to HTTPS
+By default, HTTP requests will be redirected to HTTPS.
+Automatic redirects
+OCSP
+OCSP indicates when certificates are revoked. Servers should staple OCSP responses to certificates to provide clients with better security and privacy. Caddy is the first and only server to do this automatically and by default. It also caches responses to weather OCSP responder outages, and shares them across its cluster. This can all be disabled if needed.
+Automatic OCSP stapling with caching
+Must-Staple
+Caddy can obtain certificates that force OCSP stapling if the CA supports it. This may grant a higher degree of security in the case of revocation.
+Revocation handling
+Revoked certificates automatically get replaced. Because Caddy staples and refreshes OCSP responses, it can detect if your certificate has been revoked, and if so, it will replace it with a fresh certificate.
+Session ticket hardening
+TLS connections are pointless if an attacker steals the key to encrypt session tickets. Caddy has been
+academically cited
+as the only server to rotate these keys regularly to limit attack windows.
+Automatic STEK rotation
+Key types
+You can customize the type of key used for your certificates.
+Ed25519
+ECDSA P256
+ECDSA P384
+RSA 2048
+RSA 4096
+Certificate lifetimes
+Most ACME clients assume 90-day certificates, or don't expect certificates shorter than 7 days. Caddy can successfully manage certificates with lifetimes on the order of hours and minutes.
+Instead of hard-coding a certain age before renewing, Caddy computes the age relative to the lifespan of each certificate, called a Renewal Window Ratio. By default, Caddy renews certificates after 2/3 of their usable lifetime. This ratio works for most validity periods, but can be adjusted.
+Any lifetime
+Intelligent error handling
+If Caddy can't get a certificate, errors are logged and Caddy will backoff exponentially and retry as long as needed until it succeeds (typically up to 30 days but could be longer). Caddy makes every reasonable effort to keep your certificate renewed.
+Exponential backoff
+Built-in throttling
+Caddy conforms to best practices and doesn't blast CAs with requests for certificates; instead, each order is carefully timed to avoid overwhelming CA servers.
+ACME
+Caddy's ACME client is best-in-class, with higher reliability and more production experience than any other integrated ACME client available today. Caddy has been using ACME since before the public availability of Let's Encrypt, and Caddy works with any ACME-compatible CA.
+Compatibility
+Some ACME clients are only tested with Let's Encrypt. Caddy is guaranteed compatible with all ACME-capable CAs.
+All RFC 8555-compliant certificate authorities, such as:
+Let's Encrypt
+ZeroSSL
+Google Trust Services
+BuyPass
+DigiCert
+GlobalSign
+SSL.com
+Smallstep
+Test endpoints
+By default, Caddy will fall back to a CA's test or staging endpoint (if there is one) after a failed attempt at getting a certificate to avoid hitting CA-enforced production rate limits. This could also be an ACME server you set up solely for the purpose of validating DNS configurations.
+Let's Encrypt (others configurable)
+External account binding
+Optionally configure External Account Binding (EAB) to enable Caddy to work with CAs that require you to have a separate account with them.
+Challenge types
+Caddy supports all major ACME challenge types for Web PKI and can also be extended to support others.
+HTTP-01
+TLS-ALPN-01
+DNS-01
+Alternate challenge ports
+While certain ACME challenges must use the standardized ports 80 and 443, Caddy supports listening for these on alternate ports if you are forwarding them through a router.
+HTTP (default 80)
+TLS-ALPN (default 443)
+Smart challenge selection
+Caddy learns what challenge types are most likely to succeed and tries those first. For example, if port 80 is blocked, it will learn to prefer the TLS-ALPN challenge which does not use port 80.
+DNS challenge integrations
+The DNS challenge is the only one that does not require the CA being able to access your server. Solve the DNS challenge with integrations for dozens of DNS providers via
+libdns
+.
+This list is incomplete;
+see the full list of DNS providers
+.
+ACME-DNS
+AliDNS
+Cloudflare
+DigitalOcean
+DNSPod
+DuckDNS
+DynDNS
+EasyDNS
+Gandi
+GoDaddy
+Google Cloud DNS
+Hetzner
+Linode
+Name.com
+Namecheap
+Namesilo
+Netlify
+OVH
+Porkbun
+PowerDNS
+RFC 2136
+Route 53
+Scaleway
+Vercel
+Vultr
+See all...
+Trusted CA certificates
+Optionally configure root certificates you trust when interacting with your CA of choice; this is helpful for internal PKI where trust is established without public CAs.
+Preferred chains
+When the CA offers multiple certificate chains, Caddy gives you the ability to customize which one to download and use.
+Smallest
+CommonName of root
+CommonName of any
+Renewal scheduling
+Caddy chooses conservative timeframes to renew certificates, and also takes guidance from the ACME CA if it provides ACME Renewal Information (ARI).
+Internal
+ARI
+HTTP server
+Caddy's HTTP server is one-of-a-kind: powerful, extensible, efficient, and modern.
+HTTP versions
+Caddy's HTTP server supports all major versions of HTTP and enables them by default (except H2C which is insecure, but available). You can customize exactly which versions you want to serve.
+HTTP/1.1
+HTTP/2
+HTTP/2 over cleartext (H2C)
+HTTP/3
+HTTPS
+Caddy's flagship feature is enabling HTTPS automatically and by default. You can control how it works or disable aspects: HTTP redirects, certificate management, certain hostnames, etc.
+Automatic
+Listen interfaces
+Each HTTP server can bind to one or more sockets and network interfaces. For ports, you can specify specific host interface or all interfaces with just a port. All varieties of unix sockets are also supported.
+TCP
+UDP
+Unix sockets
+Listener wrappers
+Listeners can be wrapped by modules that operate at the connection-accept level.
+Redirect HTTP on HTTPS port
+PROXY protocol
+Tailscale
+Timeouts
+Setting timeouts is an important defensive measure for production environments, but must be tuned carefully to accommodate legitimate slow clients with large downloads or uploads.
+Read timeout
+Read HTTP header timeout
+Write timeout
+Idle timeout
+TCP keepalive interval
+Full duplex communication
+Concurrent reading and writing of HTTP/1 is not supported by all clients, but can be enabled for certain clients and applications that require it.
+Configurable for HTTP/1
+Default for HTTP/2
+Error handling
+Caddy gives you full control over handling errors to give you clients the best/desired experience.
+Custom error routes
+TLS termination
+Terminate TLS (formerly "SSL") with sensible defaults that you can customize to give you fine-grained control over TLS handshakes. You can assign policies to clients based on various factors such as ServerName (SNI) or remote IP.
+TLS 1.2
+TLS 1.3
+Client authentication (TLS mutual auth; mTLS)
+Client auth modes: request, require, verify if given, require and verify
+Cipher suites
+Curves
+ALPN
+Limit protocol versions
+Default SNI
+Fallback SNI
+Cross-site security
+Caddy often serves multiple sites on the same socket, so Caddy automatically enables protections to keep your sites safe if any of them have TLS client auth enabled.
+Verification that TLS ServerName and HTTP Host header match
+Access logs
+Enable zero-allocation, structured access logs for the ultimate understanding of client requests and responses. Customize using Caddy's built-in logging configuration or the use of third-party modules.
+More useful than Common Log Format (CLF)
+Request headers (except sensitive fields)
+Response headers
+Remote IP
+Latency
+Observability
+Your web server can be monitored using standards-compatible metrics.
+Prometheus metrics, open telemetry
+Request handling
+The HTTP server handles requests using custom routes consisting of specific handlers in the order you define. A separate error route can be defined for custom error handling. You have a high degree of flexibility with HTTP handling. See below for available HTTP handler modules.
+Composable routes (and separate error handling routes)
+Request filters
+Apply handlers to only certain requests using matchers, which classify requests based on various properties. Matchers are also used for filtering. They are extensible and pluggable, so there's no limit to how specific and custom your routes can be! Some matchers support regular expressions. All are quite fast. And matchers can be combined in sets so they can be joined with AND, OR, and NOT logic.
+Host
+Path
+Method
+Headers
+Protocol
+Remote IP
+Arbitrary CEL expression
+File (existence, size, modify date)
+HTTP route variable
+Logical NOT
+Geolocation
+Remote host
+HTTP handlers
+Handlers are modules that can be composed together to handle incoming requests precisely the way you want. Handler modules are, like the rest of Caddy, extensible and pluggable. It is not really feasible for us to list all the handlers here.
+In practice, handlers are paired with matchers which filter or classify requests based on various properties such as their path, headers, query string, method, and more. This allows you to selectively apply any and all of these handlers to certain requests.
+ACME server
+Right out of the box, Caddy ships with a production-ready ACME server, perfect for your internal PKI. Automate mTLS certificates inside your infrastructure with ease. Powered by
+Smallstep
+libraries.
+Authelia
+Secure routes with authentication using Authelia.
+Authentication
+Authenticate users with an extensible authentication module. Extended by auth providers, this handler returns an error if the user cannot be authenticated by any configured providers. HTTP basic auth is included standard, and unlike other servers, passwords are hashed when setting up basic auth (since it's essentially a password database), enhancing security.
+HTTP Basic authentication
+JWT
+Discord
+Forms
+SAML
+Advanced auth
+With a full suite of authentication and authorization features, the caddy-security module provides a variety of robust auth solutions.
+Form-based
+Local
+Basic
+LDAP
+OpenID Connect
+OAuth 2
+SAML
+Cache
+Easily enable caching to serve more clients and increase performance. This cache module is compliant with RFC 7234 and supports tag-based cache purge, distributed and local storage, key generation tweaking, and more. Multiple backends are supported!
+Badger
+Etcd
+NutsDB
+Olric
+Redis
+Encode
+Compress, encode, or otherwise transform HTTP responses on-the-fly with pluggable encoding modules. Compressing responses is as easy as a single line of configuration, and encodings won't be applied to responses that are already in a compressed format or are too small to be worthwhile.
+Gzip
+Zstandard (zstd)
+Brotli
+File server
+A powerful, flexible, and efficient static file server that is described in detail below.
+Go package vanity paths
+A simple handler that implements vanity import paths for Go packages.
+gRPC-Web bridging
+Bridge/convert gRPC-Web requests to gRPC for your backend app.
+Header manipulation
+Modify HTTP request and response headers. Adding, setting, deleting, and replacing substrings in header fields is fast, but regular expressions are also supported for advanced use. Response header manipulations can be deferred until the very end when the response starts to be written, and can even be made conditional on response status code or header values.
+Add
+Set (overwrite)
+Delete
+Substring replace
+Image filtering
+Perform adjustments on images on-the-fly.
+Crop
+Fit
+Flip
+Resize
+Rotate
+Sharpen
+Map
+Assign variable/placeholder values based on input values; similar to a lookup table.
+Mercure
+Make your Caddy instance a Mercure hub: an open, easy, fast, reliable and battery-efficient solution for real-time communications.
+Metrics
+Expose a /metrics endpoint for use with Prometheus-compatible systems and other monitoring tools.
+HTTP/2 server push
+Proactively push resources to clients before they request it when HTTP/2 is used. (May be deprecated by browsers, but Caddy still has a valid implementation that is useful in certain applications.)
+Rate limiting
+Advanced, enterprise-grade rate limiter implemented using a ring buffer and sliding window algorithm that scales massively based on zone keys. Configure a cluster of Caddy instances with the same storage to distribute rate limiting across your fleet. No memory bound required like with other enterprise servers.
+Local or distributed
+Multiple zones
+Buffer pooling
+Only 1 goroutine
+Configurable O(Kn) memory management
+State persisted through reloads
+Sets Retry-After header
+Optional jitter
+Highly programmable
+Request body controls
+Restrict the size of the request body by rejecting requests that are too large.
+Reverse proxy
+Caddy has a world-class reverse proxy, described in detail in a section below.
+Rewrite requests
+Make internal changes to requests before continuing to process them. This is useful to accept requests that need to be changed to conform to an expectation later on. Various aspects of the request can be changed such as method and URI.
+Method
+URI (path, query string)
+Strip path prefix or suffix
+Regular expression support
+Intelligent URL-encoding and forward-slash handling
+Static responses
+Hard-code a static response into your config, with the ability to set the status code, header fields, and body. (This is often used to respond with HTTP redirects.) The connection may then be gracefully closed, or forcefully aborted if needed.
+Subrouting
+Group handlers into a "subroute" to treat several handlers as one, making certain logic easier to reason about.
+Templates
+Responses can be evaluated as templates, which give you the ability to turn proxied or static content into rich, dynamic content with variables, if statements, markdown rendering (with front matter support), and more.
+Tracing
+Support for distributed tracing using OpenTelemetry.
+Variables
+Read and write variables that can be used internally as you process requests.
+WebDAV
+Become a WebDAV server with one or two lines of config. Compatible with most WebDAV clients.
+Reverse proxy
+Caddy has the most flexible general-purpose reverse proxy in the world, featuring advanced request and response handling, dynamic routing, health checking, load balancing, circuit breaking, and more.
+What makes Caddy's proxy unique is its design. Only the client-facing side of the proxy needs to be HTTP; the transport underlying the roundtrip with the backend can be fulfilled with any protocol!
+Moreover, our proxy can be programmed with highly dynamic upstreams. That is, the available upstreams can change during in-flight requests! If no backends are available, Caddy can hold onto the request until one is.
+High-level proxy features
+Transports
+Transports are how Caddy gets the response from the backend. Caddy's proxy can be a front for protocols other than HTTP by using alternate transport modules. This allows Caddy to generate HTTP responses from backends that don't even speak HTTP!
+HTTP
+FastCGI
+NTLM
+Load balancing
+Selecting upstreams is a crucial function of any modern reverse proxy. Caddy has a variety of built-in load balancing policies to choose from to suit any production services. Some policies are extremely fast and lightweight; others provide upstream affinity based on properties of the client or request; others strive for even distribution by counting connections or using randomness and weights.
+Random
+Random Choose-N
+Least connections
+Round robin
+Weighted round robin
+First available
+Remote IP hash
+Client IP hash
+URI hash
+Query hash
+Header hash
+Cookie hash
+Circuit breaking
+A circuit breaker module can temporarily mark a backend as down before it actually goes down, to keep it up.
+Latency-based
+Health checking
+Health checks detect when upstreams are unavailable. Passive health checks infer status from actual requests. Active health checks work in the background, out-of-band of client requests.
+Active
+Passive
+Observability
+The admin API exposes an endpoint to retrieve the traffic count and health status of the proxy upstreams.
+Upstream sources
+Caddy can get the list of upstreams in various ways. The most common is to write them into the configuration (static). Other ways are dynamic, by which a list of upstreams are returned for each request (these utilize configurable caching to enhance performance).
+Static
+Dynamic: A records
+Dynamic: SRV records
+Dynamic: Multiple sources combined
+Retries
+Requests can be retried until a backend is available to successfully handle the request. During this time, the list of upstreams may even be updated while the request is still pending!
+Streaming
+Responses can be streamed directly to the client, or for better wire performance, buffered slightly and flushed periodically.
+Trusted proxies
+In order to use proxy-related headers like X-Forwarded-For, you can specify a list of IP ranges of proxies you trust. By default Caddy doesn't trust the clients.
+Header manipulation
+Headers can be modified in the request going up to the backend and the response coming back down from the backend. This is similar to the general HTTP server's header handler, but this is applied while proxying.
+Add
+Set (overwrite)
+Delete
+Substring replace
+Buffering
+The proxy can optionally read the entire body before flushing it. This uses more memory but can be required by some backend applications or clients in some cases.
+Requests
+Responses
+Request rewriting
+Rewriting is a different concern from proxying and is normally handled separately, but sometimes you need to rewrite requests using information from the proxy like the chosen upstream. Caddy's proxy lets you do this.
+Response interception
+By default, Caddy's proxy simply writes responses to the client. However, you can intercept the upstream's response and handle it in other ways. This includes matching only certain responses and invoking a custom handler chain you specify.
+Active health checks
+Active health checks assume a backend is down by default until that is confirmed otherwise by a health check.
+HTTP request parameters
+Active health checks are performed against an HTTP endpoint on the upstream. You can customize the parameters for these HTTP requests to work for you.
+Path & query string
+Port
+Headers
+Timing
+You can customize the interval at which active health checks are performed.
+Success criteria
+Each active health check can be customized with a set of criteria to determine healthy or unhealthy status.
+Response timeout
+HTTP status code
+Regular expression match on body
+Failure safety
+Backends that are experiencing bugs and difficulties may sometimes respond with unexpectedly large response bodies. Caddy lets you limit this to preserve proxy resources.
+Limit response size
+Passive health checks
+Passive health checks assume a backend is up by default until failure criteria are met in the course of proxying requests.
+Failure criteria
+All passive health checks count connection failures. In addition, you can set more criteria needed to deem a backend as healthy during a request.
+Concurrent request limit exceeded
+HTTP Status
+Latency
+Failure memory
+You can customize how long to remember failures and how many failures need to be in memory to consider a backend to be down.
+HTTP transport
+This is the default transport module. It crafts a proxied HTTP request to obtain an HTTP response from the backend.
+DNS resolvers
+The system resolvers are used by default, but you can specify custom DNS resolvers per proxy handler.
+TLS
+Caddy can be configured to support TLS (formerly known as SSL) to the upstream.
+Custom root CA pool
+Client authentication to backend
+Custom handshake timeout
+Server Name Indicator (SNI)
+Renegotiation level
+Exempt certain ports from TLS
+Connection pooling
+Connections to backends are pooled for maximum efficiency and minimal latency.
+HTTP Keep-Alive
+Custom probe interval
+Maximum idle connections (total and per-host)
+Idle connection timeout
+Compression
+Caddy can compress requests for the roundtrip with the backend.
+Gzip
+Connection limit
+You can limit the number of connections per host.
+PROXY Protocol
+The PROXY Protocol v1 and v2 are both supported when connecting to upstreams.
+Timeouts
+Various timeouts can be configured; some have sensible default values.
+Connection (dial)
+RFC 6555 fallback
+Reading response headers
+Expect continue
+Read
+Write
+Custom buffer sizes
+Tune the size of read/write buffers if you find that your application performs better with certain settings.
+Read buffers
+Write buffers
+HTTP versions
+Caddy's proxy supports multiple HTTP versions with the backend. By default, HTTP/1.1 and HTTP/2 are supported.
+HTTP/1.1
+HTTP/2
+H2C (HTTP/2 over cleartext)
+FastCGI transport
+FastCGI is typically used to serve PHP applications via php-fpm. FastCGI responders may require additional information about the script being run such as script name, path relative to root, etc., and Caddy's FastCGI transport takes care of all of that and makes it configurable.
+Highly efficient
+Caddy's FastCGI client implementation has been optimized to rival the performance of memory-unsafe clients written in C, sometimes even surpassing their performance.
+Path splitting
+The path can be split, usually at the extension, to compute the proper PATH_INFO variable.
+Resolve root symlink
+Optionally require paths declared to symlinks to be updated if the symlink changes without php-fpm being restarted.
+Environment variables
+Read from the parent environment, and also set custom environment variables for your CGI script.
+Timeouts
+Set timeouts to conserve resources.
+Dial (connect)
+Read
+Write
+Capture stderr
+Caddy can capture the output to stderr from the upstream and log them for visibility.
+Static file server
+Caddy's file server is the premier way of serving static files for your website.
+It's simple: specify a root directory from which to serve the files, then each request path is automatically appended to the root to get the full path of the file to serve.
+Kernel acceleration
+Caddy bypasses user-space buffers whenever possible to speed up file downloads by a significant factor.
+sendfile
+Virtual file systems
+By default, Caddy serves files from a directory you specify on the local disk, but this file access is pluggable and can be replaced by any virtualized file system modules. This allows you to serve static files from any file store such as databases, cloud storage, or even assets embedded directly in the web server binary!
+Local disk
+Embedded assets
+Amazon AWS S3
+Precompressed files
+If your deployment pipeline compresses site resources, Caddy can automatically detect them and serve them in their "precompressed" encoding for higher efficiency and greater throughput.
+Brotli
+Zstandard
+Gzip
+Hide files and folders
+Increase your security posture by proactively hiding potentially-sensitive files and folders that do or could exist in your site root. You can specify individual file/folder paths, filenames regardless of their path, or glob matches to hide files/folders with a particular pattern.
+Exact paths, filenames, globular matching
+Index filenames
+Index files are files that are served if a directory is requested by the client. The filenames of index files to look for are customizable. Directory browsing can optionally be enabled if an index file is not found in a requested directory.
+index.html, index.txt (customizable)
+Conditional requests
+Etag, Last-Modified, and related headers are supported.
+Etag
+Last-Modified
+If-Match
+If-None-Match
+If-Modified-Since
+If-Unmodified-Since
+If-Range
+Range requests
+Common for streaming large files and resuming downloads, clients requesting certain ranges of files will not be disappointed or surprised. Caddy properly handles HTTP requests with Range headers.
+Canonical paths
+In general, there are multiple URIs for a single file or directory. For example: /, /index.html, and /index.html/ represent the same resource. Caddy uses HTTP redirects to enforce path canonicalization (removing trailing slashes from files, and adding them for directories).
+Pass-thru mode
+Sometimes you only want to serve a file if it exists, otherwise continue with the next handler in the chain, rather than returning an error to the client.
+File browser
+Caddy's file server comes alive through its modern file browser that looks attractive on mobile and desktop. It has more features and utility than any other standard HTTP file server!
+Folder listings
+Show the list of files in a folder when no index file (below) exists in that folder.
+Exact paths, filenames, globular matching
+Day and night themes
+The color scheme automatically adjusts to match the system theme, whether it be light or dark, to avoid blinding you or being hard to read.
+Light mode
+Dark mode
+Sort by columns
+Quickly distill information about each directory and find items faster with sticky column sorting.
+File/directory
+Name
+Size
+Date modified
+Filter
+Every page load automatically focuses the cursor on a search box, so you can start typing a filename and filter large listings instantly.
+Layout
+Files can be shown in different layouts depending on how you want to view the listing. For example, the grid view is great for galleries.
+List
+Grid
+Responsive design
+The page width fluidly adjusts to accommodate screens of all sizes. Links are sufficiently sized to be easily tappable on touchscreens while still being information-dense enough to be useful.
+JSON API
+Requests with an
+Accept-Encoding: application/json
+header will be replied to with a JSON payload for programmatic or scripted access to your file listing.
+Customizable listing template
+If the default template isn't a good fit or you want to spice things up, customize the browse template to look and act any way you want!
+File size visualization
+File sizes are indicated by the length of the bar behind them, making it quick and easy to find outlier large and small files or to compare relative sizes at a glance.
+File type icons
+The file server recognizes dozens of common file types and shows associated icons to make identification easier when scanning the page.
+Caddy is a living project with a TON of features. This page is not yet a comprehensive list of all the features and benefits provided by Caddy because there's so many to mention. We welcome
+contributions
+on GitHub!

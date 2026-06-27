@@ -1,0 +1,164 @@
+Source: https://www.tinybird.com/docs/forward/guides/connect-clickhouse-js
+
+Connect ClickHouse JS Client to Tinybird · Tinybird Docs
+Sign In
+Sign Up
+Connect ClickHouse JS Client to Tinybird
+¶
+Copy as MD
+The official ClickHouse JavaScript client can connect to Tinybird using the ClickHouse® HTTP protocol compatibility. This enables you to query your Tinybird data sources programmatically from Node.js applications with full type safety and modern JavaScript features.
+The ClickHouse® connection to Tinybird is read-only. You can use it to query and analyze data from your Tinybird data sources, but you cannot modify data through this connection.
+Prerequisites
+¶
+Node.js 16.0 or later
+A Tinybird workspace with data sources
+A Tinybird Auth Token with scopes
+WORKSPACE:READ_ALL
+and optionally
+ORG_DATASOURCES:READ
+. See
+how to create it
+.
+Installation
+¶
+Install the official ClickHouse JavaScript client:
+npm install @clickhouse/client
+Configuration
+¶
+Create a client instance with the following configuration:
+import { createClient } from '@clickhouse/client'
+
+const client = createClient({
+  url: 'https://clickhouse.tinybird.co',
+  username: '<WORKSPACE_NAME>', // Optional, for identification
+  password: '<TOKEN>', // Your Tinybird Auth Token
+})
+See the list of
+ClickHouse hosts
+to find the correct one for your region.
+Test the connection
+¶
+Create a simple query to verify your connection:
+async function testConnection() {
+  try {
+    const resultSet = await client.query({
+      query: 'SELECT database, name, engine FROM system.tables LIMIT 5',
+    })
+
+    const data = await resultSet.json()
+    console.table(data.data)
+  } catch (error) {
+    console.error('Connection failed:', error)
+  }
+}
+
+testConnection()
+Query your data
+¶
+Once connected, you can query your Tinybird data sources:
+// Query a specific data source
+async function queryDataSource() {
+  const resultSet = await client.query({
+    query: 'SELECT * FROM your_data_source_name LIMIT 10',
+  })
+
+  const data = await resultSet.json()
+  return data.data
+}
+
+// Query with parameters
+async function queryWithParams() {
+  const resultSet = await client.query({
+    query: `
+      SELECT timestamp, user_id, event_name
+      FROM events
+      WHERE timestamp >= {start_date:DateTime}
+      LIMIT {limit:UInt32}
+    `,
+    query_params: {
+      start_date: '2024-01-01 00:00:00',
+      limit: 100,
+    },
+  })
+
+  return await resultSet.json()
+}
+Observability
+¶
+You can also explore Tinybird's observability data from internal service data sources:
+// View recent API endpoint usage and performance
+const recentUsage = await client.query({
+  query: `
+    SELECT
+      start_datetime,
+      pipe_name,
+      duration,
+      result_rows,
+      read_bytes,
+      status_code
+    FROM tinybird.pipe_stats_rt
+    WHERE start_datetime >= now() - INTERVAL 1 DAY
+    ORDER BY start_datetime DESC
+    LIMIT 10
+  `
+})
+
+// Analyze endpoint performance metrics
+const performanceMetrics = await client.query({
+  query: `
+    SELECT
+      pipe_name,
+      count() as request_count,
+      avg(duration) as avg_duration_ms,
+      avg(result_rows) as avg_result_rows,
+      sum(read_bytes) as total_bytes_read
+    FROM tinybird.pipe_stats_rt
+    WHERE start_datetime >= now() - INTERVAL 1 HOUR
+    GROUP BY pipe_name
+    ORDER BY request_count DESC
+  `
+})
+
+const usage = await recentUsage.json()
+const metrics = await performanceMetrics.json()
+console.table(usage.data)
+console.table(metrics.data)
+Error handling
+¶
+Handle connection and query errors appropriately:
+import { ClickHouseError } from '@clickhouse/client'
+
+async function safeQuery(query) {
+  try {
+    const resultSet = await client.query({ query })
+    return await resultSet.json()
+  } catch (error) {
+    if (error instanceof ClickHouseError) {
+      console.error('ClickHouse error:', error.message)
+      console.error('Code:', error.code)
+    } else {
+      console.error('Connection error:', error.message)
+    }
+    throw error
+  }
+}
+Learn more
+¶
+ClickHouse Interface overview
+Tinybird Auth Token management
+ClickHouse JavaScript Client documentation
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Connect ClickHouse JS Client to Tinybird
+Prerequisites
+Installation
+Configuration
+Test the connection
+Query your data
+Observability
+Error handling
+Learn more
+forward
+Ask AI

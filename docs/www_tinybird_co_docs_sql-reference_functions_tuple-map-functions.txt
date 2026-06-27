@@ -1,0 +1,781 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/tuple-map-functions
+
+Tuple Map Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Tuple map functions
+¶
+Copy as MD
+The following functions are available for tuple maps.
+map
+¶
+Constructs a map data type from a list of key-value pairs provided as arguments.
+Syntax
+¶
+map(key1, value1[, key2, value2, ...])
+Arguments
+¶
+key_n
+: Type. The keys for the map entries. Any type supported as a key type of a Map.
+value_n
+: Type. The values for the map entries. Any type supported as a value type of a Map.
+Returns
+¶
+A map containing
+key:value
+pairs.
+Map(key, value)
+.
+Example
+¶
+SELECT map('key1', number, 'key2', number * 2) FROM numbers(3)
+Result:
+┌─map('key1', number, 'key2', multiply(number, 2))─┐
+│ {'key1':0,'key2':0}                              │
+│ {'key1':1,'key2':2}                              │
+│ {'key1':2,'key2':4}                              │
+└──────────────────────────────────────────────────┘
+mapFromArrays
+¶
+Generates a map by pairing elements from a keys array and a values array.
+Alias:
+MAP_FROM_ARRAYS(keys, values)
+Syntax
+¶
+mapFromArrays(keys, values)
+Arguments
+¶
+keys
+: Array or Map. The source for the map's keys. If an array, Tinybird accepts
+Array(Nullable(T))
+or
+Array(LowCardinality(Nullable(T)))
+as its type as long as it doesn't contain
+NULL
+values.
+values
+: Array or Map. The source for the map's values.
+Returns
+¶
+A map with keys and values constructed from the provided key and value arrays or maps.
+Example
+¶
+select mapFromArrays(['a', 'b', 'c'], [1, 2, 3])
+Result:
+┌─mapFromArrays(['a', 'b', 'c'], [1, 2, 3])─┐
+│ {'a':1,'b':2,'c':3}                       │
+└───────────────────────────────────────────┘
+mapFromArrays
+also accepts arguments of type Map. These are cast to array of tuples during execution.
+SELECT mapFromArrays([1, 2, 3], map('a', 1, 'b', 2, 'c', 3))
+Result:
+┌─mapFromArrays([1, 2, 3], map('a', 1, 'b', 2, 'c', 3))─┐
+│ {1:('a',1),2:('b',2),3:('c',3)}                       │
+└───────────────────────────────────────────────────────┘
+SELECT mapFromArrays(map('a', 1, 'b', 2, 'c', 3), [1, 2, 3])
+Result:
+┌─mapFromArrays(map('a', 1, 'b', 2, 'c', 3), [1, 2, 3])─┐
+│ {('a',1):1,('b',2):2,('c',3):3}                       │
+└───────────────────────────────────────────────────────┘
+extractKeyValuePairs
+¶
+Parses a string containing key-value pairs into a
+Map(String, String)
+. It can handle various delimiters and quoted values, making it suitable for parsing log-like data.
+Alias:
+str_to_map
+mapFromString
+Syntax
+¶
+extractKeyValuePairs(data[, key_value_delimiter[, pair_delimiter[, quoting_character]]])
+Arguments
+¶
+data
+: String or FixedString. The input string from which to extract key-value pairs.
+key_value_delimiter
+: String or FixedString. An optional single character that separates keys from values. Defaults to
+:
+.
+pair_delimiters
+: String or FixedString. An optional set of characters that separate key-value pairs. Defaults to
+,
+,
+, and
+;
+.
+quoting_character
+: String or FixedString. An optional single character used for quoting keys and values. Defaults to
+"
+.
+Returns
+¶
+A map of key-value pairs.
+Map(String, String)
+.
+Examples
+¶
+Query
+SELECT extractKeyValuePairs('name:neymar, age:31 team:psg,nationality:brazil') as kv
+Result:
+┌─kv──────────────────────────────────────────────────────────────────────┐
+│ {'name':'neymar','age':'31','team':'psg','nationality':'brazil'}        │
+└─────────────────────────────────────────────────────────────────────────┘
+With a single quote
+'
+as quoting character:
+SELECT extractKeyValuePairs('name:\'neymar\';\'age\':31;team:psg;nationality:brazil,last_key:last_value', ':', ';,', '\'') as kv
+Result:
+┌─kv───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ {'name':'neymar','age':'31','team':'psg','nationality':'brazil','last_key':'last_value'}                                 │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Escape sequences without escape sequences support:
+SELECT extractKeyValuePairs('age:a\\x0A\\n\\0') AS kv
+Result:
+┌─kv─────────────────────┐
+│ {'age':'a\\x0A\\n\\0'} │
+└────────────────────────┘
+To restore a map string key-value pairs serialized with
+toString
+:
+SELECT
+    map('John', '33', 'Paula', '31') AS m,
+    toString(m) as map_serialized,
+    extractKeyValuePairs(map_serialized, ':', ',', '\'') AS map_restored
+Result:
+Row 1:
+──────
+m:              {'John':'33','Paula':'31'}
+map_serialized: {'John':'33','Paula':'31'}
+map_restored:   {'John':'33','Paula':'31'}
+extractKeyValuePairsWithEscaping
+¶
+Similar to
+extractKeyValuePairs
+, this function converts a string of key-value pairs into a
+Map(String, String)
+, but it also supports common escape sequences within the string.
+Syntax
+¶
+extractKeyValuePairsWithEscaping(data[, key_value_delimiter[, pair_delimiter[, quoting_character]]])
+Arguments
+¶
+data
+: String or FixedString. The input string from which to extract key-value pairs.
+key_value_delimiter
+: String or FixedString. An optional single character that separates keys from values. Defaults to
+:
+.
+pair_delimiters
+: String or FixedString. An optional set of characters that separate key-value pairs. Defaults to
+,
+,
+, and
+;
+.
+quoting_character
+: String or FixedString. An optional single character used for quoting keys and values. Defaults to
+"
+.
+Returns
+¶
+A map of key-value pairs, with escape sequences processed.
+Map(String, String)
+.
+Example
+¶
+Escape sequences with escape sequence support turned on:
+SELECT extractKeyValuePairsWithEscaping('age:a\\x0A\\n\\0') AS kv
+Result:
+┌─kv────────────────┐
+│ {'age':'a\n\n\0'} │
+└───────────────────┘
+mapAdd
+¶
+Combines multiple maps or array-tuples by summing the values for common keys. If a key exists in multiple inputs, its values are added together.
+Syntax
+¶
+mapAdd(arg1, arg2 [, ...])
+Arguments
+¶
+arg1
+,
+arg2
+, ...: Map or Tuple(Array, Array). Each argument can be a map or a tuple where the first array contains keys and the second array contains corresponding values. Key types must be consistent across all arguments, and value types are promoted to a common numeric type (
+Int64
+,
+UInt64
+, or
+Float64
+).
+Returns
+¶
+A single map or tuple where keys are sorted and values are the sum of corresponding values from the input arguments.
+Example
+¶
+Query with
+Map
+type:
+SELECT mapAdd(map(1,1), map(1,1))
+Result:
+┌─mapAdd(map(1, 1), map(1, 1))─┐
+│ {1:2}                        │
+└──────────────────────────────┘
+Query with a tuple:
+SELECT mapAdd(([toUInt8(1), 2], [1, 1]), ([toUInt8(1), 2], [1, 1])) as res, toTypeName(res) as type
+Result:
+┌─res───────────┬─type───────────────────────────────┐
+│ ([1,2],[2,2]) │ Tuple(Array(UInt8), Array(UInt64)) │
+└───────────────┴────────────────────────────────────┘
+mapSubtract
+¶
+Combines multiple maps or array-tuples by subtracting the values for common keys.
+Syntax
+¶
+mapSubtract(Tuple(Array, Array), Tuple(Array, Array) [, ...])
+Arguments
+¶
+arg1
+,
+arg2
+, ...: Map or Tuple(Array, Array). Each argument can be a map or a tuple where the first array contains keys and the second array contains corresponding values. Key types must be consistent across all arguments, and value types are promoted to a common numeric type (
+Int64
+,
+UInt64
+, or
+Float64
+).
+Returns
+¶
+A single map or tuple where keys are sorted and values are the result of subtracting corresponding values from the input arguments.
+Example
+¶
+Query with
+Map
+type:
+SELECT mapSubtract(map(1,1), map(1,1))
+Result:
+┌─mapSubtract(map(1, 1), map(1, 1))─┐
+│ {1:0}                             │
+└───────────────────────────────────┘
+Query with a tuple map:
+SELECT mapSubtract(([toUInt8(1), 2], [toInt32(1), 1]), ([toUInt8(1), 2], [toInt32(2), 1])) as res, toTypeName(res) as type
+Result:
+┌─res────────────┬─type──────────────────────────────┐
+│ ([1,2],[-1,0]) │ Tuple(Array(UInt8), Array(Int64)) │
+└────────────────┴───────────────────────────────────┘
+mapPopulateSeries
+¶
+Fills in missing integer keys in a map or array-tuple to create a continuous series of keys. You can optionally specify a maximum key value to extend the series. Missing values are filled with a default (usually zero).
+Syntax
+¶
+mapPopulateSeries(map[, max])
+mapPopulateSeries(keys, values[, max])
+Arguments
+¶
+map
+: Map. A map with integer keys.
+keys
+: Array(Int). An array of integer keys.
+values
+: Array(Int). An array of values corresponding to the keys.
+max
+: Int8, Int16, Int32, Int64, Int128, Int256. An optional maximum key value to ensure the series extends up to this point.
+Returns
+¶
+A map or a tuple of two arrays (sorted keys and corresponding values) with the series populated.
+Example
+¶
+Query with
+Map
+type:
+SELECT mapPopulateSeries(map(1, 10, 5, 20), 6)
+Result:
+┌─mapPopulateSeries(map(1, 10, 5, 20), 6)─┐
+│ {1:10,2:0,3:0,4:0,5:20,6:0}             │
+└─────────────────────────────────────────┘
+Query with mapped arrays:
+SELECT mapPopulateSeries([1,2,4], [11,22,44], 5) AS res, toTypeName(res) AS type
+Result:
+┌─res──────────────────────────┬─type──────────────────────────────┐
+│ ([1,2,3,4,5],[11,22,0,44,0]) │ Tuple(Array(UInt8), Array(UInt8)) │
+└──────────────────────────────┴───────────────────────────────────┘
+mapContains
+¶
+Checks if a specified key exists within a given map.
+Syntax
+¶
+mapContains(map, key)
+Arguments
+¶
+map
+: Map. The map to search within.
+key
+: Type. The key to look for. Its type must match the key type of the
+map
+.
+Returns
+¶
+UInt8
+. Returns
+1
+if the
+map
+contains the
+key
+, otherwise
+0
+.
+Example
+¶
+Query:
+SELECT mapContains(a, 'name')
+FROM ( select (c1, c2)::Map(String, String) as a
+      from values((['name', 'age'], ['eleven', '11']), (['number', 'position'], ['twelve', '6.0'])) )
+Result:
+┌─mapContains(a, 'name')─┐
+│                      1 │
+│                      0 │
+└────────────────────────┘
+mapKeys
+¶
+Extracts all keys from a map and returns them as an array.
+Syntax
+¶
+mapKeys(map)
+Arguments
+¶
+map
+: Map. The input map.
+Returns
+¶
+Array. An array containing all the keys present in the
+map
+.
+Example
+¶
+Query:
+SELECT mapKeys(a)
+FROM ( select (c1, c2)::Map(String, String) as a
+      from values((['name', 'age'], ['eleven', '11']), (['number', 'position'], ['twelve', '6.0'])) )
+Result:
+┌─mapKeys(a)────────────┐
+│ ['name','age']        │
+│ ['number','position'] │
+└───────────────────────┘
+mapValues
+¶
+Extracts all values from a map and returns them as an array.
+Syntax
+¶
+mapValues(map)
+Arguments
+¶
+map
+: Map. The input map.
+Returns
+¶
+Array. An array containing all the values present in the
+map
+.
+Example
+¶
+Query:
+SELECT mapValues(a)
+FROM ( select (c1, c2)::Map(String, String) as a
+      from values((['name', 'age'], ['eleven', '11']), (['number', 'position'], ['twelve', '6.0'])) )
+Result:
+┌─mapValues(a)─────┐
+│ ['eleven','11']  │
+│ ['twelve','6.0'] │
+└──────────────────┘
+mapContainsKeyLike
+¶
+Checks if any key in a map matches a specified SQL
+LIKE
+pattern.
+Syntax
+¶
+mapContainsKeyLike(map, pattern)
+Arguments
+¶
+map
+: Map. The map to search within.
+pattern
+: String. The
+LIKE
+pattern to match against the map keys.
+Returns
+¶
+UInt8
+. Returns
+1
+if any key in the
+map
+matches the pattern, otherwise
+0
+.
+Example
+¶
+Query:
+SELECT mapContainsKeyLike(a, 'a%')
+FROM ( select (c1, c2)::Map(String, String) as a
+      from values((['abc', 'def'], ['abc', 'def']), (['hij', 'klm'], ['hij', 'klm'])) )
+Result:
+┌─mapContainsKeyLike(a, 'a%')─┐
+│                           1 │
+│                           0 │
+└─────────────────────────────┘
+mapExtractKeyLike
+¶
+Filters a map, returning a new map that contains only the key-value pairs where the key matches a specified SQL
+LIKE
+pattern.
+Syntax
+¶
+mapExtractKeyLike(map, pattern)
+Arguments
+¶
+map
+: Map. The input map.
+pattern
+: String. The
+LIKE
+pattern to match against the map keys.
+Returns
+¶
+Map. A new map containing only the entries whose keys match the specified pattern. Returns an empty map if no keys match.
+Example
+¶
+Query:
+SELECT mapExtractKeyLike(a, 'a%')
+FROM ( select (c1, c2)::Map(String, String) as a
+      from values((['abc', 'def'], ['abc', 'def']), (['hij', 'klm'], ['hij', 'klm'])) )
+Result:
+┌─mapExtractKeyLike(a, 'a%')─┐
+│ {'abc':'abc'}              │
+│ {}                         │
+└────────────────────────────┘
+mapApply
+¶
+Transforms each key-value pair in a map by applying a lambda function to them.
+Syntax
+¶
+mapApply(func, map)
+Arguments
+¶
+func
+: Lambda function. A lambda function that takes the key and value of each map entry as arguments and returns a new key-value pair.
+map
+: Map. The input map.
+Returns
+¶
+Map. A new map where each key-value pair is the result of applying the
+func
+to the corresponding entry in the original map.
+Example
+¶
+Query:
+SELECT mapApply((k, v) -> (k, v * 10), _map) AS r
+FROM
+(
+    SELECT map('key1', number, 'key2', number * 2) AS _map
+    FROM numbers(3)
+)
+Result:
+┌─r─────────────────────┐
+│ {'key1':0,'key2':0}   │
+│ {'key1':10,'key2':20} │
+│ {'key1':20,'key2':40} │
+└───────────────────────┘
+mapFilter
+¶
+Creates a new map containing only the key-value pairs from the original map for which a provided lambda function returns a non-zero (true) value.
+Syntax
+¶
+mapFilter(func, map)
+Arguments
+¶
+func
+: Lambda function. A lambda function that takes the key and value of each map entry as arguments and returns a boolean (or integer convertible to boolean).
+map
+: Map. The input map.
+Returns
+¶
+Map. A new map containing only the entries that satisfy the condition defined by
+func
+.
+Example
+¶
+Query:
+SELECT mapFilter((k, v) -> ((v % 2) = 0), _map) AS r
+FROM
+(
+    SELECT map('key1', number, 'key2', number * 2) AS _map
+    FROM numbers(3)
+)
+Result:
+┌─r───────────────────┐
+│ {'key1':0,'key2':0} │
+│ {'key2':2}          │
+│ {'key1':2,'key2':4} │
+└─────────────────────┘
+mapUpdate
+¶
+Merges two maps, updating the values of the first map with corresponding values from the second map where keys overlap. New keys from the second map are added to the result.
+Syntax
+¶
+mapUpdate(map1, map2)
+Arguments
+¶
+map1
+: Map. The base map to be updated.
+map2
+: Map. The map containing new or updated key-value pairs.
+Returns
+¶
+Map. A new map based on
+map1
+, with values for common keys overwritten by
+map2
+'s values, and new keys from
+map2
+added.
+Example
+¶
+Query:
+SELECT mapUpdate(map('key1', 0, 'key3', 0), map('key1', 10, 'key2', 10)) AS map
+Result:
+┌─map────────────────────────────┐
+│ {'key3':0,'key1':10,'key2':10} │
+└────────────────────────────────┘
+mapConcat
+¶
+Combines multiple maps into a single map. If duplicate keys exist across the input maps, all entries are included, but only the first occurrence of a key is accessible via direct key lookup.
+Syntax
+¶
+mapConcat(maps)
+Arguments
+¶
+maps
+: Map. One or more maps to concatenate.
+Returns
+¶
+Map. A single map containing all key-value pairs from the input maps.
+Examples
+¶
+Query:
+SELECT mapConcat(map('key1', 1, 'key3', 3), map('key2', 2)) AS map
+Result:
+┌─map──────────────────────────┐
+│ {'key1':1,'key3':3,'key2':2} │
+└──────────────────────────────┘
+Query:
+SELECT mapConcat(map('key1', 1, 'key2', 2), map('key1', 3)) AS map, map['key1']
+Result:
+┌─map──────────────────────────┬─elem─┐
+│ {'key1':1,'key2':2,'key1':3} │    1 │
+└──────────────────────────────┴──────┘
+mapExists
+¶
+Checks if at least one key-value pair in a map satisfies a condition defined by a lambda function.
+Syntax
+¶
+mapExists([func,] map)
+Arguments
+¶
+func
+: Lambda function. An optional lambda function that takes the key and value of each map entry.
+map
+: Map. The input map.
+Returns
+¶
+UInt8
+. Returns
+1
+if
+func
+returns a non-zero value for any key-value pair, otherwise
+0
+.
+mapExists
+is a higher-order function.
+You can pass a lambda function to it as the first argument.
+Example
+¶
+Query:
+SELECT mapExists((k, v) -> (v = 1), map('k1', 1, 'k2', 2)) AS res
+Result:
+┌─res─┐
+│   1 │
+└─────┘
+mapAll
+¶
+Checks if all key-value pairs in a map satisfy a condition defined by a lambda function.
+Syntax
+¶
+mapAll([func,] map)
+Arguments
+¶
+func
+: Lambda function. An optional lambda function that takes the key and value of each map entry.
+map
+: Map. The input map.
+Returns
+¶
+UInt8
+. Returns
+1
+if
+func
+returns a non-zero value for all key-value pairs, otherwise
+0
+.
+Note that the
+mapAll
+is a
+higher-order function
+.
+You can pass a lambda function to it as the first argument.
+Example
+¶
+Query:
+SELECT mapAll((k, v) -> (v = 1), map('k1', 1, 'k2', 2)) AS res
+Result:
+┌─res─┐
+│   0 │
+└─────┘
+mapSort
+¶
+Sorts the key-value pairs within a map in ascending order based on their keys. An optional lambda function can be provided to define a custom sorting logic.
+Syntax
+¶
+mapSort([func,] map)
+Arguments
+¶
+func
+: Lambda function. An optional lambda function that takes the key and value of each map entry to determine the sorting order.
+map
+: Map. The input map to sort.
+Returns
+¶
+Map. A new map with its key-value pairs sorted.
+Examples
+¶
+SELECT mapSort(map('key2', 2, 'key3', 1, 'key1', 3)) AS map
+Result:
+┌─map──────────────────────────┐
+│ {'key1':3,'key2':2,'key3':1} │
+└──────────────────────────────┘
+SELECT mapSort((k, v) -> v, map('key2', 2, 'key3', 1, 'key1', 3)) AS map
+Result:
+┌─map──────────────────────────┐
+│ {'key3':1,'key2':2,'key1':3} │
+└──────────────────────────────┘
+mapPartialSort
+¶
+Sorts a specified number of elements in a map in ascending order. An optional lambda function can be used to define a custom sorting criterion.
+Syntax
+¶
+mapPartialSort([func,] limit, map)
+Arguments
+¶
+func
+: Lambda function. An optional lambda function to apply to the keys and values of the map for custom sorting.
+limit
+: (U)Int. The number of elements (from 1 up to
+limit
+) to sort.
+map
+: Map. The map to partially sort.
+Returns
+¶
+Map. A partially sorted map.
+Example
+¶
+SELECT mapPartialSort((k, v) -> v, 2, map('k1', 3, 'k2', 1, 'k3', 2))
+Result:
+┌─mapPartialSort(lambda(tuple(k, v), v), 2, map('k1', 3, 'k2', 1, 'k3', 2))─┐
+│ {'k2':1,'k3':2,'k1':3}                                                    │
+└───────────────────────────────────────────────────────────────────────────┘
+mapReverseSort
+¶
+Sorts the key-value pairs within a map in descending order based on their keys. An optional lambda function can be provided to define a custom sorting logic.
+Syntax
+¶
+mapReverseSort([func,] map)
+Arguments
+¶
+func
+: Lambda function. An optional lambda function that takes the key and value of each map entry to determine the sorting order.
+map
+: Map. The input map to sort.
+Returns
+¶
+Map. A new map with its key-value pairs sorted in descending order.
+Examples
+¶
+SELECT mapReverseSort(map('key2', 2, 'key3', 1, 'key1', 3)) AS map
+Result:
+┌─map──────────────────────────┐
+│ {'key3':1,'key2':2,'key1':3} │
+└──────────────────────────────┘
+SELECT mapReverseSort((k, v) -> v, map('key2', 2, 'key3', 1, 'key1', 3)) AS map
+Result:
+┌─map──────────────────────────┐
+│ {'key1':3,'key2':2,'key3':1} │
+└──────────────────────────────┘
+mapPartialReverseSort
+¶
+Sorts a specified number of elements in a map in descending order. An optional lambda function can be used to define a custom sorting criterion.
+Syntax
+¶
+mapPartialReverseSort([func,] limit, map)
+Arguments
+¶
+func
+: Lambda function. An optional lambda function to apply to the keys and values of the map for custom sorting.
+limit
+: (U)Int. The number of elements (from 1 up to
+limit
+) to sort.
+map
+: Map. The map to partially sort.
+Returns
+¶
+Map. A partially sorted map in descending order.
+Example
+¶
+SELECT mapPartialReverseSort((k, v) -> v, 2, map('k1', 3, 'k2', 1, 'k3', 2))
+Result:
+┌─mapPartialReverseSort(lambda(tuple(k, v), v), 2, map('k1', 3, 'k2', 1, 'k3', 2))─┐
+│ {'k1':3,'k3':2,'k2':1}                                                           │
+└──────────────────────────────────────────────────────────────────────────────────┘
+Updated
+3 weeks ago
+On this page
+Tuple map functions
+map
+mapFromArrays
+extractKeyValuePairs
+extractKeyValuePairsWithEscaping
+mapAdd
+mapSubtract
+mapPopulateSeries
+mapContains
+mapKeys
+mapValues
+mapContainsKeyLike
+mapExtractKeyLike
+mapApply
+mapFilter
+mapUpdate
+mapConcat
+mapExists
+mapAll
+mapSort
+mapPartialSort
+mapReverseSort
+mapPartialReverseSort
+forward
+classic
+Ask AI

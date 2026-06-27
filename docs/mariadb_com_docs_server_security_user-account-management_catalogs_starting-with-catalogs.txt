@@ -1,0 +1,122 @@
+Source: https://mariadb.com/docs/server/security/user-account-management/catalogs/starting-with-catalogs
+
+Starting with Catalogs | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Security
+Securing MariaDB
+Encryption
+User Account Management
+Roles
+Account Locking
+Authentication
+Incrementing of the access_denied_errors Status Variable
+User Password Expiry
+Catalogs
+Catalogs Overview
+Starting with Catalogs
+Catalog-Specific Functions and Variables
+Catalog Status Variables
+Connecting to a Server Configured for Catalogs
+CREATE CATALOG
+SHOW CREATE CATALOG
+SHOW CATALOGS
+USE CATALOG
+DROP CATALOG
+Authentication with Enterprise Server
+Limiting Size of Created Disk Temporary Files and Tables
+Security Vulnerabilities (CVE) Fixed in MariaDB
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Starting with Catalogs
+Guide to initializing a MariaDB server with catalog support using `mariadb-install-db --catalogs` and adding new catalogs to a running instance.
+Catalogs are planned for an upcoming release, and don't yet appear in any current releases.
+Background
+mariadb-install-db
+initializes the MariaDB data directory and creates the
+system tables
+in the
+mysql
+database.
+When used with the
+--catalog
+options it will initialize MariaDB server to use catalogs.
+The
+mariadbd server
+will automatically discover if catalogs are used or not.
+Note that
+one cannot change
+a 'normal server' to a server with catalogs or a server with catalogs to
+a 'normal server'. In the future we will add tools that will allow one to easily move an existing server inside a catalog or move an server inside a catalog to a standalone server.
+Initializing a New Server with Catalog Support
+To initialize a server with 4 catalogs (the
+def
+catalog, that holds the catalog root user (CRU) is automatically created):
+Copy
+mariadb_install_db
+--catalogs=
+"
+cat1 cat2 cat3
+"
+--datadir=/my/data/
+The above will create a directory
+/my/data
+and the 4 directories under it, one for each catalog.
+Adding More Catalogs to a Running Server
+Creating Catalogs with CREATE CATALOG
+One can create a new catalog with
+CREATE CATALOG catalog_name
+Creating Catalogs with mariadb_install_db
+When adding more catalogs to an existing server,
+mariadb_install_db
+will start the
+mariadb client
+to execute the needed commands on the running server. This is why one has to supply user and password to
+mariadb_install_db
+.
+One benefit of using
+mariadb_install_db
+is that it's possible to create many catalogs with one command.
+See Also
+CREATE CATALOG
+DROP CATALOG
+mariadb-install-db
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Catalogs Overview
+Next
+Catalog-Specific Functions and Variables
+Last updated
+4 months ago
+Was this helpful?
+Background
+Initializing a New Server with Catalog Support
+Adding More Catalogs to a Running Server
+Creating Catalogs with CREATE CATALOG
+Creating Catalogs with mariadb_install_db
+See Also
+Was this helpful?
+Copy
+mariadb_install_db --catalogs="cat4 cat5 cat6" --datadir=/my/data --catalog-user=monty --catalog-password

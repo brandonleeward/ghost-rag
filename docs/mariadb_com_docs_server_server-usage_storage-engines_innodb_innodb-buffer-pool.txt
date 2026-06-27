@@ -1,0 +1,245 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/innodb/innodb-buffer-pool
+
+InnoDB Buffer Pool | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+InnoDB Introduction
+InnoDB File Format
+InnoDB Limitations
+AUTO_INCREMENT Handling in InnoDB
+Binary Log Group Commit and InnoDB Flushing Performance
+InnoDB Asynchronous I/O
+InnoDB Buffer Pool
+InnoDB Change Buffering
+InnoDB Data Scrubbing
+InnoDB Doublewrite Buffer
+InnoDB Flush Method
+InnoDB Lock Modes
+InnoDB Log Archiving
+InnoDB Monitors
+InnoDB Page Compression
+InnoDB Page Flushing
+InnoDB Purge
+InnoDB Undo Log
+InnoDB Redo Log
+InnoDB Strict Mode
+InnoDB System Variables
+InnoDB Versions
+InnoDB Architecture for MariaDB Enterprise Server
+InnoDB Online DDL
+InnoDB Row Formats
+InnoDB Tablespaces
+InnoDB Troubleshooting
+MariaDB Enterprise Server InnoDB Operations
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+InnoDB Buffer Pool
+Complete InnoDB Buffer Pool guide for MariaDB. Complete reference documentation for implementation, configuration, and usage with comprehensive examples and.
+The InnoDB storage engine in MariaDB Enterprise Server utilizes the Buffer Pool as a crucial in-memory cache. This Buffer Pool stores recently accessed data pages, enabling faster retrieval for subsequent requests. Recognizing patterns of access, InnoDB also employs predictive prefetching, caching nearby pages when sequential access is detected. To manage memory efficiently, a least recently used (LRU) algorithm is used to evict older, less frequently accessed pages.
+To optimize server restarts, the Buffer Pool's contents can be preserved across shutdowns. At shutdown, the page numbers of all pages residing in the Buffer Pool are recorded. Upon the next startup, InnoDB reads this dump of page numbers and reloads the corresponding data pages from their respective data files, effectively avoiding a "cold" cache scenario.
+The size of each individual page within the Buffer Pool is determined by the setting of the innodb_page_size system variable.
+How the Buffer Pool Works
+The buffer pool attempts to keep frequently-used blocks in the buffer, and so essentially works as two sublists, a
+new
+sublist of recently-used information, and an
+old
+sublist of older information. By default, 37% of the list is reserved for the old list.
+When new information is accessed that doesn't appear in the list, it is placed at the top of the old list, the oldest item in the old list is removed, and everything else bumps back one position in the list.
+When information is accessed that appears in the
+old
+list, it is moved to the top the new list, and everything above moves back one position.
+innodb_buffer_pool_size
+The most important
+server system variable
+is
+innodb_buffer_pool_size
+. This size should contain most of the active data set of your server so that SQL request can work directly with information in the buffer pool cache. Starting at several gigabytes of memory is a good starting point if you have that RAM available. Once warmed up to its normal load there should be very few
+innodb_buffer_pool_reads
+compared to
+innodb_buffer_pool_read_requests
+. Look how these values change over a minute. If the change in
+innodb_buffer_pool_reads
+is less than 1% of the change in
+innodb_buffer_pool_read_requests
+then you have a good amount of usage. If you are getting the status variable
+innodb_buffer_pool_wait_free
+increasing then you don't have enough buffer pool (or your flushing isn't occurring frequently enough).
+The larger the size, the longer it takes to initialize.
+Make sure that the size is not too large, because this can cause swapping, which more than undoes the benefits of a large buffer pool.
+Using ColumnStore?
+The standard recommendation to use a large portion of your RAM for the InnoDB buffer pool does not apply if you are also running
+MariaDB ColumnStore
+on the same server. ColumnStore reserves 75% of system RAM by default. Over-allocating the InnoDB buffer pool in a combined environment will likely trigger the Linux OOM killer.
+Please refer to the
+ColumnStore Memory Requirements
+for accurate sizing and validation instructions.
+The buffer pool can be set dynamically. See
+Setting Innodb Buffer Pool Size Dynamically
+.
+Buffer Pool Changes
+From MariaDB 10.11.12 / 11.4.6 / 11.8.2, there are significant changes to the InnoDB buffer pool behavior.
+MariaDB server deprecates and ignores the
+innodb_buffer_pool_chunk_size
+. Now, the buffer pool size is changed in arbitrary 1-megabyte increments, all the way up to
+innodb_buffer_pool_size_max
+, which must be specified at startup.
+If
+innodb_buffer_pool_size_max
+is
+0
+or not specified, it defaults to the
+innodb_buffer_pool_size
+value.
+The
+innodb_buffer_pool_size_auto_min
+variable specifies the minimum size the buffer pool can be shrunk to by a memory pressure event. When a memory pressure event occurs, MariaDB server attempts to shrink
+innodb_buffer_pool_size
+halfway between its current value and the
+innodb_buffer_pool_size_auto_min
+value. If
+innodb_buffer_pool_size_auto_min
+is not specified or
+0
+, its default value is adjusted to
+innodb_buffer_pool_size
+— in other words, memory pressure events are disregarded by default.
+The minimum
+innodb_buffer_pool_size
+is 320 pages (256*5/4). With the default value of
+innodb_page_size=16k
+, this corresponds to 5 MiB. However, since
+innodb_buffer_pool_size
+includes the memory allocated for the block descriptors, the minimum is effectively
+innodb_buffer_pool_size=6m
+.
+When the buffer pool is shrunk, InnoDB tries to inform the operating system that the underlying memory for part of the virtual address range is no longer needed and may be zeroed out. On many POSIX-like systems this is done by
+madvise(MADV_DONTNEED)
+where available (Linux, FreeBSD, NetBSD, OpenBSD, Dragonfly BSD, IBM AIX, Apple macOS). On Microsoft Windows,
+VirtualFree(MEM_DECOMMIT)
+is invoked. On many systems, there is also
+MADV_FREE
+, which would be a deferred variant of
+MADV_DONTNEED
+, not freeing the virtual memory mapping immediately. We prefer immediate freeing so that the resident set size of the process reflects the current
+innodb_buffer_pool_size
+value. Shrinking the buffer pool is a rarely executed intensive operation, and the immediate configuration of the MMU mappings should not incur significant additional penalty.
+The
+Innodb_buffer_pool_resize_status
+variable is removed. Issuing
+SET GLOBAL innodb_buffer_pool_size
+blocks until the buffer pool has been resized or the operation was aborted by a
+KILL
+or
+SHUTDOWN
+command, a client disconnect, or an interrupt.
+innodb_old_blocks_pct and innodb_old_blocks_time
+The default 37% reserved for the old list can be adjusted by changing the value of
+innodb_old_blocks_pct
+. It can accept anything between 5% and 95%.
+The
+innodb_old_blocks_time
+variable specifies the delay before a block can be moved from the old to the new sublist.
+0
+means no delay, while the default has been set to
+1000
+.
+Before changing either of these values from their defaults, make sure you understand the impact and how your system currently uses the buffer. Their main reason for existence is to reduce the impact of full table scans, which are usually infrequent, but large, and previously could clear everything from the buffer. Setting a non-zero delay could help in situations where full table scans are performed in quick succession.
+Temporarily changing these values can also be useful to avoid the negative impact of a full table scan, as explained in
+InnoDB logical backups
+.
+Dumping and Restoring the Buffer Pool
+When the server starts, the buffer pool is empty. As it starts to access data, the buffer pool will slowly be populated. As more data are accessed, the most frequently accessed data are put into the buffer pool, and old data may be evicted. This means that a certain period of time is necessary before the buffer pool is really useful. This period of time is called the warmup.
+InnoDB can dump the buffer pool before the server shuts down, and restore it when it starts again. If this feature is used, no warmup is necessary. Use the
+innodb_buffer_pool_dump_at_shutdown
+and
+innodb_buffer_pool_load_at_startup
+system variables to enable or disable the buffer pool dump at shutdown and the restore at startup respectively.
+It is also possible to dump the InnoDB buffer pool at any moment while the server is running, and it is possible to restore the last buffer pool dump at any moment. To do this, the special
+innodb_buffer_pool_dump_now
+and
+innodb_buffer_pool_load_now
+system variables can be set to ON. When selected, their value is always OFF.
+A buffer pool restore, both at startup or at any other moment, can be aborted by setting
+innodb_buffer_pool_load_abort
+to ON.
+The file which contains the buffer pool dump is specified via the
+innodb_buffer_pool_filename
+system variable.
+See Also
+InnoDB Change Buffering
+Information Schema INNODB_BUFFER_POOL_STATS Table
+Setting Innodb Buffer Pool Size Dynamically
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+InnoDB Asynchronous I/O
+Next
+InnoDB Change Buffering
+Last updated
+3 months ago
+Was this helpful?
+How the Buffer Pool Works
+innodb_buffer_pool_size
+Buffer Pool Changes
+innodb_old_blocks_pct and innodb_old_blocks_time
+Dumping and Restoring the Buffer Pool
+See Also
+Was this helpful?

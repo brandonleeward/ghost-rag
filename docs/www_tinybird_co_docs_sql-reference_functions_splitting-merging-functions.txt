@@ -1,0 +1,289 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/splitting-merging-functions
+
+Split and Merge Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Functions for splitting strings
+¶
+Copy as MD
+The following functions are used to split strings into substrings.
+splitByChar
+¶
+Splits a string into an array of substrings using a single specified character as the delimiter. Empty substrings are included if the separator appears at the beginning, end, or multiple times consecutively.
+Syntax
+¶
+splitByChar(separator, s[, max_substrings])
+Arguments
+¶
+separator
+: String. The single character used to divide the string.
+s
+: String. The input string to be split.
+max_substrings
+: Int64. An optional parameter. If greater than 0, the function returns at most this many substrings. Otherwise, it returns all possible substrings.
+Returns
+¶
+An array of strings, representing the split substrings. Array(String).
+Example
+¶
+SELECT splitByChar(',', '1,2,3,abcde')
+Result:
+┌─splitByChar(',', '1,2,3,abcde')─┐
+│ ['1','2','3','abcde']           │
+└─────────────────────────────────┘
+splitByString
+¶
+Divides a string into an array of substrings using a specified string as the delimiter. If the
+separator
+string is empty, the function splits the input string into individual characters.
+Syntax
+¶
+splitByString(separator, s[, max_substrings])
+Arguments
+¶
+separator
+: String. The string used to divide the input string.
+s
+: String. The input string to be split.
+max_substrings
+: Int64. An optional parameter. If greater than 0, the function returns at most this many substrings. Otherwise, it returns all possible substrings.
+Returns
+¶
+An array of strings, representing the split substrings. Array(String).
+Setting
+splitby_max_substrings_includes_remaining_string
+(default: 0) controls if the remaining string is included in the last element of the result array when argument
+max_substrings
+> 0.
+Example
+¶
+SELECT splitByString(', ', '1, 2 3, 4,5, abcde')
+Result:
+┌─splitByString(', ', '1, 2 3, 4,5, abcde')─┐
+│ ['1','2 3','4,5','abcde']                 │
+└───────────────────────────────────────────┘
+SELECT splitByString('', 'abcde')
+Result:
+┌─splitByString('', 'abcde')─┐
+│ ['a','b','c','d','e']      │
+└────────────────────────────┘
+splitByRegexp
+¶
+Splits a string into an array of substrings based on matches to a regular expression. If the regular expression is empty, the string is split into individual characters. If no match is found, the string is not split.
+Syntax
+¶
+splitByRegexp(regexp, s[, max_substrings])
+Arguments
+¶
+regexp
+: String or FixedString. The regular expression used as the delimiter. Must be a constant.
+s
+: String. The input string to be split.
+max_substrings
+: Int64. An optional parameter. If greater than 0, the function returns at most this many substrings. Otherwise, it returns all possible substrings.
+Returns
+¶
+An array of strings, representing the split substrings. Array(String).
+Setting
+splitby_max_substrings_includes_remaining_string
+(default: 0) controls if the remaining string is included in the last element of the result array when argument
+max_substrings
+> 0.
+Example
+¶
+SELECT splitByRegexp('\\d+', 'a12bc23de345f')
+Result:
+┌─splitByRegexp('\\d+', 'a12bc23de345f')─┐
+│ ['a','bc','de','f']                    │
+└────────────────────────────────────────┘
+SELECT splitByRegexp('', 'abcde')
+Result:
+┌─splitByRegexp('', 'abcde')─┐
+│ ['a','b','c','d','e']      │
+└────────────────────────────┘
+splitByWhitespace
+¶
+Splits a string into an array of substrings, using any sequence of whitespace characters as the delimiter.
+Syntax
+¶
+splitByWhitespace(s[, max_substrings])
+Arguments
+¶
+s
+: String. The input string to be split.
+max_substrings
+: Int64. An optional parameter. If greater than 0, the function returns at most this many substrings. Otherwise, it returns all possible substrings.
+Returns
+¶
+An array of strings, representing the split substrings. Array(String).
+Setting
+splitby_max_substrings_includes_remaining_string
+(default: 0) controls if the remaining string is included in the last element of the result array when argument
+max_substrings
+> 0.
+Example
+¶
+SELECT splitByWhitespace('  1!  a,  b.  ')
+Result:
+┌─splitByWhitespace('  1!  a,  b.  ')─┐
+│ ['1!','a,','b.']                    │
+└─────────────────────────────────────┘
+splitByNonAlpha
+¶
+Splits a string into an array of substrings, using any non-alphabetic characters (whitespace or punctuation) as delimiters.
+Syntax
+¶
+splitByNonAlpha(s[, max_substrings])
+Arguments
+¶
+s
+: String. The input string to be split.
+max_substrings
+: Int64. An optional parameter. If greater than 0, the function returns at most this many substrings. Otherwise, it returns all possible substrings.
+Returns
+¶
+An array of strings, representing the split substrings. Array(String).
+Setting
+splitby_max_substrings_includes_remaining_string
+(default: 0) controls if the remaining string is included in the last element of the result array when argument
+max_substrings
+> 0.
+Example
+¶
+SELECT splitByNonAlpha('  1!  a,  b.  ')
+Result:
+┌─splitByNonAlpha('  1!  a,  b.  ')─┐
+│ ['1','a','b']                     │
+└───────────────────────────────────┘
+arrayStringConcat
+¶
+Concatenates all elements of an array into a single string, optionally separated by a specified delimiter.
+Syntax
+¶
+arrayStringConcat(arr[, separator])
+Arguments
+¶
+arr
+: Array. The array of values to concatenate.
+separator
+: String. An optional string to insert between array elements. Defaults to an empty string if not provided.
+Returns
+¶
+A single string resulting from the concatenation. String.
+Example
+¶
+SELECT arrayStringConcat(['12/05/2021', '12:50:00'], ' ') AS DateString
+Result:
+┌─DateString──────────┐
+│ 12/05/2021 12:50:00 │
+└─────────────────────┘
+alphaTokens
+¶
+Extracts sequences of consecutive alphabetic characters (a-z, A-Z) from a string into an array of substrings.
+Syntax
+¶
+alphaTokens(s[, max_substrings])
+Alias:
+splitByAlpha
+Arguments
+¶
+s
+: String. The input string to extract tokens from.
+max_substrings
+: Int64. An optional parameter. If greater than 0, the function returns at most this many substrings. Otherwise, it returns all possible substrings.
+Returns
+¶
+An array of strings, containing only the alphabetic tokens. Array(String).
+Setting
+splitby_max_substrings_includes_remaining_string
+(default: 0) controls if the remaining string is included in the last element of the result array when argument
+max_substrings
+> 0.
+Example
+¶
+SELECT alphaTokens('abca1abc')
+Result:
+┌─alphaTokens('abca1abc')─┐
+│ ['abca','abc']          │
+└─────────────────────────┘
+extractAllGroups
+¶
+Extracts all non-overlapping matches of a regular expression from a string, returning each capturing group as a separate element within nested arrays.
+Syntax
+¶
+extractAllGroups(text, regexp)
+Arguments
+¶
+text
+: String or FixedString. The input string to search within.
+regexp
+: String or FixedString. The regular expression to match. Must be a constant.
+Returns
+¶
+An array of arrays of strings. Each inner array contains the captured groups for a single match. If no matches are found, an empty array is returned. Array(Array(String)).
+Example
+¶
+SELECT extractAllGroups('abc=123, 8="hkl"', '("[^"]+"|\\w+)=("[^"]+"|\\w+)')
+Result:
+┌─extractAllGroups('abc=123, 8="hkl"', '("[^"]+"|\\w+)=("[^"]+"|\\w+)')─┐
+│ [['abc','123'],['8','"hkl"']]                                         │
+└───────────────────────────────────────────────────────────────────────┘
+ngrams
+¶
+Splits a UTF-8 encoded string into an array of n-grams, where each n-gram is a substring of a specified length.
+Syntax
+¶
+ngrams(string, ngramsize)
+Arguments
+¶
+string
+: String or FixedString. The input string to generate n-grams from.
+ngramsize
+: UInt. The desired length of each n-gram.
+Returns
+¶
+An array of strings, where each string is an n-gram. Array(String).
+Example
+¶
+SELECT ngrams('Tinybird', 3)
+Result:
+┌─ngrams('Tinybird', 3)─────────────────┐
+│ ['Tin','iny','nyb','ybi','bir','ird'] │
+└───────────────────────────────────────┘
+tokens
+¶
+Splits a string into an array of tokens, using any non-alphanumeric ASCII characters as delimiters.
+Syntax
+¶
+tokens(input_string)
+Arguments
+¶
+input_string
+: String. The input string to tokenize.
+Returns
+¶
+An array of strings, representing the extracted tokens. Array.
+Example
+¶
+SELECT tokens('test1,;\\ test2,;\\ test3,;\\   test4') AS tokens
+Result:
+┌─tokens────────────────────────────┐
+│ ['test1','test2','test3','test4'] │
+└───────────────────────────────────┘
+Updated
+3 weeks ago
+On this page
+Functions for splitting strings
+splitByChar
+splitByString
+splitByRegexp
+splitByWhitespace
+splitByNonAlpha
+arrayStringConcat
+alphaTokens
+extractAllGroups
+ngrams
+tokens
+forward
+classic
+Ask AI

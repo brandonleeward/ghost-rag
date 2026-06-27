@@ -1,0 +1,69 @@
+Source: https://www.tinybird.com/docs/sql-reference/data-types/aggregatefunction
+
+AggregateFunction Data Type reference · Tinybird Docs
+Sign In
+Sign Up
+AggregateFunction
+¶
+Copy as MD
+This data type isn't supported at ingest. It is only supported at query time and to create Copy Data Sources or Materialized View Data Sources.
+The
+AggregateFunction
+data type stores the intermediate state of an aggregate function. This allows for partial aggregation results to be stored and later combined to produce a final aggregate value. It is commonly used in Materialized Views or Copy Data Sources to pre-aggregate data.
+To produce a value of this type, you typically use an aggregate function with the
+-State
+suffix. To retrieve the final aggregated result from one or more
+AggregateFunction
+states, you use the corresponding aggregate function with the
+-Merge
+suffix.
+Syntax
+¶
+AggregateFunction(name, types_of_arguments...)
+Parameters
+¶
+name
+: The name of the aggregate function whose state is being stored (e.g.,
+uniq
+,
+sum
+,
+quantiles
+). If the aggregate function itself takes parameters (like
+quantiles(0.5)
+), these should be included here.
+types_of_arguments
+: The data types of the arguments that the aggregate function expects (e.g.,
+UInt64
+,
+String
+).
+Example
+¶
+This example demonstrates how to first generate an
+AggregateFunction
+state using
+uniqState
+and then combine and finalize it using
+uniqMerge
+.
+SELECT
+    uniqMerge(state_col) AS final_unique_count
+FROM
+(
+    SELECT
+        uniqState(number) AS state_col
+    FROM numbers(5)
+    GROUP BY number % 2 -- Creates two intermediate states: one for even numbers, one for odd
+) AS subquery;
+Result:
+┌─final_unique_count─┐
+│                  5 │
+└────────────────────┘
+Updated
+3 weeks ago
+On this page
+AggregateFunction
+forward
+classic
+Ask AI

@@ -1,0 +1,48 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-materialization
+
+tb materialization · Tinybird Docs
+Sign In
+Sign Up
+tb materialization
+¶
+Copy as MD
+Manage materialized views. Global options apply to this command. See
+Global options
+.
+The following subcommands are available:
+Subcommand
+Description
+ls
+Lists materialized views.
+tb materialization ls
+¶
+Lists materialized views.
+Option
+Description
+--match TEXT
+Retrieves any resource matching the pattern.
+--format [json]
+Returns the results in the specified format.
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✓ Yes (default)
+Lists materialized views locally.
+--cloud
+✓ Yes
+Lists materialized views in Tinybird Cloud.
+--branch=BRANCH_NAME
+✓ Yes
+Lists materialized views in a branch.
+Updated
+6 months ago
+Looking for Classic docs?
+On this page
+tb materialization
+tb materialization ls
+Environment support
+forward
+Ask AI

@@ -1,0 +1,521 @@
+Source: https://www.tinybird.com/docs/forward/ingest-data/connectors/dynamodb
+
+DynamoDB connector · Tinybird Docs
+Sign In
+Sign Up
+DynamoDB connector
+¶
+Copy as MD
+Stream data from an Amazon DynamoDB table into a Tinybird data source. Tinybird performs an initial backfill of the table via a PITR (Point-in-Time Recovery) by exporting to S3, then continuously ingests changes through DynamoDB Streams (Change Data Capture).
+Use the DynamoDB connector when you want to mirror an operational DynamoDB table into Tinybird for analytics, while keeping it up to date in near real time.
+How it works
+¶
+When you deploy a DynamoDB data source, Tinybird does two things:
+Initial export
+: triggers an on-demand PITR export of your table to an S3 bucket you own, then loads that snapshot into the data source. AWS exports can take several minutes. The process will keep polling until AWS marks the export as
+COMPLETED
+.
+Change Data Capture (CDC)
+: starts a worker on Tinybird's infrastructure that reads from DynamoDB Streams and appends inserts, updates, and deletes to the same data source. Each row in the Data Source represents a
+change
+to your table, not the current state. To keep its size under control DynamoDB Data Sources use the
+ReplacingMergeTree
+engine
+. See
+Query the data
+below for considerations.
+Requirements
+¶
+Before you create the connection, make sure your DynamoDB table meets these requirements:
+Point-in-Time Recovery (PITR)
+is enabled on the table.
+DynamoDB Streams
+is enabled, with a stream view type of
+NEW_IMAGE
+or
+NEW_AND_OLD_IMAGES
+.
+The table should not be larger than
+500 GB
+and write no more than
+250 WCU (Write Capacity Unit)
+(≈ 250 KB/s of writes). If you need higher limits, contact
+Tinybird support
+.
+AWS permissions
+¶
+Tinybird ingests from DynamoDB by assuming an IAM role in
+your
+AWS account via
+sts:AssumeRole
+with an external ID. The role needs two policies: an
+access policy
+(what Tinybird may do) and a
+trust policy
+(who may assume it). You need to create both policies in AWS.
+AWS Access Policy
+AWS Trust Policy
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:Scan",
+        "dynamodb:DescribeStream",
+        "dynamodb:DescribeExport",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:DescribeTable",
+        "dynamodb:DescribeContinuousBackups",
+        "dynamodb:ExportTableToPointInTime",
+        "dynamodb:UpdateTable",
+        "dynamodb:UpdateContinuousBackups"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:us-east-1:123456789012:table/orders",
+        "arn:aws:dynamodb:us-east-1:123456789012:table/orders/stream/*",
+        "arn:aws:dynamodb:us-east-1:123456789012:table/orders/export/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:ListBucket"],
+      "Resource": [
+        "arn:aws:s3:::my-orders-exports",
+        "arn:aws:s3:::my-orders-exports/*"
+      ]
+    }
+  ]
+}
+The access policy grants read on the table, its stream, and its exports, plus read-write on the export bucket. Scope the resources to your table and bucket.
+dynamodb:UpdateTable
+and
+dynamodb:UpdateContinuousBackups
+let the connector enable PITR and Streams (
+NEW_AND_OLD_IMAGES
+) on the table if they aren't already on.
+The trust policy must name Tinybird's connector account for your region and environment, and the Workspace's external ID. The account and external ID differ per region and environment. See
+Set up the connector
+section to see how to get
+<TINYBIRD_CONNECTOR_ACCOUNT>
+and
+<EXTERNAL_ID>
+values.
+A
+403 ... include the following external ID
+error means the trust policy's external ID or
+Principal
+account doesn't match what Tinybird presents when it assumes the role. If you defined the connection in code without running
+tb connection create dynamodb
+, the trust policy is likely missing the Workspace-specific external ID entirely. If the external ID is already there, the
+Principal
+account is wrong for this environment: Tinybird assumes the role from a different account per region and environment. Either way, the
+tb connection create dynamodb
+output is the source of truth.
+One role can serve many Workspaces.
+sts:ExternalId
+accepts a list, so you can add more Workspaces' external IDs to the same role:
+"sts:ExternalId": ["<workspace-a-id>", "<workspace-b-id>"]
+.
+Environment considerations
+¶
+The DynamoDB connector behaves differently across the Cloud, Branch, and Local environments. PITR exports and stream reads run in
+your
+AWS account, but the AWS account that assumes your IAM role changes from one environment to the next — so the trust policy you write depends on where the connector runs.
+Cloud environment
+¶
+In Tinybird Cloud, Tinybird uses its own AWS account to assume the IAM role you create. When you deploy to your main Cloud Workspace, use
+tb deploy
+as usual.
+Branch environment
+¶
+When you test a data source using the DynamoDB connector in a Cloud Branch, include
+--with-connections
+so Tinybird sets up the DynamoDB connections in the branch:
+tb build --with-connections
+A cloud branch reuses the same connection (and therefore the same IAM role) as the parent Workspace, so no extra AWS setup is needed. To avoid duplicate exports and CDC workers competing over the same DynamoDB stream, point branch Data Sources at a separate test table.
+PITR exports and CDC run on Cloud branches and in Local, not just main. A fresh PITR export is triggered whenever the connection file becomes active in a new context:
+Declaring the connection in a branch triggers an export in that branch.
+Checking out another branch triggers another export for that branch.
+Moving a connection declared in a branch up to main triggers an export in main.
+Local environment
+¶
+Tinybird Local runs in a container. Because PITR exports run in your AWS account, Tinybird Local needs your local AWS credentials to assume the role:
+tb local restart --use-aws-creds
+The trust policy differs per environment: Cloud is assumed by Tinybird's AWS account, while Local is assumed by the AWS account of the credentials you pass with
+--use-aws-creds
+. When you create the connection, choose
+Local
+,
+Cloud
+, or
+Both
+so the generated trust policy lists the right account IDs. If local credentials aren't available, the CLI warns you and continues Cloud-only — the connection stays valid for
+tb --cloud deploy
+, but
+tb build
+and
+tb deploy
+against Local skip the DynamoDB resource.
+Set up the connector
+¶
+The Tinybird CLI includes a wizard that walks you through the whole flow: creating the IAM role, generating the
+.connection
+and
+.datasource
+files, and validating the table.
+tb connection create dynamodb
+Working in the TypeScript or Python SDK? Run the Tinybird CLI wizard anyway to handle the IAM role and external ID, then convert the generated
+.connection
+and
+.datasource
+files to their SDK equivalents (see the
+TypeScript SDK
+and
+Python SDK
+tabs below). The IAM role and secret carry over unchanged.
+You'll be asked for:
+A name for the connection.
+The DynamoDB
+table name
+and
+export bucket name
+(used to scope the IAM policy — use
+*
+for unrestricted).
+The AWS
+region
+of your table.
+Which environments will use the connection:
+Local
+,
+Cloud
+, or
+Both
+. Tinybird builds a trust policy containing the AWS account IDs of the selected environments.
+The wizard prints a managed IAM
+access policy
+and
+trust policy
+with the correct values for you to paste into AWS. After you create the role, paste its ARN back into the CLI. Tinybird then validates the table and writes the connection file.
+Finally, the wizard asks for:
+The
+DynamoDB table ARN
+(e.g.
+arn:aws:dynamodb:us-east-1:123456789012:table/my-table
+).
+The
+S3 export bucket
+(just the bucket name, no
+s3://
+prefix).
+It generates
+connections/<name>.connection
+and
+datasources/<name>.datasource
+, ready to deploy. The generated
+.datasource
+file includes the table's partition key (pk) and sort key (sk) as typed columns, extracted from the change record with
+json:
+paths and set as the engine sorting key, so you can query and filter on them without writing
+JSONExtract*
+expressions yourself.
+Build the project locally or on a Tinybird Cloud Branch to validate the generated datafiles. Include
+--with-connections
+flag so the DynamoDB connections are set up:
+tb build --with-connections
+When the build succeeds, deploy to Tinybird Cloud:
+tb --cloud deploy
+Manual setup
+¶
+To write the
+.connection
+and
+.datasource
+files manually instead of using the wizard, follow these steps.
+1. Create the IAM role
+¶
+Create the IAM role Tinybird assumes to read your table, its stream, and the S3 export bucket. The role needs an
+access policy
+and a
+trust policy
+— see
+AWS permissions
+for both policy documents, the per-environment placeholders, and the AWS IAM console steps.
+The trust policy's
+Principal
+account and
+ExternalId
+differ per region and environment.
+To create the role in the AWS IAM console:
+Go to
+Policies
+→
+Create policy
+, paste the access policy JSON from above, and name it (for example,
+tinybird-dynamodb-orders
+).
+Go to
+Roles
+→
+Create role
+→
+Custom trust policy
+, and paste the trust policy JSON from above.
+Attach the access policy from step 1, then name the role (for example,
+TinybirdRole-dynamo
+).
+Copy the role ARN and paste it back into the wizard, or store it as a secret (see
+Add the role ARN as a secret
+).
+Since the
+<TINYBIRD_CONNECTOR_ACCOUNT>
+and
+<EXTERNAL_ID>
+values vary per environment, use the Tinybird CLI wizard
+tb connection create dynamodb
+to get them.
+2. Add the role ARN as a secret
+¶
+Store the role ARN as a Tinybird secret so it isn't checked into your repo. When you create the secret manually, its name
+must
+follow the format
+dynamodb_role_arn_<connection_name>
+, where
+<connection_name>
+matches the name of your
+.connection
+file — Tinybird looks up the secret by this exact name:
+tb secret set dynamodb_role_arn_<connection_name> "arn:aws:iam::123456789012:role/tb-my-dynamodb-role"
+The wizard does this automatically in Local and Cloud when it creates the connection.
+3. Define the
+.connection
+file
+¶
+Tinybird CLI
+TypeScript SDK
+Python SDK
+connections/my_ddb.connection
+TYPE dynamodb
+DYNAMODB_ARN {{ tb_secret("dynamodb_role_arn_my_ddb") }}
+DYNAMODB_REGION us-east-1
+Instruction
+Required
+Description
+TYPE
+Yes
+Must be
+dynamodb
+.
+DYNAMODB_ARN
+Yes
+The IAM role ARN. Reference via
+tb_secret(...)
+so it stays out of git.
+DYNAMODB_REGION
+Yes
+The AWS region the DynamoDB table lives in. Must match the region in
+IMPORT_TABLE_ARN
+. See
+AWS service endpoints
+for valid region codes.
+4. Define the
+.datasource
+file
+¶
+Tinybird CLI
+TypeScript SDK
+Python SDK
+datasources/orders.datasource
+SCHEMA >
+    `<partition_key>` String `json:$.Item.<partition_key>`,
+    `<sort_key>` String `json:$.Item.<sort_key>`,
+    `_record` String `json:$.NewImage`,
+    `_old_record` Nullable(String) `json:$.OldImage`,
+    `_timestamp` DateTime64(3) `json:$.ApproximateCreationDateTime`,
+    `_event_name` LowCardinality(String) `json:$.eventName`,
+    `_is_deleted` UInt8 `json:$._is_deleted`
+
+ENGINE "ReplacingMergeTree"
+ENGINE_SORTING_KEY <partition_key>, <sort_key>
+ENGINE_VER _timestamp
+ENGINE_IS_DELETED _is_deleted
+
+IMPORT_CONNECTION_NAME 'my_ddb'
+IMPORT_TABLE_ARN 'arn:aws:dynamodb:us-east-1:123456789012:table/orders'
+IMPORT_EXPORT_BUCKET 'my-orders-exports'
+The first columns are the table's partition key (pk) and sort key (sk), named after your table's key attributes.
+tb connection create dynamodb
+adds them automatically, pulls them from the item with
+json:
+paths, and uses them as the
+ENGINE_SORTING_KEY
+.
+DynamoDB data sources
+must
+use the
+ReplacingMergeTree
+engine. Other engines are rejected at build time.
+Instruction
+Required
+Description
+IMPORT_CONNECTION_NAME
+Yes
+Name of the
+.connection
+file (without the extension).
+IMPORT_TABLE_ARN
+Yes
+Full ARN of the DynamoDB table to mirror. Must start with
+arn:aws:dynamodb:
+.
+IMPORT_EXPORT_BUCKET
+Yes
+Name of the S3 bucket where PITR exports will be written. Bucket name only — no
+s3://
+prefix.
+Schema columns
+Alongside the key columns described above, every DynamoDB data source has these system columns, each populated from the change record with a
+json:
+path:
+Column
+Type
+json:
+path
+Description
+_record
+String
+$.NewImage
+JSON-encoded current item image after the change.
+_old_record
+Nullable(String)
+$.OldImage
+JSON-encoded previous item image. Only present when the stream view type is
+NEW_AND_OLD_IMAGES
+.
+_timestamp
+DateTime64(3)
+$.ApproximateCreationDateTime
+Approximate time the change happened in DynamoDB. Used as the
+ReplacingMergeTree
+version column.
+_event_name
+LowCardinality(String)
+$.eventName
+INSERT
+,
+MODIFY
+,
+REMOVE
+, or
+EXPORT
+for initial backfill rows.
+_is_deleted
+UInt8
+$._is_deleted
+1
+for deletes,
+0
+otherwise. Drives
+ReplacingMergeTree
+'s deleted-row semantics.
+To extract any other typed columns from your items, query
+_record
+with
+JSONExtract*
+functions in a pipe rather than adding more columns to the data source. The connector maps columns from the change-record envelope (
+$.NewImage
+,
+$.eventName
+, and so on), not from the attributes inside your item, so item fields aren't available as top-level columns. Keeping the full item in
+_record
+also means the mirror keeps working when DynamoDB attributes are added, renamed, or retyped, since there's no fixed item schema to migrate. If a field is read often and you want it as a typed, pre-computed column, extract it in a downstream materialized view instead.
+Query the data
+¶
+Because the data source captures
+every
+change, querying it directly will return multiple rows per item. Use
+FINAL
+(or rely on the underlying ReplacingMergeTree merges) to get the current state:
+SELECT
+    JSONExtractString(_record, 'id')        AS id,
+    JSONExtractString(_record, 'status')    AS status,
+    JSONExtractFloat (_record, 'amount')    AS amount
+FROM orders FINAL
+Deploying
+¶
+Deploy to Tinybird Cloud:
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb --cloud deploy
+On deploy, Tinybird:
+Validates the table (PITR enabled, streams enabled with a supported view type, within size and WCU limits).
+Triggers the PITR export to your S3 bucket.
+Streams the export into the data source.
+Starts the CDC worker.
+You'll see a message like:
+△ DynamoDB initial export backfill started for datasource 'orders'.
+  AWS exports can stay in progress for several minutes; Tinybird Local will keep
+  retrying the import until AWS marks the export as completed.
+  Export ARN: arn:aws:dynamodb:us-east-1:123456789012:export/...
+Validation errors
+¶
+tb deploy
+runs the same validation as
+tb connection create dynamodb
+. Common errors:
+Error
+What to do
+The DynamoDB table was not found.
+Check the table ARN and that the region in the
+.connection
+file matches the ARN's region.
+Point-in-Time Recovery (PITR) must be enabled.
+Enable PITR on the table in the DynamoDB console.
+DynamoDB Streams must be enabled.
+Enable streams on the table.
+DynamoDB Streams must use NEW_IMAGE or NEW_AND_OLD_IMAGES.
+Change the stream view type —
+KEYS_ONLY
+and
+OLD_IMAGE
+are not supported.
+The DynamoDB table exceeds the current size limit.
+The table is over 500 GB. Contact support to raise the limit.
+The DynamoDB table exceeds the current write-capacity limit.
+The table writes more than 250 WCU. Contact support to raise the limit.
+Limitations
+¶
+One CDC worker per data source. Throughput is bounded by ~250 WCU.
+Stream records have a 24-hour retention in DynamoDB. If CDC is paused for more than 24 hours (for example, a broken IAM role), some changes will be missed and you'll need to re-backfill.
+CDC delivery is
+at-least-once
+— duplicate change events can appear in recovery scenarios.
+ReplacingMergeTree
+with
+_timestamp
+as the version column collapses them on read with
+FINAL
+.
+Updated
+5 days ago
+Looking for Classic docs?
+On this page
+DynamoDB connector
+How it works
+Requirements
+AWS permissions
+Environment considerations
+Cloud environment
+Branch environment
+Local environment
+Set up the connector
+Manual setup
+Query the data
+Deploying
+Validation errors
+Limitations
+forward
+Ask AI

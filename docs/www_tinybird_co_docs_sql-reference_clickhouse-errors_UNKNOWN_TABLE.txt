@@ -1,0 +1,210 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/UNKNOWN_TABLE
+
+UNKNOWN_TABLE ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+UNKNOWN_TABLE ClickHouse error
+¶
+Copy as MD
+This error occurs when you reference a table that doesn't exist in the current database. It's one of the most common errors and usually indicates a typo or missing table creation.
+The
+UNKNOWN_TABLE
+error in ClickHouse (and Tinybird) happens when you try to reference a table that doesn't exist in the current database context. This is different from
+UNKNOWN_IDENTIFIER
+which typically refers to columns or functions. The table might not exist, be in a different database, or have a different name than expected.
+What causes this error
+¶
+You'll typically see it when:
+Referencing a table that hasn't been created yet
+Using incorrect table names (typos, case sensitivity)
+Referencing tables from different databases without proper qualification
+Using table names that contain special characters
+Referencing temporary tables that have expired
+Using table aliases incorrectly
+ClickHouse table names are case-sensitive. Make sure you're using the exact case as defined in the table creation.
+Example errors
+¶
+Fails: table doesn't exist
+SELECT * FROM non_existent_table
+Fails: wrong database context
+USE database1;
+SELECT * FROM table_in_database2
+Fails: typo in table name
+SELECT * FROM usrs  -- Should be 'users'
+Fails: case sensitivity issue
+SELECT * FROM Users  -- Should be 'users' (lowercase)
+Fails: special characters in table name
+SELECT * FROM `user-events`  -- Table name with hyphens
+How to fix it
+¶
+Check if the table exists
+¶
+Verify table existence in the current database:
+Check existing tables
+SELECT name FROM system.tables WHERE database = currentDatabase()
+List all tables
+¶
+See all available tables:
+List all tables
+SELECT database, name FROM system.tables
+Check specific database
+¶
+Look for tables in a specific database:
+Check specific database
+SELECT name FROM system.tables WHERE database = 'your_database_name'
+Use proper database qualification
+¶
+Specify the database when referencing tables:
+Fix: specify database
+SELECT * FROM database_name.table_name
+Common patterns and solutions
+¶
+Table creation
+¶
+Create the missing table:
+Create missing table
+CREATE TABLE users (
+    id UInt64,
+    name String,
+    email String,
+    created_at DateTime
+) ENGINE = MergeTree()
+ORDER BY id
+Database switching
+¶
+Switch to the correct database:
+Switch database
+USE correct_database_name;
+SELECT * FROM table_name
+Cross-database queries
+¶
+Query tables across databases:
+Cross-database query
+SELECT * FROM database1.table1
+JOIN database2.table2 ON table1.id = table2.id
+Table aliases
+¶
+Use proper table aliases:
+Proper table aliases
+SELECT u.id, u.name, e.event_type
+FROM users u
+JOIN events e ON u.id = e.user_id
+Tinybird-specific notes
+¶
+In Tinybird, this error often occurs when:
+Referencing Data Sources that don't exist
+Using incorrect Data Source names in Pipes
+Referencing Materialized Views that haven't been created
+Using wrong workspace context
+To debug in Tinybird:
+Check your Data Sources list in the UI
+Verify Data Source names in your Pipes
+Ensure Materialized Views are properly created
+Check workspace permissions and context
+In Tinybird, Data Sources are equivalent to tables. Make sure your Data Source names match exactly.
+Best practices
+¶
+Table naming
+¶
+Use consistent naming conventions
+Avoid special characters in table names
+Use descriptive but concise names
+Follow your organization's naming standards
+Database organization
+¶
+Group related tables in the same database
+Use meaningful database names
+Document table relationships
+Keep table names consistent across environments
+Query writing
+¶
+Always verify table names before running queries
+Use database qualification for cross-database queries
+Test queries with small datasets first
+Use table aliases for complex queries
+Troubleshooting steps
+¶
+Step 1: Verify table existence
+¶
+Check if table exists
+SELECT name FROM system.tables
+WHERE database = currentDatabase()
+  AND name = 'your_table_name'
+Step 2: Check database context
+¶
+Check current database
+SELECT currentDatabase() as current_db
+Step 3: List similar tables
+¶
+Find similar table names
+SELECT name FROM system.tables
+WHERE database = currentDatabase()
+  AND name LIKE '%table%'
+Step 4: Check permissions
+¶
+Check table permissions
+SELECT database, name, engine
+FROM system.tables
+WHERE database = currentDatabase()
+Common table name patterns
+¶
+User-related tables
+¶
+Common user table names
+-- Check for user tables
+SELECT name FROM system.tables
+WHERE database = currentDatabase()
+  AND (name LIKE '%user%' OR name LIKE '%customer%' OR name LIKE '%account%')
+Event-related tables
+¶
+Common event table names
+-- Check for event tables
+SELECT name FROM system.tables
+WHERE database = currentDatabase()
+  AND (name LIKE '%event%' OR name LIKE '%log%' OR name LIKE '%activity%')
+Time-series tables
+¶
+Common time-series table names
+-- Check for time-series tables
+SELECT name FROM system.tables
+WHERE database = currentDatabase()
+  AND (name LIKE '%metric%' OR name LIKE '%time%' OR name LIKE '%date%')
+See also
+¶
+Working with Data Sources
+Common identifier errors
+Table Engines
+Updated
+4 weeks ago
+On this page
+UNKNOWN_TABLE ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Check if the table exists
+List all tables
+Check specific database
+Use proper database qualification
+Common patterns and solutions
+Table creation
+Database switching
+Cross-database queries
+Table aliases
+Tinybird-specific notes
+Best practices
+Table naming
+Database organization
+Query writing
+Troubleshooting steps
+Step 1: Verify table existence
+Step 2: Check database context
+Step 3: List similar tables
+Step 4: Check permissions
+Common table name patterns
+User-related tables
+Event-related tables
+Time-series tables
+See also
+forward
+classic
+Ask AI

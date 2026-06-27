@@ -1,0 +1,130 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/ILLEGAL_TYPE_OF_ARGUMENT
+
+ILLEGAL\_TYPE\_OF\_ARGUMENT ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+ILLEGAL_TYPE_OF_ARGUMENT ClickHouse error
+¶
+Copy as MD
+This error usually means you're passing the wrong type to a function or operator. ClickHouse is strict about types, and many functions require exact matches.
+The
+ILLEGAL_TYPE_OF_ARGUMENT
+error in ClickHouse (and Tinybird) happens when a function receives an argument of the wrong type. For example, trying to sum a
+String
+, or using
+toDate
+on an
+Int
+without casting.
+This is one of the most common issues users hit when building Pipes or querying Tinybird Data Sources.
+What causes this error
+¶
+You'll typically see it when:
+Using a function with the wrong input type (e.g.,
+sum(String)
+).
+Implicit casting is not supported (ClickHouse won't auto-convert).
+You're mixing types in expressions (
+String + Int
+,
+DateTime - String
+, etc).
+Aggregations or filters using values that don't match column types.
+Example errors
+¶
+Fails: wrong type in sum()
+SELECT sum(url) FROM events
+Fails: toDate() on Int
+SELECT toDate(1234567890)
+Fails: substring() on Int
+SELECT substring(123, 1, 5)
+Fails: DateTime minus String
+SELECT now() - '5'
+How to fix it
+¶
+Use explicit casts and make sure argument types match the function expectations:
+Fix: cast String to Float64
+SELECT sum(toFloat64(url)) FROM events
+Fix: convert Int to DateTime first
+SELECT toDate(toDateTime(1234567890))
+Fix: subtract seconds using interval
+SELECT now() - INTERVAL 5 SECOND
+Common casting functions
+¶
+ClickHouse doesn't automatically cast strings to numbers. Use these functions for explicit type conversion:
+Function
+Purpose
+Example
+toInt32()
+,
+toInt64()
+Convert to integer
+toInt32('123')
+toFloat32()
+,
+toFloat64()
+Convert to float
+toFloat64('123.45')
+toString()
+Convert to string
+toString(123)
+toDate()
+,
+toDateTime()
+Convert to date/datetime
+toDateTime('2023-01-01 12:00:00')
+parseDateTimeBestEffort()
+Smart datetime parsing
+parseDateTimeBestEffort('2023/01/01 12:00:00')
+toInt32OrZero()
+,
+toFloat64OrZero()
+Safe conversion (returns 0 on failure)
+toInt32OrZero('abc')
+→
+0
+Safe conversion with try functions
+¶
+Use the
+try
+family of functions when you're unsure about data quality:
+Safe conversion examples
+SELECT toInt32OrZero('123') as safe_int,      -- Returns 123
+       toInt32OrZero('abc') as failed_int,    -- Returns 0
+       toFloat64OrZero('123.45') as safe_float -- Returns 123.45
+Proper datetime handling
+¶
+For datetime operations, use proper functions:
+Correct datetime examples
+SELECT toDateTime('2023-01-01 12:00:00') as parsed_datetime,
+       parseDateTimeBestEffort('2023/01/01 12:00:00') as smart_parsed,
+       now() - INTERVAL 5 SECOND as five_seconds_ago
+Tinybird-specific notes
+¶
+In Pipes, the schema inference might auto-assign wrong types if input data is inconsistent. You can:
+Use
+toTypeName()
+to debug columns and check what's being inferred.
+Add a
+CAST()
+early in the pipe to normalize types.
+See also
+¶
+ClickHouse Type Conversion docs
+Working with Date and Time
+Common function errors
+Updated
+7 months ago
+On this page
+ILLEGAL_TYPE_OF_ARGUMENT ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Common casting functions
+Safe conversion with try functions
+Proper datetime handling
+Tinybird-specific notes
+See also
+forward
+classic
+Ask AI

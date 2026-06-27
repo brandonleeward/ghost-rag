@@ -1,0 +1,100 @@
+Source: https://www.tinybird.com/docs/sql-reference/data-types/tuple
+
+Tuple Data Type reference · Tinybird Docs
+Sign In
+Sign Up
+Tuple(T1, T2, ...)
+¶
+Copy as MD
+This data type isn't supported at ingest. It is only supported at query time and to create Copy Data Sources or Materialized View Data Sources.
+A tuple is a fixed-size collection of elements, where each element can have a different data type. Tuples must contain at least one element.
+Tuples are useful for temporarily grouping related values, such as when using
+IN
+expressions or passing multiple arguments to higher-order functions. When returned as a query result, tuples are typically represented as comma-separated values enclosed in parentheses.
+Creating tuples
+¶
+You can create a tuple using the
+tuple()
+function or by enclosing comma-separated values in parentheses.
+Syntax
+¶
+tuple(T1, T2, ...)
+Arguments
+¶
+T1, T2, ...
+: Any valid SQL expressions or literal values. Each argument can be of a different data type.
+Returns
+¶
+A tuple containing the provided elements.
+Tuple(typeOf(T1), typeOf(T2), ...)
+Example
+¶
+SELECT tuple(1, 'a') AS x, toTypeName(x)
+Result:
+┌─x───────┬─toTypeName(tuple(1, 'a'))─┐
+│ (1,'a') │ Tuple(UInt8, String)      │
+└─────────┴───────────────────────────┘
+A tuple can also contain a single element:
+Example
+¶
+SELECT tuple('a') AS x
+Result:
+┌─x─────┐
+│ ('a') │
+└───────┘
+You can also create tuples using a shorthand syntax by simply enclosing the elements in parentheses:
+Example
+¶
+SELECT (1, 'a') AS x, (today(), rand(), 'someString') AS y, ('a') AS not_a_tuple
+Result:
+┌─x───────┬─y──────────────────────────────────────┬─not_a_tuple─┐
+│ (1,'a') │ ('2024-01-01',1234567890,'someString') │ a           │
+└─────────┴────────────────────────────────────────┴─────────────┘
+Note: The
+rand()
+function returns a different value each time it's called.
+Data type detection
+¶
+When tuples are created on the fly, Tinybird automatically infers the most appropriate and smallest data type for each element. If an element is
+NULL
+, its inferred type will be
+Nullable(Nothing)
+.
+Example
+¶
+SELECT tuple(1, NULL) AS x, toTypeName(x)
+Result:
+┌─x─────────┬─toTypeName(tuple(1, NULL))──────┐
+│ (1, NULL) │ Tuple(UInt8, Nullable(Nothing)) │
+└───────────┴─────────────────────────────────┘
+Referring to tuple elements
+¶
+You can access individual elements within a tuple using dot notation with their 1-based index. For named tuples (typically defined within a Data Source schema), you can also access elements by their assigned name using dot notation.
+Example
+¶
+SELECT (10, 'apple', 3.14).1 AS int_val, (10, 'apple', 3.14).2 AS string_val
+Result:
+┌─int_val─┬─string_val─┐
+│      10 │ apple      │
+└─────────┴────────────┘
+Comparison operations with tuple
+¶
+Tuples can be compared element by element from left to right. The comparison stops at the first pair of elements that are not equal, determining the overall comparison result. If all elements are equal, the tuples are considered equal.
+Example
+¶
+SELECT (1, 'z') > (1, 'a') AS c1, (2022, 01, 02) > (2023, 04, 02) AS c2, (1,2,3) = (3,2,1) AS c3
+Result:
+┌─c1─┬─c2─┬─c3─┐
+│  1 │  0 │  0 │
+└────┴────┴────┘
+Updated
+3 weeks ago
+On this page
+Tuple(T1, T2, ...)
+Creating tuples
+Data type detection
+Referring to tuple elements
+Comparison operations with tuple
+forward
+classic
+Ask AI

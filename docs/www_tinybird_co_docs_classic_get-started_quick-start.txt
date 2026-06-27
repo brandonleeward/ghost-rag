@@ -1,0 +1,115 @@
+Source: https://www.tinybird.com/docs/classic/get-started/quick-start
+
+Classic: Get started with Tinybird · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Get started with Tinybird
+¶
+Copy as MD
+With Tinybird, you can ingest data from anywhere, query and transform it using SQL, and publish it as high-concurrency, low-latency REST API endpoints.
+Read on to learn how to create a Workspace, ingest data, create a query, publish an API, and confirm your setup works properly using the Tinybird user interface.
+1
+Create your Tinybird account
+¶
+Create a Tinybird account
+. It's free and no credit card is required. See
+Tinybird pricing plans
+for more information.
+Sign up for Tinybird
+2
+Select your cloud provider and region
+¶
+When logging in to Tinybird, select the cloud provider and region you want to work in.
+3
+Create your Workspace
+¶
+A
+Workspace
+is an area that contains a set of Tinybird resources, including Data Sources, Pipes, nodes, API Endpoints, and Tokens.
+Create a Workspace named
+customer_rewards
+. The name must be unique.
+4
+Download and ingest sample data
+¶
+Download the following sample data from a fictitious online coffee shop:
+Download data file
+Select
+File Upload
+and follow the instructions to load the file.
+Select
+Create Data Source
+to automatically create the
+orders
+Data Source
+.
+5
+Query data using a Pipe
+¶
+You can create
+Pipes
+to query your data using SQL.
+To create a Pipe, select
+Pipes
+and then
+Create Pipe
+.
+Name your Pipe
+rewards
+and add the following SQL:
+select count() from orders
+Select the node name and change it to
+rewards_count
+.
+Select
+Run
+to preview the result of your Pipe.
+6
+Publish your query as an API
+¶
+You can turn any Pipe into a high-concurrency, low-latency API Endpoint.
+Select
+Create API Endpoint
+and then select the
+rewards_count
+node in the menu.
+7
+Call your API
+¶
+You can test your API endpoint using a curl command. Go to the
+Output
+section of the API page and select the
+cURL
+tab.
+Copy the curl command into a Terminal window and run it.
+Congratulations! You have created your first API Endpoint in Tinybird.
+Next steps
+¶
+Check the
+Tinybird CLI Quick start
+.
+Try a template to get started quickly. See
+Templates
+.
+Learn more about
+User-Facing Analytics
+in the Use Case Hub.
+Learn about
+Tinybird Charts
+and build beautiful visualizations for your API endpoints.
+Updated
+1 month ago
+On this page
+Get started with Tinybird
+Create your Tinybird account
+Select your cloud provider and region
+Create your Workspace
+Download and ingest sample data
+Query data using a Pipe
+Publish your query as an API
+Call your API
+Next steps
+classic
+Ask AI

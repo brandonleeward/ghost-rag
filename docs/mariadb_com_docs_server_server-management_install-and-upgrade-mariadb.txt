@@ -1,0 +1,87 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb
+
+Deployment | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Deployment
+Learn to install and upgrade MariaDB Server. This section provides detailed instructions and best practices for setting up new instances and seamlessly upgrading existing ones to newer versions.
+Deployment includes installing, configuring, upgrading, downgrading, migration from other
+DBMS
+s, and automated deployment options. Here's an overview of what you can find in this section.
+MariaDB Package Repository Setup and Usage
+MariaDB Repository Setup Scripts
+MariaDB Foundation Repository Configuration Tool
+Set up RedHat, Ubuntu, Debian, and Suse repositories
+General Deployment Instructions
+Best practices
+Deployment methods
+Installing Enterprise Server
+Customer download token
+Single-node installation
+Multi-node installation (primary/replica)
+Installation with ColumnStore
+Upgrade paths
+Installing Community Server
+MariaDB ID
+Installing binary packages (executables)
+Installing from source
+Installing system tables
+Troubleshooting installation issues
+Configuring MariaDB
+Option files
+Environment variables
+Advanced configuration options
+Upgrading MariaDB
+Upgrade guides
+Upgrade paths
+Automated Deployment & Administration
+Automation systems overview
+Ansible
+Puppet
+Containers
+Kubernetes
+Vagrant
+Last updated
+2 months ago
+Was this helpful?
+Was this helpful?

@@ -1,0 +1,29 @@
+Source: https://www.tinybird.com/docs/classic/get-data-in/ingest-apis
+
+Classic: Ingest APIs · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Ingest APIs
+¶
+Copy as MD
+Tinybird provides the following APIs for ingesting data:
+The
+Data Sources API
+lets you create and manage Data Sources, as well as import data from files (CSV, NDJSON, Parquet). You can use it to create new Data Sources from files, append data to existing Data Sources, or replace data selectively. The Data Sources API supports both local and remote files, with automatic schema inference for CSV files.
+The
+Events API
+provides high-throughput streaming ingestion through a simple HTTP API. It's designed for sending JSON events individually or in batches using NDJSON format. The Events API is optimized for real-time data ingestion, supporting compression and write acknowledgements when needed.
+Both APIs require authentication using tokens with appropriate scopes. For detailed information about each API's capabilities and usage, see:
+Data Sources API documentation
+Events API documentation
+Data Sources API Reference
+Events API Reference
+Ingestion limits
+Updated
+11 months ago
+On this page
+Ingest APIs
+classic
+Ask AI

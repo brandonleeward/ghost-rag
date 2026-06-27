@@ -1,0 +1,54 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/
+
+Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Functions
+¶
+Copy as MD
+Functions in SQL are predefined operations that perform specific tasks on data. They accept input parameters, process them according to defined rules, and return results. Functions help you transform, calculate, or analyze data within your queries.
+Aggregate functions
+Arithmetic functions
+Array functions
+ArrayJoin functions
+Bit functions
+Bitmap functions
+Comparison functions
+Conditional functions
+Date and time functions
+Distance functions
+Encoding functions
+Encryption functions
+Functions for nulls
+Geo functions
+Hash functions
+IP addresses functions
+JSON functions
+Logical functions
+Machine learning functions
+Math functions
+Other functions
+Parametric functions
+Random functions
+Rounding functions
+Splitting and merging functions
+String functions
+String replace functions
+String search functions
+Time series functions
+Time window functions
+Tuple functions
+Tuple map functions
+Type conversion functions
+ULID functions
+UniqTheta functions
+URL functions
+UUID functions
+Window functions
+Updated
+1 month ago
+On this page
+Functions
+forward
+classic
+Ask AI

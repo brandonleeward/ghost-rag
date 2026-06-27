@@ -1,0 +1,175 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/TYPE_MISMATCH
+
+TYPE_MISMATCH ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+TYPE_MISMATCH ClickHouse error
+¶
+Copy as MD
+This error usually means you're trying to perform operations between values of different types that can't be automatically converted. You need to explicitly cast one or both values to compatible types.
+The
+TYPE_MISMATCH
+error in ClickHouse (and Tinybird) happens when you try to perform operations between values of different types that ClickHouse can't automatically convert. This is different from
+NO_COMMON_TYPE
+in that the types could potentially be compatible, but the specific operation or context doesn't allow automatic conversion.
+What causes this error
+¶
+You'll typically see it when:
+Comparing values of different types in WHERE clauses
+Performing arithmetic operations on mixed types
+Using incompatible types in JOIN conditions
+Passing wrong types to function parameters
+Using different types in ORDER BY or GROUP BY clauses
+Example errors
+¶
+Fails: comparing String with Int
+SELECT * FROM events WHERE user_id = 'abc'
+Fails: comparison with mixed types
+SELECT user_id = 'abc' FROM events
+Fails: JOIN with type mismatch
+SELECT * FROM users u JOIN events e ON u.id = e.user_id_string
+Fails: IN clause with mixed types
+SELECT user_id IN ('1', '2', 'abc') FROM events
+How to fix it
+¶
+Use explicit type casting
+¶
+Convert values to compatible types using CAST or type conversion functions:
+Fix: cast String to Int for comparison
+SELECT * FROM events WHERE user_id = toInt32('123')
+Fix: cast String to Int for arithmetic
+SELECT value + toInt32('10') FROM events
+Fix JOIN conditions
+¶
+Ensure JOIN conditions use compatible types:
+Fix: cast to same type in JOIN
+SELECT * FROM users u
+JOIN events e ON u.id = toInt32(e.user_id_string)
+Use proper type conversion functions
+¶
+ClickHouse provides specific conversion functions:
+Fix: use toInt32 for conversion
+SELECT * FROM events WHERE user_id = toInt32(user_id_string)
+Fix: use toString for string conversion
+SELECT toString(user_id) as user_id_str FROM events
+Common patterns and solutions
+¶
+String vs Numeric comparisons
+¶
+When comparing strings with numbers:
+Wrong: direct comparison
+WHERE user_id = '123'
+Correct: cast string to number
+WHERE user_id = toInt32('123')
+Correct: cast number to string
+WHERE toString(user_id) = '123'
+Date and DateTime operations
+¶
+When working with dates and timestamps:
+Wrong: mixing Date and DateTime
+WHERE date_column = now()
+Correct: convert to same type
+WHERE toDate(date_column) = toDate(now())
+Array operations
+¶
+When working with arrays of different types:
+Wrong: mixing array types
+SELECT [1, 2, 3] + ['a', 'b', 'c']
+Correct: convert to common type
+SELECT [toString(1), toString(2), toString(3)] + ['a', 'b', 'c']
+Advanced solutions
+¶
+Using CASE statements with mixed types
+¶
+Convert all branches to a common type:
+Fix: convert all CASE branches to String
+SELECT CASE
+    WHEN user_id = 123 THEN 'user_123'
+    WHEN user_id = 456 THEN 'user_456'
+    ELSE toString(user_id)
+END as user_label FROM events
+Working with JSON data
+¶
+When extracting values from JSON:
+Fix: cast JSON values to proper types
+SELECT
+    toInt32(JSONExtractRaw(data, 'user_id')) as user_id,
+    toString(JSONExtractRaw(data, 'event_type')) as event_type
+FROM events
+Handling NULL values
+¶
+Be careful with NULL values in type conversions:
+Fix: handle NULL in type conversion
+SELECT toInt32OrZero(user_id_string) as user_id FROM events
+Type conversion functions
+¶
+Common ClickHouse type conversion functions:
+toInt8()
+,
+toInt16()
+,
+toInt32()
+,
+toInt64()
+- Convert to integers
+toUInt8()
+,
+toUInt16()
+,
+toUInt32()
+,
+toUInt64()
+- Convert to unsigned integers
+toFloat32()
+,
+toFloat64()
+- Convert to floating point
+toString()
+- Convert to string
+toDate()
+,
+toDateTime()
+- Convert to date/time types
+toUUID()
+- Convert to UUID
+Tinybird-specific notes
+¶
+In Tinybird, this error often occurs when:
+Data Sources have inconsistent data types in the same column
+Pipes try to combine data from different sources with incompatible schemas
+Schema inference assigns wrong types to columns
+JSON data contains mixed types
+To debug in Tinybird:
+Check your Data Source schema for type consistency
+Use Schema Hints to enforce proper types
+Add explicit CAST operations in your Pipes
+Validate incoming data types in Data Sources
+See also
+¶
+ClickHouse Data Types
+Type Conversion Functions
+Common function errors
+Updated
+7 months ago
+On this page
+TYPE_MISMATCH ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Use explicit type casting
+Fix JOIN conditions
+Use proper type conversion functions
+Common patterns and solutions
+String vs Numeric comparisons
+Date and DateTime operations
+Array operations
+Advanced solutions
+Using CASE statements with mixed types
+Working with JSON data
+Handling NULL values
+Type conversion functions
+Tinybird-specific notes
+See also
+forward
+classic
+Ask AI

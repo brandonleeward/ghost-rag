@@ -1,0 +1,141 @@
+Source: https://www.tinybird.com/docs/forward/query-data/sql-api
+
+Query API · Tinybird Docs
+Sign In
+Sign Up
+Query API
+¶
+Copy as MD
+The
+Query API
+runs SQL directly against Pipes and Data Sources in your Workspace through the
+/v0/sql
+endpoint. Use it for internal tools, automation, and ad hoc queries that do not need a published Endpoint contract.
+Use API Endpoints for production query contracts that applications call repeatedly. Use the Query API when the SQL is owned by the caller, such as an internal tool, notebook, script, or debugging workflow.
+Query API requests can also use typed
+Query parameters
+when you need validated request-time values.
+Run a SQL query
+¶
+Send a request to
+/v0/sql
+with a
+q
+parameter containing the SQL query. Use a Token with read permissions for the resources you query. Use a
+static Token
+for backend services and trusted internal tools. Use a
+JWT
+for browser, user-facing, or multi-tenant access where each user or tenant needs scoped access, filters, expiration, or rate limits.
+For short queries, use
+GET
+and pass the SQL in the
+q
+query parameter:
+curl \
+  -H "Authorization: Bearer <read token or JWT>" \
+  --get \
+  --data-urlencode "q=SELECT * FROM <pipe_or_datasource> FORMAT JSON" \
+  https://api.tinybird.co/v0/sql
+Use
+POST
+when the SQL query or request parameters are large. This avoids URL length limits and keeps long queries out of the URL:
+curl \
+  -X POST \
+  -H "Authorization: Bearer <read token or JWT>" \
+  --data-urlencode "q=SELECT * FROM <pipe_or_datasource> FORMAT JSON" \
+  https://api.tinybird.co/v0/sql
+You can query Data Sources and Pipes by name. Add a
+FORMAT
+clause when you need a specific response format.
+Available response formats
+¶
+Set the response format with a ClickHouse
+FORMAT
+clause at the end of the SQL query:
+SELECT * FROM events LIMIT 10 FORMAT JSON
+Common formats include:
+Format
+Use when
+JSON
+You need the default JSON response with metadata.
+CSV
+You need comma-separated values without headers.
+CSVWithNames
+You need comma-separated values with column headers.
+JSONEachRow
+You need newline-delimited JSON.
+Parquet
+You need a binary columnar format for larger exports or downstream analytics tools.
+If you don't specify a
+FORMAT
+, Tinybird returns the default Query API format. For the full endpoint contract, see the
+Query API reference
+.
+Use query parameters
+¶
+Query API requests can use Tinybird's
+templating language
+and receive request parameters the same way API Endpoints do. This is useful when an internal tool or script owns the SQL but still needs typed, validated inputs.
+curl \
+  -X POST \
+  -H "Authorization: Bearer <read token or JWT>" \
+  --data-urlencode "q=% SELECT count() FROM events WHERE timestamp >= {{DateTime(start_date)}} FORMAT JSON" \
+  --data-urlencode "start_date=2026-01-01 00:00:00" \
+  https://api.tinybird.co/v0/sql
+For parameter syntax, defaults, and helper functions, see
+Templating language
+and
+Query parameters
+.
+Query a specific Pipe
+¶
+You can also run a SQL query against a specific Pipe. Send the request to
+/v0/pipes/<pipe>.json
+and use
+_
+as the Pipe input in the
+q
+parameter:
+curl \
+  -X POST \
+  -H "Authorization: Bearer <read token or JWT>" \
+  --data "q=SELECT count() FROM _" \
+  https://api.tinybird.co/v0/pipes/<pipe>.json
+This is useful when you want to reuse a Pipe's logic but apply an extra aggregation, filter, or format at request time.
+Track Query API usage
+¶
+Query API requests are logged as
+query_api
+in Service Data Sources. Add metadata as request parameters when you want to group requests by application, customer, or workflow.
+curl \
+  -X POST \
+  -H "Authorization: Bearer <read token or JWT>" \
+  --data "q=SELECT count() FROM events FORMAT JSON" \
+  "https://api.tinybird.co/v0/sql?app_name=internal_tool"
+See
+Endpoint performance
+for monitoring examples.
+Next steps
+¶
+Review the
+Query API reference
+.
+Add typed parameters with
+Query parameters
+.
+Use the
+ClickHouse interface
+for SQL clients and BI tools.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Query API
+Run a SQL query
+Available response formats
+Use query parameters
+Query a specific Pipe
+Track Query API usage
+Next steps
+forward
+Ask AI

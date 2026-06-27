@@ -1,0 +1,121 @@
+Source: https://www.tinybird.com/docs/sql-reference/ingestion
+
+Data ingestion · Tinybird Docs
+Sign In
+Sign Up
+Data ingestion
+¶
+Copy as MD
+Common issues and solutions for data ingestion problems in ClickHouse and Tinybird.
+Overview
+¶
+This section covers troubleshooting for data ingestion issues, including format problems, parsing errors, and data validation issues.
+Ingestion categories
+¶
+JSON formatting
+¶
+Common JSON ingestion issues:
+CANNOT_PARSE_TEXT
+- Malformed JSON data
+UNKNOWN_TYPE
+- ClickHouse can't infer types from JSON
+Nested JSON objects
+- Complex nested structure handling
+Array handling
+- JSON arrays causing parsing issues
+View JSON formatting troubleshooting →
+CSV type issues
+¶
+Common CSV ingestion issues:
+CANNOT_PARSE_TEXT
+- Malformed CSV data or wrong delimiter
+TYPE_MISMATCH
+- Non-numeric data in numeric columns
+Missing headers
+- CSV files without column headers
+Inconsistent delimiters
+- Mixed delimiters in CSV files
+View CSV type issues troubleshooting →
+Cannot parse date
+¶
+Common date parsing issues:
+CANNOT_PARSE_DATE
+- Date strings in unexpected format
+CANNOT_PARSE_DATETIME
+- DateTime strings in unexpected format
+Timezone issues
+- Dates with timezone information
+Mixed date formats
+- Same column with different date formats
+View cannot parse date troubleshooting →
+Unexpected null
+¶
+Common null value issues:
+Missing data in source
+- Source data with missing values
+Schema inference issues
+- ClickHouse inferring nulls from sample data
+Data validation
+- Checking for null values in data
+Handling strategies
+- Using COALESCE and CASE statements
+View unexpected null troubleshooting →
+Common patterns
+¶
+Data validation
+¶
+Strategies for validating ingested data:
+Check data formats
+- Validate JSON, CSV, and other formats
+Verify data types
+- Ensure data matches expected types
+Handle missing data
+- Provide defaults for missing values
+Monitor ingestion
+- Track ingestion success and failure rates
+Schema handling
+¶
+Best practices for schema design during ingestion:
+Use explicit schemas
+- Don't rely on automatic inference
+Handle mixed types
+- Use string types for mixed data
+Provide defaults
+- Use default values for missing data
+Validate early
+- Check data quality during ingestion
+Best practices
+¶
+Validate data formats
+- Check JSON, CSV, and other formats before ingestion
+Use explicit schemas
+- Specify expected types in schema
+Handle missing data
+- Provide appropriate defaults
+Monitor ingestion quality
+- Track parsing errors and data quality
+Document data sources
+- Keep track of data source characteristics
+Related documentation
+¶
+Data source configuration
+Data types
+ClickHouse errors
+Updated
+4 weeks ago
+On this page
+Data ingestion
+Overview
+Ingestion categories
+JSON formatting
+CSV type issues
+Cannot parse date
+Unexpected null
+Common patterns
+Data validation
+Schema handling
+Best practices
+Related documentation
+forward
+classic
+Ask AI

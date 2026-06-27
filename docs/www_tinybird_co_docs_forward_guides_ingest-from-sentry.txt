@@ -1,0 +1,107 @@
+Source: https://www.tinybird.com/docs/forward/guides/ingest-from-sentry
+
+Send Sentry Webhooks to Tinybird · Tinybird Docs
+Sign In
+Sign Up
+Send Sentry events to Tinybird
+¶
+Copy as MD
+Sentry
+is a platform for monitoring and alerting on errors in your applications. By integrating Sentry with Tinybird, you can analyze your Sentry events in real time and enrich it with other data sources.
+Some common use cases for sending Sentry events to Tinybird include:
+Analyze errors from your applications.
+Detect patterns in your error data.
+Build an alert system based on error patterns.
+Build custom analytical dashboards.
+Read on to learn how to send logs from Sentry to Tinybird.
+Before you start
+¶
+Before you connect Sentry to Tinybird, ensure:
+You have a Sentry account.
+You have a Tinybird workspace.
+Connect Sentry to Tinybird
+¶
+In Sentry, go to
+Settings
+>
+Developer Settings
+>
+Custom Integrations
+.
+Select
+Create New Integration
+.
+In your Tinybird project, create a data source called
+sentry
+. You can follow this
+schema
+:
+SCHEMA >
+  `event_time` DateTime `json:$.tinybirdIngestTime` DEFAULT now(),
+  `event_type` String `json:$.action` DEFAULT 'unknown',
+  `event` JSON `json:$` DEFAULT '{}'
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(event_time)"
+ENGINE_SORTING_KEY "event_time"
+Using the
+JSON Data Type
+you can store the semi-structured data you receive from Sentry in a single column. You can later retrieve various events and their metadata as needed in your pipes.
+The
+JSON
+data type is in private beta. If you are interested in using this type, contact Tinybird at
+support@tinybird.co
+or in the
+Community Slack
+.
+From Tinybird Cloud, copy a token with privileges to append to the data source you created. You can use the admin token or create one with the required scope.
+Back in Sentry, paste the Events API URL in your Custom Integration. Use the query parameter
+name
+to match the name of the data source you created in Tinybird.
+https://<your_host>/v0/events?name=sentry&token=<your user token>
+The API host in the following examples must match your Workspace's region. See the full list of
+regions and hosts
+Select
+Alert Rule Action
+.
+In the
+Permissions
+box
+Issue and Event
+>
+Read
+.
+Check all webhooks and
+Save Changes
+.
+If you also want to send alerts to Tinybird, select
+Alerts
+from the left menu, click on an alert and select
+Edit Rule
+. You can select
+Send Notifications via
+your previously created Custom Integration.
+You can then select
+Send Test Notification
+to check the connection.
+You're done. Any of the Sentry events you selected are automatically sent to Tinybird through the
+Events API
+.
+Check the status of the integration from the
+Log
+tab in the Tinybird
+sentry
+data source.
+See also
+¶
+Sentry Webhooks
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Send Sentry events to Tinybird
+Before you start
+Connect Sentry to Tinybird
+See also
+forward
+Ask AI

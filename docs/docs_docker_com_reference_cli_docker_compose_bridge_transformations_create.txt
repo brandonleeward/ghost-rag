@@ -1,0 +1,33 @@
+Source: https://docs.docker.com/reference/cli/docker/compose/bridge/transformations/create/
+
+docker compose bridge transformations create | Docker Docs
+Gordon
+Gordon, your AI assistant for Docker docs
+Search
+Start a new chat
+When enabled, Gordon considers the current page you're viewing
+to provide more relevant answers.
+Share feedback
+Answers are generated based on the documentation.
+Back
+Reference
+Get started
+Guides
+Manuals
+docker compose bridge transformations create
+Ask Gordon
+Copy Markdown
+View Markdown
+Description
+Create a new transformation
+Usage
+docker compose bridge transformations create [OPTION] PATH
+Description
+Create a new transformation
+Options
+Option
+Default
+Description
+-f, --from
+Existing transformation to copy (default: docker/compose-bridge-kubernetes)
+Table of contents

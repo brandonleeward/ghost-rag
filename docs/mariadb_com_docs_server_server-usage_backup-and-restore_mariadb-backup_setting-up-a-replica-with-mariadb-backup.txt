@@ -1,0 +1,240 @@
+Source: https://mariadb.com/docs/server/server-usage/backup-and-restore/mariadb-backup/setting-up-a-replica-with-mariadb-backup
+
+Setting up a Replica (mariadb-backup) | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Backup and Restore Overview
+Forming a Backup Strategy
+Backup Optimization
+MariaDB Enterprise Backup
+mariadb-backup
+mariadb-backup Overview
+mariadb-backup Options
+Full Backup and Restore (mariadb-backup)
+Incremental Backup and Restore (mariadb-backup)
+Partial Backup and Restore (mariadb-backup)
+Point-In-Time Recovery (PITR, mariadb-backup)
+Restoring Individual Databases From a Full Backup (mariadb-backup)
+Restoring Individual Tables and Partitions (mariadb-backup)
+Setting up a Replica (mariadb-backup)
+Files Backed Up by mariadb-backup
+Files Created by mariadb-backup
+Using Encryption and Compression Tools With mariadb-backup
+Encrypted Files Backup (mariadb-backup)
+How mariadb-backup Works
+mariadb-backup and BACKUP STAGE
+mariadb-backup SST Method
+Manual SST of Galera Cluster Node With mariadb-backup
+Point-In-Time Recovery (InnoDB Log Archiving)
+Replication as a Backup Solution
+Backup and Restore via dbForge Studio
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Setting up a Replica (mariadb-backup)
+Initialize a replication slave using a backup. This guide shows how to use mariadb-backup to provision a new replica from a master server.
+The terms
+master
+and
+slave
+have historically been used in replication, and MariaDB has begun the process of adding
+primary
+and
+replica
+synonyms. The old terms will continue to be used to maintain backward compatibility - see
+MDEV-18777
+to follow progress on this effort.
+mariadb-backup was previously called mariabackup.
+This page documents how to set up a replica from a backup.
+If you are using MariaDB Galera Cluster, then you may want to try one of the following pages instead:
+Configuring MariaDB Replication between MariaDB Galera Cluster and MariaDB Server
+Configuring MariaDB Replication between Two MariaDB Galera Clusters
+For a complete list of
+mariadb-backup
+options,
+see this page
+.
+For a detailed description of
+mariadb-backup
+functionality,
+see this page
+.
+Back up the Database and Prepare it
+The first step is to simply take and prepare a fresh full backup of a database server in the replication topology. If the source database server is the desired replication primary, then we do not need to add any additional options when taking the full backup. For example:
+Copy
+$
+mariadb-backup
+--backup
+\
+--target-dir=/var/mariadb/backup/
+\
+--user=mariadb-backup
+--password=mypassword
+If the source database server is a replica of the desired primary, then we should add the
+--slave-info
+option, and possibly the
+--safe-slave-backup
+option. For example:
+Copy
+$
+mariadb-backup
+--backup
+\
+--slave-info
+--safe-slave-backup
+\
+--target-dir=/var/mariadb/backup/
+\
+--user=mariadb-backup
+--password=mypassword
+And then we would prepare the backup as you normally would. For example:
+Copy the Backup to the New Replica
+Once the backup is done and prepared, we can copy it to the new replica. For example:
+Restore the Backup on the New Replica
+At this point, we can restore the backup to the
+datadir
+, as you normally would. For example:
+And adjusting file permissions, if necessary:
+Create a Replication User on the Primary
+Before the new replica can begin replicating from the primary, we need to create a user account on the primary that the replica can use to connect, and we need to grant the user account the
+REPLICATION SLAVE
+privilege. For example:
+Configure the New Replica
+Before we start the server on the new replica, we need to configure it. At the very least, we need to ensure that it has a unique server_id value. We also need to make sure other replication settings are what we want them to be, such as the various GTID system variables, if those apply in the specific environment.
+Once configuration is done, we can
+start the MariaDB Server process
+on the new replica.
+Start Replication on the New Replica
+At this point, we need to get the replication coordinates of the primary from the original backup directory.
+If we took the backup on the primary, then the coordinates are in the
+xtrabackup_binlog_info
+file. If we took the backup on another replica and if we provided the
+--slave-info
+option, then the coordinates are in the file
+xtrabackup_slave_info
+file.
+mariadb-backup dumps replication coordinates in two forms: GTID coordinates and binary log file and position coordinates, like the ones you would normally see from
+SHOW MASTER STATUS
+output. We can choose which set of coordinates we would like to use to set up replication.
+For example:
+Regardless of the coordinates we use, we will have to set up the primary connection using
+CHANGE MASTER TO
+and then start the replication threads with
+START SLAVE
+.
+GTIDs
+If we want to use GTIDs, then we will have to first set
+gtid_slave_pos
+to the GTID coordinates that we pulled from either the
+xtrabackup_binlog_info
+file or the
+xtrabackup_slave_info
+file in the backup directory. For example:
+And then we would set
+MASTER_USE_GTID=slave_pos
+in the
+CHANGE MASTER TO
+statement. For example:
+File and Position
+If we want to use the binary log file and position coordinates, then we would set
+MASTER_LOG_FILE
+and
+MASTER_LOG_POS
+in the
+CHANGE MASTER TO
+statement to the file and position coordinates that we pulled; either the
+xtrabackup_binlog_info
+file or the
+xtrabackup_slave_info
+file in the backup directory, depending on whether the backup was taken from the primary or from a replica of the primary. For example:
+Check the Status of the New Replica
+We should be done setting up the replica now, so we should check its status with
+SHOW SLAVE STATUS
+. For example:
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Restoring Individual Tables and Partitions (mariadb-backup)
+Next
+Files Backed Up by mariadb-backup
+Last updated
+5 months ago
+Was this helpful?
+Back up the Database and Prepare it
+Copy the Backup to the New Replica
+Restore the Backup on the New Replica
+Create a Replication User on the Primary
+Configure the New Replica
+Start Replication on the New Replica
+Check the Status of the New Replica
+Was this helpful?
+Copy
+$ mariadb-backup --prepare \
+--target-dir=/var/mariadb/backup/
+Copy
+$ rsync -avP /var/mariadb/backup dbserver2:/var/mariadb/backup
+Copy
+$ mariadb-backup --copy-back \
+--target-dir=/var/mariadb/backup/
+Copy
+$ chown -R mysql:mysql /var/lib/mysql/
+Copy
+CREATE USER 'repl'@'dbserver2' IDENTIFIED BY 'password';
+GRANT REPLICATION SLAVE ON *.*  TO 'repl'@'dbserver2';
+Copy
+mariadb-bin.000096 568 0-1-2
+Copy
+$ cat xtrabackup_binlog_info
+mariadb-bin.000096 568 0-1-2
+Copy
+SET GLOBAL gtid_slave_pos = "0-1-2";
+CHANGE MASTER TO
+MASTER_HOST="dbserver1",
+MASTER_PORT=3306,
+MASTER_USER="repl",
+MASTER_PASSWORD="password",
+MASTER_USE_GTID=slave_pos;
+START SLAVE;
+Copy
+CHANGE MASTER TO
+MASTER_HOST="dbserver1",
+MASTER_PORT=3306,
+MASTER_USER="repl",
+MASTER_PASSWORD="password",
+MASTER_LOG_FILE='mariadb-bin.000096',
+MASTER_LOG_POS=568;
+START SLAVE;
+Copy
+SHOW SLAVE STATUS\G

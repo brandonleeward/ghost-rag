@@ -1,0 +1,579 @@
+Source: https://www.tinybird.com/docs/forward/copy-export-data/gcs-sink
+
+GCS Sink · Tinybird Docs
+Sign In
+Sign Up
+GCS Sink
+¶
+Copy as MD
+You can set up a GCS Sink to export your data from Tinybird to any Google Cloud Storage bucket in CSV, NDJSON, or Parquet format. The GCS Sink allows you to offload data on a batch-based schedule using Tinybird's fully managed connector.
+Setting up the GCS Sink requires:
+Configuring a
+Service Account
+with these
+permissions
+in GCP.
+Creating a connection file in Tinybird.
+Creating a Sink pipe that uses this connection
+The GCS Sink feature is available for Developer and Enterprise plans. See
+Plans
+.
+Environment considerations
+¶
+Before setting up the GCS Sink, understand how it works in different environments.
+Cloud environment
+¶
+In the Tinybird Cloud environment, Tinybird uses the Service Account credentials you provide to write to your GCS bucket.
+Local environment
+¶
+When using the GCS Sink in the Tinybird Local environment, which runs in a container, you need to pass your local GCP credentials to the container. These credentials must have the
+permissions described in the GCS permissions section
+, including access to GCS operations like
+storage.objects.create
+,
+storage.objects.get
+, etc.
+When using the GCS Sink in the
+--local
+environment, scheduled sink operations are not supported. You can only run on-demand sinks using
+tb sink run <pipe_name>
+. For scheduled sink operations, use the Cloud environment.
+Set up the sink
+¶
+1
+Create a GCS connection
+¶
+You can create a GCS connection in Tinybird using either the guided CLI process or by manually creating a connection file.
+Option 1: Use the guided CLI process (recommended)
+¶
+The Tinybird CLI provides a guided process that helps you set up the required GCP permissions and creates the connection file automatically:
+tb connection create gcs
+When prompted, you'll need to:
+Enter a name for your connection.
+Enter the GCS bucket name.
+Provide the service account credentials (JSON key file).
+The credentials will be stored securely using
+tb secret
+, which will allow you to have different credentials for each environment.
+Option 2: Define the Connection manually
+¶
+You can also define the GCS Connection manually in your project. The recommended authentication method is a Google Cloud Service Account with the credentials stored as a secret:
+Tinybird CLI
+TypeScript SDK
+Python SDK
+connections/gcs_sample.connection
+TYPE gcs
+GCS_SERVICE_ACCOUNT_CREDENTIALS_JSON {{ tb_secret("GCS_KEY") }}
+When creating your Connection manually, set up the required GCP Service Account with appropriate permissions. See the
+GCS permissions
+section for details on the required role configurations.
+Service Account authentication is recommended over HMAC authentication. It provides better integration with Google Cloud's IAM system and more granular permission control.
+See
+Connection files
+for more details on how to create a connection file and manage secrets.
+You need to create separate connections for each environment you're working with, Local and Cloud.
+For example, you can create:
+my-gcs-local
+for your Local environment
+my-gcs-cloud
+for your Cloud environment
+2
+Create a Sink pipe
+¶
+To create a Sink pipe, filter the data you want to export to your bucket in the SQL section as in any other pipe. Then, specify the pipe as a Sink and add the needed configuration.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+gcs_export.pipe
+NODE node_0
+
+SQL >
+    SELECT *
+    FROM events
+    WHERE status = 'processed'
+
+TYPE sink
+EXPORT_CONNECTION_NAME "gcs_sample"
+EXPORT_BUCKET_URI "gs://tinybird-sinks"
+EXPORT_FILE_TEMPLATE "daily_prices" # Supports partitioning
+EXPORT_SCHEDULE "*/5 * * * *" 
+EXPORT_FORMAT "csv" # Optional
+EXPORT_COMPRESSION "gz" # Optional
+EXPORT_STRATEGY "create_new" # Optional
+3
+Deploy the Sink pipe
+¶
+After defining your GCS data source and connection, test it by running a deploy check:
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb --cloud deploy --check
+This runs the connection locally and checks if the connection is valid. To see the connection details, run
+tb --cloud connection ls
+.
+When ready, push the datafile to your Workspace using
+tb deploy
+to create the Sink pipe:
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb --cloud deploy
+This creates the Sink pipe in your workspace and makes it available for execution.
+.connection settings
+¶
+The GCS connector uses the following settings in .connection files:
+Instruction
+Required
+Description
+GCS_SERVICE_ACCOUNT_CREDENTIALS_JSON
+No*
+Service Account Key in JSON format for Service Account authentication. We recommend using
+Tinybird Secrets
+.
+GCS_ACCESS_ID
+No*
+HMAC access ID for HMAC authentication. Store as a
+Tinybird secret
+.
+GCS_SECRET
+No*
+HMAC secret key for HMAC authentication. Store as a
+Tinybird secret
+.
+*Either
+GCS_SERVICE_ACCOUNT_CREDENTIALS_JSON
+(for Service Account authentication) or both
+GCS_ACCESS_ID
+and
+GCS_SECRET
+(for HMAC authentication) are required.
+.pipe settings
+¶
+The GCS Sink pipe uses the following settings in .pipe files:
+Key
+Type
+Description
+EXPORT_CONNECTION_NAME
+string
+Required. The connection name to the destination service. This is the connection created in Step 1.
+EXPORT_BUCKET_URI
+string
+Required. The path to the destination bucket. Example:
+gs://tinybird-export
+EXPORT_FILE_TEMPLATE
+string
+Required. The target file name. Can use parameters to dynamically name and partition the files. See File partitioning section below. Example:
+daily_prices_{customer_id}
+EXPORT_SCHEDULE
+string
+Required. A crontab expression that sets the frequency of the Sink operation or the @on-demand string.
+EXPORT_FORMAT
+string
+Optional. The output format of the file. Values: CSV, NDJSON, Parquet. Default value: CSV
+EXPORT_COMPRESSION
+string
+Optional. Accepted values:
+none
+,
+gz
+for gzip,
+br
+for brotli,
+xz
+for LZMA,
+zst
+for zstd. Default:
+none
+EXPORT_STRATEGY
+string
+Optional. Defines how to handle existing files. Values:
+create_new
+(default),
+replace
+. See
+Write strategies
+section below.
+Supported regions
+¶
+The Tinybird GCS Sink feature only supports exporting data to the following Google Cloud regions:
+us-*
+eu-*
+us-central-*
+us-east-*
+us-west-*
+europe-west-*
+northamerica-northeast-*
+Scheduling considerations
+¶
+The schedule applied to a Sink pipe doesn't guarantee that the underlying job executes immediately at the configured time. The job is placed into a job queue when the configured time elapses. It is possible that, if the queue is busy, the job could be delayed and executed after the scheduled time.
+To reduce the chances of a busy queue affecting your Sink pipe execution schedule, distribute the jobs over a wider period of time rather than grouping them close together.
+Write strategies
+¶
+The
+EXPORT_STRATEGY
+parameter determines how Tinybird handles existing files in your GCS bucket:
+create_new
+(default): Creates new files without overwriting existing ones. If a file with the same name already exists, Tinybird will append a suffix to make the filename unique.
+replace
+: Overwrites existing files with the same name. Use this when you want to replace previous exports entirely.
+Query parameters
+¶
+You can add
+query parameters
+to your Sink pipes, the same way you do in API Endpoints or Copy pipes.
+For on-demand executions, you can set parameters when you trigger the Sink pipe to whatever values you wish.
+For scheduled executions, the default values for the parameters will be used when the Sink pipe runs.
+Execute the Sink pipe
+¶
+On-demand execution
+¶
+You can trigger your Sink pipe manually using:
+tb sink run <pipe_name>
+When triggering a Sink pipe you have the option of overriding several of its settings, like format or compression. Refer to the
+Sink pipes API spec
+for the full list of parameters.
+Scheduled execution
+¶
+If you configured a schedule with
+EXPORT_SCHEDULE
+, the Sink pipe will run automatically according to the cron expression.
+Once the Sink pipe is triggered, it creates a standard Tinybird job that can be followed via the
+v0/jobs
+API or using
+tb job ls --kind=sink
+.
+File template
+¶
+The export process allows you to partition the result in different files, allowing you to organize your data and get smaller files. The partitioning is defined in the file template and based on the values of columns of the result set.
+Partition by column
+¶
+Add a template variable like
+{COLUMN_NAME}
+to the filename. For instance, consider the following query schema and result for an export:
+customer_id
+invoice_id
+amount
+ACME
+INV20230608
+23.45
+ACME
+12345INV
+12.3
+GLOBEX
+INV-ABC-789
+35.34
+OSCORP
+INVOICE2023-06-08
+57
+ACME
+INV-XYZ-98765
+23.16
+OSCORP
+INV210608-001
+62.23
+GLOBEX
+987INV654
+36.23
+With the given file template
+invoice_summary_{customer_id}.csv
+you'd get 3 files:
+invoice_summary_ACME.csv
+customer_id
+invoice_id
+amount
+ACME
+INV20230608
+23.45
+ACME
+12345INV
+12.3
+ACME
+INV-XYZ-98765
+23.16
+invoice_summary_OSCORP.csv
+customer_id
+invoice_id
+amount
+OSCORP
+INVOICE2023-06-08
+57
+OSCORP
+INV210608-001
+62.23
+invoice_summary_GLOBEX.csv
+customer_id
+invoice_id
+amount
+GLOBEX
+INV-ABC-789
+35.34
+GLOBEX
+987INV654
+36.23
+Values format
+¶
+In the case of DateTime columns, it can be dangerous to partition just by the column. Why? Because you could end up with as many files as seconds, as they're the different values for a DateTime column. In an hour, that's potentially 3600 files.
+To help partition in a sensible way, you can add a format string to the column name using the following placeholders:
+Placeholder
+Description
+Example
+%Y
+Year
+2023
+%m
+Month as an integer number (01-12)
+06
+%d
+Day of the month, zero-padded (01-31)
+07
+%H
+Hour in 24h format (00-23)
+14
+%i
+Minute (00-59)
+45
+For instance, for a result like this:
+timestamp
+invoice_id
+amount
+2023-07-07 09:07:05
+INV20230608
+23.45
+2023-07-07 09:07:01
+12345INV
+12.3
+2023-07-07 09:06:45
+INV-ABC-789
+35.34
+2023-07-07 09:05:35
+INVOICE2023-06-08
+57
+2023-07-06 23:14:05
+INV-XYZ-98765
+23.16
+2023-07-06 23:14:02
+INV210608-001
+62.23
+2023-07-06 23:10:55
+987INV654
+36.23
+Note that all 7 events have different times in the column timestamp. Using a file template like
+invoices_{timestamp}
+would create 7 different files.
+If you were interested in writing one file per hour, you could use a file template like
+invoices_{timestamp, '%Y%m%d-%H'}
+. You'd then get only two files for that dataset:
+invoices_20230707-09.csv
+timestamp
+invoice_id
+amount
+2023-07-07 09:07:05
+INV20230608
+23.45
+2023-07-07 09:07:01
+12345INV
+12.3
+2023-07-07 09:06:45
+INV-ABC-789
+35.34
+2023-07-07 09:05:35
+INVOICE2023-06-08
+57
+invoices_20230706-23.csv
+timestamp
+invoice_id
+amount
+2023-07-06 23:14:05
+INV-XYZ-98765
+23.16
+2023-07-06 23:14:02
+INV210608-001
+62.23
+2023-07-06 23:10:55
+987INV654
+36.23
+By number of files
+¶
+You also have the option to write the result into X files. Instead of using a column name, use an integer between brackets.
+Example:
+invoice_summary.{8}.csv
+This is convenient to reduce the file size of the result, especially when the files are meant to be consumed by other services where uploading big files is discouraged.
+The results are written in random order. This means that the final result rows would be written in X files, but you can't count the specific order of the result.
+There are a maximum of 16 files.
+Combining different partitions
+¶
+It's possible to add more than one partitioning parameter in the file template. This is useful, for instance, when you do a daily dump of data, but want to export one file per hour.
+Setting the file template as
+invoices/dt={timestamp, '%Y-%m-%d'}/H{timestamp, '%H}.csv
+would create the following file structure in different days and executions:
+Invoices
+├── dt=2023-07-07
+│   └── H23.csv
+│   └── H22.csv
+│   └── H21.csv
+│   └── ...
+├── dt=2023-07-06
+│   └── H23.csv
+│   └── H22.csv
+You can also mix column names and number of files. For instance, setting the file template as
+invoices/{customer_id}/dump_{4}.csv
+would create the following file structure in different days and executions:
+Invoices
+├── ACME
+│   └── dump_0.csv
+│   └── dump_1.csv
+│   └── dump_2.csv
+│   └── dump_3.csv
+├── OSCORP
+│   └── dump_0.csv
+│   └── dump_1.csv
+│   └── dump_2.csv
+│   └── dump_3.csv
+Be careful with excessive partitioning. Take into consideration that the write process will create as many files as combinations of the values of the partitioning columns for a given result set.
+Supported file types
+¶
+The GCS Sink supports exporting data in the following file formats:
+File type
+Accepted extensions
+Compression formats supported
+CSV
+.csv
+,
+.csv.gz
+gzip
+NDJSON
+.ndjson
+,
+.ndjson.gz
+,
+.jsonl
+,
+.jsonl.gz
+,
+.json
+,
+.json.gz
+gzip
+Parquet
+.parquet
+,
+.parquet.gz
+snappy
+,
+gzip
+,
+lzo
+,
+brotli
+,
+lz4
+,
+zstd
+You can optionally configure the export format using the
+EXPORT_FORMAT
+parameter (defaults to CSV) and compression using the
+EXPORT_COMPRESSION
+parameter in your Sink pipe configuration.
+GCS permissions
+¶
+The GCS connector requires a Service Account with specific permissions to access objects in your Google Cloud Storage bucket. Following the principle of least privilege, the minimum required roles are:
+Storage Object Creator
+(
+roles/storage.objectCreator
+) - Allows users to create objects
+Storage Object Viewer
+(
+roles/storage.objectViewer
+) - Grants access to view objects and their metadata, and list objects in a bucket
+Storage Bucket Viewer
+(
+roles/storage.legacyBucketReader
+) - Allows users to list objects in a bucket and view bucket metadata
+You need to create a Service Account in Google Cloud Platform:
+In the Google Cloud Console, create or use an existing service account.
+Assign the following roles to the service account for the specific bucket or project:
+roles/storage.legacyBucketReader
+roles/storage.objectCreator
+roles/storage.objectViewer
+Generate a JSON key file and download it.
+Store the key as a Tinybird secret.
+Alternatively, you can use the broader
+Storage Object Admin
+(
+roles/storage.objectAdmin
+) role which includes all the necessary permissions, but it grants additional permissions beyond what's required for the sink operation.
+Observability
+¶
+Sink pipes operations are logged in the
+tinybird.jobs_log
+Service Data Source. You can filter by
+job_type = 'sink'
+to see only Sink pipe executions.
+For more detailed Sink-specific information, you can also use
+tinybird.sinks_ops_log
+.
+Data Transfer incurred by Sink pipes is tracked in
+tinybird.data_transfer
+Service Data Source.
+Limits & quotas
+¶
+Check the
+limits page
+for limits on ingestion, queries, API Endpoints, and more.
+Billing
+¶
+Tinybird bills Sink pipes based on Data Transfer. When a Sink pipe executes, it uses your plan's included compute resources (vCPUs and active minutes) to run the query, then writes the result to a bucket (Data Transfer). If the resulting files are compressed, Tinybird accounts for the compressed size.
+Data Transfer
+¶
+Data Transfer depends on your environment. There are two scenarios:
+The destination bucket is in the
+same
+cloud provider and region as your Tinybird Workspace: $0.01 / GB
+The destination bucket is in a
+different
+cloud provider or region as your Tinybird Workspace: $0.10 / GB
+You must include the
+Storage Bucket Viewer
+permission in your Service Account configuration. This permission allows Tinybird to determine your bucket's region and apply the correct billing rate. Without this permission, Tinybird cannot detect the bucket region and will charge the higher cross-region rate ($0.10 / GB) regardless of your bucket's actual location.
+Next steps
+¶
+Get familiar with the
+Service Data Source
+and see what's going on in your account
+Deep dive on Tinybird's
+pipes concept
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+GCS Sink
+Environment considerations
+Cloud environment
+Local environment
+Set up the sink
+Create a GCS connection
+Create a Sink pipe
+Deploy the Sink pipe
+.connection settings
+.pipe settings
+Supported regions
+Scheduling considerations
+Write strategies
+Query parameters
+Execute the Sink pipe
+On-demand execution
+Scheduled execution
+File template
+Partition by column
+Values format
+By number of files
+Combining different partitions
+Supported file types
+GCS permissions
+Observability
+Limits & quotas
+Billing
+Data Transfer
+Next steps
+forward
+Ask AI

@@ -1,0 +1,334 @@
+Source: https://mariadb.com/docs/server/server-usage/triggers-events/triggers/trigger-overview
+
+Trigger Overview | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Triggers & Events
+Event Scheduler
+Triggers
+Trigger Overview
+CREATE TRIGGER
+Trigger Limitations
+Triggers and Implicit Locks
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Trigger Overview
+Complete MariaDB triggers overview: BEFORE/AFTER INSERT/UPDATE/DELETE timing, CREATE TRIGGER syntax, FOLLOWS|PRECEDES ordering, and DROP/SHOW TRIGGERS.
+A trigger is a set of statements that run when, or are triggered by, an event that occurs on a table.
+Events
+The event can be an
+INSERT
+, an
+UPDATE
+, or a
+DELETE
+. The trigger can be executed
+BEFORE
+or
+AFTER
+the event. A table can have multiple triggers defined for the same event and timing combination.
+The
+LOAD DATA INFILE
+and
+LOAD XML
+statements invoke
+INSERT
+triggers for each row that is being inserted.
+The
+REPLACE
+statement is executed with the following workflow:
+BEFORE INSERT
+;
+BEFORE DELETE
+(only if a row is being deleted);
+AFTER DELETE
+(only if a row is being deleted);
+AFTER INSERT
+.
+The
+INSERT ... ON DUPLICATE KEY UPDATE
+statement, when a row already exists, follows the following workflow:
+BEFORE INSERT
+;
+BEFORE UPDATE
+;
+AFTER UPDATE
+.
+Otherwise, it works like a normal
+INSERT
+statement.
+Note that
+TRUNCATE TABLE
+does not activate any triggers.
+Triggers and Errors
+With non-transactional storage engines, if a
+BEFORE
+statement produces an error, the statement isn't executed. Statements that affect multiple rows fail before inserting the current row.
+With transactional engines, triggers are executed in the same transaction as the statement that invoked them.
+If a warning is issued with the
+SIGNAL
+or
+RESIGNAL
+statement (that is, an error with an
+SQLSTATE
+starting with
+'01'
+), it is treated like an error.
+Creating a Trigger
+Here's a simple example to demonstrate a trigger in action. Using these two tables as an example:
+We want to increment a counter each time a new animal is added. Here's what the trigger looks like:
+The trigger has:
+a name (in this case,
+increment_animal
+),
+a trigger time (in this case, after the specified trigger event),
+a trigger event (an
+INSERT
+),
+a table with which it is associated (
+animals
+),
+a set of statements to run (here, just the one
+UPDATE
+statement).
+AFTER INSERT
+specifies that the trigger runs
+after
+an
+INSERT
+. The trigger could also be set to run
+before
+, and the statement causing the trigger could be a
+DELETE
+or an
+UPDATE
+as well. You can also have multiple triggers for an action. In this case, you can use
+FOLLOWS | PRECEDES`` ``
+other_trigger_name
+to specify the order of the triggers.
+The set of statements to run are the statements on the table of the trigger; therefore, columns/values that change are always just a column name or an expression like
+NEW.
+column_name
+. Table references of other tables must come from explicit table references.
+Now, if we insert a record into the
+animals
+table, the trigger runs, incrementing the
+animal_count
+table.
+For more details on the syntax, see
+CREATE TRIGGER
+.
+Dropping Triggers
+To drop a trigger, use the
+DROP TRIGGER
+statement. Triggers are also dropped if the table with which they are associated is also dropped.
+Triggers Metadata
+The
+Information Schema TRIGGERS Table
+stores information about triggers.
+The
+SHOW TRIGGERS
+statement returns similar information.
+The
+SHOW CREATE TRIGGER
+statement returns a
+CREATE TRIGGER
+statement that creates the given trigger.
+More Complex Triggers
+Triggers can consist of multiple statements enclosed by a
+BEGIN and END
+. If you're entering multiple statements on the command line, temporarily set a new delimiter so that you can use a semicolon to delimit the statements inside your trigger. See
+Delimiters in the mariadb client
+for more.
+Trigger Errors
+If a trigger contains an error and the engine is transactional, or it is a
+BEFORE
+trigger, the trigger will not run, and will prevent the original statement from running as well. If the engine is non-transactional, and it is an
+AFTER
+trigger, the trigger will not run, but the original statement will.
+Here, we'll drop the above examples and then recreate the trigger with an error, a field that doesn't exist, first using the default
+InnoDB
+, a transactional engine, and then again using
+MyISAM
+, a non-transactional engine.
+And now the identical procedure, but with a MyISAM table.
+The following example shows how to use a trigger to validate data. The
+SIGNAL
+statement is used to intentionally produce an error if the email field is not a valid email. As the example shows, in that case, the new row is not inserted (because it is a
+BEFORE
+trigger).
+See Also
+CREATE TRIGGER
+DROP TRIGGER
+Information Schema TRIGGERS Table
+SHOW TRIGGERS
+SHOW CREATE TRIGGER
+Trigger Limitations
+Creative uses of triggers: Things you people wouldn't believe
+(video)
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Triggers
+Next
+CREATE TRIGGER
+Last updated
+4 months ago
+Was this helpful?
+Events
+Triggers and Errors
+Creating a Trigger
+Dropping Triggers
+Triggers Metadata
+More Complex Triggers
+Trigger Errors
+See Also
+Was this helpful?
+Copy
+CREATE TABLE animals (id MEDIUMINT(9)
+NOT NULL AUTO_INCREMENT,
+name CHAR(30) NOT NULL,
+PRIMARY KEY (`id`));
+CREATE TABLE animal_count (animals INT);
+INSERT INTO animal_count (animals) VALUES(0);
+Copy
+CREATE TRIGGER increment_animal
+AFTER INSERT ON animals
+FOR EACH ROW
+UPDATE animal_count SET animal_count.animals = animal_count.animals+1;
+Copy
+SELECT * FROM animal_count;
++---------+
+| animals |
++---------+
+|       0 |
++---------+
+INSERT INTO animals (name) VALUES('aardvark');
+INSERT INTO animals (name) VALUES('baboon');
+SELECT * FROM animal_count;
++---------+
+| animals |
++---------+
+|       2 |
++---------+
+Copy
+DROP TRIGGER increment_animal;
+Copy
+DROP TABLE animals;
+UPDATE animal_count SET animals=0;
+CREATE TABLE animals (id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
+name CHAR(30) NOT NULL,
+PRIMARY KEY (`id`))
+ENGINE=InnoDB;
+DELIMITER //
+CREATE TRIGGER the_mooses_are_loose
+AFTER INSERT ON animals
+FOR EACH ROW
+BEGIN
+IF NEW.name = 'Moose' THEN
+UPDATE animal_count SET animal_count.animals = animal_count.animals+100;
+ELSE
+UPDATE animal_count SET animal_count.animals = animal_count.animals+1;
+END IF;
+END; //
+DELIMITER ;
+INSERT INTO animals (name) VALUES('Aardvark');
+SELECT * FROM animal_count;
++---------+
+| animals |
++---------+
+|       1 |
++---------+
+INSERT INTO animals (name) VALUES('Moose');
+SELECT * FROM animal_count;
++---------+
+| animals |
++---------+
+|     101 |
++---------+
+Copy
+DROP TABLE animals;
+CREATE TABLE animals (id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
+name CHAR(30) NOT NULL,
+PRIMARY KEY (`id`))
+ENGINE=InnoDB;
+CREATE TRIGGER increment_animal
+AFTER INSERT ON animals
+FOR EACH ROW
+UPDATE animal_count SET animal_count.id = animal_count_id+1;
+INSERT INTO animals (name) VALUES('aardvark');
+ERROR 1054 (42S22): Unknown column 'animal_count.id' in 'field list'
+SELECT * FROM animals;
+Empty set (0.00 sec)
+Copy
+DROP TABLE animals;
+CREATE TABLE animals (id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
+name CHAR(30) NOT NULL,
+PRIMARY KEY (`id`))
+ENGINE=MyISAM;
+CREATE TRIGGER increment_animal
+AFTER INSERT ON animals
+FOR EACH ROW
+UPDATE animal_count SET animal_count.id = animal_count_id+1;
+INSERT INTO animals (name) VALUES('aardvark');
+ERROR 1054 (42S22): Unknown column 'animal_count.id' in 'field list'
+SELECT * FROM animals;
++----+----------+
+| id | name     |
++----+----------+
+|  1 | aardvark |
++----+----------+
+Copy
+CREATE TABLE user (
+id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+first_name CHAR(20),
+last_name CHAR(20),
+email CHAR(100)
+)
+ENGINE = MyISAM;
+DELIMITER //
+CREATE TRIGGER bi_user
+BEFORE INSERT ON user
+FOR EACH ROW
+BEGIN
+IF NEW.email NOT LIKE '_%@_%.__%' THEN
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Email field IS NOT valid';
+END IF;
+END; //
+DELIMITER ;
+INSERT INTO user (first_name, last_name, email) VALUES ('John', 'Doe', 'john_doe.example.net');
+ERROR 1644 (45000): Email field is not valid
+SELECT * FROM user;
+Empty set (0.00 sec)

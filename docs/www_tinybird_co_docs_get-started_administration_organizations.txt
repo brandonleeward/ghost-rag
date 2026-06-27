@@ -1,0 +1,236 @@
+Source: https://www.tinybird.co/docs/get-started/administration/organizations
+
+Organizations · Tinybird Docs
+Sign In
+Sign Up
+Organizations
+¶
+Copy as MD
+Organizations group Workspaces, members, billing, limits, and infrastructure settings in one region. Every
+Workspace
+belongs to an Organization.
+Use Organizations to manage access across Workspaces, monitor usage, review billing, and control dedicated infrastructure settings when your plan includes them. See
+Plans
+.
+The
+Organization settings
+section consists of the following areas:
+Overview
+Cluster (dedicated infrastructure only)
+Observability
+Logs
+Workspaces
+Members
+Billing
+Managed regions
+Users and organizations
+¶
+Users can be members of one or more Organizations. A user can only be the admin of one Organization.
+Access the organization settings
+¶
+To access
+Organization settings
+, click on the organization name in the top left corner of the page. You can also reach it from any
+Settings
+page by clicking on the
+Organization settings
+button in the top right corner.
+Overview
+¶
+The
+Overview
+page is the Organization landing page. It gives you a snapshot of your Organization's health and usage at a glance.
+The page is organized in three sections:
+Recently visited workspaces
+: shows the Workspaces you visited most recently. Up to 4 Workspaces are shown. Select
+View all workspaces
+to see all Workspaces in the Organization.
+Usage metrics
+: 7-day usage cards with maximum aggregation for CPU, API vCPU, Memory, and other metrics depending on your plan.
+Errors
+: a 7-day errors chart with the 5 most recent error log entries. Select the chart to go to the
+Logs
+page filtered by errors.
+The
+Usage metrics
+section varies by plan:
+Free, Developer, and Enterprise (shared)
+: 7-day usage cards with maximum values.
+Enterprise (dedicated)
+: per-cluster Load and Memory indicators with one row per replica. You can toggle between
+Now
+,
+6h avg
+, and
+24h avg
+views.
+Cluster
+¶
+The
+Cluster
+section is only available for Organizations with dedicated infrastructure.
+The
+Cluster
+page is the central place to monitor and manage your dedicated cluster. It includes:
+Load and memory charts
+showing cluster resource usage over time.
+Replica information
+with the status and metrics for each replica in your cluster.
+Manage Cluster
+flow to adjust your cluster configuration.
+For replica operations, see
+Cluster management
+.
+Observability
+¶
+The
+Observability
+page shows details about your resource usage.
+Charts view
+¶
+The following charts are available depending on your plan:
+Plan
+Charts
+Free
+Max/Average vCPU time, Max/Average API vCPU time, Max/Average memory, Storage, Accumulated daily requests, Total errors
+Developer
+Total errors, Max/Average vCPU time, Max/Average API vCPU time, Max/Average memory, Requests, Storage, Ingested rows, Quarantine rows, Data Transfer
+SaaS
+Max/Average vCPU time, Max/Average QPS, Max/Average memory, Requests, Storage, Data Transfer, Total errors
+Enterprise (Dedicated infrastructure)
+Max load, Max memory, Requests, Storage, Data Transfer, Total errors
+You can select between average and maximum values for all usage charts, as well as the period, from
+Last hour
+to
+Last 7 days
+.
+Table view
+¶
+You can switch between charts and table view using the toggle in the top right corner.
+The table view shows resource usage by Workspace or resource. You can filter by resource name by typing in the text box.
+Logs
+¶
+The
+Logs
+page is a cross-workspace logs explorer. It surfaces logs from all Workspaces in your Organization in one place, with the same filters and layout as the per-workspace logs page.
+The page includes:
+A
+chart
+at the top showing log volume over time. Drag to zoom in on a time range.
+A
+filter sidebar
+on the left with time range presets and a custom range picker, plus filters for errors, status codes, log types, sources, Workspace, and a text search.
+A
+paginated table
+showing log entries. Select a row to open a side panel with full log details.
+A
+real-time toggle
+that refreshes the view every 5 seconds.
+The
+Workspace filter
+surfaces only Workspaces that have logs in the current time range, ranked by log count. This lets you quickly narrow down to a specific Workspace.
+Filter state is reflected in the URL, so you can share links to a specific view with colleagues.
+Workspaces
+¶
+The
+Workspaces
+page shows details of all your Workspaces, including their name, members, and resources used by each Workspace.
+New Workspaces created by a user with an email domain linked to, or matching an Organization are automatically added to that Organization.
+Members
+¶
+The
+Members
+page shows details of your organization members, the workspaces they belong to, and their roles. From this page you can manage existing members, their permissions, or invite new members.
+The table shows the following information:
+Email
+workspaces and roles
+To view the detail of a member’s workspaces and roles, select the arrow next to the Workspace count. A menu shows all the workspaces that user is part of, plus their role in each Workspace.
+To change a user’s role or remove them from a Workspace, hover over the Workspace name and follow the arrow. Select a new role from
+Admin
+or
+Viewer
+, or remove them from the Workspace. You don't need to be a user in that Workspace to make changes to its users.
+Add or remove members
+¶
+To add a user, select
+Add member
+.
+To remove a user from the Organization, select
+Remove member
+in the menu.
+Only organization administrators can manage users in the
+Members
+page.
+Add an organization admin
+¶
+To add another user as an organization administrator, follow these steps:
+Navigate to the
+Organization settings
+page.
+Go to the
+Members
+section.
+Locate the user you want to make an administrator.
+Select the
+More actions (⋯)
+icon.
+Select
+Organization admin
+in the menu.
+This grants organization administrator access to the selected users.
+Billing
+¶
+The
+Billing
+page contains a summary of the credits balance for your plan, with links to billing details and a summary of your plan. See
+Billing
+.
+From the
+Billing
+page you can upgrade or resize your plan, or cancel it if you wish to downgrade to Free.
+If you're on a Developer plan, the usage diagram shows the total expenditure by monthly invoice.
+Only organization administrators can access the
+Billing
+section.
+Managed regions
+¶
+The
+Managed regions
+page shows the self-managed regions where your Organization has Workspaces. See
+Self-managed
+.
+Add a region
+¶
+To add a region, select
+Add region
+.
+Remove a region
+¶
+To remove a region, select the
+More actions (⋯)
+and then select
+Delete
+.
+Updated
+5 days ago
+Looking for Classic docs?
+On this page
+Organizations
+Users and organizations
+Access the organization settings
+Overview
+Cluster
+Observability
+Charts view
+Table view
+Logs
+Workspaces
+Members
+Add or remove members
+Add an organization admin
+Billing
+Managed regions
+Add a region
+Remove a region
+forward
+Ask AI

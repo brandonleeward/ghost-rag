@@ -1,0 +1,76 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands
+
+Tinybird CLI command reference · Tinybird Docs
+Sign In
+Sign Up
+CLI command reference
+¶
+Copy as MD
+Recent CLI versions removed AI-assisted command generation and introduced
+tb init
+for project setup.
+tb init
+replaces
+tb create
+for scaffolding projects.
+tb mock
+has been removed. Create fixture files manually (or asking a codign agent) in
+fixtures/
+.
+tb test create
+has been removed. Create YAML tests manually (or asking a coding agent), then use
+tb test run
+and
+tb test update
+.
+tb --prompt
+and interactive
+tb
+mode are no longer available.
+The following list shows all available commands in the Tinybird command-line interface, their options, and their arguments.
+For SDK-specific command references, see:
+TypeScript SDK CLI (
+npx tinybird
+):
+TypeScript SDK CLI commands
+Python SDK CLI (
+tinybird
+):
+Python SDK CLI commands
+Global options
+tb
+tb branch
+tb build
+tb connection
+tb copy
+tb datasource
+tb deploy
+tb deployment
+tb dev
+tb endpoint
+tb fmt
+tb info
+tb init
+tb infra
+tb job
+tb local
+tb login
+tb logout
+tb materialization
+tb open
+tb pipe
+tb pull
+tb secret
+tb sink
+tb sql
+tb test
+tb token
+tb update
+tb workspace
+Updated
+5 days ago
+Looking for Classic docs?
+On this page
+CLI command reference
+forward
+Ask AI

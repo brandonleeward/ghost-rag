@@ -1,0 +1,38 @@
+Source: https://caddyserver.com/support
+
+Caddy help & support
+A
+Project
+Store
+Forum
+GitHub
+Theme:
+System
+Download
+Sponsor
+Support
+Community help
+Participate as volunteers in our forum to exchange free help in our open source community.
+We welcome your contributions to our community and look forward to meeting you!
+Caddy forum
+Business support
+We offer private and dedicated support for professionals and businesses through most
+sponsorship tiers
+.
+Sponsors can then email us for expert support:
+caddy@dya
+antispam
+nim
+.nospam
+.com
+Higher tiers enable other forms of support such as chats and phone/video calls.
+Depending on tier, additional benefits and services include:
+Onboarding
+Training
+Presentations
+On-sites
+Custom patches and branches
+Prioritization
+Publicity/marketing
+We work with businesses and teams of all sizes, from startups to enterprises, non-profits and government agencies.
+Sponsor Caddy

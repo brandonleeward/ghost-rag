@@ -1,0 +1,200 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/connect/connect-table-types/connect-table-types-overview
+
+CONNECT Table Types Overview | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+Introduction to the CONNECT Engine
+Using CONNECT
+Installing CONNECT
+CONNECT Create Table Options
+CONNECT Data Types
+CONNECT Table Types
+CONNECT Table Types Overview
+CONNECT BIN Table Type
+CONNECT CSV and FMT Table Types
+CONNECT DBF Table Type
+CONNECT DOS and FIX Table Types
+CONNECT - External Table Types
+CONNECT - Files Retrieved Using Rest Queries
+CONNECT INI Table Type
+CONNECT JDBC Table Type: Accessing Tables from Another DBMS
+CONNECT JSON Table Type
+CONNECT MONGO Table Type: Accessing Collections from MongoDB
+CONNECT MYSQL Table Type: Accessing MySQL/MariaDB Tables
+CONNECT - NoSQL Table Types
+CONNECT OCCUR Table Type
+CONNECT ODBC Table Type: Accessing Tables From Another DBMS
+CONNECT PIVOT Table Type
+CONNECT PROXY Table Type
+CONNECT Table Types - Catalog Tables
+CONNECT Table Types - Data Files
+CONNECT Table Types - OEM: Implemented in an External LIB
+CONNECT Table Types - Special "Virtual" Tables
+CONNECT Table Types - VIR
+CONNECT TBL Table Type: Table List
+CONNECT - Using the TBL and MYSQL Table Types Together
+CONNECT VEC Table Type
+CONNECT XCOL Table Type
+CONNECT XML Table Type
+CONNECT Zipped File Tables
+Inward and Outward Tables
+CONNECT Security
+CONNECT System Variables
+Adding the REST Feature as a Library Called by an OEM Table
+Compiling JSON UDFs in a Separate Library
+Making the GetRest Library
+OEM Table Example
+Current Status of the CONNECT Handler
+JSON Sample Files
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+CONNECT Table Types Overview
+The CONNECT storage engine.
+CONNECT can handle very many table formats; it is indeed one of its main
+features. The Type option specifies the type and format of the table. The Type
+options available values and their descriptions are listed in the following
+table:
+Type
+Description
+BIN
+Binary file with numeric values in platform representation, also with columns at fixed offset within records and fixed record length.
+BSON
+(Temporary) JSON table handled by the new JSON handling.
+CSV
+*$
+"Comma Separated Values" file in which each variable length record contains column values separated by a specific character (defaulting to the comma)
+DBF
+*
+File having the dBASE format.
+DOS
+The table is contained in one or several files. The file format can be refined by some other options of the command or more often using a specific type as many of those described below. Otherwise, it is a flat text file where columns are placed at a fixed offset within each record, the last column being of variable length.
+DIR
+Virtual table that returns a file list like the Unix ls or DOS dir command.
+FIX
+Text file arranged like DOS but with fixed length records.
+FMT
+File in which each record contains the column values in a non-standard format (the same for each record) This format is specified in the column definition.
+INI
+File having the format of the initialization or configuration files used by many applications.
+JDBC
+*
+Table accessed via a JDBC driver.
+JSON
+*$
+File having the JSON format.
+MAC
+Virtual table returning information about the machine and network cards (Windows only).
+MONGO
+*
+Table accessed via the MongoDB C Driver API.
+MYSQL
+*
+Table accessed using the MySQL API like the FEDERATED engine.
+OCCUR
+*
+A table based on another table existing on the current server, several columns of the object table containing values that can be grouped in only one column.
+ODBC
+*
+Table extracted from an application accessible via ODBC or unixODBC. For example from another DBMS or from an Excel spreadsheet.
+OEM
+*
+Table of any other formats not directly handled by CONNECT but whose access is implemented by an external FDW (foreign data wrapper) written in C++ (as a DLL or Shared Library).
+PIVOT
+*
+Used to "pivot" the display of an existing table or view.
+PROXY
+*
+A table based on another table existing on the current server.
+TBL
+*
+Accessing a collection of tables as one table (like the MERGE engine does for MyIsam tables)
+VEC
+Binary file organized in vectors, in which column values are grouped consecutively, either split in separate files or in a unique file.
+VIR*
+Virtual table containing only special and virtual columns.
+WMI
+*
+Windows Management Instrumentation table displaying information coming from a WMI provider. This type enables to get in tabular format all sorts of information about the machine hardware and operating system (Windows only).
+XCOL
+*
+A table based on another table existing on the current server with one of its columns containing comma separated values.
+XML
+*$
+File having the XML or HTML format.
+ZIP
+Table giving information about the contents of a zip file.
+Catalog Tables
+For all table types marked with a '*' in the table above, CONNECT is able to
+analyze the data source to retrieve the column definition. This can be used to
+define a “catalog” table that display the column description of the source, or
+to create a table without specifying the column definition that are
+automatically constructed by CONNECT when creating the table.
+When marked with a ‘$’ the file can be the result returned by a REST query.
+This page is licensed: GPLv2
+spinner
+Previous
+CONNECT Table Types
+Next
+CONNECT BIN Table Type
+Last updated
+4 months ago
+Was this helpful?
+Was this helpful?

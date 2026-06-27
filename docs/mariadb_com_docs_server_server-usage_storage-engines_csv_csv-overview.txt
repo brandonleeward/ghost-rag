@@ -1,0 +1,150 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/csv/csv-overview
+
+CSV Overview | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+CSV Overview
+Checking and Repairing CSV Tables
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+CSV Overview
+The CSV Storage Engine stores data in comma-separated values format text files, making it easy to exchange data with other applications.
+The CSV Storage Engine can read and append to files stored in CSV (comma-separated-values) format.
+The CSV storage engine and logging to tables
+The CSV storage engine is the default storage engine when using
+logging of SQL queries
+to tables.
+Copy
+mysqld
+--log-output=table
+CSV Storage Engine files
+When you create a table using the CSV storage engine, three files are created:
+<table_name>.frm
+<table_name>.CSV
+<table_name>.CSM
+The
+.frm
+file is the table format file.
+The
+.CSV
+file is a plain text file. Data you enter into the table is stored as plain text in comma-separated-values format.
+The
+.CSM
+file stores metadata about the table such as the state and the number of rows in the table.
+Limitations
+CSV tables do not support indexing.
+CSV tables cannot be partitioned.
+Columns in CSV tables must be declared as NOT NULL.
+No
+transactions
+.
+The original CSV-format does not enable IETF-compatible parsing of embedded quote and comma characters. From
+MariaDB 10.1.8
+, it is possible to do so by setting the
+IETF_QUOTES
+option when creating a table.
+Examples
+Forgetting to add NOT NULL:
+Creating, inserting and selecting:
+Viewing in a text editor:
+See Also
+Checking and Repairing CSV Tables
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+CSV
+Next
+Checking and Repairing CSV Tables
+Last updated
+6 months ago
+Was this helpful?
+The CSV storage engine and logging to tables
+CSV Storage Engine files
+Limitations
+Examples
+See Also
+Was this helpful?
+Copy
+CREATE TABLE csv_test (x INT, y DATE, z CHAR(10)) ENGINE=CSV;
+ERROR 1178 (42000): The storage engine for the table doesn't support nullable columns
+Copy
+CREATE TABLE csv_test (
+x INT NOT NULL, y DATE NOT NULL, z CHAR(10) NOT NULL
+) ENGINE=CSV;
+Copy
+INSERT INTO csv_test VALUES
+(1,CURDATE(),'one'),
+(2,CURDATE(),'two'),
+(3,CURDATE(),'three');
+Copy
+SELECT * FROM csv_test;
++---+------------+-------+
+| x | y          | z     |
++---+------------+-------+
+| 1 | 2011-11-16 | one   |
+| 2 | 2011-11-16 | two   |
+| 3 | 2011-11-16 | three |
++---+------------+-------+
+Copy
+$ cat csv_test.CSV
+1,"2011-11-16","one"
+2,"2011-11-16","two"
+3,"2011-11-16","three"

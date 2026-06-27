@@ -1,0 +1,85 @@
+Source: https://www.tinybird.co/docs/forward/get-data-in/guides/ingest-with-estuary
+
+Ingest with Estuary · Tinybird Docs
+Sign In
+Sign Up
+Ingest with Estuary
+¶
+Copy as MD
+In this guide, you'll learn how to use Estuary to push data streams to Tinybird.
+Estuary
+is a real-time ETL tool that allows you capture data from a range of source, and push it to a range of destinations. Using Estuary's Dekaf, you can connect Tinybird to Estuary as if it was a Kafka broker - meaning you can use Tinybird's native Kafka Connector to consume data from Estuary.
+Read more about Estuary Dekaf.
+Prerequisites
+¶
+An Estuary account and collection
+A Tinybird account and workspace
+Connecting to Estuary
+¶
+In Estuary, create a new Dekaf materialization to use for the Tinybird connection.
+You can create it from the
+Estuary destinations tab
+.
+You have all the details on the
+Tinybird Dekaf Estuary docs page.
+In your Tinybird workspace, create a new data source and use the
+Kafka Connector
+.
+To configure the connection details, use the following settings (these can also be found in the
+Estuary Dekaf docs
+).
+Bootstrap servers:
+dekaf.estuary-data.com
+SASL Mechanism:
+PLAIN
+SASL Username: Your materialization task name, such as
+YOUR-ORG/YOUR-PREFIX/YOUR-MATERIALIZATION
+SASL Password: Auth token provided when you the Dekaf materialization was created on Estuary
+Tick the
+Decode Avro messages with Schema Register
+box, and use the following settings:
+URL:
+https://dekaf.estuary-data.com
+Username: The same Materialization name from the preceding step,
+YOUR-ORG/YOUR-PREFIX/YOUR-MATERIALIZATION
+Password: The same Auth token created on the Dekaf materialization from the preceding step
+Select
+Next
+and you see a list of topics. These topics are the collections you have in Estuary. Select the collection you want to ingest into Tinybird, and select
+Next
+.
+Configure your consumer group as needed.
+Finally, you see a preview of the data source schema. Feel free to make any modifications as required, then select
+Create data source
+.
+This completes the connection with Estuary, and new data from the Estuary collection arrives in your Tinybird data source in real-time.
+If you need
+support for deletions
+, check the
+configuring support for deletions
+section on Estuary docs.
+Handling updates and deletes
+¶
+When capturing change data that includes updates and deletes, you need to deduplicate the data in Tinybird to maintain the latest state.
+There are several strategies to deduplicate data in your data source, but with Estuary, the recommended approach is to use a
+ReplacingMergeTree engine
+with appropriate settings and the
+FINAL
+modifier.
+Do not build materialized views with an AggregatingMergeTree on top of a ReplacingMergeTree. The target data source always contains duplicates due to the incremental nature of materialized views.
+Learn more
+¶
+For a complete step-by-step tutorial on setting up CDC with PostgreSQL, Estuary Flow, and Tinybird, see the
+From CDC to real-time analytics with Tinybird and Estuary
+blog post.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Ingest with Estuary
+Prerequisites
+Connecting to Estuary
+Handling updates and deletes
+Learn more
+forward
+Ask AI

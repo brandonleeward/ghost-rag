@@ -1,0 +1,147 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/connect/connect-table-types
+
+CONNECT Table Types | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+Introduction to the CONNECT Engine
+Using CONNECT
+Installing CONNECT
+CONNECT Create Table Options
+CONNECT Data Types
+CONNECT Table Types
+CONNECT Table Types Overview
+CONNECT BIN Table Type
+CONNECT CSV and FMT Table Types
+CONNECT DBF Table Type
+CONNECT DOS and FIX Table Types
+CONNECT - External Table Types
+CONNECT - Files Retrieved Using Rest Queries
+CONNECT INI Table Type
+CONNECT JDBC Table Type: Accessing Tables from Another DBMS
+CONNECT JSON Table Type
+CONNECT MONGO Table Type: Accessing Collections from MongoDB
+CONNECT MYSQL Table Type: Accessing MySQL/MariaDB Tables
+CONNECT - NoSQL Table Types
+CONNECT OCCUR Table Type
+CONNECT ODBC Table Type: Accessing Tables From Another DBMS
+CONNECT PIVOT Table Type
+CONNECT PROXY Table Type
+CONNECT Table Types - Catalog Tables
+CONNECT Table Types - Data Files
+CONNECT Table Types - OEM: Implemented in an External LIB
+CONNECT Table Types - Special "Virtual" Tables
+CONNECT Table Types - VIR
+CONNECT TBL Table Type: Table List
+CONNECT - Using the TBL and MYSQL Table Types Together
+CONNECT VEC Table Type
+CONNECT XCOL Table Type
+CONNECT XML Table Type
+CONNECT Zipped File Tables
+Inward and Outward Tables
+CONNECT Security
+CONNECT System Variables
+Adding the REST Feature as a Library Called by an OEM Table
+Compiling JSON UDFs in a Separate Library
+Making the GetRest Library
+OEM Table Example
+Current Status of the CONNECT Handler
+JSON Sample Files
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+CONNECT Table Types
+The CONNECT storage engine.
+CONNECT Table Types Overview
+CONNECT BIN Table Type
+CONNECT CSV and FMT Table Types
+CONNECT DBF Table Type
+CONNECT DOS and FIX Table Types
+CONNECT - External Table Types
+CONNECT - Files Retrieved Using Rest Queries
+CONNECT INI Table Type
+CONNECT JDBC Table Type: Accessing Tables from Another DBMS
+CONNECT JSON Table Type
+CONNECT MONGO Table Type: Accessing Collections from MongoDB
+CONNECT MYSQL Table Type: Accessing MySQL/MariaDB Tables
+CONNECT - NoSQL Table Types
+CONNECT OCCUR Table Type
+CONNECT ODBC Table Type: Accessing Tables From Another DBMS
+CONNECT PIVOT Table Type
+CONNECT PROXY Table Type
+CONNECT Table Types - Catalog Tables
+CONNECT Table Types - Data Files
+CONNECT Table Types - OEM: Implemented in an External LIB
+CONNECT Table Types - Special "Virtual" Tables
+CONNECT Table Types - VIR
+CONNECT TBL Table Type: Table List
+CONNECT - Using the TBL and MYSQL Table Types Together
+CONNECT VEC Table Type
+CONNECT XCOL Table Type
+CONNECT XML Table Type
+CONNECT Zipped File Tables
+Inward and Outward Tables
+Previous
+CONNECT Data Types
+Next
+CONNECT Table Types Overview
+Last updated
+1 year ago
+Was this helpful?
+Was this helpful?

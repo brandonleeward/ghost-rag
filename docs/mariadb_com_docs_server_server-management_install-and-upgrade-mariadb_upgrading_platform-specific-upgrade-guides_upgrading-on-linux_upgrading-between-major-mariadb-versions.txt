@@ -1,0 +1,248 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading/platform-specific-upgrade-guides/upgrading-on-linux/upgrading-between-major-mariadb-versions
+
+Upgrading Between Major MariaDB Versions | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Platform Specific Upgrade Guides
+Upgrading on Linux
+Upgrading Between Major MariaDB Versions
+Upgrading Between Minor MariaDB Versions
+Upgrading MariaDB on Windows
+MariaDB Community Server Upgrade Paths
+MariaDB Enterprise Server Upgrade Paths
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Upgrading Between Major MariaDB Versions
+Complete MariaDB upgrade guide. Complete migration reference with version compatibility, backup procedures, and rollback strategies for production use.
+MariaDB is designed to allow easy upgrades. You should be able to trivially upgrade from ANY earlier MariaDB version to the latest one (for example
+MariaDB 10.3
+.x to
+MariaDB 10.11
+.x), usually in a few seconds. This is also mainly true for any MySQL version < 8.0 to
+MariaDB 10.4
+and up.
+Upgrades are normally easy because:
+All MariaDB table data files are backward compatible
+The MariaDB connection protocol is backward compatible. You don't normally need to upgrade any of your old clients to be able to connect to a newer MariaDB version.
+The MariaDB replica can be of any newer version than the primary.
+MariaDB Corporation regularly runs tests to check that one can upgrade from
+MariaDB 5.5
+to the latest MariaDB version without any trouble. All older versions should work too (as long as the storage engines you were using are still around).
+Note that if you are using
+MariaDB Galera Cluster
+, you have to follow the
+Galera upgrading instructions
+!
+Requirements for Doing an Upgrade Between Major Versions
+Galera Cluster Users (Upgrading to 12.3+): You must manually install the
+mariadb-server-galera
+(or
+MariaDB-server-galera
+) package during the upgrade. Because the automatic dependency has been removed, a standard upgrade will not pull in the necessary cluster management components, which may prevent your cluster from bootstrapping.
+Go through the individual version upgrade notes (listed below) to look for any major changes or configuration options that have changed.
+Ensure that the target MariaDB version supports the storage engines you are using. For example, in 10.5
+TokuDB
+is not supported.
+Back up the database (just in case). At least, take a copy of the
+mysql
+system database directory under the data directory with
+mariadb-dump --add-drop-table mysql
+(called
+mysqldump
+in
+MariaDB 10.3
+and earlier) as most of the upgrade changes are done there (adding new fields and new system tables etc).
+Cleanly shutdown the server. This is necessary because even if data files are compatible between versions, recovery logs may not be.
+Ensure that the
+innodb_fast_shutdown
+variable is not 2 (fast crash shutdown). The default of this variable is
+1
+.
+innodb_force_recovery
+must be less than
+3
+.
+Note that rpms don't support upgrading between major versions, only minor like 10.4.1 to 10.4.2. If you are using rpms, you should de-install the old MariaDB rpms and install the new MariaDB rpms before running
+mariadb-upgrade
+. Note that when installing the new rpms,
+mariadb-upgrade
+may be run automatically. There is no problem with running
+mariadb-upgrade
+many times.
+Recommended Steps
+If you have a
+primary-replica setup
+, first upgrade one replica and when you have verified that the replica works well, upgrade the rest of the replicas (if any). Then
+upgrade one replica to primary
+, upgrade the primary, and change the replica to a primary.
+If you don't have a primary-replica setup, then
+take a backup
+,
+shutdown MariaDB
+and do the upgrade.
+Step by Step Instructions for Upgrades
+Upgrade MariaDB binaries and libraries, preferably without starting MariaDB.
+If the MariaDB server process,
+mariadbd
+was not started as part of the upgrade, start it by executing
+mariadbd --skip-grant-tables
+. This may produce some warnings about some system tables not being up to date, but you can ignore these for now as
+mariadb-upgrade
+will fix that.
+Run
+mariadb-upgrade
+Restart MariaDB server.
+Work Done by mariadb-upgrade
+The main work done when upgrading is done by running
+mariadb-upgrade
+. The main things it does are:
+Updating the system tables in the
+mysql
+database to the newest version. This is very quick.
+mariadb-upgrade
+also runs
+mariadb-check --check-upgrade
+to check if there have been any collation changes between the major versions. This recreates indexes in old tables that are using any of the changed collations. This can take a bit of time if there are a lot of tables or there are many tables which used the changed collation. The last time a collation changed was in MariaDB/MySQL 5.1.23.
+Post Upgrade Work
+Check the
+MariaDB error log
+for any problems during upgrade. If there are any warnings in the log files, do your best to get rid of them!
+The common warnings/errors are:
+Using obsolete options. If this is the case, remove them from your
+my.cnf files
+.
+Check the manual for
+new features
+that have been added since your last MariaDB version.
+Test that your application works as before. The main difference from before is that because of optimizer improvements your application should work better than before, but in some rare cases the optimizer may get something wrong. In this case, you can try to use
+explain
+,
+optimizer trace
+or
+optimizer_switch
+to fix the queries.
+If Something Goes Wrong
+First, check the
+MariaDB error log
+to see if you are using configure options that are not supported anymore.
+Check the upgrade notices for the MariaDB release that you are upgrading to.
+File an issue in the
+MariaDB bug tracker
+so that we know about the issue and can provide a fix to make upgrades even better.
+Add a comment to this manual entry for how we can improve it.
+Disaster Recovery
+In the unlikely event something goes wrong, you can try the following:
+Remove the InnoDB tables from the
+mysql
+data directory. They are:
+gtid_slave_pos
+innodb_table_stats
+innodb_index_stats
+transaction_registry
+Move the
+mysql
+data directory to
+mysql-old
+and run
+mariadb-install-db
+to generate a new one.
+After the above, you have to add back your old users.
+When done, delete the
+mysql-old
+data directory.
+Downgrading
+MariaDB server is not designed for downgrading. That said, in most cases, as long as you haven't run any
+ALTER TABLE
+or
+CREATE TABLE
+statements and you have a
+mariadb-dump
+of your old
+mysql
+database , you should be able to downgrade to your previous version by doing the following:
+Do a clean shutdown. For this special case you have to set
+innodb_fast_shutdown
+to 0,before taking down the new MariaDB server, to ensure there are no redo or undo logs that need to be applied on the downgraded server.
+Delete the tables in the
+mysql
+database (if you didn't use the option
+--add-drop-table
+to
+mariadb-dump
+)
+Delete the new MariaDB installation
+Install the old MariaDB version
+Start the server with
+mariadbd --skip-grant-tables
+Install the old
+mysql
+database
+Execute in the
+mariadb client
+FLUSH PRIVILEGES
+See Also
+Upgrading from MySQL to MariaDB
+Upgrading from MariaDB 10.11 to MariaDB 11.4
+Upgrading from MariaDB 10.6 to MariaDB 10.11
+Upgrading from MariaDB 10.6 to MariaDB 10.7
+Upgrading from MariaDB 10.5 to MariaDB 10.6
+Upgrading from MariaDB 10.4 to MariaDB 10.5
+Galera upgrading instructions
+innodb_fast_shutdown
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Upgrading on Linux
+Next
+Upgrading Between Minor MariaDB Versions
+Last updated
+2 months ago
+Was this helpful?
+Requirements for Doing an Upgrade Between Major Versions
+Recommended Steps
+Step by Step Instructions for Upgrades
+Work Done by mariadb-upgrade
+Post Upgrade Work
+If Something Goes Wrong
+Disaster Recovery
+Downgrading
+See Also
+Was this helpful?

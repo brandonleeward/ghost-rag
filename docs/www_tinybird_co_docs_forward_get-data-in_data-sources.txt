@@ -1,0 +1,246 @@
+Source: https://www.tinybird.com/docs/forward/get-data-in/data-sources
+
+Data sources · Tinybird Docs
+Sign In
+Sign Up
+Data sources
+¶
+Copy as MD
+When you send data to Tinybird, it's stored in a data source. You then write SQL queries to publish API
+endpoints
+, use the
+ClickHouse® interface
+, or use
+MCP
+to query the data.
+For example, if your event data lives in a Kafka topic, you can create a data source that connects directly to
+Kafka
+and writes the events to Tinybird. Similarly, you can
+send events
+or data
+from a file
+.
+There are also intermediate data sources that are the result of
+materialization
+or a
+copy pipe
+.
+Data sources can be defined with
+.datasource
+files, in
+.ts
+files with the TypeScript SDK, or in
+.py
+files using the Python SDK.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+sample.datasource
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `session_id` String `json:$.session_id`,
+    `action` LowCardinality(String) `json:$.action`,
+    `version` LowCardinality(String) `json:$.version`,
+    `payload` String `json:$.payload`
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "session_id, timestamp"
+ENGINE_TTL "timestamp + toIntervalDay(60)"
+See all syntax options in the
+Datafiles reference
+,
+TypeScript SDK reference
+, and
+Python SDK reference
+.
+Create Data Sources
+¶
+To create a new Data Source, define it in your project and then deploy it.
+If you need help generating a
+.datasource
+file, run
+tb datasource create
+. The CLI asks which type of Data Source you want to create:
+Blank
+: Generates a
+.datasource
+file with example columns you can edit.
+Local file
+: Creates a
+.datasource
+file based on the schema of a local file.
+Remote URL
+: Creates a
+.datasource
+file based on the schema of a file at a remote URL.
+Kafka
+: Creates a Data Source for a
+Kafka connection
+. If you don't have a Kafka connection yet, create it first; the schema is built from the topic you select.
+Amazon S3
+: Creates a Data Source for an
+S3 connection
+. You need an existing connection because the schema is built from the file in the bucket you choose.
+GCS
+: Creates a Data Source for a
+Google Cloud Storage connection
+. You need an existing connection because the schema is built from the file in the bucket you choose.
+Run
+tb datasource create -h
+anytime to see this list in the command help.
+To convert
+.datasource
+files to SDK definitions, use
+tinybird migrate
+for TypeScript projects or
+tinybird migrate
+for Python projects.
+Delete Data Sources
+¶
+To delete a data source in Tinybird, remove its corresponding
+.datasource
+file or definition from your project and deploy your changes.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb deploy --allow-destructive-operations
+The Tinybird CLI and SDK CLIs require the
+--allow-destructive-operations
+flag to confirm the removal.
+This operation will permanently remove the data source and all its data from your Tinybird workspace. Make sure to review dependencies such as pipes or materialized views that might rely on the data source before deleting it.
+Shared Data Source
+¶
+Workspace administrators can share a Data Source with another Workspace they have access to in the same Organization.
+To share a Data Source, add the destination Workspace names to the Data Source definition and deploy your changes. Use
+SHARED_WITH
+in
+.datasource
+files,
+sharedWith
+in the TypeScript SDK, or
+shared_with
+in the Python SDK.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+origin_datasource.datasource
+# ... data source definition ...
+
+SHARED_WITH >
+    <destination_workspace>,
+    <other_destination_workspace>
+tb deploy
+You can use the shared Data Source to create Pipes in the target Workspace. Users that have access to a shared Data Source can access the
+tinybird.datasources_ops_log
+and the
+tinybird.kafka_ops_log
+Service Data Sources.
+Limitations
+¶
+The following limitations apply to shared Data Sources:
+Shared Data Sources are read-only.
+You can't share a shared Data Source, only the original Workspace can share it.
+You can't check the quarantine of a shared Data Source.
+You can't create a Materialized View from a shared Data Source unless you're migrating from Classic and you already have them.
+Working locally with Shared Data Sources
+¶
+When one Workspace shares a Data Source with another Workspace, deploy order matters. For example, say Workspace A shares a Data Source with Workspace B, and Workspace B uses that Data Source in an endpoint. If you start with a fresh Tinybird Local environment without either Workspace, deploy in this order:
+Tinybird CLI
+TypeScript SDK
+Python SDK
+# Workspace B: first deploy creates the workspace, but fails because the shared Data Source is not available yet.
+tb deploy
+
+# Workspace A: deploy the Data Source that is shared with Workspace B.
+tb deploy
+
+# Workspace B: deploy again after the shared Data Source is available.
+tb deploy
+tb build
+for datafile projects, or
+tinybird build
+for SDK projects, hides all this complexity and creates the necessary workspaces and Data Sources to verify that a workspace is valid.
+Keeping .datasource files up-to-date
+¶
+For datafile projects, run
+tb [--cloud] pull --only-vendored
+to update the
+.datasource
+files of Data Sources shared with your workspace. They will be placed in
+vendor/<name_of_the_source_workspace>/datasources
+.
+You can only deploy your project if the files in
+vendor/
+are up-to-date. If they aren't, your
+deployment will fail and you'll be prompted to run the aforementioned command.
+If you're using the SDKs, run the corresponding
+tinybird migrate
+command to convert
+.datasource
+files to
+.ts
+or
+.py
+definitions.
+Quarantine Data Sources
+¶
+Every Data Source you create in your Workspace has an associated quarantine Data Source that stores rows that don't fit the schema. If a row doesn't match the Data Source schema, Tinybird writes it to the quarantine Data Source instead of failing the whole ingest process.
+The quarantine Data Source keeps the columns from the original row and adds metadata columns that explain why the row was quarantined:
+c__error_column
+(
+Array(String)
+): The columns that contain invalid values.
+c__error
+(
+Array(String)
+): The ingestion errors that caused the row to be quarantined.
+c__import_id
+(
+Nullable(String)
+): The import job identifier, when the row was imported through a job.
+insertion_date
+(
+DateTime
+): The timestamp when Tinybird ingested the row.
+Quarantine Data Sources are recreated when you deploy a new version of the original Data Source. If you need to inspect, query, or recover quarantined rows, do it before deploying schema changes to the original Data Source.
+Use quarantine Data Sources to inspect schema mismatches, recover failed rows, and validate schema changes during ingest workflows. For step-by-step examples, see the
+Quarantine Data Sources guide
+.
+Data operations
+¶
+Data Sources are append-only by default. When you need to update or remove data, use explicit data operations instead of treating Data Sources like mutable OLTP tables.
+Append data
+from events, files, or connectors. See
+Ingest Data
+.
+Replace data
+when you need to reingest a full Data Source or a partitioned slice. See
+Replace and delete data
+and
+Replace data from a file
+.
+Delete data
+for selective removals or compliance workflows. See
+Delete data selectively
+,
+GDPR-compliant data deletion
+, and
+delete limits
+.
+Deduplicate data
+at query time, with table engines, or by rebuilding derived Data Sources depending on your workload. See
+Deduplication strategies
+. This is often the best pattern when you need update-like behavior in analytical workloads.
+For one-off corrections, use replace or delete operations directly. If updates and deletes are frequent, model the workload as append-only events and deduplicate the latest state at query or processing time. This is usually more efficient and easier to operate at scale.
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Data sources
+Create Data Sources
+Delete Data Sources
+Shared Data Source
+Quarantine Data Sources
+Data operations
+forward
+Ask AI

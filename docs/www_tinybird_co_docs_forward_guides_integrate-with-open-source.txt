@@ -1,0 +1,228 @@
+Source: https://www.tinybird.com/docs/forward/guides/integrate-with-open-source
+
+Add Tinybird to your Open Source Project · Tinybird Docs
+Sign In
+Sign Up
+Add Tinybird to your Open Source project
+¶
+Copy as MD
+Tinybird is a managed ClickHouse® service with flexible deployment options used by many open source developers to integrate ClickHouse®-based analytics features into their open source projects.
+This guide walks you through best practices for adding Tinybird into your open source project.
+Apply to our Open Source Program
+to get plan credits, swag, and support integrating Tinybird into your open source project.
+Including Tinybird in your open source repository
+¶
+Tinybird resources are represented as plaintext files that can be versioned alongside your application code. When you initialize a Tinybird project with
+tb init
+, it creates a default directory structure with folders for different resource types.
+Default project structure
+¶
+Tinybird generates the following folder structure:
+├── .tinyb                    # Project configuration and authentication
+├── connections/              # Connection files
+├── datasources/              # Data source definitions (.datasource)
+│   └── user_actions.datasource
+├── endpoints/                # API endpoint pipes (.pipe)
+│   ├── daily_metrics.pipe
+│   └── user_stats.pipe
+├── pipes/                    # Processing pipes (.pipe)
+├── materializations/         # Materialized views
+├── fixtures/                 # Test data files
+│   └── sample_data.ndjson
+│   └── sample_data.sql
+└── tests/                    # Test suites
+    └── daily_metrics.yaml
+You can include these Tinybird resources as a part of your open source distribution so that self-hosters and contributors can deploy the Tinybird project using their preferred deployment model.
+Refer to the
+reference implementations
+for example approaches to organizing Tinybird resources within your open source codebase.
+Documenting Tinybird
+¶
+We recommend including a
+TINYBIRD.md
+or a
+README.md
+within your
+/tinybird
+folder to explain Tinybird resources to contributors. Note that
+tb init
+can generate starter project files and structure that you can build on.
+Development workflow for contributors and self-hosters
+¶
+Tinybird projects follow standard Git-based development workflows. Contributors can pull repositories, run
+Tinybird Local
+for development, and use agent skills in their coding assistants to understand and evolve Tinybird resources.
+npx skills add tinybirdco/tinybird-agent-skills
+As with any software codebase, the typical workflow is: clone → install → build → develop → test → deploy.
+CI/CD and testing
+¶
+Tinybird automatically generates CI/CD templates for GitHub and GitLab to automate testing and deployment.
+You can also use Tinybird's testing framework to generate unit tests and data quality tests to detect breaking changes during CI/CD.
+Learn more:
+CI/CD workflows
+Test your project
+Select your query interface
+¶
+Developers often choose Tinybird because of the simplified abstractions it provides over ClickHouse®, including its concept of pipes that can be instantly deployed as API endpoints.
+Endpoint pipes are the most common way to query data in Tinybird, however Tinybird offers three different query interfaces, each with different trade-offs for open source projects.
+API Endpoints
+¶
+Deploy pipes as hosted API endpoints with type-safe parameters and built-in monitoring. This provides the highest level of abstraction and separation of concerns, as query logic - including filter parameters - is maintained entirely within Tinybird pipe files.
+An example endpoint pipe configuration:
+TOKEN analytics_read READ
+
+DESCRIPTION >
+    User activity metrics for the last 30 days
+
+NODE user_activity
+SQL >
+    %
+    SELECT
+        user_id,
+        event_type,
+        count() AS event_count,
+        max(timestamp) AS last_activity
+    FROM user_events
+    WHERE user_id = {{UInt32(user_id)}}
+      AND timestamp >= {{DateTime(start_date, '2024-01-01 00:00:00')}}
+    GROUP BY user_id, event_type
+    ORDER BY event_count DESC
+
+TYPE ENDPOINT
+// Calling the endpoint
+const response = await fetch(
+  `https://api.tinybird.co/v0/pipes/user_activity.json?user_id=123&start_date=2024-01-01`,
+  {
+    headers: {
+      'Authorization': 'Bearer tb_your_read_token'
+    }
+  }
+);
+const data = await response.json();
+Learn more:
+API Endpoints
+Pipes
+Query API
+¶
+The Query API allows you to execute arbitrary SQL queries directly against your Tinybird data sources and pipes. With this approach, queries are defined directly within your application code and passed to the Tinybird API. This provides some level of portability for open source projects that want to allow self-hosters the option to port the analytics deployment to open source ClickHouse®, but it still relies on Tinybird APIs.
+// Direct SQL query
+const queryData = {
+  q: `
+    SELECT
+      event_type,
+      count() as total_events,
+      uniq(user_id) as unique_users
+    FROM user_events
+    WHERE timestamp >= today() - INTERVAL 7 DAY
+    GROUP BY event_type
+    ORDER BY total_events DESC
+    FORMAT JSON
+  `
+};
+
+const response = await fetch('https://api.tinybird.co/v0/sql', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer tb_your_token',
+    'Content-Type': 'application/x-www-form-urlencoded'
+  },
+  body: new URLSearchParams(queryData)
+});
+Learn more:
+Query API
+ClickHouse® HTTP Interface
+¶
+You can connect to the underlying ClickHouse® databases in your Tinybird workspace using the native ClickHouse® HTTP interface. This allows you to query Tinybird with existing ORMs, language clients, and BI tools. This approach provides maximum portability and perhaps the easiest migration path to open source ClickHouse®, though it eliminates the convenient query abstractions that Tinybird provides.
+Protocol: HTTPS
+Host: clickhouse.<region>.tinybird.co  # (adjust for your region)
+Port: 443
+Username: <optional - workspace_name>
+Password: <your_read_token>
+// Using @clickhouse/client (HTTP interface)
+import { createClient } from '@clickhouse/client'
+
+const client = createClient({
+  host: 'https://clickhouse.<region>.tinybird.co',
+  username: 'optional_workspace_name', // optional
+  password: 'tb_your_read_token'
+})
+
+const resultSet = await client.query({
+  query: 'SELECT * FROM user_events LIMIT 10',
+  format: 'JSON'
+})
+
+const data = await resultSet.json()
+console.log(data)
+Choosing the right query interface
+¶
+Each query interface offers different tradeoffs: API Endpoints provide standardization but may be less portable for those who want to self-host ClickHouse®. The Query API offers a middle ground with familiar SQL syntax defined in the application code while still using Tinybird APIs, and the ClickHouse® HTTP Interface maximizes portability via a raw connection to the underlying databases.
+Many projects use a combination based on their specific needs - for example, using ClickHouse® Interface for BI tools, Query API for ad hoc queries, and API Endpoints for common query patterns in user-facing analytics.
+Ingestion APIs
+: All data ingestion into Tinybird uses Tinybird-specific APIs (Events API, Data Sources API, Connectors). If you plan to support ClickHouse® open source as an alternative, your project will need to implement separate ingestion patterns for pure ClickHouse® deployments.
+Choose your deployment model
+¶
+Open source projects integrating Tinybird have several deployment options. The most common pattern for open source projects:
+Use
+Tinybird Cloud
+to power analytics for the hosted or commercial service.
+Offer
+self-hosting users
+the flexibility to choose between Tinybird Cloud,
+Tinybird Self-Managed Regions
+, or, perhaps, open source ClickHouse®.
+Learn more:
+Self-managed
+Considerations for Open Source ClickHouse® deployments
+¶
+If your
+query interface
+choice supports it, self-hosting users can potentially deploy your project with open source ClickHouse® as their analytics database.
+Note, however, there are some requirements you must consider:
+Alternative ingestion patterns
+- ClickHouse®-native ingestion instead of Tinybird APIs
+Custom deployment logic
+- Handling ClickHouse® cluster setup, scaling, and maintenance
+Limited features
+- No access to Tinybird's pipes, endpoints, or management tools
+Additional complexity
+- Users manage ClickHouse® operations, security, and monitoring
+Zero-copy support
+- Open source ClickHouse® currently doesn't support zero-copy replication, which can impact storage cost and performance for self-hosters.
+Some open source projects will want to offer flexibility to self-hosters, and Tinybird's ClickHouse® HTTP interface can allow you to design this flexibility into your open source project, with these considerations in mind.
+You can read our
+guide on migrating from ClickHouse® to Tinybird
+to better understand the mapping of concepts between Tinybird and ClickHouse®.
+Reference implementations
+¶
+The following open source projects demonstrate different approaches to integrating Tinybird and can be used as reference implementations:
+Ghost
+: a popular open source publishing platform that uses Tinybird for content and audience analytics.
+Dub
+: an open source link attribution platform that uses Tinybird to capture link click events and build real-time analytics for link creators.
+OpenStatus
+: an open source synthetic monitoring platform that uses Tinybird to store and analyze uptime monitoring data.
+Inbox Zero
+: an open source email management tool that uses Tinybird to analyze email patterns and monitor LLM calls.
+Papermark
+: an open source document sharing platform that uses Tinybird to track document views, engagement metrics, and sharing analytics.
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Add Tinybird to your Open Source project
+Including Tinybird in your open source repository
+Default project structure
+Documenting Tinybird
+Development workflow for contributors and self-hosters
+CI/CD and testing
+Select your query interface
+API Endpoints
+Query API
+ClickHouse® HTTP Interface
+Choosing the right query interface
+Choose your deployment model
+Considerations for Open Source ClickHouse® deployments
+Reference implementations
+forward
+Ask AI

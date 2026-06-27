@@ -1,0 +1,290 @@
+Source: https://mariadb.com/docs/server/server-management/server-monitoring-logs/binary-log/activating-the-binary-log
+
+Activating the Binary Log | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Overview of MariaDB Logs
+Securing MariaDB Logs
+Binary Log
+Overview of the Binary Log
+Activating the Binary Log
+Binary Log Formats
+Using and Maintaining the Binary Log
+Row Binlog Events
+InnoDB-Based Binary Log
+Compressing Events to Reduce Size of the Binary Log
+Flashback
+Group Commit for the Binary Log
+Relay Log
+Selectively Skipping Replication of Binlog Events
+Error Log
+General Query Log
+MyISAM Log
+Rotating Logs on Unix and Linux
+Slow Query Log
+SQL Error Log Plugin
+Transaction Coordinator Log
+Writing Logs Into Tables
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Activating the Binary Log
+Instructions for enabling the binary log using the --log-bin option and configuring the log file basename and index file.
+Turning on Binary Logging
+To enable binary logging, start the server with the
+--log-bin
+option. Alternatively, add this to the
+configuration file
+(for instance,
+my.cnf
+), then restart the server:
+Copy
+[client-server]
+log_bin
+Optionally, you can specify a
+basename
+(with or without a path). If you don't, MariaDB assigns a default basename (for instance,
+c525d37c-b2ff-4543-b06f-87012d142d44-bin)
+, derived from the UUID or hostname of the computer the server runs on. To the basename, file extensions are added, determining the nature of the log files. See
+this section
+for details.
+From MariaDB 12.3, InnoDB-based binary logs can be used. (This is configurable, and not the default.)
+If configured, binary logs are stored in InnoDB page-based tablespaces, rather than flat files. This removes the need for expensive two-phase commit between InnoDB transactions and the binary log.
+InnoDB-based binary logs are enabled by setting
+binlog_storage_engine=innodb
+in the server configuration. See
+InnoDB-Based Binary Log
+for more information.
+On server start, you can set a basename (in the example, with a path) like this:
+Copy
+mariadbd
+--log-bin=/var/log/mariadb/mariadb-logs
+The following applies:
+If you specify a binary log basename with an extension (for example
+.log
+), the extension is silently ignored.
+If you don't specify a path with the basename, the server logs into
+datadir
+.
+(
+Datadir
+is determined by the value of the
+datadir
+system variable.)
+If you don't specify a basename, it is strongly recommended to use
+--log-basename
+or to ensure that
+replication
+doesn't stop if the hostname of the computer changes.
+Verifying Logging is On
+Once
+log-bin
+or
+log_bin
+is configured and the server has been restarted, binary logging is enabled. To verify that, issue this statement:
+Viewing Log Files
+From MariaDB 12.3, InnoDB-based binary logs can be used. (This is configurable, and not the default.)
+If configured, binary logs are stored in InnoDB page-based tablespaces, rather than flat files. This removes the need for expensive two-phase commit between InnoDB transactions and the binary log.
+InnoDB-based binary logs are enabled by setting
+binlog_storage_engine=innodb
+in the server configuration. See
+InnoDB-Based Binary Log
+for more information.
+To view the log files created by the server, issue this statement:
+To see which log file is currently used, issue this statement:
+To find out where log files are stored, issue this statement:
+/opt/homebrew/var/mysql/
+is the
+storage location
+.
+c525d37c-b2ff-4543-b06f-87012d142d44-bin
+is the
+basename
+of the binary log files.
+Log File Organization
+From MariaDB 12.3, InnoDB-based binary logs can be used. (This is configurable, and not the default.)
+If configured, binary logs are stored in InnoDB page-based tablespaces, rather than flat files. This removes the need for expensive two-phase commit between InnoDB transactions and the binary log.
+InnoDB-based binary logs are enabled by setting
+binlog_storage_engine=innodb
+in the server configuration. See
+InnoDB-Based Binary Log
+for more information.
+Knowing the
+basename
+, you can view the log files on the file system, too. Change directory (
+cd
+) to the
+storage location
+, and issue this command:
+The binary log index
+is the file containing an
+.index
+extension. It is a plain-text file, containing a master list of the binary log files, in order.
+By default, the name of the index file is
+basename.index
+. This can be overridden with the
+--log-bin-index
+option.
+The binary log files
+have an extension using consecutive numbers, starting with
+.000001
+. (The higher the number, the newer the log file is.)
+The binary log files for
+GTID binlog indexing
+(available from MariaDB 11.4) have an
+.idx
+extension.
+A new binary log file with a new extension (number) is created:
+Every time the server starts.
+When the logs are flushed with a
+FLUSH LOGS
+statement.
+When the maximum size for a binary log file is reached. (This is determined by
+max_binlog_size
+.)
+Turning off Logging per Session
+Clients with the
+BINLOG ADMIN
+privilege can disable and re-enable binary logging for the current session by setting the
+sql_log_bin
+variable:
+Reading Log Files
+From MariaDB 12.3, InnoDB-based binary logs can be used. (This is configurable, and not the default.)
+If configured, binary logs are stored in InnoDB page-based tablespaces, rather than flat files. This removes the need for expensive two-phase commit between InnoDB transactions and the binary log.
+InnoDB-based binary logs are enabled by setting
+binlog_storage_engine=innodb
+in the server configuration. See
+InnoDB-Based Binary Log
+for more information.
+Log files, with the exception of the
+index
+log file, are binary-encoded. To display them in a human-readable format, change directory to the
+storage location
+of the log files, and issue this
+mariadb-binlog
+command:
+To store that output permanently (for instance, for later processing), issue a command like this:
+Log File Security
+From MariaDB 12.3, InnoDB-based binary logs can be used. (This is configurable, and not the default.)
+If configured, binary logs are stored in InnoDB page-based tablespaces, rather than flat files. This removes the need for expensive two-phase commit between InnoDB transactions and the binary log.
+InnoDB-based binary logs are enabled by setting
+binlog_storage_engine=innodb
+in the server configuration. See
+InnoDB-Based Binary Log
+for more information.
+For instructions how to secure binary log
+files
+, see
+Securing MariaDB Logs
+.
+Binary Log Format
+There are three formats for the binary log. The default is
+mixed logging
+, which is a mix of
+statement-based
+and
+row-based logging
+. See
+Binary Log Formats
+for a detailed discussion.
+See Also
+Setting sql_log_bin
+PURGE LOGS
+- Delete logs
+FLUSH LOGS
+- Close and rotate logs
+GTID binlog indexing
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Overview of the Binary Log
+Next
+Binary Log Formats
+Last updated
+4 months ago
+Was this helpful?
+Turning on Binary Logging
+Verifying Logging is On
+Viewing Log Files
+Log File Organization
+Turning off Logging per Session
+Reading Log Files
+Log File Security
+Binary Log Format
+See Also
+Was this helpful?
+Copy
+SHOW VARIABLES LIKE 'log_bin';
++---------------+-------+
+| Variable_name | Value |
++---------------+-------+
+| log_bin       | ON    |
++---------------+-------+
+Copy
+SHOW BINARY LOGS;
++-------------------------------------------------+-----------+
+| Log_name                                        | File_size |
++-------------------------------------------------+-----------+
+| c525d37c-b2ff-4543-b06f-87012d142d44-bin.000001 |       437 |
+| c525d37c-b2ff-4543-b06f-87012d142d44-bin.000002 |       433 |
++-------------------------------------------------+-----------+
+Copy
+SHOW BINLOG STATUS \G
+*************************** 1. row ***************************
+File: c525d37c-b2ff-4543-b06f-87012d142d44-bin.000002
+Position: 433
+Binlog_Do_DB:
+Binlog_Ignore_DB:
+Copy
+SHOW VARIABLES LIKE 'log_bin_basename' \G
+*************************** 1. row ***************************
+Variable_name: log_bin_basename
+Value: /opt/homebrew/var/mysql/c525d37c-b2ff-4543-b06f-87012d142d44-bin
+Copy
+ls -1 c525d37c-b2ff-4543-b06f-87012d142d44-bin.*
+c525d37c-b2ff-4543-b06f-87012d142d44-bin.000001
+c525d37c-b2ff-4543-b06f-87012d142d44-bin.000001.idx
+c525d37c-b2ff-4543-b06f-87012d142d44-bin.000002
+c525d37c-b2ff-4543-b06f-87012d142d44-bin.000002.idx
+c525d37c-b2ff-4543-b06f-87012d142d44-bin.index
+Copy
+SET sql_log_bin = 0; -- turns off logging
+SET sql_log_bin = 1; -- turns on logging
+Copy
+mariadb-binlog c525d37c-b2ff-4543-b06f-87012d142d44-bin.000001
+/*!50530 SET @@SESSION.PSEUDO_SLAVE_MODE=1*/;
+/*!40019 SET @@session.max_delayed_threads=0*/;
+/*!50003 SET @OLD_COMPLETION_TYPE=@@COMPLETION_TYPE,COMPLETION_TYPE=0*/;
+DELIMITER /*!*/;
+# at 4
+#260205 17:13:09 server id 1  end_log_pos 256 CRC32 0x59977cc7 	Start: binlog v 4, server v 12.1.2-MariaDB-log created 260205 17:13:09 at startup
+ROLLBACK/*!*/;
+…
+Copy
+mariadb-binlog c525d37c-b2ff-4543-b06f-87012d142d44-bin.000001 > binlog.sql

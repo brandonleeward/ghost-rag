@@ -1,0 +1,627 @@
+Source: https://docs.ghost.org/admin-api/members/overview
+
+Overview - Ghost Developer Docs
+Documentation Index
+Fetch the complete documentation index at:
+/llms.txt
+Use this file to discover all available pages before exploring further.
+Skip to main content
+Ghost Developer Docs
+home page
+Search...
+⌘
+K
+Search...
+Navigation
+Members
+Overview
+Home
+Documentation
+Migration Guides
+Advanced Tools
+Admin API
+Members
+Overview
+The members resource provides an endpoint for fetching, creating, and updating member data.
+Fetch members (by default, the 15 newest members are returned):
+// GET /admin/members/?include=newsletters%2Clabels
+{
+"members"
+: [
+{
+"id"
+:
+"623199bfe8bc4d3097caefe0"
+,
+"uuid"
+:
+"4fa3e4df-85d5-44bd-b0bf-d504bbe22060"
+,
+"email"
+:
+"jamie@example.com"
+,
+"name"
+:
+"Jamie"
+,
+"note"
+:
+null
+,
+"geolocation"
+:
+null
+,
+"subscribed"
+:
+true
+,
+"created_at"
+:
+"2022-03-16T08:03:11.000Z"
+,
+"updated_at"
+:
+"2022-03-16T08:03:40.000Z"
+,
+"labels"
+: [
+{
+"id"
+:
+"623199dce8bc4d3097caefe9"
+,
+"name"
+:
+"Label 1"
+,
+"slug"
+:
+"label-1"
+,
+"created_at"
+:
+"2022-03-16T08:03:40.000Z"
+,
+"updated_at"
+:
+"2022-03-16T08:03:40.000Z"
+}
+],
+"subscriptions"
+: [],
+"avatar_image"
+:
+"https://gravatar.com/avatar/76a4c5450dbb6fde8a293a811622aa6f?s=250&d=blank"
+,
+"email_count"
+:
+0
+,
+"email_opened_count"
+:
+0
+,
+"email_open_rate"
+:
+null
+,
+"status"
+:
+"free"
+,
+"last_seen_at"
+:
+"2022-05-20T16:29:29.000Z"
+,
+"comped"
+:
+false
+,
+"unsubscribe_url"
+:
+"https://example.com/unsubscribe/?uuid=4fa3e4df-85d5-44bd-b0bf-d504bbe22060&key=..."
+,
+"can_comment"
+:
+true
+,
+"commenting"
+: {
+"disabled"
+:
+false
+,
+"disabled_reason"
+:
+null
+,
+"disabled_until"
+:
+null
+},
+"email_suppression"
+: {
+"suppressed"
+:
+false
+,
+"info"
+:
+null
+},
+"newsletters"
+: [
+{
+"id"
+:
+"62750bff2b868a34f814af08"
+,
+"name"
+:
+"My Ghost Site"
+,
+"description"
+:
+null
+,
+"status"
+:
+"active"
+}
+]
+}
+]
+}
+Key
+Description
+email
+Member’s email address
+name
+Member’s display name
+note
+Internal note about the member (max 2000 chars)
+geolocation
+JSON-encoded geolocation data (country, city, region) populated from the member’s IP
+subscribed
+true
+if the member is subscribed to at least one active newsletter
+status
+free
+,
+paid
+,
+comped
+, or
+gift
+comped
+true
+if the member is on a complimentary subscription (
+status === "comped"
+)
+last_seen_at
+Timestamp of the member’s most recent site activity
+avatar_image
+Gravatar URL for the member’s email, or
+null
+when Gravatar is disabled
+email_count
+Total number of newsletter emails sent to this member
+email_opened_count
+Total number of newsletter emails opened
+email_open_rate
+Open rate as an integer percentage (0-100), or
+null
+when too few emails have been sent
+labels
+Array of label objects:
+{id, name, slug, created_at, updated_at}
+newsletters
+Active newsletters the member is subscribed to. Only included when
+?include=newsletters
+is requested. Each entry:
+{id, name, description, status}
+tiers
+Tiers the member has access to. Included when
+?include=tiers
+is requested, and by default on the single-member read endpoint. See
+Tiers
+subscriptions
+Paid, complimentary, or gift subscriptions for this member. See
+Subscription object
+below
+unsubscribe_url
+One-click unsubscribe URL for the member
+can_comment
+true
+if the member is permitted to comment
+commenting
+{disabled, disabled_reason, disabled_until}
+- moderation state for commenting
+email_suppression
+{suppressed, info}
+- whether the member’s email is on the suppression list (bounces/complaints) and the reason
+attribution
+Source attribution for the member’s signup:
+{id, type, url, title, referrer_source, referrer_medium, referrer_url}
+. Only returned by the single-member read endpoint
+email_recipients
+Per-email delivery records for this member. Only returned when
+?include=email_recipients
+is requested
+​
+Subscription object
+A paid member includes a subscription object that provides subscription details. Complimentary and gift members (
+status
+of
+comped
+or
+gift
+) are returned with a synthetic subscription object where
+id
+and
+customer.id
+are empty strings,
+default_payment_card_last4
+is
+"****"
+, and
+current_period_end
+reflects the tier expiry.
+// Subscription object
+[
+{
+"id"
+:
+"sub_1KlTkYSHlkrEJE2dGbzcgc61"
+,
+"customer"
+: {
+"id"
+:
+"cus_LSOXHFwQB7ql18"
+,
+"name"
+:
+"Jamie"
+,
+"email"
+:
+"jamie@ghost.org"
+},
+"status"
+:
+"active"
+,
+"start_date"
+:
+"2022-04-06T07:57:58.000Z"
+,
+"default_payment_card_last4"
+:
+"4242"
+,
+"cancel_at_period_end"
+:
+false
+,
+"cancellation_reason"
+:
+null
+,
+"current_period_end"
+:
+"2023-04-06T07:57:58.000Z"
+,
+"trial_start_at"
+:
+null
+,
+"trial_end_at"
+:
+null
+,
+"discount_start"
+:
+null
+,
+"discount_end"
+:
+null
+,
+"price"
+: {
+"id"
+:
+"price_1Kg0ymSHlkrEJE2dflUN66EW"
+,
+"price_id"
+:
+"6239692c664a9e6f5e5e840a"
+,
+"nickname"
+:
+"Yearly"
+,
+"amount"
+:
+100000
+,
+"interval"
+:
+"year"
+,
+"type"
+:
+"recurring"
+,
+"currency"
+:
+"USD"
+,
+"tier"
+: {
+"id"
+:
+"prod_LX9o7VWBLU3QLh"
+,
+"name"
+:
+"Platinum"
+,
+"tier_id"
+:
+"62307cc71b4376a976734038"
+}
+},
+"tier"
+: {
+"id"
+:
+"62307cc71b4376a976734038"
+,
+"name"
+:
+"Platinum"
+,
+"slug"
+:
+"platinum"
+,
+"description"
+:
+null
+,
+"type"
+:
+"paid"
+,
+"currency"
+:
+"USD"
+,
+"monthly_price"
+:
+1000
+,
+"yearly_price"
+:
+10000
+,
+"welcome_page_url"
+:
+null
+,
+"visibility"
+:
+"public"
+,
+"trial_days"
+:
+0
+,
+"created_at"
+:
+"2022-03-15T15:01:11.000Z"
+,
+"updated_at"
+:
+"2022-04-06T07:57:58.000Z"
+,
+"expiry_at"
+:
+null
+},
+"offer"
+:
+null
+,
+"offer_redemptions"
+: [],
+"next_payment"
+: {
+"original_amount"
+:
+100000
+,
+"amount"
+:
+100000
+,
+"interval"
+:
+"year"
+,
+"currency"
+:
+"USD"
+,
+"discount"
+:
+null
+},
+"plan"
+: {
+"id"
+:
+"price_1Kg0ymSHlkrEJE2dflUN66EW"
+,
+"nickname"
+:
+"Yearly"
+,
+"amount"
+:
+100000
+,
+"interval"
+:
+"year"
+,
+"currency"
+:
+"USD"
+}
+}
+]
+Key
+Description
+customer
+Stripe customer attached to the subscription:
+{id, name, email}
+status
+Stripe subscription status:
+active
+,
+trialing
+,
+past_due
+,
+canceled
+, or
+unpaid
+start_date
+Subscription start date
+default_payment_card_last4
+Last 4 digits of the customer’s default card
+cancel_at_period_end
+Whether the subscription will cancel at
+current_period_end
+cancellation_reason
+Free-form reason text recorded when the subscription was canceled
+current_period_end
+End of the current billing period (subscription renewal/expiry date)
+trial_start_at
+Trial start date, or
+null
+if the subscription is not in a trial
+trial_end_at
+Trial end date, or
+null
+discount_start
+Start of an active discount window from a redeemed offer, or
+null
+discount_end
+End of an active discount window, or
+null
+price
+Price details. See
+Price object
+below
+tier
+Full tier (product) the subscription belongs to, including pricing and
+expiry_at
+from the member-tier pivot. See
+Tiers
+offer
+The signup offer applied to the subscription, or
+null
+. Same shape as the
+offer object
+plus
+redemption_type
+and
+last_redeemed
+offer_redemptions
+Array of every offer redeemed against this subscription (same shape as
+offer
+)
+next_payment
+Next scheduled payment, or
+null
+when the subscription is not active. See
+Next payment object
+below
+attribution
+Source attribution for the subscription. Only returned by the single-member read endpoint
+plan
+Deprecated.
+Legacy pricing block kept for backward compatibility - use
+price
+instead
+​
+Price object
+Key
+Description
+price_id
+Internal Ghost ID for the price
+nickname
+Stripe price nickname (typically
+Monthly
+or
+Yearly
+)
+amount
+Price amount in the smallest currency unit (e.g. cents)
+interval
+month
+,
+year
+, or
+null
+for one-off prices
+type
+recurring
+,
+one_time
+, or
+donation
+currency
+ISO 4217 currency code, uppercase
+tier
+The Stripe-side tier reference:
+{id, name, tier_id}
+where
+id
+is the Stripe product ID and
+tier_id
+is the internal Ghost tier ID
+​
+Next payment object
+Key
+Description
+original_amount
+The undiscounted amount that would be charged
+amount
+The amount that will actually be charged after any active discount
+interval
+Billing interval (
+month
+or
+year
+)
+currency
+ISO 4217 currency code
+discount
+Active discount details
+{offer_id, start, end, duration, duration_in_months, type, amount}
+, or
+null
+when no discount
+Suggest edits
+Raise issue
+Updating an Offer
+Creating a member
+⌘
+I

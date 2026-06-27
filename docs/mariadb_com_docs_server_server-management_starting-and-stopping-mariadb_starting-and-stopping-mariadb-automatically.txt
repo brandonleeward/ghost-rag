@@ -1,0 +1,140 @@
+Source: https://mariadb.com/docs/server/server-management/starting-and-stopping-mariadb/starting-and-stopping-mariadb-automatically
+
+Starting and Stopping Overview | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+Starting & Stopping
+Starting and Stopping Overview
+launchd (macOS)
+systemd (Linux)
+sysVinit
+mariadbd-safe
+mariadbd-multi
+mariadbd Options
+mariadbd
+mysql.server
+Running MariaDB From the Build Directory
+Running Multiple MariaDB Server Processes
+Specifying Permissions for Schema (Data) Directories and Tables
+Switching Between Different Installed MariaDB Versions
+What to Do if MariaDB Doesn't Start
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Starting and Stopping Overview
+Complete Starting and Stopping Overview guide for MariaDB. Complete reference documentation for implementation, configuration, and usage for production use.
+There are several different methods to start or stop the MariaDB Server process. There are two primary categories that most of these methods fall into: starting the process with the help of a service manager, and starting the process manually.
+Service Managers
+sysVinit
+and
+systemd
+are the most common Linux service managers.
+launchd
+is used in MacOS X.
+Upstart
+is a less common service manager.
+Systemd
+RHEL/CentOS 7 and above, Debian 8 Jessie and above, and Ubuntu 15.04 and above use
+systemd
+by default.
+For information on how to start and stop MariaDB with this service manager, see
+systemd: Interacting with the MariaDB Server Process
+.
+SysVinit
+RHEL/CentOS 6 and below, and Debian 7 Wheezy and below use
+sysVinit
+by default.
+For information on how to start and stop MariaDB with this service manager, see
+sysVinit: Interacting with the MariaDB Server Process
+.
+launchd
+launchd
+is used in MacOS X.
+Upstart
+Ubuntu 14.10 and below use Upstart by default.
+Starting the Server Process Manually
+mariadbd
+mariadbd
+is the actual MariaDB Server binary. It can be started manually on its own.
+mariadbd-safe
+mariadbd-safe
+is a wrapper that can be used to start the
+mariadbd
+server process. The script has some built-in safeguards, such as automatically restarting the server process if it dies. See
+mariadbd-safe
+for more information.
+mariadbd-multi
+mariadbd-multi
+is a wrapper that can be used to start the
+mariadbd
+server process if you plan to run multiple server processes on the same host. See
+mariadbd-multi
+for more information.
+mysql.server
+mysql.server
+is a wrapper that works as a standard
+sysVinit
+script. However, it can be used independently of
+sysVinit
+as a regular
+sh
+script. The script starts the
+mariadbd
+server process by first changing its current working directory to the MariaDB install directory and then starting
+mariadbd-safe
+. The script requires the standard
+sysVinit
+arguments, such as
+start
+,
+stop
+, and
+status
+. See
+mysql.server
+for more information.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Starting & Stopping
+Next
+launchd (macOS)
+Last updated
+1 month ago
+Was this helpful?
+Service Managers
+Systemd
+SysVinit
+launchd
+Upstart
+Starting the Server Process Manually
+mariadbd
+mariadbd-safe
+mariadbd-multi
+mysql.server
+Was this helpful?

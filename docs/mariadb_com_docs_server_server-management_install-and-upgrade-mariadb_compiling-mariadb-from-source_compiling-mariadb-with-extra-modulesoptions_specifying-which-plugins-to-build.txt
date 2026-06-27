@@ -1,0 +1,96 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/compiling-mariadb-from-source/compiling-mariadb-with-extra-modulesoptions/specifying-which-plugins-to-build
+
+Specifying Which Plugins to Build | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Compiling MariaDB From Source: The Master Guide
+Building MariaDB on Windows
+Cross-compiling MariaDB
+Compiling MariaDB with Extra Modules/Options
+Specifying Which Plugins to Build
+Using MariaDB with TCMalloc or jemalloc
+Legacy Guides
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Specifying Which Plugins to Build
+Explains how to use CMake options like `PLUGIN_xxx` to control which plugins are built statically, dynamically, or not at all during compilation.
+By default all plugins are enabled and built as dynamic
+.so
+(or
+.dll
+) modules. If a plugin does not support dynamic builds, it is not built at all.
+Use
+PLUGIN_xxx
+cmake variables. They can be set on the command line with
+-DPLUGIN_xxx=value
+or in the cmake gui. Supported values are
+Value
+Effect
+NO
+the plugin will be not compiled at all
+STATIC
+the plugin will be compiled statically, if supported. Otherwise it will be not compiled.
+DYNAMIC
+the plugin will be compiled dynamically, if supported. Otherwise it will be not compiled. This is the default behavior.
+AUTO
+the plugin will be compiled statically, if supported. Otherwise it will be compiled dynamically.
+YES
+same as AUTO, but if plugin prerequisites (for example, specific libraries) are missing, it will not be skipped, it will abort cmake with an error.
+Note that unlike autotools, cmake tries to configure and build incrementally. You can modify one configuration option and cmake will only rebuild the part of the tree affected by it. For example, when you do
+cmake -DWITH_EMBEDDED_SERVER=1
+in the already-built tree, it will make libmysqld to be built, but no other configuration options will be changed or reset to their default values.
+In particular this means that if you have run, for example
+cmake -DPLUGIN_OQGRAPH=NO
+and later you want to restore the default behavior (with OQGraph being built) in the same build tree, you would need to run
+cmake -DPLUGIN_OQGRAPH=DYNAMIC
+Alternatively, you might simply delete the
+CMakeCache.txt
+file — this is the file where cmake stores current build configuration — and rebuild everything from scratch.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Compiling MariaDB with Extra Modules/Options
+Next
+Using MariaDB with TCMalloc or jemalloc
+Last updated
+11 months ago
+Was this helpful?
+Was this helpful?

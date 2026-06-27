@@ -1,0 +1,486 @@
+Source: https://mariadb.com/docs/server/server-usage/basics/mariadb-advanced-sql-guide-1
+
+Commonly Used Queries | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+A MariaDB Primer
+Basic Queries
+Basic SQL Debugging
+Basic SQL Statements
+Commonly Used Queries
+String Functions
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Commonly Used Queries
+This guide provides examples of frequent SQL patterns, such as finding maximum values, calculating averages, and using auto-increment columns.
+This page is intended to be a quick reference of commonly-used and/or useful queries in MariaDB.
+WEBINAR
+MariaDB 101: Learning the Basics of MariaDB
+Watch Now
+Creating a Table
+Copy
+CREATE
+TABLE
+t1
+( a
+INT
+);
+CREATE
+TABLE
+t2
+( b
+INT
+);
+CREATE
+TABLE
+student_tests
+(
+name
+CHAR
+(
+10
+), test
+CHAR
+(
+10
+),
+score
+TINYINT
+, test_date
+DATE
+);
+See
+CREATE TABLE
+for more.
+Inserting Records
+Copy
+INSERT INTO
+t1
+VALUES
+(
+1
+), (
+2
+), (
+3
+);
+INSERT INTO
+t2
+VALUES
+(
+2
+), (
+4
+);
+INSERT INTO
+student_tests
+(
+name
+, test, score, test_date)
+VALUES
+(
+'
+Chun
+'
+,
+'
+SQL
+'
+,
+75
+,
+'
+2012-11-05
+'
+),
+(
+'
+Chun
+'
+,
+'
+Tuning
+'
+,
+73
+,
+'
+2013-06-14
+'
+),
+(
+'
+Esben
+'
+,
+'
+SQL
+'
+,
+43
+,
+'
+2014-02-11
+'
+),
+(
+'
+Esben
+'
+,
+'
+Tuning
+'
+,
+31
+,
+'
+2014-02-09
+'
+),
+(
+'
+Kaolin
+'
+,
+'
+SQL
+'
+,
+56
+,
+'
+2014-01-01
+'
+),
+(
+'
+Kaolin
+'
+,
+'
+Tuning
+'
+,
+88
+,
+'
+2013-12-29
+'
+),
+(
+'
+Tatiana
+'
+,
+'
+SQL
+'
+,
+87
+,
+'
+2012-04-28
+'
+),
+(
+'
+Tatiana
+'
+,
+'
+Tuning
+'
+,
+83
+,
+'
+2013-09-30
+'
+);
+See
+INSERT
+for more.
+Using AUTO_INCREMENT
+The AUTO_INCREMENT attribute is used to automatically generate a unique identity for new rows.
+When inserting, the id field can be omitted, and is automatically created.
+See
+AUTO_INCREMENT
+for more.
+Querying from two tables on a common value
+This kind of query is called a join - see
+JOINS
+for more.
+Finding the Maximum Value
+See the
+MAX() function
+for more, as well as
+Finding the maximum value and grouping the results
+below for a more practical example.
+Finding the Minimum Value
+See the
+MIN() function
+for more.
+Finding the Average Value
+See the
+AVG() function
+for more.
+Finding the Maximum Value and Grouping the Results
+See the
+MAX() function
+for more.
+Ordering Results
+See
+ORDER BY
+for more.
+Finding the Row with the Minimum of a Particular Column
+In this example, we want to find the lowest test score for any student.
+Finding Rows with the Maximum Value of a Column by Group
+This example returns the best test results of each student:
+Calculating Age
+The
+TIMESTAMPDIFF
+function can be used to calculate someone's age:
+See
+TIMESTAMPDIFF()
+for more.
+Using User-defined Variables
+This example sets a
+user-defined variable
+with the average test score, and then uses it in a later query to return all results above the average.
+User-defined variables can also be used to add an incremental counter to a resultset:
+See
+User-defined Variables
+for more.
+View Tables in Order of Size
+Returns a list of all tables in the database, ordered by size:
+Removing Duplicates
+This example assumes there's a unique ID, but that all other fields are identical. In the example below, there are 4 records, 3 of which are duplicates, so two of the three duplicates need to be removed. The intermediate SELECT is not necessary, but demonstrates what is being returned.
+CC BY-SA / Gnu FDL
+Previous
+Basic SQL Statements
+Next
+String Functions
+Last updated
+12 months ago
+Was this helpful?
+Creating a Table
+Inserting Records
+Using AUTO_INCREMENT
+Querying from two tables on a common value
+Finding the Maximum Value
+Finding the Minimum Value
+Finding the Average Value
+Finding the Maximum Value and Grouping the Results
+Ordering Results
+Finding the Row with the Minimum of a Particular Column
+Finding Rows with the Maximum Value of a Column by Group
+Calculating Age
+Using User-defined Variables
+View Tables in Order of Size
+Removing Duplicates
+Was this helpful?
+Copy
+CREATE TABLE student_details (
+id INT NOT NULL AUTO_INCREMENT, name CHAR(10),
+date_of_birth DATE, PRIMARY KEY (id)
+);
+Copy
+INSERT INTO student_details (name,date_of_birth) VALUES
+('Chun', '1993-12-31'),
+('Esben','1946-01-01'),
+('Kaolin','1996-07-16'),
+('Tatiana', '1988-04-13');
+SELECT * FROM student_details;
++----+---------+---------------+
+| id | name    | date_of_birth |
++----+---------+---------------+
+|  1 | Chun    | 1993-12-31    |
+|  2 | Esben   | 1946-01-01    |
+|  3 | Kaolin  | 1996-07-16    |
+|  4 | Tatiana | 1988-04-13    |
++----+---------+---------------+
+Copy
+SELECT * FROM t1 INNER JOIN t2 ON t1.a = t2.b;
+Copy
+SELECT MAX(a) FROM t1;
++--------+
+| MAX(a) |
++--------+
+|      3 |
++--------+
+Copy
+SELECT MIN(a) FROM t1;
++--------+
+| MIN(a) |
++--------+
+|      1 |
++--------+
+Copy
+SELECT AVG(a) FROM t1;
++--------+
+| AVG(a) |
++--------+
+| 2.0000 |
++--------+
+Copy
+SELECT name, MAX(score) FROM student_tests GROUP BY name;
++---------+------------+
+| name    | MAX(score) |
++---------+------------+
+| Chun    |         75 |
+| Esben   |         43 |
+| Kaolin  |         88 |
+| Tatiana |         87 |
++---------+------------+
+Copy
+SELECT name, test, score FROM student_tests ORDER BY score DESC;
++---------+--------+-------+
+| name    | test   | score |
++---------+--------+-------+
+| Kaolin  | Tuning |    88 |
+| Tatiana | SQL    |    87 |
+| Tatiana | Tuning |    83 |
+| Chun    | SQL    |    75 |
+| Chun    | Tuning |    73 |
+| Kaolin  | SQL    |    56 |
+| Esben   | SQL    |    43 |
+| Esben   | Tuning |    31 |
++---------+--------+-------+
+Copy
+SELECT name,test, score FROM student_tests WHERE score=(SELECT MIN(score) FROM student);
++-------+--------+-------+
+| name  | test   | score |
++-------+--------+-------+
+| Esben | Tuning |    31 |
++-------+--------+-------+
+Copy
+SELECT name, test, score FROM student_tests st1 WHERE score = (
+SELECT MAX(score) FROM student st2 WHERE st1.name = st2.name
+);
++---------+--------+-------+
+| name    | test   | score |
++---------+--------+-------+
+| Chun    | SQL    |    75 |
+| Esben   | SQL    |    43 |
+| Kaolin  | Tuning |    88 |
+| Tatiana | SQL    |    87 |
++---------+--------+-------+
+Copy
+SELECT CURDATE() AS today;
++------------+
+| today      |
++------------+
+| 2014-02-17 |
++------------+
+SELECT name, date_of_birth, TIMESTAMPDIFF(YEAR,date_of_birth,'2014-08-02') AS age
+FROM student_details;
++---------+---------------+------+
+| name    | date_of_birth | age  |
++---------+---------------+------+
+| Chun    | 1993-12-31    |   20 |
+| Esben   | 1946-01-01    |   68 |
+| Kaolin  | 1996-07-16    |   18 |
+| Tatiana | 1988-04-13    |   26 |
++---------+---------------+------+
+Copy
+SELECT @avg_score:= AVG(score) FROM student_tests;
++-------------------------+
+| @avg_score:= AVG(score) |
++-------------------------+
+|            67.000000000 |
++-------------------------+
+SELECT * FROM student_tests WHERE score > @avg_score;
++---------+--------+-------+------------+
+| name    | test   | score | test_date  |
++---------+--------+-------+------------+
+| Chun    | SQL    |    75 | 2012-11-05 |
+| Chun    | Tuning |    73 | 2013-06-14 |
+| Kaolin  | Tuning |    88 | 2013-12-29 |
+| Tatiana | SQL    |    87 | 2012-04-28 |
+| Tatiana | Tuning |    83 | 2013-09-30 |
++---------+--------+-------+------------+
+Copy
+SET @count = 0;
+SELECT @count := @count + 1 AS counter, name, date_of_birth FROM student_details;
++---------+---------+---------------+
+| counter | name    | date_of_birth |
++---------+---------+---------------+
+|       1 | Chun    | 1993-12-31    |
+|       2 | Esben   | 1946-01-01    |
+|       3 | Kaolin  | 1996-07-16    |
+|       4 | Tatiana | 1988-04-13    |
++---------+---------+---------------+
+Copy
+SELECT table_schema AS `DB`, table_name AS `TABLE`,
+ROUND(((data_length + index_length) / 1024 / 1024), 2) `Size (MB)`
+FROM information_schema.TABLES
+ORDER BY (data_length + index_length) DESC;
++--------------------+---------------------------------------+-----------+
+| DB                 | Table                                 | Size (MB) |
++--------------------+---------------------------------------+-----------+
+| wordpress          | wp_simple_history_contexts            |      7.05 |
+| wordpress          | wp_posts                              |      6.59 |
+| wordpress          | wp_simple_history                     |      3.05 |
+| wordpress          | wp_comments                           |      2.73 |
+| wordpress          | wp_commentmeta                        |      2.47 |
+| wordpress          | wp_simple_login_log                   |      2.03 |
+...
+Copy
+CREATE TABLE t (id INT, f1 VARCHAR(2));
+INSERT INTO t VALUES (1,'a'), (2,'a'), (3,'b'), (4,'a');
+SELECT * FROM t t1, t t2 WHERE t1.f1=t2.f1 AND t1.id<>t2.id AND t1.id=(
+SELECT MAX(id) FROM t tab WHERE tab.f1=t1.f1
+);
++------+------+------+------+
+| id   | f1   | id   | f1   |
++------+------+------+------+
+|    4 | a    |    1 | a    |
+|    4 | a    |    2 | a    |
++------+------+------+------+
+DELETE FROM t WHERE id IN (
+SELECT t2.id FROM t t1, t t2 WHERE t1.f1=t2.f1 AND t1.id<>t2.id AND t1.id=(
+SELECT MAX(id) FROM t tab WHERE tab.f1=t1.f1
+)
+);
+Query OK, 2 rows affected (0.120 sec)
+SELECT * FROM t;
++------+------+
+| id   | f1   |
++------+------+
+|    3 | b    |
+|    4 | a    |
++------+------

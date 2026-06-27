@@ -1,0 +1,28 @@
+Source: https://www.tinybird.com/docs/use-cases/vector-search
+
+Vector search · Tinybird Docs
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+Vector search
+¶
+Copy as MD
+Vector search allows you to search through multi-modal content based on calculated embeddings. It is a popular approach to search when keyword matching is insufficient.
+Tinybird can help you search largescale vector embeddings in real-time and apply real-time analytics principles to make vector search more performant.
+Tutorials
+¶
+Getting started
+¶
+Learn how to build a content recommendation API using vector search in our step-by-step tutorial:
+Build a content recommendation API using vector search
+Updated
+5 months ago
+On this page
+Vector search
+Tutorials
+Getting started
+forward
+classic
+Ask AI

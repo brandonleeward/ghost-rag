@@ -1,0 +1,20 @@
+Source: https://www.tinybird.com/docs/use-cases/realtime-personalization
+
+Real-time personalization · Tinybird Docs
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+Real-time personalization
+¶
+Copy as MD
+Real-time personalization is the pathway to better user experiences. This user-centered approach powers a vast number of modern customer experiences, and is fast becoming the standard of digital engagement.
+Not only can you provide meaningfully tailored recommendations, ads, or products, you can also leverage real-time personalization to analyze transaction streams for digital fraud, and more.
+Updated
+2 months ago
+On this page
+Real-time personalization
+forward
+classic
+Ask AI

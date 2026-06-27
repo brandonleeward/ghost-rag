@@ -1,0 +1,225 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/CANNOT_READ_ARRAY_FROM_TEXT
+
+CANNOT_READ_ARRAY_FROM_TEXT ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+CANNOT_READ_ARRAY_FROM_TEXT ClickHouse error
+¶
+Copy as MD
+This error usually means ClickHouse can't parse a text string as an Array value. Check the format of your array strings and make sure they match the expected format.
+The
+CANNOT_READ_ARRAY_FROM_TEXT
+error in ClickHouse (and Tinybird) happens when you try to convert a text string to an Array value, but the string format doesn't match what ClickHouse expects. This commonly occurs when importing array data or using array conversion functions.
+What causes this error
+¶
+You'll typically see it when:
+Using
+toArray()
+on strings with unexpected formats
+Working with array strings that don't match ClickHouse's default format
+Importing data with non-standard array formats
+Using array functions with incorrectly formatted strings
+Working with arrays from different sources or formats
+Example errors
+¶
+Fails: wrong array format
+SELECT splitByString(',', '1,2,3')
+Fails: invalid array string
+SELECT splitByString(',', 'not an array')
+Fails: wrong separator
+SELECT splitByString(';', '1;2;3')
+Fails: missing brackets
+SELECT splitByString(',', '1,2,3')
+How to fix it
+¶
+Use the correct array format
+¶
+ClickHouse expects array format with square brackets:
+Fix: use correct array format
+SELECT splitByString(',', '1,2,3') as array_from_string
+Use proper array functions
+¶
+Use appropriate functions for array conversion:
+Fix: use proper array function
+SELECT splitByString(',', '1,2,3') as array_from_string
+parseArray
+is not available in all ClickHouse versions. Use
+splitByString
+or
+JSONExtractArrayRaw
+instead.
+Handle different array formats
+¶
+Convert different array formats to ClickHouse format:
+Fix: convert array format
+SELECT toArray('[' || replace('1,2,3', ',', ',') || ']')
+Use try functions for error handling
+¶
+Use try functions to handle parsing errors gracefully:
+Fix: use try function
+SELECT try(toArray(array_string)) as parsed_array FROM events
+Common patterns and solutions
+¶
+Standard array format
+¶
+ClickHouse expects arrays in JSON-like format:
+Standard array format
+SELECT splitByString(',', '1,2,3')  -- Array of integers
+SELECT splitByString(',', 'a,b,c')  -- Array of strings
+SELECT JSONExtractArrayRaw('[true,false,true]')  -- Array of booleans
+Converting from comma-separated strings
+¶
+Convert comma-separated strings to arrays:
+Comma-separated to array
+SELECT splitByString(',', '1,2,3') as array_from_csv
+SELECT splitByString(',', 'a,b,c') as string_array
+Arrays are represented with square brackets and comma-separated values, and strings must be quoted:
+['a','b']
+.
+Arrays are represented with square brackets and comma-separated values, and strings must be quoted:
+['a','b']
+.
+Working with JSON arrays
+¶
+Parse arrays from JSON data:
+JSON array parsing
+SELECT JSONExtractArrayRaw('{"items": [1,2,3]}', 'items') as json_array
+SELECT JSONExtract('{"items": [1,2,3]}', 'items') as json_array
+Array manipulation functions
+¶
+Array manipulation
+SELECT arrayStringConcat(['a', 'b', 'c'], ',') as concatenated
+SELECT arrayJoin(['a', 'b', 'c']) as exploded
+JSON array parsing
+SELECT JSONExtractArrayRaw(data, 'tags') as tags_array FROM events
+SELECT JSONExtractArrayString(data, 'categories') as categories FROM events
+Array type conversion
+¶
+Convert arrays to different types:
+Array type conversion
+SELECT toArrayInt32(splitByChar(',', '1,2,3')) as int_array
+SELECT toArrayString(splitByChar(',', 'a,b,c')) as string_array
+Advanced solutions
+¶
+Handling various array formats
+¶
+Create robust parsing for multiple formats:
+Multiple format handling
+SELECT CASE
+    WHEN array_string LIKE '[%]' THEN toArray(array_string)
+    WHEN array_string LIKE '%[%]%' THEN toArray(array_string)
+    ELSE splitByChar(',', array_string)
+END as parsed_array
+FROM events
+Working with nested arrays
+¶
+Handle nested array structures:
+Nested array handling
+SELECT toArray('[[1,2],[3,4]]') as nested_array
+SELECT JSONExtractArrayRaw(data, 'nested_array') as json_nested FROM events
+Array validation
+¶
+Validate array strings before conversion:
+Array validation
+SELECT CASE
+    WHEN array_string REGEXP '^\\[.*\\]$' THEN toArray(array_string)
+    WHEN array_string REGEXP '^[0-9,]+$' THEN splitByChar(',', array_string)
+    ELSE NULL
+END as validated_array
+FROM events
+Array format reference
+¶
+ClickHouse array format
+¶
+Arrays in ClickHouse use JSON-like syntax:
+Array format examples
+SELECT toArray('[1,2,3]')  -- Integer array
+SELECT toArray('["a","b","c"]')  -- String array
+SELECT toArray('[true,false]')  -- Boolean array
+SELECT toArray('[[1,2],[3,4]]')  -- Nested array
+Converting from other formats
+¶
+Convert common formats to ClickHouse arrays:
+Format conversion
+-- From comma-separated
+SELECT splitByChar(',', '1,2,3') as from_csv
+
+-- From space-separated
+SELECT splitByChar(' ', '1 2 3') as from_space
+
+-- From JSON array
+SELECT JSONExtractArrayRaw('{"tags":["a","b","c"]}', 'tags') as from_json
+Tinybird-specific notes
+¶
+In Tinybird, this error often occurs when:
+Ingesting data with non-standard array formats
+Using Schema Hints with mismatched array formats
+Processing JSON data with embedded array strings
+Working with Data Sources that have inconsistent array formats
+To debug in Tinybird:
+Check your Data Source schema for array column types
+Use Schema Hints to specify array formats
+Validate incoming array formats
+Use try functions in your Pipes for robust parsing
+Best practices
+¶
+Array standardization
+¶
+Use ClickHouse array format
+[1,2,3]
+when possible
+Standardize array formats across your data sources
+Handle different array separators consistently
+Use appropriate array functions for your use case
+Error handling
+¶
+Use
+try()
+functions for robust array parsing
+Validate array strings before conversion
+Provide fallback values for invalid arrays
+Log parsing errors for debugging
+Performance considerations
+¶
+Use appropriate array data types
+Consider using Array functions for array operations
+Use array indexes when available
+Monitor array operation performance
+See also
+¶
+ClickHouse Array Functions
+Working with Arrays
+Common function errors
+Updated
+7 months ago
+On this page
+CANNOT_READ_ARRAY_FROM_TEXT ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Use the correct array format
+Use proper array functions
+Handle different array formats
+Use try functions for error handling
+Common patterns and solutions
+Standard array format
+Converting from comma-separated strings
+Working with JSON arrays
+Array manipulation functions
+Array type conversion
+Advanced solutions
+Handling various array formats
+Working with nested arrays
+Array validation
+Array format reference
+ClickHouse array format
+Converting from other formats
+Tinybird-specific notes
+Best practices
+Array standardization
+Error handling
+Performance considerations
+See also
+forward
+classic
+Ask AI

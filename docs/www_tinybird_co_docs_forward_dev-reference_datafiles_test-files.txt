@@ -1,0 +1,72 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/datafiles/test-files
+
+Test files · Tinybird Docs
+Sign In
+Sign Up
+Test files
+¶
+Copy as MD
+Test files describe the tests for the API endpoints. See
+Test your project
+.
+Test files are stored in the
+tests
+folder in your project.
+Test file format
+¶
+Test files are YAML files that contain the tests for the API endpoints.
+Test files are structured as YAML arrays. For example:
+- name: get_sets_by_theme_year_2000s_range
+  description: Test filtering by year range 2000-2005
+  expected_http_status: 200
+  parameters: year_start=2000&year_end=2005
+  expected_result: |
+    {"year":2004,"sets_count":1,"parts_count":42,"avg_parts_per_set":42}
+    {"year":2005,"sets_count":1,"parts_count":177,"avg_parts_per_set":177}
+
+- name: get_sets_by_theme_year_1990s_range
+  description: Test filtering by year range 1990-1999
+  expected_http_status: 200
+  parameters: year_start=1990&year_end=1999
+  expected_result: |
+    {"year":1992,"sets_count":1,"parts_count":668,"avg_parts_per_set":668}
+    {"year":1993,"sets_count":1,"parts_count":129,"avg_parts_per_set":129}
+    {"year":1994,"sets_count":1,"parts_count":1343,"avg_parts_per_set":1343}
+    {"year":1996,"sets_count":1,"parts_count":803,"avg_parts_per_set":803}
+    {"year":1998,"sets_count":1,"parts_count":1272,"avg_parts_per_set":1272}
+    {"year":1999,"sets_count":1,"parts_count":397,"avg_parts_per_set":397}
+Each test is a YAML object with the following fields:
+name
+: The name of the test.
+description
+: The description of the test.
+parameters
+: The query parameters for the endpoint.
+expected_result
+: The expected result for the test.
+expected_http_status
+: The expected HTTP status, for example
+200
+.
+Create a test file
+¶
+Create a YAML file manually in the
+tests
+folder. See the format above and the
+tb test
+command reference.
+Run tests
+¶
+To run tests, use
+tb test run
+.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Test files
+Test file format
+Create a test file
+Run tests
+forward
+Ask AI

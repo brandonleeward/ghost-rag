@@ -1,0 +1,86 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/installing-mariadb/mariadb-id-sign-up
+
+MariaDB ID Sign Up | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+MariaDB ID Sign Up
+MariaDB Binary Packages
+Installing System Tables
+Troubleshooting Installation Issues
+Installing MariaDB on IBM Cloud
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+MariaDB ID Sign Up
+Information on creating a free MariaDB ID account to access software downloads, including binary packages and repositories.
+A MariaDB ID is a free account that provides:
+Customer access to MariaDB database product downloads
+Create A MariaDB ID
+You can register for a MariaDB ID with a social login or a traditional email/password.
+Register for a MariaDB ID account.
+Create a
+MariaDB ID
+using one of the following Single sign-on methods:
+Sign up using your Google Account
+Sign up using your GitHub Account
+Sign up using your LinkedIn Account
+Or use your email address:
+Enter your email address and press next.
+Click the reset button. A password link will appear in your email.
+Once you set a new password, the MariaDB account page will appear.
+Obtaining Support
+MariaDB Corporation provides commercial support and services for MariaDB database products.
+To contact us with questions, or if you need assistance:
+If you are able to login to your MariaDB ID,
+open a support case
+If you do not have a MariaDB ID or are unable to login,
+contact us
+MariaDB Customer Portal
+\
+Previous
+Installing Community Server
+Next
+MariaDB Binary Packages
+Last updated
+1 year ago
+Was this helpful?
+Create A MariaDB ID
+Obtaining Support
+Was this helpful?

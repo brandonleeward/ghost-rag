@@ -1,0 +1,112 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/typescript-sdk-cli
+
+TypeScript SDK CLI commands · Tinybird Docs
+Sign In
+Sign Up
+TypeScript SDK CLI commands
+¶
+Copy as MD
+The TypeScript SDK ships with a
+tinybird
+CLI. Install it globally to run
+tinybird
+directly, or use
+npx
+for one-off usage. It manages TypeScript-based Tinybird projects, syncs resources, and deploys them to Tinybird.
+Install
+¶
+pnpm add -g @tinybirdco/sdk
+Or install it in your project and run it with
+npx tinybird
+:
+pnpm install @tinybirdco/sdk
+Commands
+¶
+tinybird init
+¶
+Scaffolds a new TypeScript project, authenticates you if needed, and can optionally add CI/CD workflow files.
+tinybird init
+tinybird init --force
+tinybird init --skip-login
+tinybird dev
+¶
+Watch for changes and sync to Tinybird. Defaults to a feature branch; use
+--local
+to work against Tinybird Local.
+tinybird dev
+tinybird dev --local
+tinybird dev --branch my_feature_branch
+tinybird build
+¶
+Build and push resources to a Tinybird branch. Use this in CI for preview environments.
+tinybird build
+tinybird build --dry-run
+tinybird build --local
+tinybird build --branch my_feature_branch
+tinybird deploy
+¶
+Deploy resources to your main Tinybird workspace (production).
+tinybird deploy
+tinybird deploy --dry-run
+tinybird deploy --check
+tinybird deploy --allow-destructive-operations
+tinybird preview
+¶
+Creates or replaces an ephemeral preview branch and deploys the project resources to it. Designed for CI pipelines. See
+Preview deployments
+for details.
+tinybird preview
+tinybird preview --dry-run
+tinybird preview --check
+tinybird preview --name custom_branch_name
+tinybird preview --local
+tinybird migrate
+¶
+Migrate
+.datasource
+,
+.pipe
+, and
+.connection
+files into TypeScript definitions.
+tinybird migrate "tinybird/**/*.datasource" "tinybird/**/*.pipe" "tinybird/**/*.connection"
+tinybird migrate tinybird/legacy --out ./tinybird.migration.ts
+tinybird migrate tinybird --dry-run
+tinybird pull
+¶
+Download cloud resources as Tinybird datafiles.
+tinybird pull
+tinybird pull --output-dir ./tinybird-datafiles
+tinybird pull --force
+tinybird login
+¶
+Authenticate with Tinybird and write credentials to
+.env.local
+.
+tinybird login
+tinybird branch
+¶
+Manage Tinybird branches.
+tinybird branch list
+tinybird branch status
+tinybird branch delete my_feature_branch
+tinybird info
+¶
+Display information about the current project and workspace.
+tinybird info
+tinybird info --json
+Next steps
+¶
+Follow the TypeScript SDK quickstart. See
+Quick start: TypeScript SDK
+.
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+TypeScript SDK CLI commands
+Install
+Commands
+Next steps
+forward
+Ask AI

@@ -1,0 +1,204 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/s3-storage-engine/aria_s3_copy
+
+aria_s3_copy | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+Using the S3 Storage Engine
+S3 Status Variables
+S3 System Variables
+S3 Engine Internals
+Testing Connections to S3
+aria_s3_copy
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+aria_s3_copy
+A reference for the `aria_s3_copy` tool, which is used to manually copy Aria tables to and from S3 storage for testing and data migration.
+The
+S3 storage engine
+is available from
+MariaDB 10.5.4
+.
+aria_s3_copy
+is a tool for copying an
+Aria
+table to and from
+S3
+.
+The Aria table must be non transactional and have
+ROW_FORMAT=PAGE
+.
+For
+aria_s3_copy
+to work reliably, the table should not be changed by the MariaDB server during the copy, and one should have first performed
+FLUSH TABLES
+to ensure that the table is properly closed.
+Example of properly created Aria table:
+Copy
+CREATE
+TABLE
+test1
+(a
+INT
+) transactional
+=
+0
+row_format
+=
+PAGE
+engine
+=
+aria;
+ALTER TABLE table_name ENGINE=S3
+works for any kind of table. It internally converts the table to an Aria table, then moves it to S3 storage.
+Main Arguments
+Option
+Description
+-?, --help
+Display this help and exit.
+-k, --s3-access-key=name
+AWS access key ID
+-r, --s3-region=name
+AWS region
+-K, --s3-secret-key=name
+AWS secret access key ID
+-b, --s3-bucket=name
+AWS prefix for tables
+-h, --s3-host-name=name
+Host name to S3 provider
+-c, --compress
+Use compression
+-o, --op=name
+Operation to execute. One of 'from_s3', 'to_s3' or 'delete_from_s3'
+-d, --database=name
+Database for copied table (second prefix). If not given, the directory of the table file is used
+-B, --s3-block-size=#
+Block size for data/index blocks in s3
+-L, --s3-protocol-version=name
+Protocol used to communication with S3. One of "Amazon" or "Original".
+-f, --force
+Force copy even if target exists
+-v, --verbose
+Write more information
+-V, --version
+Print version and exit.
+-#, --debug[=name]
+Output debug log. Often this is 'd:t:o,filename'.
+--s3-debug
+Output debug log from marias3 to stdout
+-p, --s3-port=#
+Port number to connect to (0 means use default)
+-P, --s3-use-http
+If true, force use of HTTP protocol
+Typical Configuration in a my.cnf File
+Example Usage
+The following code will copy an existing Aria table named
+test1
+to S3.
+If the
+--database
+option is not given, then the directory name where the table files exist are used as the database.
+When using
+--verbose
+,
+aria_s3_copy
+will write a dot for each #/79 part of the file copied.
+See Also
+Using the S3 storage engine
+. This pages has examples of .my.cnf entries for using
+aria_s3_copy
+.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Testing Connections to S3
+Next
+SphinxSE
+Last updated
+6 months ago
+Was this helpful?
+Main Arguments
+Typical Configuration in a my.cnf File
+Example Usage
+See Also
+Was this helpful?
+Copy
+[aria_s3_copy]
+s3-bucket=mariadb
+s3-access-key=xxxx
+s3-secret-key=xxx
+s3-region=eu-north-1
+#s3-host-name=s3.amazonaws.com
+#s3-protocol-version=Amazon
+verbose=1
+op=to
+Copy
+shell> aria_s3_copy --force --op=to --database=foo --compress --verbose --s3_block_size=4M test1
+Delete of aria table: foo.test1
+Delete of index information foo/test1/index
+Delete of data information foo/test1/data
+Delete of base information and frm
+Copying frm file test1.frm
+Copying aria table: foo.test1 to s3
+Creating aria table information foo/test1/aria
+Copying index information foo/test1/index
+.
+Copying data information foo/test1/data
+.

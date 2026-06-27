@@ -1,0 +1,139 @@
+Source: https://www.tinybird.com/docs/api-reference/events-api
+
+Events API Reference · Tinybird Docs
+Sign In
+Sign Up
+Events API
+¶
+Copy as MD
+The API host in the following examples must match your Workspace's region. See the full list of
+regions and hosts
+The Events API allows you to ingest JSON events with a simple HTTP POST request. See
+Events API
+and
+Ingestion limits
+.
+All endpoints require authentication using a Token with
+DATASOURCE:APPEND
+or
+DATASOURCE:CREATE
+scope.
+POST /v0/events
+¶
+Use this endpoint to send NDJSON (new-line delimited JSON) events to a Data Source.
+Request parameters
+¶
+Key
+Type
+Description
+name
+String
+name or ID of the target Data Source to append data to it
+wait
+Bool
+'false' by default. Set to 'true' to wait until the write is acknowledged by the database. Enabling this flag makes possible to retry on database errors, but it introduces additional latency. It's recommended to enable it in use cases in which data loss avoidance is critical. Disable it otherwise.
+Return HTTP status codes
+¶
+Status Code
+Description
+200
+The data has been inserted into the database. The write has been acknowledged. The request 'wait' parameter was enabled.
+202
+The data has been processed, and it will be send to the database eventually. The write hasn't been acknowledged yet. The request 'wait' parameter was disabled.
+400
+The request is invalid. The body will contain more information. A common cause is missing the 'name' parameter. No data has been inserted, but the request shouldn't be retried.
+403
+The token isn't valid. The request shouldn't be retried.
+404
+The token's Workspace doesn't belong to this cluster. The Workspace is probably removed or in another cluster. The request shouldn't be retried, ensure the token's region and the Tinybird domain matches.
+413
+The request payload size exceeds the limit for your plan (e.g., 10MB on the Free plan). Retry the request with a smaller payload.
+422
+The ingestion has been partially completed due to an error in a Materialized View. Retrying may result in data duplication, but not retrying may result in data loss. The general advice is to not retry, review attached Materialized Views, and contact us if the issue persists.
+429
+The request/second limit has been reached. Default limit is 100 requests/second, contact us for increased capacity. The request may be retried after a while. Use exponential backoff with a limited amount of retries.
+500
+An unexpected error has occurred. The body will contain more information. Retrying is the general advice, contact with us if the issue persists.
+503
+The service is temporarily unavailable. Service unavailability can be caused by throughput being processed slower than expected, which can result from increased payload size, slower data transmission due to network issues, or Tinybird infrastructure issues. No data has been inserted, and it's safe to retry. Contact with us if the issue persists.
+0x07 GOAWAY
+HTTP2 only. Too many alive connections. Recreate the connection and retry.
+Compression
+¶
+You can compress JSON events with Gzip or Zstandard and send the compressed payload to the Events API. You must include the
+Content-Encoding
+header in the request, set to
+gzip
+or
+zstd
+to indicate the compression algorithm used.
+Idempotency
+¶
+The Events API is not idempotent. Sending the same data more than once inserts it multiple times.
+The following responses are safe to retry without risk of duplication:
+HTTP 429 (rate-limited):
+The original request was not processed.
+HTTP 503 (service unavailable):
+No data was inserted.
+For other transient failures,
+Tinybird handles retries internally
+: partially inserted data is deduplicated for up to 5 hours.
+Examples
+¶
+NDJSON messages
+¶
+The following example shows how to push single NDJSON messages using the Events API:
+Send individual NDJSON messages
+curl \
+    -H "Authorization: Bearer <import_token>" \
+    -d '{"date": "2020-04-05 00:05:38", "city": "Chicago"}' \
+    'https://<your_host>/v0/events?name=events_test'
+JSON messages
+¶
+The following example shows how to push single JSON messages using the Events API:
+Send individual JSON messages
+curl \
+    -H "Authorization: Bearer <import_token>" \
+    -d $'{ \
+          "date": "2020-04-05 00:05:38", \
+          "city": "Chicago" \
+        }' \
+    'https://<your_host>/v0/events?name=events_test&format=json'
+Multiple NDJSON messages
+¶
+The following example shows how to push multiple NDJSON messages using the Events API. Notice the '$' before the JSON events. It's needed in order for Bash to replace the '\n'. curl doesn't do it automatically.
+Send many NDJSON events.
+curl \
+    -H "Authorization: Bearer <import_token>" \
+    -d $'{"date": "2020-04-05 00:05:38", "city": "Chicago"}\n{"date": "2020-04-05 00:07:22", "city": "Madrid"}\n' \
+    'https://<your_host>/v0/events?name=events_test'
+Gzip compressed payload
+¶
+The following example shows how to push a Gzip compressed payload using the Events API, where 'body.gz' is a batch of NDJSON events.
+Send a Gzip compressed payload.
+curl \
+    -H "Authorization: Bearer <import_token>" \
+    -H "Content-Encoding: gzip" \
+    --data-binary @body.gz \
+    'https://<your_host>/v0/events?name=events_example'
+Zstandard compressed payload
+¶
+The following example shows how to push Zstandard compressed NDJSON events from a file named
+body.ndjson.zst
+using the Events API.
+Send a ZSTD compressed payload.
+curl \
+    -H "Authorization: Bearer <import_token>" \
+    -H "Content-Encoding: zstd" \
+    --data-binary @body.ndjson.zst \
+    'https://<your_host>/v0/events?name=events_example'
+Updated
+4 weeks ago
+On this page
+Events API
+POST /v0/events
+Idempotency
+Examples
+forward
+classic
+Ask AI

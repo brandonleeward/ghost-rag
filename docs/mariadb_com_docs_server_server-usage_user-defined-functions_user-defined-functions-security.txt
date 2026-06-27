@@ -1,0 +1,97 @@
+Source: https://mariadb.com/docs/server/server-usage/user-defined-functions/user-defined-functions-security
+
+User-Defined Functions Security | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Triggers & Events
+User-Defined Functions
+User-Defined Functions Overview
+Creating User-Defined Functions
+CREATE FUNCTION UDF
+DROP FUNCTION UDF
+User-Defined Functions Calling Sequences
+User-Defined Functions Security
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+User-Defined Functions Security
+Overview of security measures for UDFs, including file location restrictions, required privileges, and system variable configurations.
+The MariaDB server imposes a number of limitations on
+user-defined functions
+for security purposes.
+The
+INSERT
+privilege for the mysql database is required to run
+CREATE FUNCTION
+, as a record are added to the
+mysql.func-table
+.
+The
+DELETE
+privilege for the mysql database is required to run
+DROP FUNCTION
+as the corresponding record are removed from the
+mysql.func-table
+.
+UDF object files can only be placed in the plugin directory, as specified by the value of the
+plugin_dir
+system variable.
+At least one symbol, beyond the required
+x()
+, corresponding to an SQL function
+X()
+, is required. These can be
+x_init()
+,
+x_deinit()
+,
+xxx_reset()
+,
+x_clear()
+, and
+x_add()
+functions (see
+Creating User-defined Functions
+). The
+allow-suspicious-udfs
+mariadbd option (by default unset) provides a workaround, permitting only one symbol to be used. This is not recommended, as it opens the possibility of loading shared objects that are not legitimate user-defined functions.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+User-Defined Functions Calling Sequences
+Next
+Views
+Last updated
+6 months ago
+Was this helpful?
+Was this helpful?

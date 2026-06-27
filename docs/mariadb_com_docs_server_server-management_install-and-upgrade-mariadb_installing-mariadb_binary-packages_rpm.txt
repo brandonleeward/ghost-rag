@@ -1,0 +1,85 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/installing-mariadb/binary-packages/rpm
+
+Installing MariaDB RPM Files | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+MariaDB ID Sign Up
+MariaDB Binary Packages
+GPG
+Installing MariaDB .deb Files
+Installing MariaDB RPM Files
+About the MariaDB RPM Files
+Installing MariaDB with yum/dnf
+Installing MariaDB with zypper
+Checking MariaDB RPM Package Signatures
+Installing MariaDB With the rpm Tool
+MariaDB for DirectAdmin Using RPMs
+MariaDB Installation via RPMs on CentOS 7
+Troubleshooting MariaDB Installs on RHEL / CentOS
+Why Source RPMs (SRPMs) Aren't Packaged For Some Platforms
+Installing MariaDB Alongside MySQL
+Installing MariaDB Binary Tarballs
+Installing MariaDB MSI Packages on Windows
+Installing MariaDB on macOS
+Installing MariaDB on macOS (PKG)
+Installing MariaDB Windows ZIP Packages
+Deploy with Package Tarballs
+Deploy with Local Package Repository Mirrors
+Installing System Tables
+Troubleshooting Installation Issues
+Installing MariaDB on IBM Cloud
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Installing MariaDB RPM Files
+Install and manage MariaDB Server using RPM packages. This section provides detailed instructions for deploying and upgrading MariaDB on RPM-based Linux distributions.
+About the MariaDB RPM Files
+Installing MariaDB with yum/dnf
+Installing MariaDB with zypper
+Checking MariaDB RPM Package Signatures
+Installing MariaDB With the rpm Tool
+MariaDB for DirectAdmin Using RPMs
+MariaDB Installation via RPMs on CentOS 7
+Troubleshooting MariaDB Installs on RHEL / CentOS
+Why Source RPMs (SRPMs) Aren't Packaged For Some Platforms
+Last updated
+1 year ago
+Was this helpful?
+Was this helpful?

@@ -1,0 +1,186 @@
+Source: https://www.tinybird.com/docs/classic/analytics-agents/best-practices
+
+Classic: Analytics agents and MCP best practices · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Best practices to build analytics agents with the Tinybird MCP server
+¶
+Copy as MD
+Tinybird Workspaces are fully managed remote MCP servers that you can instantly connect to LLMs and agents with no additional setup.
+Here are some best practices for effectively building analytics agents using your data in Tinybird.
+Add context to your APIs for language models
+¶
+The Tinybird MCP server provides
+list_datasources
+and
+list_endpoints
+tools to publish useful context for LLMs.
+Add LLM-friendly descriptions to your resources. Helping the LLM understand what a data source contains or how an API endpoint works without having to infer it from the schema or raw data makes it much easier to generate accurate responses.
+Use the
+DESCRIPTION
+field in .datasource and .pipe files, and the
+description
+,
+required
+, and
+example
+metadata fields in pipe parameters.
+.datasource
+example:
+DESCRIPTION >
+    - `analytics_events` contains web analytics events, such as `page_hit` actions or custom events.
+    - The `action` column specifies the event type for each `session_id` and `timestamp`.
+    - The `payload` is a JSON string with metadata about the action, such as the `user_agent`.
+
+TOKEN "tracker" APPEND
+
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `session_id` Nullable(String) `json:$.session_id`,
+    `action` LowCardinality(String) `json:$.action`,
+    `version` LowCardinality(String) `json:$.version`,
+    `payload` String `json:$.payload`
+
+ENGINE MergeTree
+ENGINE_PARTITION_KEY toYYYYMM(timestamp)
+ENGINE_SORTING_KEY timestamp
+ENGINE_TTL timestamp + toIntervalDay(60)
+.pipe
+example:
+DESCRIPTION >
+    - Use this tool when you need to get most visited pages for a given period.
+    - Parameters:
+        - `date_from` and `date_to`: Optional date filters, defaulting to the last 7 days.
+        - `skip` and `limit`: Pagination parameters.
+    - Response: `pathname`, unique `visits`, and total `hits` for the given period.
+
+TOKEN "dashboard" READ
+
+NODE endpoint
+SQL >
+    %
+    select pathname, uniqMerge(visits) as visits, countMerge(hits) as hits
+    from analytics_pages_mv
+    where
+        {% if defined(date_from) %}
+            date
+            >=
+            {{ Date(date_from, description="Starting day for filtering a date range", required=False, example="2025-05-01") }}
+        {% else %} date >= timestampAdd(today(), interval -7 day)
+        {% end %}
+        {% if defined(date_to) %}
+            and date
+            <=
+            {{ Date(date_to, description="Finishing day for filtering a date range", required=False, example="2025-05-01") }}
+        {% else %} and date <= today()
+        {% end %}
+    group by pathname
+    order by visits desc
+    limit {{ Int32(skip, 0) }},{{ Int32(limit, 50) }}
+
+TYPE endpoint
+2. Build APIs for semantic context
+¶
+Your data represents semantic context for LLMs.
+If the LLM cannot infer the meaning of certain terms or formats, you can create dedicated tools to provide that context. For example, if your analytics data encodes device types with internal notations, create a pipe that lists the possible device values and document it clearly:
+DESCRIPTION >
+  - Retrieves the list of available devices.
+  - Use this list to filter other endpoints that require a `device` parameter.
+
+NODE uniq_devices
+SQL >
+    SELECT distinct(device) as device
+    FROM analytics_events
+
+TYPE endpoint
+3. Return LLM friendly errors
+¶
+Requests from the MCP server include a
+from=mcp
+parameter. Use this to return error messages optimized for LLM interpretation:
+NODE validate_endpoint
+SQL >
+    %
+    {% if defined(from) and from == 'mcp' %}
+        {% if defined(device) and device not in ['Android', 'iPhone'] %}
+              {{error('Parameter error. There was an error with the parameter you provided. The supported values for the `device` parameters are Android or iPhone, fix the issue by retrying again the request with a valid `device` value.')}}
+        {% end %}
+    {% end %}
+    SELECT * FROM endpoint
+    
+TYPE endpoint
+4. Mind your LLM tokens
+¶
+The MCP server returns data in CSV format to reduce LLM token usage. Additional tips to minimize tokens:
+Use pagination (
+skip
+,
+limit
+) and ranks in APIs.
+Instruct agents to
+SELECT
+only necessary columns.
+Avoid high-precision types: round numbers to 1–2 decimals; avoid
+DateTime64
+.
+Leverage aggregated materialized views.
+5. More tools ≠ better agents
+¶
+More tools does not correlate with better agents. In Tinybird all your API endpoints in a workspace are published as MCP tools, but you have control over them with authorization tokens.
+Use
+resource-scoped tokens
+to restrict tool access and build domain-specific agents.
+6. Limit agent steps
+¶
+Agents degrade rapidly when more than three steps are required. A simple, effective workflow is:
+Data Retrieval: Use Tinybird tools to gather data based on user inputs.
+LLM Processing: Let the LLM summarize, explain, or analyze the data.
+Automation: Use third-party tools for alerts or workflows based on the results.
+7. Build public facing analytics agents
+¶
+Use JSON Web Tokens (JWTs) for multi-tenant public agents.
+Tinybird JWTs allow fine-grained access control, automatically filtering data by tenant ID. For example, for an
+org_id
+parameter in your pipe, use a JWT like:
+{
+    "workspace_id": "<workspaces_id>",
+    "name": "frontend_jwt",
+    "exp": 123123123123,
+    "scopes": [
+        {
+            "type": "PIPES:READ",
+            "resource": "top_pages",
+            "fixed_params": {
+                "org_id": "<org_uid>"
+            }
+        },
+        {
+            "type": "DATASOURCES:READ",
+            "resource": "analytics_events",
+            "filter": "tenant_id = '<org_uid>'"
+        }
+    ],
+    "limits": {
+      "rps": 10
+    }
+}
+Include the token in your MCP URL to support multi-tenancy:
+https://mcp.tinybird.co?token=<jwt_token>
+For integrations, check out:
+Clerk JWT Template
+Auth0 JWT Template
+Updated
+3 weeks ago
+On this page
+Best practices to build analytics agents with the Tinybird MCP server
+Add context to your APIs for language models
+2. Build APIs for semantic context
+3. Return LLM friendly errors
+4. Mind your LLM tokens
+5. More tools ≠ better agents
+6. Limit agent steps
+7. Build public facing analytics agents
+classic
+Ask AI

@@ -1,0 +1,169 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/innodb/innodb-asynchronous-io
+
+InnoDB Asynchronous I/O | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+InnoDB Introduction
+InnoDB File Format
+InnoDB Limitations
+AUTO_INCREMENT Handling in InnoDB
+Binary Log Group Commit and InnoDB Flushing Performance
+InnoDB Asynchronous I/O
+InnoDB Buffer Pool
+InnoDB Change Buffering
+InnoDB Data Scrubbing
+InnoDB Doublewrite Buffer
+InnoDB Flush Method
+InnoDB Lock Modes
+InnoDB Log Archiving
+InnoDB Monitors
+InnoDB Page Compression
+InnoDB Page Flushing
+InnoDB Purge
+InnoDB Undo Log
+InnoDB Redo Log
+InnoDB Strict Mode
+InnoDB System Variables
+InnoDB Versions
+InnoDB Architecture for MariaDB Enterprise Server
+InnoDB Online DDL
+InnoDB Row Formats
+InnoDB Tablespaces
+InnoDB Troubleshooting
+MariaDB Enterprise Server InnoDB Operations
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+InnoDB Asynchronous I/O
+Explore how InnoDB uses asynchronous I/O on various operating systems to handle multiple read and write requests concurrently without blocking.
+From
+MariaDB 10.5
+,
+InnoDB
+uses asynchronous I/O to read from and write to disk asynchronously. This forms part of the InnoDB Background Thread Pool.
+Stages
+Each asynchronous IO operation goes through multiple stages:
+SUBMITTED – The IO operation is initiated.
+For asynchronous writes, this typically occurs in the buffer pool flushing code.
+For asynchronous reads, this may happen during buffer pool loading at startup or in prefetching logic.
+COMPLETED_IN_OS – The operating system notifies InnoDB that the I/O operation is complete.
+If using libaio or io_uring, a dedicated thread handles this notification.
+The completed IO operation is then submitted to InnoDB’s internal thread pool (tpool).
+EXECUTING_COMPLETION_TASK – A tpool thread processes the completion task for the IO operation.
+COMPLETED – The IO operation is fully handled.
+Resource Constraints and Queuing Mechanisms
+Waiting for IO Slots
+The total number of pending asynchronous IO operations is limited by:
+Copy
+total_count = number_of_IO_threads * 256
+where number_of_IO_threads refers to either
+innodb_io_read_threads
+or
+innodb_io_write_threads
+.
+Each IO operation is associated with an IO slot, which contains necessary metadata such as the file handle, operation type, offset, length, and any OS error codes. Initially, all total_count slots are free, but as pending IO requests accumulate, slots get occupied. If all slots are in use, additional IO requests must wait for a free slot.
+Queuing Mechanism
+The number of completion tasks (EXECUTING_COMPLETION_TASK stage) that can run in parallel is also limited by
+innodb_io_read_threads
+or
+innodb_io_write_threads
+. If too many IO operations complete simultaneously, they cannot all be processed in parallel and must be queued, respecting the thread limit.
+Variables
+From
+MariaDB 11.5
+, a number of status variables were added to give insight into the above operations:
+innodb_async_reads_pending
+– Number of read IO operations currently in progress (from SUBMITTED to COMPLETED).
+innodb_async_reads_tasks_running
+– Number of read IO operations currently in the EXECUTING_COMPLETION_TASK state.
+innodb_async_reads_total_count
+– Total number of read completion tasks that have finished execution.
+innodb_async_reads_queue_size
+– Current size of the queue (see
+Queuing Mechanism
+).
+innodb_async_reads_wait_slot_sec
+– Total wait time for a free IO slot (see Waiting for IO Slots).
+innodb_async_reads_total_enqueues
+– Total number of read operations that were queued (see
+Queuing Mechanism
+). Includes those still waiting and making up
+innodb_async_reads_queue_size
+.
+Similar variables exist for write operations:
+innodb_async_writes_pending
+innodb_async_writes_tasks_running
+innodb_async_reads_total_count
+innodb_async_writes_queue_size
+innodb_async_writes_wait_slot_sec
+innodb_async_writes_total_enqueues
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Binary Log Group Commit and InnoDB Flushing Performance
+Next
+InnoDB Buffer Pool
+Last updated
+1 year ago
+Was this helpful?
+Stages
+Resource Constraints and Queuing Mechanisms
+Variables
+Was this helpful?

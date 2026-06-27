@@ -1,0 +1,238 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/comparison-functions
+
+Comparison Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Comparison functions
+¶
+Copy as MD
+These functions evaluate the relationship between two values, returning
+1
+if the comparison is true and
+0
+if it is false. The result type is always
+UInt8
+.
+Values can be compared if they belong to compatible type groups, such as numbers, strings, dates, or date-times. Tuples and arrays are compared lexicographically, meaning element by element from left to right.
+Strings are compared byte-by-byte. This can lead to unexpected results with multi-byte UTF-8 characters. A string that is a prefix of another string is considered "less than" the longer string (e.g., 'apple' < 'applepie').
+equals
+¶
+This function checks if two values are identical.
+Alias:
+a = b
+(operator)
+a == b
+(operator)
+Syntax
+¶
+equals(a, b)
+Arguments
+¶
+a
+: Any. The first value to compare.
+b
+: Any. The second value to compare.
+Returns
+¶
+1
+if
+a
+is equal to
+b
+, otherwise
+0
+.
+UInt8
+.
+Example
+¶
+SELECT equals(10, 10);
+Result:
+┌─equals(10, 10)─┐
+│              1 │
+└────────────────┘
+notEquals
+¶
+This function determines if two values are different.
+Alias:
+a != b
+(operator)
+a <> b
+(operator)
+Syntax
+¶
+notEquals(a, b)
+Arguments
+¶
+a
+: Any. The first value to compare.
+b
+: Any. The second value to compare.
+Returns
+¶
+1
+if
+a
+is not equal to
+b
+, otherwise
+0
+.
+UInt8
+.
+Example
+¶
+SELECT notEquals('hello', 'world');
+Result:
+┌─notEquals('hello', 'world')─┐
+│                           1 │
+└─────────────────────────────┘
+less
+¶
+This function checks if the first value is strictly less than the second value.
+Alias:
+a < b
+(operator)
+Syntax
+¶
+less(a, b)
+Arguments
+¶
+a
+: Any. The first value to compare.
+b
+: Any. The second value to compare.
+Returns
+¶
+1
+if
+a
+is less than
+b
+, otherwise
+0
+.
+UInt8
+.
+Example
+¶
+SELECT less(5, 10);
+Result:
+┌─less(5, 10)─┐
+│           1 │
+└─────────────┘
+greater
+¶
+This function checks if the first value is strictly greater than the second value.
+Alias:
+a > b
+(operator)
+Syntax
+¶
+greater(a, b)
+Arguments
+¶
+a
+: Any. The first value to compare.
+b
+: Any. The second value to compare.
+Returns
+¶
+1
+if
+a
+is greater than
+b
+, otherwise
+0
+.
+UInt8
+.
+Example
+¶
+SELECT greater(20.5, 15.2);
+Result:
+┌─greater(20.5, 15.2)─┐
+│                   1 │
+└─────────────────────┘
+lessOrEquals
+¶
+This function determines if the first value is less than or equal to the second value.
+Alias:
+a <= b
+(operator)
+Syntax
+¶
+lessOrEquals(a, b)
+Arguments
+¶
+a
+: Any. The first value to compare.
+b
+: Any. The second value to compare.
+Returns
+¶
+1
+if
+a
+is less than or equal to
+b
+, otherwise
+0
+.
+UInt8
+.
+Example
+¶
+SELECT lessOrEquals(7, 7);
+Result:
+┌─lessOrEquals(7, 7)─┐
+│                  1 │
+└────────────────────┘
+greaterOrEquals
+¶
+This function determines if the first value is greater than or equal to the second value.
+Alias:
+a >= b
+(operator)
+Syntax
+¶
+greaterOrEquals(a, b)
+Arguments
+¶
+a
+: Any. The first value to compare.
+b
+: Any. The second value to compare.
+Returns
+¶
+1
+if
+a
+is greater than or equal to
+b
+, otherwise
+0
+.
+UInt8
+.
+Example
+¶
+SELECT greaterOrEquals(DATE '2023-01-01', DATE '2022-12-31');
+Result:
+┌─greaterOrEquals(toDate('2023-01-01'), toDate('2022-12-31'))─┐
+│                                                           1 │
+└───────────────────────────────────────────────────────────┘
+Updated
+3 weeks ago
+On this page
+Comparison functions
+equals
+notEquals
+less
+greater
+lessOrEquals
+greaterOrEquals
+forward
+classic
+Ask AI

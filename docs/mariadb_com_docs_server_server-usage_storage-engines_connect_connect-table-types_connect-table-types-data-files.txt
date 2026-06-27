@@ -1,0 +1,245 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/connect/connect-table-types/connect-table-types-data-files
+
+CONNECT Table Types - Data Files | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+Introduction to the CONNECT Engine
+Using CONNECT
+Installing CONNECT
+CONNECT Create Table Options
+CONNECT Data Types
+CONNECT Table Types
+CONNECT Table Types Overview
+CONNECT BIN Table Type
+CONNECT CSV and FMT Table Types
+CONNECT DBF Table Type
+CONNECT DOS and FIX Table Types
+CONNECT - External Table Types
+CONNECT - Files Retrieved Using Rest Queries
+CONNECT INI Table Type
+CONNECT JDBC Table Type: Accessing Tables from Another DBMS
+CONNECT JSON Table Type
+CONNECT MONGO Table Type: Accessing Collections from MongoDB
+CONNECT MYSQL Table Type: Accessing MySQL/MariaDB Tables
+CONNECT - NoSQL Table Types
+CONNECT OCCUR Table Type
+CONNECT ODBC Table Type: Accessing Tables From Another DBMS
+CONNECT PIVOT Table Type
+CONNECT PROXY Table Type
+CONNECT Table Types - Catalog Tables
+CONNECT Table Types - Data Files
+CONNECT Table Types - OEM: Implemented in an External LIB
+CONNECT Table Types - Special "Virtual" Tables
+CONNECT Table Types - VIR
+CONNECT TBL Table Type: Table List
+CONNECT - Using the TBL and MYSQL Table Types Together
+CONNECT VEC Table Type
+CONNECT XCOL Table Type
+CONNECT XML Table Type
+CONNECT Zipped File Tables
+Inward and Outward Tables
+CONNECT Security
+CONNECT System Variables
+Adding the REST Feature as a Library Called by an OEM Table
+Compiling JSON UDFs in a Separate Library
+Making the GetRest Library
+OEM Table Example
+Current Status of the CONNECT Handler
+JSON Sample Files
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+CONNECT Table Types - Data Files
+The CONNECT storage engine.
+Most of the tables processed by CONNECT are just plain DOS or UNIX data files, logically regarded as tables thanks to the description given when creating the table. This description comes from the
+CREATE TABLE
+statement. Depending on the application, these tables can already exist as data files, used as is by CONNECT, or can have been physically made by CONNECT as the result of a
+CREATE TABLE ... SELECT ...
+and/or INSERT statement(s).
+The file
+path/name
+is given by the
+FILE_NAME
+option. If it is a relative path/name, it are relative to the database directory, the one containing the table
+.FRM
+file.
+Unless specified, the maturity of file table types is stable.
+Multiple File Tables
+A
+multiple
+file table is one that is physically contained in several files of the same type instead of just one. These files are processed sequentially during the process of a query and the result is the same as if all the table files were merged into one. This is great to process files coming from different sources (such as cash register log files) or made at different time periods (such as bank monthly reports) regarded as one table. Note that the operations on such files are restricted to sequential Select and Update; and that VEC multiple tables are not supported by CONNECT. The file list depends on the setting of the
+multiple
+option of the
+CREATE TABLE
+statement for that table.
+Multiple tables are specified by the option MULTIPLE=
+n
+, which can take This storage engine has been deprecated.four values:
+0
+Not a multiple table (the default). This can be used in an
+ALTER TABLE
+statement.
+1
+The table is made from files located in the same directory. The FILE_NAME option is a pattern such as 'cash*.log' that all the table file path/names verify.
+2
+The FILE_NAME gives the name of a file that contains the path/names of all the table files. This file can be made using a DIR table.
+3
+Like multiple=1 but also including eligible files from the directory sub-folders.
+The
+FILEID
+special column, described
+here
+, allows query pruning by filtering the file list or doing some grouping on the files that make a multiple table.
+Note:
+Multiple was not initially implemented for XML tables. This restriction was removed in version 1.02.
+Record Format
+This characteristic applies to table files handled by the operating system input/output functions. It is
+fixed
+for table types
+FIX
+,
+BIN
+,
+DBF
+and
+VEC
+, and it is variable for
+DOS
+, VCT,
+FMT
+and some
+JSON
+tables.
+For fixed tables, most I/O operations are done by block of BLOCK_SIZE rows. This diminishes the number of I/O’s and enables block indexing.
+Starting with CONNECT version 1.6.6, the BLOCK_SIZE option can also be specified for variable tables. Then, a file similar to the block indexing file is created by CONNECT that gives the size in bytes of each block of BLOCK_SIZE rows. This enables the use of block I/Os and block indexing to variable tables. It also enables CONNECT to return the exact row number for info commands
+File Mapping
+For file-based tables of reasonable size, processing time can be greatly enhanced under Windows(TM) and some flavors of UNIX or Linux by using the technique of “file mapping”, in which a file is processed as if it were entirely in memory. Mapping is specified when creating the table by the use of the
+MAPPED=YES
+option. This does not apply to tables not handled by system I/O functions (
+XML
+and
+INI
+).
+Big File Tables
+Because all files are handled by the standard input/output functions of the operating system, their size is limited to 2GB, the maximum size handled by standard functions. For some table types, CONNECT can deal with files that are larger than 2GB, or prone to become larger than this limit. These are the
+FIX
+,
+BIN
+and
+VEC
+types. To tell connect to use input/output functions dealing with big files, specify the option
+huge=1
+or
+huge=YES
+for that table. Note however that CONNECT cannot randomly access tables having more than 2G records.
+Compressed File Tables
+CONNECT can make and process some tables whose data file is compressed. The only supported compression format is the gzlib format. Zip and zlib formats are supported differently. The table types that can be compressed are
+DOS
+,
+FIX
+,
+BIN
+,
+CSV
+and
+FMT
+. This can save some disk space
+at the cost of a somewhat longer processing time.
+Some restrictions apply to compressed tables:
+Compressed tables are not indexable.
+Update and partial delete are not supported.
+Use the numeric compress option to specify a compressed table:
+Not compressed
+Compressed in gzlib format.
+Made of compressed blocks of block_size records (enabling block indexing)
+Relational Formatted Tables
+These are based on files whose records represent one table row. Only the column representation within each record can differ. The following relational formatted tables are supported:
+DOS and FIX Table Types
+DBF Table Type
+BIN Table Type
+VEC Table Type
+CSV and FMT Table Types
+NoSQL Table Types
+These are based on files that do not match the relational format but often represent hierarchical data. CONNECT can handle JSON, INI-CFG, XML and some HTML files..
+The way it is done is different from what PostgreSQL does. In addition to including in a table some column values of a specific data format (JSON, XML) to be handled by specific functions, CONNECT can directly use JSON, XML or INI files that can be produced by other applications and this is the table definition that describes where and how the contained information must be retrieved.
+This is also different from what MariaDB does with
+dynamic columns
+, which is close to what MySQL and PostgreSQL do with the JSON column type.
+The following NoSQL types are supported:
+XML Table Type
+JSON Table Type
+INI Table Type
+This page is licensed: GPLv2
+spinner
+Previous
+CONNECT Table Types - Catalog Tables
+Next
+CONNECT Table Types - OEM: Implemented in an External LIB
+Last updated
+4 months ago
+Was this helpful?
+Multiple File Tables
+Record Format
+File Mapping
+Big File Tables
+Compressed File Tables
+Relational Formatted Tables
+NoSQL Table Types
+Was this helpful?

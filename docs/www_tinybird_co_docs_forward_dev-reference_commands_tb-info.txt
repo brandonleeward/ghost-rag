@@ -1,0 +1,67 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-info
+
+tb info · Tinybird Docs
+Sign In
+Sign Up
+tb info
+¶
+Copy as MD
+Displays authentication details stored for Tinybird Cloud and Tinybird Local, along with the current project path configuration.
+The credentials are stored in the
+.tinyb
+file. See
+.tinyb file
+.
+For example:
+tb info
+
+» Tinybird Cloud:
+--------------------------------------------------------------------------------------------
+user: tinybird@domain.co
+workspace_name: forward
+workspace_id: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX
+token: YOUR-ADMIN-TOKEN
+user_token: YOUR-USER-TOKEN
+api: https://api.tinybird.co
+ui: https://cloud.tinybird.co/gcp/europe-west2/forward
+--------------------------------------------------------------------------------------------
+
+» Tinybird Local:
+--------------------------------------------------------------------------------------------
+user: tinybird@domain.co
+workspace_name: forward
+workspace_id: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX
+token: YOUR-LOCAL-ADMIN-TOKEN
+user_token: YOUR-LOCAL-USER-TOKEN
+api: http://localhost:7181
+ui: http://cloud.tinybird.co/local/7181/forward
+--------------------------------------------------------------------------------------------
+
+» Project:
+---------------------------------------------------
+current: /path/to/your/project
+.tinyb: /path/to/your/project/.tinyb
+project: /path/to/your/project
+---------------------------------------------------
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✗ No
+Displays info for all environments.
+--cloud
+✗ No
+Displays info for all environments.
+--branch=BRANCH_NAME
+✗ No
+Displays info for all environments.
+Updated
+6 months ago
+Looking for Classic docs?
+On this page
+tb info
+Environment support
+forward
+Ask AI

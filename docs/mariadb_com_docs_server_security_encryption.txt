@@ -1,0 +1,73 @@
+Source: https://mariadb.com/docs/server/security/encryption
+
+Encryption | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Security
+Securing MariaDB
+Encryption
+TLS and Cryptography Libraries
+Data-in-Transit Encryption
+Data-at-Rest Encryption
+User Account Management
+Authentication with Enterprise Server
+Limiting Size of Created Disk Temporary Files and Tables
+Security Vulnerabilities (CVE) Fixed in MariaDB
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Encryption
+Enhance MariaDB Server security with encryption. This section covers data-at-rest and in-transit encryption, helping you protect sensitive information and meet compliance requirements.
+MariaDB's security architecture distinguishes between data moving across the network (Data-in-Transit) and data stored on disk (Data-at-Rest).
+TLS and Cryptography Libraries
+MariaDB links to cryptography libraries (OpenSSL, wolfSSL, GnuTLS, Schannel) either statically or dynamically. How to verify the active library and version.
+Data-in-Transit Encryption
+Data-in-Transit Encryption
+Protects credentials and query results from "man-in-the-middle" attacks during client-server communication.
+Uses the TLS protocol. It handles the handshake, identity verification, and encryption of the network stream.
+Utilizes Asymmetric Key Pairs (Public/Private keys) and Certificates (PEM/CRT files) managed by libraries like OpenSSL.
+Defined in the
+[mariadb]
+section using
+ssl_cert
+,
+ssl_key
+, and
+ssl_ca
+.
+Data-at-Rest Encryption
+Data-at-Rest Encryption
+Protects physical data files (InnoDB/Aria tables, Redo logs, and Binary logs) if the storage media or backups are stolen.
+Uses Symmetric Encryption (typically AES) managed by specialized Key Management Plugins.
+Uses Symmetric Keys identified by a
+Key ID
+. These are fetched from a local file, AWS KMS, or HashiCorp Vault.
+Enabled via variables like
+innodb_encrypt_tables
+and requires a specific plugin (e.g.,
+file_key_management
+) to be loaded.
+Last updated
+4 months ago
+Was this helpful?
+Was this helpful?

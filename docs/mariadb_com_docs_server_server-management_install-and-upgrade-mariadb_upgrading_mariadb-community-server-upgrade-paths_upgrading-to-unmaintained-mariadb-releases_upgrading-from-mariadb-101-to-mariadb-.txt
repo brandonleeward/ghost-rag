@@ -1,0 +1,179 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading/mariadb-community-server-upgrade-paths/upgrading-to-unmaintained-mariadb-releases/upgrading-from-mariadb-101-to-mariadb-102.md
+
+> For the complete documentation index, see [llms.txt](https://mariadb.com/docs/llms.txt). Markdown versions of documentation pages are available by appending `.md` to page URLs; this page is available as [Markdown](https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading/mariadb-community-server-upgrade-paths/upgrading-to-unmaintained-mariadb-releases/upgrading-from-mariadb-101-to-mariadb-102.md).
+
+# Upgrading from MariaDB 10.1 to MariaDB 10.2
+
+### How to Upgrade
+
+For Windows, see [Upgrading MariaDB on Windows](/docs/server/server-management/install-and-upgrade-mariadb/upgrading/platform-specific-upgrade-guides/upgrading-mariadb-on-windows.md) instead.
+
+For MariaDB Galera Cluster, see [Upgrading with Galera Cluster](/docs/galera-cluster/galera-management/upgrading-galera-cluster.md) instead.
+
+Before you upgrade, it would be best to take a backup of your database. This is always a good idea to do before an upgrade. We would recommend [mariadb-backup](/docs/server/server-usage/backup-and-restore/mariadb-backup/mariadb-backup-overview.md).
+
+The suggested upgrade procedure is:
+
+1. Modify the repository configuration, so the system's package manager installs [MariaDB 10.2](/docs/release-notes/community-server/old-releases/10.2/what-is-mariadb-102.md). For example,
+
+* On Debian, Ubuntu, and other similar Linux distributions, see [Updating the MariaDB APT repository to a New Major Release](/docs/server/server-management/install-and-upgrade-mariadb/installing-mariadb/binary-packages/installing-mariadb-deb-files.md#updating-the-mariadb-apt-repository-to-a-new-major-release) for more information.
+* On RHEL, CentOS, Fedora, and other similar Linux distributions, see [Updating the MariaDB YUM repository to a New Major Release](/docs/server/server-management/install-and-upgrade-mariadb/installing-mariadb/binary-packages/rpm/yum.md#updating-the-mariadb-yum-repository-to-a-new-major-release) for more information.
+* On SLES, OpenSUSE, and other similar Linux distributions, see [Updating the MariaDB ZYpp repository to a New Major Release](/docs/server/server-management/install-and-upgrade-mariadb/installing-mariadb/binary-packages/rpm/installing-mariadb-with-zypper.md#updating-the-mariadb-zypp-repository-to-a-new-major-release) for more information.
+
+1. Set [innodb\_fast\_shutdown](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_fast_shutdown) to `0`. It can be changed dynamically with [SET GLOBAL](/docs/server/reference/sql-statements/administrative-sql-statements/replication-statements/set-global-sql_slave_skip_counter.md). For example:`SET GLOBAL innodb_fast_shutdown=0;`
+
+* This step is not necessary when upgrading to [MariaDB 10.2.5](/docs/release-notes/community-server/old-releases/10.2/10.2.5.md) or later. Omitting it can make the upgrade process far faster. See [MDEV-12289](https://jira.mariadb.org/browse/MDEV-12289) for more information.
+
+1. [Stop MariaDB](/docs/server/server-management/starting-and-stopping-mariadb/starting-and-stopping-mariadb-automatically.md).
+2. Uninstall the old version of MariaDB.
+
+* On Debian, Ubuntu, and other similar Linux distributions, execute the following:`sudo apt-get remove mariadb-server`
+* On RHEL, CentOS, Fedora, and other similar Linux distributions, execute the following:`sudo yum remove MariaDB-server`
+* On SLES, OpenSUSE, and other similar Linux distributions, execute the following:`sudo zypper remove MariaDB-server`
+
+1. Install the new version of MariaDB.
+
+* On Debian, Ubuntu, and other similar Linux distributions, see [Installing MariaDB Packages with APT](/docs/server/server-management/install-and-upgrade-mariadb/installing-mariadb/binary-packages/installing-mariadb-deb-files.md#installing-mariadb-packages-with-apt) for more information.
+* On RHEL, CentOS, Fedora, and other similar Linux distributions, see [Installing MariaDB Packages with YUM](/docs/server/server-management/install-and-upgrade-mariadb/installing-mariadb/binary-packages/rpm/yum.md#installing-mariadb-packages-with-yum) for more information.
+* On SLES, OpenSUSE, and other similar Linux distributions, see [Installing MariaDB Packages with ZYpp](/docs/server/server-management/install-and-upgrade-mariadb/installing-mariadb/binary-packages/rpm/installing-mariadb-with-zypper.md#installing-mariadb-packages-with-zypp) for more information.
+
+1. Make any desired changes to configuration options in [option files](/docs/server/server-management/install-and-upgrade-mariadb/configuring-mariadb/configuring-mariadb-with-option-files.md), such as `my.cnf`. This includes removing any options that are no longer supported.
+2. [Start MariaDB](/docs/server/server-management/starting-and-stopping-mariadb/starting-and-stopping-mariadb-automatically.md).
+3. Run [mysql\_upgrade](/docs/server/clients-and-utilities/legacy-clients-and-utilities/mysql_upgrade.md).
+
+* `mysql_upgrade` does two things:
+  1. Ensures that the system tables in the `[mysq](../../../../reference/sql-statements-and-structure/sql-statements/administrative-sql-statements/system-tables/the-mysql-database-tables/README.md) l` database are fully compatible with the new version.
+  2. Does a very quick check of all tables and marks them as compatible with the new version of MariaDB .
+
+### Incompatible Changes Between 10.1 and 10.2
+
+On most servers upgrading from 10.1 should be painless. However, there are some things that have changed which could affect an upgrade:
+
+#### InnoDB Instead of XtraDB
+
+[MariaDB 10.2](/docs/release-notes/community-server/old-releases/10.2/what-is-mariadb-102.md) uses [InnoDB](/docs/server/server-usage/storage-engines/innodb.md) as the default storage engine, rather than XtraDB, used in [MariaDB 10.1](/docs/release-notes/community-server/old-releases/10.1/changes-improvements-in-mariadb-10-1.md) and before. See [Why does MariaDB 10.2 use InnoDB instead of XtraDB?](https://github.com/mariadb-corporation/docs-server/blob/test/kb/en/why-does-mariadb-102-use-innodb-instead-of-xtradb/README.md) In most cases this should have minimal effect as the latest InnoDB has incorporated most of the improvements made in earlier versions of XtraDB. Note that certain [XtraDB system variables](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md) are now ignored (although they still exist so as to permit easy upgrading).
+
+#### Options That Have Changed Default Values
+
+In particular, take note of the changes to [innodb\_strict\_mode](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md), [sql\_mode](/docs/server/server-management/variables-and-modes/server-system-variables.md#sql_mode), [binlog\_format](/docs/server/ha-and-performance/standard-replication/replication-and-binary-log-system-variables.md), [binlog\_checksum](/docs/server/ha-and-performance/standard-replication/replication-and-binary-log-system-variables.md) and [innodb\_checksum\_algorithm](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md).
+
+| Option                                                                                                                                                              | Old default value                                                                                                                    | New default value                                                                                       |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| [aria\_recover(\_options)](/docs/server/server-usage/storage-engines/aria/aria-system-variables.md#aria_recover_options)                                            | NORMAL                                                                                                                               | BACKUP, QUICK                                                                                           |
+| [binlog\_annotate\_row\_events](/docs/server/ha-and-performance/standard-replication/replication-and-binary-log-system-variables.md)                                | OFF                                                                                                                                  | ON                                                                                                      |
+| [binlog\_checksum](/docs/server/ha-and-performance/standard-replication/replication-and-binary-log-system-variables.md)                                             | NONE                                                                                                                                 | CRC32                                                                                                   |
+| [binlog\_format](/docs/server/ha-and-performance/standard-replication/replication-and-binary-log-system-variables.md)                                               | STATEMENT                                                                                                                            | MIXED                                                                                                   |
+| [group\_concat\_max\_len](/docs/server/server-management/variables-and-modes/server-system-variables.md#group_concat_max_len)                                       | 1024                                                                                                                                 | 1048576                                                                                                 |
+| [innodb\_autoinc\_lock\_mode](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                                          | 1                                                                                                                                    | 2                                                                                                       |
+| [innodb\_buffer\_pool\_dump\_at\_shutdown](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                             | OFF                                                                                                                                  | ON                                                                                                      |
+| [innodb\_buffer\_pool\_dump\_pct](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                                      | 100                                                                                                                                  | 25                                                                                                      |
+| [innodb\_buffer\_pool\_instances](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                                      | 8                                                                                                                                    | Varies                                                                                                  |
+| [innodb\_buffer\_pool\_load\_at\_startup](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                              | OFF                                                                                                                                  | ON                                                                                                      |
+| [innodb\_checksum\_algorithm](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                                          | innodb                                                                                                                               | crc32                                                                                                   |
+| [innodb\_file\_format](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                                                 | Antelope                                                                                                                             | Barracuda                                                                                               |
+| [innodb\_large\_prefix](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                                                | OFF                                                                                                                                  | ON                                                                                                      |
+| [innodb\_lock\_schedule\_algorithm](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                                    | VATS                                                                                                                                 | FCFS                                                                                                    |
+| [innodb\_log\_compressed\_pages](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                                       | OFF                                                                                                                                  | ON                                                                                                      |
+| [innodb\_max\_dirty\_pages\_pct\_lwm](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                                  | 0.001000                                                                                                                             | 0                                                                                                       |
+| [innodb\_max\_undo\_log\_size](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                                         | 1073741824                                                                                                                           | 10485760                                                                                                |
+| [innodb\_purge\_threads](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                                               | 1                                                                                                                                    | 4                                                                                                       |
+| [innodb\_strict\_mode](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                                                 | OFF                                                                                                                                  | ON                                                                                                      |
+| [innodb\_undo\_directory](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                                              | .                                                                                                                                    | NULL                                                                                                    |
+| [innodb\_use\_atomic\_writes](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                                          | OFF                                                                                                                                  | ON                                                                                                      |
+| [innodb\_use\_trim](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)                                                                    | OFF                                                                                                                                  | ON                                                                                                      |
+| [lock\_wait\_timeout](/docs/server/server-management/variables-and-modes/server-system-variables.md#lock_wait_timeout)                                              | 31536000                                                                                                                             | 86400                                                                                                   |
+| [log\_slow\_admin\_statements](/docs/server/server-management/variables-and-modes/server-system-variables.md#log_slow_admin_statements)                             | OFF                                                                                                                                  | ON                                                                                                      |
+| [log\_slow\_slave\_statements](/docs/server/ha-and-performance/standard-replication/replication-and-binary-log-system-variables.md)                                 | OFF                                                                                                                                  | ON                                                                                                      |
+| [log\_warnings](/docs/server/server-management/variables-and-modes/server-system-variables.md#log_warnings)                                                         | 1                                                                                                                                    | 2                                                                                                       |
+| [max\_allowed\_packet](/docs/server/server-management/variables-and-modes/server-system-variables.md#max_allowed_packet)                                            | 4M                                                                                                                                   | 16M                                                                                                     |
+| [max\_long\_data\_size](/docs/server/server-management/variables-and-modes/server-system-variables.md#max_long_data_size)                                           | 4M                                                                                                                                   | 16M                                                                                                     |
+| [myisam\_recover\_options](/docs/server/server-usage/storage-engines/myisam-storage-engine/myisam-system-variables.md#myisam_recover_options)                       | NORMAL                                                                                                                               | BACKUP, QUICK                                                                                           |
+| [optimizer\_switch](/docs/server/server-management/variables-and-modes/server-system-variables.md#optimizer_switch)                                                 | See [Optimizer Switch](/docs/server/ha-and-performance/optimization-and-tuning/query-optimizations/optimizer-switch.md) for details. |                                                                                                         |
+| [replicate\_annotate\_row\_events](/docs/server/ha-and-performance/standard-replication/replication-and-binary-log-system-variables.md)                             | OFF                                                                                                                                  | ON                                                                                                      |
+| [server\_id](/docs/server/ha-and-performance/standard-replication/replication-and-binary-log-system-variables.md)                                                   | 0                                                                                                                                    | 1                                                                                                       |
+| [slave\_net\_timeout](/docs/server/ha-and-performance/standard-replication/replication-and-binary-log-system-variables.md)                                          | 3600                                                                                                                                 | 60                                                                                                      |
+| [sql\_mode](/docs/server/server-management/variables-and-modes/server-system-variables.md#sql_mode)                                                                 | NO\_AUTO\_CREATE\_USER, NO\_ENGINE\_SUBSTITUTION                                                                                     | STRICT\_TRANS\_TABLES, ERROR\_FOR\_DIVISION\_BY\_ZERO, NO\_AUTO\_CREATE\_USER, NO\_ENGINE\_SUBSTITUTION |
+| [thread\_cache\_size](/docs/server/server-management/variables-and-modes/server-system-variables.md#thread_cache_size)                                              | 0                                                                                                                                    | Auto                                                                                                    |
+| [thread\_pool\_max\_threads](/docs/server/ha-and-performance/optimization-and-tuning/buffers-caches-and-threads/thread-pool/thread-pool-system-status-variables.md) | 1000                                                                                                                                 | 65536                                                                                                   |
+| [thread\_stack](/docs/server/server-management/variables-and-modes/server-system-variables.md#thread_stack)                                                         | 295936                                                                                                                               | 299008                                                                                                  |
+
+#### Options That Have Been Removed or Renamed
+
+The following options should be removed or renamed if you use them in your [option files](/docs/server/server-management/install-and-upgrade-mariadb/configuring-mariadb/configuring-mariadb-with-option-files.md):
+
+| Option                                                                                                             | Reason                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| aria\_recover                                                                                                      | Renamed to [aria\_recover\_options](/docs/server/server-usage/storage-engines/aria/aria-system-variables.md#aria_recover_options) to match [myisam\_recover\_options](/docs/server/server-usage/storage-engines/myisam-storage-engine/myisam-system-variables.md#myisam_recover_options). |
+| [innodb\_additional\_mem\_pool\_size](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md) | Deprecated in [MariaDB 10.0](/docs/release-notes/community-server/old-releases/10.0/changes-improvements-in-mariadb-10-0.md).                                                                                                                                                             |
+| [innodb\_api\_bk\_commit\_interval](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)   | Memcache never implemented in MariaDB.                                                                                                                                                                                                                                                    |
+| [innodb\_api\_disable\_rowlock](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)       | Memcache never implemented in MariaDB.                                                                                                                                                                                                                                                    |
+| [innodb\_api\_enable\_binlog](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)         | Memcache never implemented in MariaDB.                                                                                                                                                                                                                                                    |
+| [innodb\_api\_enable\_mdl](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)            | Memcache never implemented in MariaDB.                                                                                                                                                                                                                                                    |
+| \[                                                                                                                 | innodb\_api\_trx\_level]\(../../../../reference/storage-engines/innodb/innodb-system-variables.md)                                                                                                                                                                                        |
+| [innodb\_use\_sys\_malloc](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md)            | Deprecated in [MariaDB 10.0](/docs/release-notes/community-server/old-releases/10.0/changes-improvements-in-mariadb-10-0.md).                                                                                                                                                             |
+
+#### Reserved Words
+
+New [reserved words](/docs/server/reference/sql-structure/sql-language-structure/reserved-words.md): OVER, RECURSIVE and ROWS. These can no longer be used as [identifiers](/docs/server/reference/sql-structure/sql-language-structure/identifier-names.md) without being quoted.
+
+#### TokuDB
+
+[TokuDB](/docs/server/server-usage/storage-engines/legacy-storage-engines/tokudb.md) has been split into a separate package, mariadb-plugin-tokudb.
+
+#### Replication
+
+[Replication](/docs/server/ha-and-performance/standard-replication.md) from legacy MySQL servers may require setting [binlog\_checksum](/docs/server/ha-and-performance/standard-replication/replication-and-binary-log-system-variables.md) to NONE.
+
+#### SQL Mode
+
+[SQL\_MODE](/docs/server/server-management/variables-and-modes/sql_mode.md) has been changed; in particular, NOT NULL fields with no default will no longer fall back to a dummy value for inserts which do not specify a value for that field.
+
+#### Auto\_increment
+
+[Auto\_increment](/docs/server/reference/data-types/auto_increment.md) columns are no longer permitted in [CHECK constraints](/docs/server/reference/sql-statements/data-definition/constraint.md), [DEFAULT value expressions](/docs/server/server-usage/tables/create-table.md#default) and [virtual columns](/docs/server/reference/sql-statements/data-definition/create/generated-columns.md). They were permitted in earlier versions, but did not work correctly.
+
+#### TLS
+
+Starting with [MariaDB 10.2](/docs/release-notes/community-server/old-releases/10.2/what-is-mariadb-102.md), when the user specifies the `--ssl` option with a [client or utility](https://github.com/mariadb-corporation/docs-server/blob/test/kb/en/clients-utilities/README.md), the [client or utility](https://github.com/mariadb-corporation/docs-server/blob/test/kb/en/clients-utilities/README.md) will not [verify the server certificate](/docs/server/security/encryption/data-in-transit-encryption/secure-connections-overview.md#server-certificate-verification) by default. In order to verify the server certificate, the user must specify the `--ssl-verify-server-cert` option to the [client or utility](https://github.com/mariadb-corporation/docs-server/blob/test/kb/en/clients-utilities/README.md). For more information, see the [list of options](/docs/server/clients-and-utilities/mariadb-client/mysql-command-line-client.md#options) for the [mysql](/docs/server/clients-and-utilities/mariadb-client/mysql-command-line-client.md) client.
+
+### Major New Features To Consider
+
+You might consider using the following major new features in [MariaDB 10.2](/docs/release-notes/community-server/old-releases/10.2/what-is-mariadb-102.md):
+
+* [Window Functions](/docs/server/reference/sql-functions/special-functions/window-functions.md)
+* [mysqlbinlog](/docs/server/clients-and-utilities/logging-tools/mariadb-binlog.md) now supports continuous binary log backups
+* [Recursive Common Table Expressions](/docs/server/reference/sql-statements/data-manipulation/selecting-data/common-table-expressions/recursive-common-table-expressions-overview.md)
+* [JSON functions](/docs/server/reference/sql-functions/special-functions/json-functions.md)
+* See also [System Variables Added in MariaDB 10.2](/docs/server/ha-and-performance/optimization-and-tuning/system-variables/system-and-status-variables-added-by-major-release/system-and-status-variables-added-by-major-unmaintained-release/system-variables-added-in-mariadb-102.md).
+
+### See Also
+
+* [The features in MariaDB 10.2](/docs/release-notes/community-server/old-releases/10.2/what-is-mariadb-102.md)
+* [Upgrading from MariaDB 10.1 to MariaDB 10.2 with Galera Cluster](https://github.com/mariadb-corporation/docs-server/blob/test/server/server-management/getting-installing-and-upgrading-mariadb/upgrading/upgrading-to-unmaintained-mariadb-releases/upgrading-from-mariadb-101-to-mariadb-102-with-galera-cluster/README.md)
+* [Upgrading from MariaDB 10.0 to MariaDB 10.1](/docs/server/server-management/install-and-upgrade-mariadb/upgrading/mariadb-community-server-upgrade-paths/upgrading-to-unmaintained-mariadb-releases/upgrading-from-mariadb-100-to-mariadb-101.md)
+* [Upgrading from MariaDB 5.5 to MariaDB 10.0](/docs/server/server-management/install-and-upgrade-mariadb/upgrading/mariadb-community-server-upgrade-paths/upgrading-to-unmaintained-mariadb-releases/upgrading-from-mariadb-10-4-to-mariadb-10-5.md)
+*This page is licensed: CC BY-SA / Gnu FDL*
+{% @marketo/form formId="4316" %}
+
+
+---
+
+# Agent Instructions
+This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
+
+## Querying This Documentation
+If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
+
+Perform an HTTP GET request on the current page URL with the `ask` query parameter, and the optional `goal` query parameter:
+
+```
+GET https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading/mariadb-community-server-upgrade-paths/upgrading-to-unmaintained-mariadb-releases/upgrading-from-mariadb-101-to-mariadb-102.md?ask=
+&goal=
+```
+
+`ask` is the immediate question: it should be specific, self-contained, and written in natural language.
+`goal` is optional and describes the broader end goal you are ultimately trying to accomplish on behalf of the user. GitBook uses it to tailor the answer towards what is most useful for that goal.
+
+The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
+
+Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

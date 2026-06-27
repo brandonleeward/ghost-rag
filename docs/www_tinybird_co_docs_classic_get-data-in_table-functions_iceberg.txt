@@ -1,0 +1,81 @@
+Source: https://www.tinybird.com/docs/classic/get-data-in/table-functions/iceberg
+
+Classic: Apache Iceberg table function · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Iceberg table function
+BETA
+¶
+Copy as MD
+The Tinybird
+iceberg()
+table function is currently in private beta. If you're interested in early access, reach out to support.
+The Tinybird
+iceberg()
+table function allows you to read data from your existing Apache Iceberg database in S3 into Tinybird, then schedule a regular copy pipe to orchestrate synchronization. You can load full tables, and every run performs a full replace on the data source.
+To use it, define a node using standard SQL and the
+iceberg
+function keyword, then publish the node as a copy pipe that does a sync on every run. See
+Table functions
+for general information and tips.
+Additionally you can use the
+iceberg
+table function in API endpoints.
+Setting secrets
+¶
+Table functions require authentication credentials (such as AWS keys) that must be stored securely. Tinybird provides different methods for managing secrets depending on the version you're using.
+Using the Variables API (Classic)
+¶
+In Tinybird Classic, you must set your credentials using the Environment Variables API:
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  --data-urlencode "name=aws_key" \
+  --data-urlencode "value=your_aws_key" \
+  https://<TB_HOST_URL>/v0/variables/
+For more details, see the
+Environment Variables API
+documentation.
+Using the CLI (Forward)
+¶
+In Tinybird Forward, you manage secrets using the
+tb secret
+command:
+tb secret set aws_key your_aws_key
+tb secret set aws_secret your_aws_secret
+For more details, see the
+tb secret
+command documentation.
+Once you've set up your secrets, you can reference them in your SQL with the
+tb_secret
+function as shown in the Syntax section below.
+Syntax
+¶
+Create a new pipe node. Call the
+iceberg
+table function and pass the AWS access key and secret as Tinybird secrets:
+Example query logic
+SELECT *
+FROM iceberg(
+  's3://your_bucket/iceberg/db/table',
+  {{tb_secret('aws_key')}},
+  {{tb_secret('aws_secret')}}
+)
+Publish this node as a copy pipe. You can choose to append only new data or replace all data.
+Check a full working example in this
+GitHub repository
+See also
+¶
+How to effectively use table functions
+Updated
+3 weeks ago
+On this page
+Iceberg table function
+BETA
+Setting secrets
+Using the Variables API (Classic)
+Using the CLI (Forward)
+Syntax
+See also
+classic
+Ask AI

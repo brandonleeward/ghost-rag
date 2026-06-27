@@ -1,0 +1,98 @@
+Source: https://www.tinybird.co/docs/guides/ingest-from-google-pubsub.html
+
+Ingest from Google Pub/Sub · Tinybird Docs
+Sign In
+Sign Up
+Stream from Google Pub/Sub
+¶
+Copy as MD
+In this guide you'll learn how to send data from Google Pub/Sub to Tinybird.
+Overview
+¶
+Google Pub/Sub
+is often used as a messaging middleware that decouples event stream sources from the end destination. Pub/Sub streams are usually consumed by Google's DataFlow which can send events on to destinations such as BigQuery, BigTable, or Google Cloud Storage.
+This DataFlow pattern works with Tinybird too, however, Pub/Sub also has a feature called
+Push subscriptions
+which can forward messages directly from Pub/Sub to Tinybird. The following guide steps use the subscription approach.
+Push messages from Pub/Sub to Tinybird
+¶
+1. Create a Pub/Sub topic
+¶
+Start by creating a topic in Google Pub/Sub following the
+Google Pub/Sub documentation
+.
+2. Create a push subscription
+¶
+Next,
+create a Push subscription in Pub/Sub
+.
+Set the
+Delivery Type
+to
+Push
+.
+In the
+Endpoint URL
+field, ue the following snippet (which uses the
+Tinybird Events API
+) and pass your own Token, which you can find in your workspace > Tokens:
+Endpoint URL
+https://<your_host>/v0/events?wait=true&name=<Data Source name>&token=<Static token>
+The API host in the following examples must match your Workspace's region. See the full list of
+regions and hosts
+If you are sending single-line JSON payload through Pubsub, tick the
+Enable payload unwrapping
+option to enable unwrapping. This means that data isn't base64 encoded before sending it to Tinybird. If you are sending any other format via Pubsub, leave this unchecked (you'll need to follow the decoding steps at the bottom of this guide).
+Set
+Retry policy
+to
+Retry after exponential backoff delay
+. Set the
+Minimum backoff
+to
+1
+and
+Maximum backoff
+to
+60
+.
+You don't need to create the data source in advance, it will automatically be created for you. This snippet also includes the
+wait=true
+parameter, which is explained in the
+Events API docs
+.
+3. Send sample messages
+¶
+Generate and send some sample messages to test your connection. If you don't have your own messages to test, use
+this script
+.
+4. Check the data source
+¶
+Pub/sub will start to push data to Tinybird. Check the Tinybird UI to see that the data source has been created and events are arriving.
+(Optional) Decode the payload
+¶
+If you enabled the
+Enable payload unwrapping
+option, there is nothing else to do.
+However, if you aren't sending single-line JSON payloads (NDJSON, JOSNL) through Pubsub, you'll need to continue to base64 encode data before sending it to Tinybird. When the data arrived in Tinybird, you can decode it using the
+base64Decode
+function, like this:
+SELECT
+    message_message_id as message_id,
+    message_publish_time,
+    base64Decode(message_data) as message_data
+  FROM events_demo
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Stream from Google Pub/Sub
+Overview
+Push messages from Pub/Sub to Tinybird
+1. Create a Pub/Sub topic
+2. Create a push subscription
+3. Send sample messages
+4. Check the data source
+(Optional) Decode the payload
+forward
+Ask AI

@@ -1,0 +1,43 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-logout
+
+tb logout · Tinybird Docs
+Sign In
+Sign Up
+tb logout
+¶
+Copy as MD
+Logs you out of your Tinybird session in the project directory you're in.
+tb logout
+
+» Logging out from <workspace>...
+✓ Logged out!
+Logging out erases all the credentials stored in the
+.tinyb
+file. See
+.tinyb
+.
+To log back in, run
+tb login
+.
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✗ No
+Logout is global and erases all credentials.
+--cloud
+✗ No
+Logout is global and erases all credentials.
+--branch=BRANCH_NAME
+✗ No
+Logout is global and erases all credentials.
+Updated
+1 month ago
+Looking for Classic docs?
+On this page
+tb logout
+Environment support
+forward
+Ask AI

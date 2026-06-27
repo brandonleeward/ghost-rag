@@ -1,0 +1,85 @@
+Source: https://www.tinybird.com/docs/classic/get-started/concepts
+
+Classic: Core concepts · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Core concepts
+¶
+Copy as MD
+Familiarize yourself with Tinybird's core concepts and terminology to get a better understanding of how Tinybird works and how you can make the most of its features.
+Workspaces
+¶
+Workspaces help you organize and collaborate on your Tinybird projects. You can have more than one Workspace.
+A Workspace contains the project resources, data, and state. You can share resources, such as Pipes or Data Sources, between Workspaces. You can also invite users to your Workspaces and define their role and permissions.
+A typical usage of Workspaces is to provide a team or project with a space to work in.
+See
+Workspaces
+for more information.
+Data Sources
+¶
+Data Sources are how you ingest and store data in Tinybird.
+All your data lives inside a Data Source, and you write SQL queries against Data Sources. You can bulk upload or stream data into a Data Source, and they support several different incoming data formats, such as CSV, JSON, and Parquet.
+See
+Data Sources
+for more information.
+Pipes
+¶
+Pipes are how you write SQL logic in Tinybird.
+Pipes are a collection of one or more SQL queries chained together and compiled into a single query. Pipes let you break larger queries down into smaller queries that are easier to read. You can publish Pipes as API Endpoints, copy them, and create Materialized Views.
+See
+Pipes
+for more information.
+Nodes
+¶
+A node is a single SQL
+SELECT
+statement that selects data from a Data Source or another node or API Endpoint. Nodes live within
+Pipes
+.
+API Endpoints
+¶
+You can build your SQL logic inside a Pipe and then publish the result of your query as an HTTP API Endpoint.
+See
+API Endpoints
+for more information.
+Charts
+¶
+Charts visualize your data. You can create and publish Charts in Tinybird from your published API Endpoints.
+See
+Charts
+for more information.
+Tokens
+¶
+Tokens authorize requests. Tokens can be static for back-end integrations, or custom JWTs for front-end applications.
+See
+Tokens
+for more information.
+Branches
+¶
+Branches let you create a copy of your Workspace where you can make changes, run tests, and develop new features. You can then merge the changes back into the original Workspace.
+See
+Branches
+for more information.
+CLI
+¶
+Use the Tinybird command line interface (CLI) to interact with Tinybird from the terminal. You can install it on your local machine or embed it into your CI/CD pipelines.
+See
+Tinybird CLI
+for more information.
+Updated
+1 year ago
+On this page
+Core concepts
+Workspaces
+Data Sources
+Pipes
+Nodes
+API Endpoints
+Charts
+Tokens
+Branches
+CLI
+classic
+Ask AI

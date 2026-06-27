@@ -1,0 +1,232 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/innodb/innodb-row-formats/innodb-redundant-row-format
+
+InnoDB REDUNDANT Row Format | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+InnoDB Introduction
+InnoDB File Format
+InnoDB Limitations
+AUTO_INCREMENT Handling in InnoDB
+Binary Log Group Commit and InnoDB Flushing Performance
+InnoDB Asynchronous I/O
+InnoDB Buffer Pool
+InnoDB Change Buffering
+InnoDB Data Scrubbing
+InnoDB Doublewrite Buffer
+InnoDB Flush Method
+InnoDB Lock Modes
+InnoDB Log Archiving
+InnoDB Monitors
+InnoDB Page Compression
+InnoDB Page Flushing
+InnoDB Purge
+InnoDB Undo Log
+InnoDB Redo Log
+InnoDB Strict Mode
+InnoDB System Variables
+InnoDB Versions
+InnoDB Architecture for MariaDB Enterprise Server
+InnoDB Online DDL
+InnoDB Row Formats
+InnoDB Row Formats Overview
+InnoDB COMPACT Row Format
+InnoDB COMPRESSED Row Format
+InnoDB DYNAMIC Row Format
+InnoDB REDUNDANT Row Format
+Troubleshooting Row Size Too Large Errors with InnoDB
+InnoDB Tablespaces
+InnoDB Troubleshooting
+MariaDB Enterprise Server InnoDB Operations
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+InnoDB REDUNDANT Row Format
+Information on the legacy REDUNDANT row format, primarily maintained for backward compatibility with older MySQL versions.
+The
+REDUNDANT
+row format is the original non-compacted row format.
+The
+REDUNDANT
+row format was the only available row format before MySQL 5.0.3. In that release, this row format was retroactively named the
+REDUNDANT
+row format. In the same release, the
+COMPACT
+row format was introduced as the new default row format.
+Using the
+REDUNDANT
+Row Format
+Redundant row format should not be used in modern versions of MariaDB Server.
+Redundant row format does not store large columns as efficiently as the Dynamic row format.
+Redundant row format limits indexing column values to 767 bytes, which is significant smaller than the Dynamic row format.
+The easiest way to create an InnoDB table that uses the
+REDUNDANT
+row format is by setting the
+ROW_FORMAT
+table option to
+REDUNDANT
+in a
+CREATE TABLE
+or
+ALTER TABLE
+statement.
+It is recommended to set the
+innodb_strict_mode
+system variable to
+ON
+when using this format.
+The
+REDUNDANT
+row format is supported by both the
+Antelope
+and the
+Barracuda
+file formats
+, so tables with this row format can be created regardless of the value of the
+innodb_file_format
+system variable.
+For example:
+Copy
+SET
+SESSION
+innodb_strict_mode
+=
+ON
+;
+CREATE
+TABLE
+tab
+(
+id
+INT
+,
+str
+VARCHAR
+(
+50
+)
+) ENGINE
+=
+InnoDB ROW_FORMAT
+=
+REDUNDANT;
+Index Prefixes with the
+REDUNDANT
+Row Format
+The
+REDUNDANT
+row format supports index prefixes up to 767 bytes.
+Overflow Pages with the
+REDUNDANT
+Row Format
+All InnoDB row formats can store certain kinds of data in overflow pages. This allows for the maximum row size of an InnoDB table to be larger than the maximum amount of data that can be stored in the row's main data page. See
+Maximum Row Size
+for more information about the other factors that can contribute to the maximum row size for InnoDB tables.
+In the
+REDUNDANT
+row format variable-length columns, such as columns using the
+VARBINARY
+,
+VARCHAR
+,
+BLOB
+and
+TEXT
+data types, can be partially stored in overflow pages.
+InnoDB only considers using overflow pages if the table's row size is greater than half of
+innodb_page_size
+. If the row size is greater than this, then InnoDB chooses variable-length columns to be stored on overflow pages until the row size is less than half of
+innodb_page_size
+.
+For
+VARBINARY
+,
+VARCHAR
+,
+BLOB
+and
+TEXT
+columns, only values longer than 767 bytes are considered for storage on overflow pages. Bytes that are stored to track a value's length do not count towards this limit. This limit is only based on the length of the actual column's data.
+Fixed-length columns greater than 767 bytes are encoded as variable-length columns, so they can also be stored in overflow pages if the table's row size is greater than half of
+innodb_page_size
+. Even though a column using the
+CHAR
+data type can hold at most 255 characters, a
+CHAR
+column can still exceed 767 bytes in some cases. For example, a
+char(255)
+column can exceed 767 bytes if the
+character set
+is
+utf8mb4
+.
+If a column is chosen to be stored on overflow pages, then the first 767 bytes of the column's value and a 20-byte pointer to the column's first overflow page are stored on the main page. Each overflow page is the size of [innodb-system-variables#innodb_page_size|innodb_page_size]]. If a column is too large to be stored on a single overflow page, then it is stored on multiple overflow pages. Each overflow page contains part of the data and a 20-byte pointer to the next overflow page, if a next page exists.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+InnoDB DYNAMIC Row Format
+Next
+Troubleshooting Row Size Too Large Errors with InnoDB
+Last updated
+11 months ago
+Was this helpful?
+Using the REDUNDANT Row Format
+Index Prefixes with the REDUNDANT Row Format
+Overflow Pages with the REDUNDANT Row Format
+Was this helpful?

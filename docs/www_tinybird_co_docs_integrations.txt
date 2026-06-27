@@ -1,0 +1,95 @@
+Source: https://www.tinybird.co/docs/integrations
+
+Guides · Tinybird Docs
+Sign In
+Sign Up
+Guides
+¶
+Copy as MD
+Use these guides for practical workflows that span Tinybird concepts, resources, and deployment options.
+Add Tinybird to your Open Source Project
+Connect Grafana to Tinybird
+Connect Hex to Tinybird
+Connect Metabase to Tinybird
+Connect Superset to Tinybird
+Connect DataGrip to Tinybird
+Connect DBeaver to Tinybird
+Connect ClickHouse JS Client to Tinybird
+Connect ClickHouse Go Client to Tinybird
+Connect ClickHouse Python Client to Tinybird
+Connect Microsoft Power BI to Tinybird
+Connect Redash to Tinybird
+Connect Chartbrew to Tinybird
+Connect Deepnote to Tinybird
+Connect Draxlr to Tinybird
+Connect Fabi.ai to Tinybird
+Connect Holistics to Tinybird
+Connect Luzmo to Tinybird
+Connect Mitzu to Tinybird
+Connect Tableau to Tinybird
+Consume API endpoints in Prometheus format
+Consume APIs in a Notebook
+Consume APIs in a Next.js frontend with JWTs
+Multi-tenant real-time APIs with Clerk and Tinybird
+Reliable scheduling with Trigger.dev
+Share API endpoints documentation
+Advanced template functions for dynamic API endpoint
+Cluster management
+Add a self-managed region manually
+Use the CLI to add a self-managed region
+Test your project
+Evolve Data Sources
+Confluent Cloud setup
+AWS MSK setup
+Redpanda setup
+Migrate from Classic
+Migrate from Classic without connectors
+Migrate from Classic with connectors
+Migrate from PostgreSQL
+Migrate from ClickHouse self-hosted
+Migrate from Shared to Dedicated Infrastructure
+Lambda architecture
+Deduplication strategies
+Copy and export data
+Monitoring examples
+Quarantine Data Sources
+Replace and delete data
+GDPR-compliant data deletion
+Send Auth0 Log Streams to Tinybird
+Ingest AWS ELB logs
+Stream from AWS Kinesis
+Ingest from BigQuery using Google Cloud Storage
+Send Clerk webhooks to Tinybird
+Ingest CSV files
+Send Dub webhooks to Tinybird
+Working with DynamoDB Single-Table Design
+Send GitHub Events to Tinybird
+Send GitLab Events to Tinybird
+Ingest from Google Pub/Sub
+Send Knock Events to Tinybird
+Send Mailgun Events to Tinybird
+Ingest data from MongoDB
+Ingest from OpenTelemetry
+Send Orb events to Tinybird
+Send PagerDuty events to Tinybird
+Send Resend webhooks to Tinybird
+Stream from RudderStack
+Send Sentry Webhooks to Tinybird
+Ingest from Snowflake using AWS S3
+Ingest from Snowflake using Azure Blob Storage
+Ingest from Snowflake using incremental updates
+Send Stripe Events to Tinybird
+Ingest data using Vector.dev
+Send Vercel Webhooks to Tinybird
+Send LiteLLM Events to Tinybird
+Instrument LLM calls with the Vercel AI SDK and Tinybird
+Send Vercel log drains to Tinybird
+Ingest with Estuary
+Postgres CDC with Redpanda Connect
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Guides
+forward
+Ask AI

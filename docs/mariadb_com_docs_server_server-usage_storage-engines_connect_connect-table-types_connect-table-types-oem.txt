@@ -1,0 +1,169 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/connect/connect-table-types/connect-table-types-oem
+
+CONNECT Table Types - OEM: Implemented in an External LIB | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+Introduction to the CONNECT Engine
+Using CONNECT
+Installing CONNECT
+CONNECT Create Table Options
+CONNECT Data Types
+CONNECT Table Types
+CONNECT Table Types Overview
+CONNECT BIN Table Type
+CONNECT CSV and FMT Table Types
+CONNECT DBF Table Type
+CONNECT DOS and FIX Table Types
+CONNECT - External Table Types
+CONNECT - Files Retrieved Using Rest Queries
+CONNECT INI Table Type
+CONNECT JDBC Table Type: Accessing Tables from Another DBMS
+CONNECT JSON Table Type
+CONNECT MONGO Table Type: Accessing Collections from MongoDB
+CONNECT MYSQL Table Type: Accessing MySQL/MariaDB Tables
+CONNECT - NoSQL Table Types
+CONNECT OCCUR Table Type
+CONNECT ODBC Table Type: Accessing Tables From Another DBMS
+CONNECT PIVOT Table Type
+CONNECT PROXY Table Type
+CONNECT Table Types - Catalog Tables
+CONNECT Table Types - Data Files
+CONNECT Table Types - OEM: Implemented in an External LIB
+CONNECT Table Types - Special "Virtual" Tables
+CONNECT Table Types - VIR
+CONNECT TBL Table Type: Table List
+CONNECT - Using the TBL and MYSQL Table Types Together
+CONNECT VEC Table Type
+CONNECT XCOL Table Type
+CONNECT XML Table Type
+CONNECT Zipped File Tables
+Inward and Outward Tables
+CONNECT Security
+CONNECT System Variables
+Adding the REST Feature as a Library Called by an OEM Table
+Compiling JSON UDFs in a Separate Library
+Making the GetRest Library
+OEM Table Example
+Current Status of the CONNECT Handler
+JSON Sample Files
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+CONNECT Table Types - OEM: Implemented in an External LIB
+The CONNECT storage engine.
+Although CONNECT provides a rich set of table types, specific applications may need to access data organized in a way that is not handled by its existing foreign data wrappers (FDW). To handle these cases, CONNECT features an interface that enables developers to implement in C++ the required table wrapper and use it as if it were part of the standard CONNECT table type list. CONNECT can use these additional handlers providing the corresponding external module (dll or shared lib) be available.
+To create such a table on an existing handler, use a Create Table statement as shown below.
+Copy
+CREATE TABLE xtab (COLUMN definitions)
+ENGINE=CONNECT table_type=OEM MODULE='libname'
+subtype='MYTYPE' [standard table options]
+Option_list='Myopt=foo';
+The option module gives the name of the DLL or shared library implementing the OEM wrapper for the table type. This library must be located in the plugin directory like all other plugins or UDF’s.
+This library must export a function
+GetMYTYPE
+. The option subtype enables CONNECT to have the name of the exported function and to use the new table type. Other options are interpreted by the OEM type and can also be specified within the
+option_list
+option.
+Column definitions can be unspecified only if the external wrapper is able to return this information. For this it must export a function ColMYTYPE returning these definitions in a format acceptable by the CONNECT discovery function.
+Which and how options must be specified and the way columns must be defined may vary depending on the OEM type used and should be documented by the OEM type implementer(s).
+An OEM Table Example
+The OEM table REST described in
+Adding the REST Feature as a Library Called by an OEM Table
+permits using REST-like tables with MariaDB binary distributions containing but not enabling the
+REST table type
+Of course, the mongo (dll or so) exporting the GetREST and colREST functions must be available in the plugin directory for all this to work.
+Some Currently Available OEM Table Modules and Subtypes
+Module
+Subtype
+Description
+libhello
+HELLO
+A sample OEM wrapper displaying a one line table saying “Hello world”
+mongo
+MONGO
+Enables using tables based on MongoDB collections.
+Tabfic
+FIC
+Handles files having the Windev HyperFile format.
+Tabofx
+OFC
+Handles Open Financial Connectivity files.
+Tabofx
+QIF
+Handles Quicken Interchange Format files.
+Cirpack
+CRPK
+Handles CDR's from Cirpack UTP's.
+Tabplg
+PLG
+Access tables from the PlugDB DBMS.
+How to implement an OEM handler is out of the scope of this document.
+This page is licensed: GPLv2
+spinner
+Previous
+CONNECT Table Types - Data Files
+Next
+CONNECT Table Types - Special "Virtual" Tables
+Last updated
+4 months ago
+Was this helpful?
+An OEM Table Example
+Some Currently Available OEM Table Modules and Subtypes
+Was this helpful?

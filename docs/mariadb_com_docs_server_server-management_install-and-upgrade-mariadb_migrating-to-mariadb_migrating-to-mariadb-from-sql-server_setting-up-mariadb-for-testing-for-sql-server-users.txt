@@ -1,0 +1,129 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/migrating-to-mariadb/migrating-to-mariadb-from-sql-server/setting-up-mariadb-for-testing-for-sql-server-users
+
+Setting Up MariaDB for Testing for SQL Server Users | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+Differences Between MariaDB and Other DBMSs
+DDL Export Guide
+Migrating to MariaDB from MySQL
+Migrating to MariaDB from PostgreSQL
+Migrating to MariaDB from Oracle
+Migrating to MariaDB from SQL Server
+MariaDB Backups Overview for SQL Server Users
+Understanding MariaDB Architecture
+MariaDB Features Not Available in SQL Server
+SQL Server Features Not Available in MariaDB
+SQL Server Features Implemented Differently in MariaDB
+SQL Server and MariaDB Types Comparison
+Syntax Differences between MariaDB and SQL Server
+MariaDB Authorization and Permissions for SQL Server Users
+MariaDB Replication Overview for SQL Server Users
+MariaDB Transactions and Isolation Levels for SQL Server Users
+Moving Data Between SQL Server and MariaDB
+Repairing MariaDB Tables for SQL Server Users
+Setting Up MariaDB for Testing for SQL Server Users
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Setting Up MariaDB for Testing for SQL Server Users
+From selecting a MariaDB version to setting it up on Windows, using various packages or Docker, this page covers multiple scenarios.
+Migrating from SQL Server?
+Contact our Migration Experts
+This page contains links and hints to setup MariaDB for testing. The page is designed for SQL Server users, assuming that they are mostly familiar with Windows and they are not familiar with MariaDB.
+Choosing a MariaDB Version
+As a general rule, for new installations it's better to choose the
+latest Generally Available (GA) version
+.
+If you need a feature that is only present in a version that is not yet production-ready, and the project will surely not go to production before that version is GA, it could make sense to use a non-GA version. In this case however, keep in mind that you are using a version that is only suitable for testing.
+If you need to work with an existing production instance, you should of course use the same version in testing. However, deprecated versions should not be used in production, because they could be exposed to vulnerabilities that will never be fixed. See
+deprecation policies
+if you are not sure about the version you are using.
+Setting up MariaDB on Windows
+There are two different ways to use MariaDB on Windows natively: using Zip packages or MSI packages.
+In both cases, 32-bit platforms are still supported.
+Check the page
+Installation issues on Windows
+to verify if current versions of MariaDB have troubles on Windows. More generally, it is a good idea to check the
+Troubleshooting Installation Issues
+category.
+ZIP Packages
+Windows users don't necessarily need to install MariaDB to use it. They can download ready-to-use ZIP packages to avoid any change in the system (except for downloading MariaDB and writing databases on the disk). This is very useful for testing without risking some undesired side effect on the machine in use. And it avoids the hassle of installing Docker or virtual machines.
+It is necessary to run
+mysql_install_db.exe
+to install the data directory.
+The drawback is that MariaDB will need to be started and stopped from the command line.
+See
+Installing MariaDB Windows ZIP Packages
+.
+MSI Packages
+MSI packages provide a friendly graphical interface to install MariaDB. The installation process is easy but flexible. For example, the user can decide which components to install, whether to install it as a service or not, and if networking should be enabled. An interface to uninstall MariaDB is also provided.
+See
+Installing MariaDB MSI Packages on Windows
+.
+Installing MariaDB on Docker
+Docker is a container platform that runs natively on Linux. A Docker image is a representation of a basic Linux system, which usually runs a single process - in our case, that process is MariaDB. A container is an instance of an image, which can be created or destroyed instantaneously. Once a container is started, it can be used just like a normal system.
+Docker runs on all major operating systems. On Windows and MacOS it runs on a Linux virtual machine, but this additional complexity is transparent for the end user.
+Docker's characteristics makes it optimal to test MariaDB functionalities without wasting time on installation and without making changes to the host system. However, it is not ideal to test MariaDB performance.
+See
+Installing and Using MariaDB via Docker
+.
+Reinitializing MariaDB Data Directory
+While experimenting with MariaDB, you could end up with an unusable installation. This occurs for example if you deliberately delete files that you shouldn't delete. If it happens, there is no need to uninstall and reinstall MariaDB. Instead, you can simply delete the contents of the data directory and run
+mariadb-install-db
+. The program will recreate your system tables and the essential files.
+To know where your data directory is, check the
+datadir
+system variable.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Repairing MariaDB Tables for SQL Server Users
+Next
+MariaDB on Amazon RDS
+Last updated
+3 months ago
+Was this helpful?
+Choosing a MariaDB Version
+Setting up MariaDB on Windows
+ZIP Packages
+MSI Packages
+Installing MariaDB on Docker
+Reinitializing MariaDB Data Directory
+Was this helpful?

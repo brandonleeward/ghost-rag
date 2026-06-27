@@ -1,0 +1,876 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/arithmetic-functions
+
+Arithmetic Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Arithmetic functions
+¶
+Copy as MD
+The following functions are used to perform arithmetic operations.
+Arithmetic functions work for any two operands of type
+UInt8
+,
+UInt16
+,
+UInt32
+,
+UInt64
+,
+Int8
+,
+Int16
+,
+Int32
+,
+Int64
+,
+Float32
+, or
+Float64
+.
+Before performing the operation, both operands are cast to the result type. The result type is determined as follows:
+If both operands are up to 32 bits wide, the size of the result type will be the size of the next bigger type following the bigger of the
+two operands (integer size promotion). For example,
+UInt8 + UInt16 = UInt32
+or
+Float32 * Float32 = Float64
+.
+If one of the operands has 64 or more bits, the size of the result type will be the same size as the bigger of the two operands. For
+example,
+UInt32 + UInt128 = UInt128
+or
+Float32 * Float64 = Float64
+.
+If one of the operands is signed, the result type will also be signed, otherwise it will be signed. For example,
+UInt32 * Int32 = Int64
+.
+These rules make sure that the result type will be the smallest type which can represent all possible results. While this introduces a risk
+of overflows around the value range boundary, it ensures that calculations are performed quickly using the maximum native integer width of
+64 bit. This behavior also guarantees compatibility with many other databases which provide 64 bit integers (BIGINT) as the biggest integer
+type.
+For example:
+SELECT toTypeName(0), toTypeName(0 + 0), toTypeName(0 + 0 + 0), toTypeName(0 + 0 + 0 + 0)
+┌─toTypeName(0)─┬─toTypeName(plus(0, 0))─┬─toTypeName(plus(plus(0, 0), 0))─┬─toTypeName(plus(plus(plus(0, 0), 0), 0))─┐
+│ UInt8         │ UInt16                 │ UInt32                          │ UInt64                                   │
+└───────────────┴────────────────────────┴─────────────────────────────────┴──────────────────────────────────────────┘
+Overflows are produced the same way as in C++.
+plus
+¶
+Calculates the sum of two numeric values. This function can also add an integer to a Date or DateTime, incrementing days or seconds respectively.
+Syntax
+¶
+plus(a, b)
+Arguments
+¶
+a
+: The first numeric value, or a Date/DateTime.
+b
+: The second numeric value, or an integer for Date/DateTime arithmetic.
+Returns
+¶
+The sum of
+a
+and
+b
+. The return type depends on the input types, following type promotion rules.
+Alias:
+a + b
+(operator)
+Example
+¶
+SELECT plus(10, 5), 10 + 5, plus(toDate('2023-01-01'), 5)
+Result:
+┌─plus(10, 5)─┬─plus(10, 5)─┬─plus(toDate('2023-01-01'), 5)─┐
+│          15 │          15 │                     2023-01-06 │
+└─────────────┴─────────────┴──────────────────────────────┘
+minus
+¶
+Calculates the difference between two numeric values. This function can also subtract an integer from a Date or DateTime, or subtract two Date/DateTime values to get a time difference. The result is always signed.
+Syntax
+¶
+minus(a, b)
+Arguments
+¶
+a
+: The first numeric value, or a Date/DateTime.
+b
+: The second numeric value, an integer for Date/DateTime arithmetic, or another Date/DateTime.
+Returns
+¶
+The difference between
+a
+and
+b
+. The return type depends on the input types, following type promotion rules.
+Alias:
+a - b
+(operator)
+Example
+¶
+SELECT minus(10, 5), 10 - 5, minus(toDate('2023-01-06'), 5), minus(toDateTime('2023-01-01 10:00:00'), toDateTime('2023-01-01 09:00:00'))
+Result:
+┌─minus(10, 5)─┬─minus(10, 5)─┬─minus(toDate('2023-01-06'), 5)─┬─minus(toDateTime('2023-01-01 10:00:00'), toDateTime('2023-01-01 09:00:00'))─┐
+│            5 │            5 │                      2023-01-01 │                                                                       3600 │
+└──────────────┴──────────────┴────────────────────────────────┴────────────────────────────────────────────────────────────────────────────┘
+multiply
+¶
+Calculates the product of two numeric values.
+Syntax
+¶
+multiply(a, b)
+Arguments
+¶
+a
+: The first numeric value.
+b
+: The second numeric value.
+Returns
+¶
+The product of
+a
+and
+b
+. The return type depends on the input types, following type promotion rules.
+Alias:
+a * b
+(operator)
+Example
+¶
+SELECT multiply(10, 5), 10 * 5, multiply(2.5, 4)
+Result:
+┌─multiply(10, 5)─┬─multiply(10, 5)─┬─multiply(2.5, 4)─┐
+│              50 │              50 │             10.0 │
+└─────────────────┴─────────────────┴──────────────────┘
+divide
+¶
+Calculates the quotient of two numeric values. The result type is always
+Float64
+. For integer division, use
+intDiv
+. Division by zero results in
+inf
+,
+-inf
+, or
+nan
+.
+Syntax
+¶
+divide(a, b)
+Arguments
+¶
+a
+: The dividend.
+b
+: The divisor.
+Returns
+¶
+The quotient of
+a
+divided by
+b
+.
+Float64
+.
+Alias:
+a / b
+(operator)
+Example
+¶
+SELECT divide(10, 4), 10 / 4, divide(10, 0)
+Result:
+┌─divide(10, 4)─┬─divide(10, 4)─┬─divide(10, 0)─┐
+│           2.5 │           2.5 │           inf │
+└───────────────┴───────────────┴───────────────┘
+intDiv
+¶
+Performs integer division, returning the quotient rounded down to the nearest whole number. The result type has the same width as the dividend. This function throws an exception if the divisor is zero, the quotient exceeds the dividend's range, or if dividing the minimum negative number by -1.
+Syntax
+¶
+intDiv(a, b)
+Arguments
+¶
+a
+: The dividend.
+b
+: The divisor.
+Returns
+¶
+The integer quotient of
+a
+divided by
+b
+. The return type matches the width of
+a
+.
+Example
+¶
+Query:
+SELECT
+    intDiv(toFloat64(1), 0.001) AS res,
+    toTypeName(res)
+┌──res─┬─toTypeName(intDiv(toFloat64(1), 0.001))─┐
+│ 1000 │ Int64                                   │
+└──────┴─────────────────────────────────────────┘
+SELECT
+    intDiv(1, 0.001) AS res,
+    toTypeName(res)
+Received exception from server (version 23.2.1):
+Code: 153. DB::Exception: Received from localhost:9000. DB::Exception: Cannot perform integer division, because it will produce infinite or too large number: While processing intDiv(1, 0.001) AS res, toTypeName(res). (ILLEGAL_DIVISION)
+intDivOrZero
+¶
+Performs integer division similar to
+intDiv
+, but returns
+0
+instead of throwing an exception if the divisor is zero or if dividing the minimum negative number by -1.
+Syntax
+¶
+intDivOrZero(a, b)
+Arguments
+¶
+a
+: The dividend.
+b
+: The divisor.
+Returns
+¶
+The integer quotient of
+a
+divided by
+b
+, or
+0
+in case of division by zero or overflow. The return type matches the width of
+a
+.
+Example
+¶
+SELECT intDivOrZero(10, 3), intDivOrZero(10, 0)
+Result:
+┌─intDivOrZero(10, 3)─┬─intDivOrZero(10, 0)─┐
+│                   3 │                   0 │
+└─────────────────────┴─────────────────────┘
+isFinite
+¶
+Checks if a floating-point number is finite (not infinite and not NaN).
+Syntax
+¶
+isFinite(x)
+Arguments
+¶
+x
+: The floating-point number to check.
+Float32
+or
+Float64
+.
+Returns
+¶
+1
+if
+x
+is finite,
+0
+otherwise.
+UInt8
+.
+Example
+¶
+SELECT isFinite(1.0/3.0), isFinite(1.0/0.0), isFinite(0.0/0.0)
+Result:
+┌─isFinite(1 / 3)─┬─isFinite(1 / 0)─┬─isFinite(0 / 0)─┐
+│               1 │               0 │               0 │
+└─────────────────┴─────────────────┴─────────────────┘
+isInfinite
+¶
+Checks if a floating-point number is infinite.
+Syntax
+¶
+isInfinite(x)
+Arguments
+¶
+x
+: The floating-point number to check.
+Float32
+or
+Float64
+.
+Returns
+¶
+1
+if
+x
+is infinite,
+0
+otherwise.
+UInt8
+. Returns
+0
+for NaN values.
+Example
+¶
+SELECT isInfinite(1.0/0.0), isInfinite(-1.0/0.0), isInfinite(0.0/0.0), isInfinite(1.0)
+Result:
+┌─isInfinite(1 / 0)─┬─isInfinite(-1 / 0)─┬─isInfinite(0 / 0)─┬─isInfinite(1)─┐
+│                 1 │                  1 │                 0 │             0 │
+└───────────────────┴────────────────────┴───────────────────┴───────────────┘
+ifNotFinite
+¶
+Returns the original value if it is finite; otherwise, returns a specified fallback value.
+Syntax
+¶
+ifNotFinite(x, y)
+Arguments
+¶
+x
+: Value to check for finiteness.
+Float32
+or
+Float64
+.
+y
+: Fallback value to return if
+x
+is not finite.
+Float32
+or
+Float64
+.
+Returns
+¶
+x
+if
+x
+is finite, otherwise
+y
+.
+Float32
+or
+Float64
+.
+Example
+¶
+Query:
+SELECT 1/0 as infimum, ifNotFinite(infimum,42)
+Result:
+┌─infimum─┬─ifNotFinite(divide(1, 0), 42)─┐
+│     inf │                            42 │
+└─────────┴───────────────────────────────┘
+You can get similar result by using the ternary operator:
+isFinite(x) ? x : y
+.
+isNaN
+¶
+Checks if a floating-point number is "Not a Number" (NaN).
+Syntax
+¶
+isNaN(x)
+Arguments
+¶
+x
+: The floating-point number to check.
+Float32
+or
+Float64
+.
+Returns
+¶
+1
+if
+x
+is NaN,
+0
+otherwise.
+UInt8
+.
+Example
+¶
+SELECT isNaN(0.0/0.0), isNaN(1.0/0.0), isNaN(1.0)
+Result:
+┌─isNaN(0 / 0)─┬─isNaN(1 / 0)─┬─isNaN(1)─┐
+│            1 │            0 │          0 │
+└──────────────┴──────────────┴──────────┘
+modulo
+¶
+Calculates the remainder of the division of
+a
+by
+b
+. The behavior for negative numbers follows C++ semantics (truncated division). An exception is thrown if the divisor is zero or if dividing the minimum negative number by -1.
+Syntax
+¶
+modulo(a, b)
+Arguments
+¶
+a
+: The dividend.
+b
+: The divisor.
+Returns
+¶
+The remainder of
+a
+divided by
+b
+. The return type is an integer if both inputs are integers, otherwise
+Float64
+.
+Alias:
+a % b
+(operator)
+Example
+¶
+SELECT modulo(10, 3), modulo(-10, 3), modulo(10, -3), modulo(-10, -3)
+Result:
+┌─modulo(10, 3)─┬─modulo(-10, 3)─┬─modulo(10, -3)─┬─modulo(-10, -3)─┐
+│             1 │             -1 │              1 │              -1 │
+└───────────────┴────────────────┴────────────────┴─────────────────┘
+moduloOrZero
+¶
+Calculates the remainder of the division of
+a
+by
+b
+, similar to
+modulo
+. If the divisor
+b
+is zero, it returns
+0
+instead of throwing an exception.
+Syntax
+¶
+moduloOrZero(a, b)
+Arguments
+¶
+a
+: The dividend.
+b
+: The divisor.
+Returns
+¶
+The remainder of
+a
+divided by
+b
+, or
+0
+if
+b
+is zero. The return type is an integer if both inputs are integers, otherwise
+Float64
+.
+Example
+¶
+SELECT moduloOrZero(10, 3), moduloOrZero(10, 0)
+Result:
+┌─moduloOrZero(10, 3)─┬─moduloOrZero(10, 0)─┐
+│                   1 │                   0 │
+└─────────────────────┴─────────────────────┘
+positiveModulo
+¶
+Calculates the remainder of the division of
+a
+by
+b
+, always returning a non-negative result. This function is generally slower than
+modulo
+.
+Syntax
+¶
+positiveModulo(a, b)
+Arguments
+¶
+a
+: The dividend.
+b
+: The divisor.
+Returns
+¶
+The non-negative remainder of
+a
+divided by
+b
+. The return type is an integer if both inputs are integers, otherwise
+Float64
+.
+Alias:
+positive_modulo(a, b)
+pmod(a, b)
+Example
+¶
+Query:
+SELECT positiveModulo(-1, 10)
+Result:
+┌─positiveModulo(-1, 10)─┐
+│                      9 │
+└────────────────────────┘
+negate
+¶
+Returns the negative of a numeric value. The result is always signed.
+Syntax
+¶
+negate(a)
+Arguments
+¶
+a
+: The numeric value to negate.
+Returns
+¶
+The negated value of
+a
+. The return type is a signed version of the input type, or the same type if already signed.
+Alias:
+-a
+Example
+¶
+SELECT negate(5), negate(-5), -10
+Result:
+┌─negate(5)─┬─negate(-5)─┬─negate(10)─┐
+│        -5 │          5 │         -10 │
+└───────────┴────────────┴────────────┘
+abs
+¶
+Calculates the absolute value of a numeric input. For unsigned types, it has no effect. For signed types, it returns an unsigned number.
+Syntax
+¶
+abs(a)
+Arguments
+¶
+a
+: The numeric value.
+Returns
+¶
+The absolute value of
+a
+. The return type is an unsigned version of the input type if
+a
+is signed, otherwise the same type.
+Example
+¶
+SELECT abs(5), abs(-5), abs(0)
+Result:
+┌─abs(5)─┬─abs(-5)─┬─abs(0)─┐
+│      5 │       5 │      0 │
+└────────┴─────────┴────────┘
+gcd
+¶
+Returns the greatest common divisor (GCD) of two integer values. An exception is thrown if the divisor is zero or if dividing the minimum negative number by -1.
+Syntax
+¶
+gcd(a, b)
+Arguments
+¶
+a
+: The first integer.
+b
+: The second integer.
+Returns
+¶
+The greatest common divisor of
+a
+and
+b
+.
+Int64
+.
+Example
+¶
+SELECT gcd(12, 18), gcd(7, 5)
+Result:
+┌─gcd(12, 18)─┬─gcd(7, 5)─┐
+│           6 │         1 │
+└─────────────┴───────────┘
+lcm
+¶
+Returns the least common multiple (LCM) of two integer values. An exception is thrown if the divisor is zero or if dividing the minimum negative number by -1.
+Syntax
+¶
+lcm(a, b)
+Arguments
+¶
+a
+: The first integer.
+b
+: The second integer.
+Returns
+¶
+The least common multiple of
+a
+and
+b
+.
+Int64
+.
+Example
+¶
+SELECT lcm(12, 18), lcm(7, 5)
+Result:
+┌─lcm(12, 18)─┬─lcm(7, 5)─┐
+│          36 │        35 │
+└─────────────┴───────────┘
+max2
+¶
+Compares two values and returns the larger one.
+Syntax
+¶
+max2(a, b)
+Arguments
+¶
+a
+: The first value.
+b
+: The second value.
+Returns
+¶
+The greater of
+a
+and
+b
+.
+Float64
+.
+Example
+¶
+Query:
+SELECT max2(-1, 2)
+Result:
+┌─max2(-1, 2)─┐
+│           2 │
+└─────────────┘
+min2
+¶
+Compares two values and returns the smaller one.
+Syntax
+¶
+min2(a, b)
+Arguments
+¶
+a
+: The first value.
+b
+: The second value.
+Returns
+¶
+The lesser of
+a
+and
+b
+.
+Float64
+.
+Example
+¶
+Query:
+SELECT min2(-1, 2)
+Result:
+┌─min2(-1, 2)─┐
+│          -1 │
+└─────────────┘
+multiplyDecimal
+¶
+Multiplies two
+Decimal
+values,
+a
+and
+b
+. The result is a
+Decimal256
+. You can optionally specify the
+result_scale
+to control the precision of the output. If
+result_scale
+is not provided, the maximum scale of the input values is used. This function is slower than the standard
+multiply
+function but offers precise control over decimal arithmetic.
+Syntax
+¶
+multiplyDecimal(a, b[, result_scale])
+Arguments
+¶
+a
+: The first value.
+Decimal
+.
+b
+: The second value.
+Decimal
+.
+result_scale
+: (Optional) The desired scale (number of decimal places) for the result.
+Int/UInt
+.
+Returns
+¶
+The product of
+a
+and
+b
+with the specified or inferred scale.
+Decimal256
+.
+Example
+¶
+┌─multiplyDecimal(toDecimal256(-12, 0), toDecimal32(-2.1, 1), 1)─┐
+│                                                           25.2 │
+└────────────────────────────────────────────────────────────────┘
+Differences compared to regular multiplication
+¶
+SELECT toDecimal64(-12.647, 3) * toDecimal32(2.1239, 4)
+SELECT toDecimal64(-12.647, 3) as a, toDecimal32(2.1239, 4) as b, multiplyDecimal(a, b)
+Result:
+┌─multiply(toDecimal64(-12.647, 3), toDecimal32(2.1239, 4))─┐
+│                                               -26.8609633 │
+└───────────────────────────────────────────────────────────┘
+┌───────a─┬──────b─┬─multiplyDecimal(toDecimal64(-12.647, 3), toDecimal32(2.1239, 4))─┐
+│ -12.647 │ 2.1239 │                                                         -26.8609 │
+└─────────┴────────┴──────────────────────────────────────────────────────────────────┘
+SELECT
+    toDecimal64(-12.647987876, 9) AS a,
+    toDecimal64(123.967645643, 9) AS b,
+    multiplyDecimal(a, b)
+
+SELECT
+    toDecimal64(-12.647987876, 9) AS a,
+    toDecimal64(123.967645643, 9) AS b,
+    a * b
+Result:
+┌─────────────a─┬─────────────b─┬─multiplyDecimal(toDecimal64(-12.647987876, 9), toDecimal64(123.967645643, 9))─┐
+│ -12.647987876 │ 123.967645643 │                                                               -1567.941279108 │
+└───────────────┴───────────────┴───────────────────────────────────────────────────────────────────────────────┘
+
+Received exception from server (version 22.11.1):
+Code: 407. DB::Exception: Received from localhost:9000. DB::Exception: Decimal math overflow: While processing toDecimal64(-12.647987876, 9) AS a, toDecimal64(123.967645643, 9) AS b, a * b. (DECIMAL_OVERFLOW)
+divideDecimal
+¶
+Divides two
+Decimal
+values,
+a
+by
+b
+. The result is a
+Decimal256
+. You can optionally specify the
+result_scale
+to control the precision of the output. If
+result_scale
+is not provided, the maximum scale of the input values is used. This function is slower than the standard
+divide
+function but offers precise control over decimal arithmetic.
+Syntax
+¶
+divideDecimal(a, b[, result_scale])
+Arguments
+¶
+a
+: The dividend.
+Decimal
+.
+b
+: The divisor.
+Decimal
+.
+result_scale
+: (Optional) The desired scale (number of decimal places) for the result.
+Int/UInt
+.
+Returns
+¶
+The quotient of
+a
+divided by
+b
+with the specified or inferred scale.
+Decimal256
+.
+Example
+¶
+┌─divideDecimal(toDecimal256(-12, 0), toDecimal32(2.1, 1), 10)─┐
+│                                                -5.7142857142 │
+└──────────────────────────────────────────────────────────────┘
+Differences compared to regular division
+¶
+SELECT toDecimal64(-12, 1) / toDecimal32(2.1, 1)
+SELECT toDecimal64(-12, 1) as a, toDecimal32(2.1, 1) as b, divideDecimal(a, b, 1), divideDecimal(a, b, 5)
+Result:
+┌─divide(toDecimal64(-12, 1), toDecimal32(2.1, 1))─┐
+│                                             -5.7 │
+└──────────────────────────────────────────────────┘
+
+┌───a─┬───b─┬─divideDecimal(toDecimal64(-12, 1), toDecimal32(2.1, 1), 1)─┬─divideDecimal(toDecimal64(-12, 1), toDecimal32(2.1, 1), 5)─┐
+│ -12 │ 2.1 │                                                       -5.7 │                                                   -5.71428 │
+└─────┴─────┴────────────────────────────────────────────────────────────┴────────────────────────────────────────────────────────────┘
+SELECT toDecimal64(-12, 0) / toDecimal32(2.1, 1)
+SELECT toDecimal64(-12, 0) as a, toDecimal32(2.1, 1) as b, divideDecimal(a, b, 1), divideDecimal(a, b, 5)
+Result:
+DB::Exception: Decimal result's scale is less than argument's one: While processing toDecimal64(-12, 0) / toDecimal32(2.1, 1). (ARGUMENT_OUT_OF_BOUND)
+
+┌───a─┬───b─┬─divideDecimal(toDecimal64(-12, 0), toDecimal32(2.1, 1), 1)─┬─divideDecimal(toDecimal64(-12, 0), toDecimal32(2.1, 1), 5)─┐
+│ -12 │ 2.1 │                                                       -5.7 │                                                   -5.71428 │
+└─────┴─────┴────────────────────────────────────────────────────────────┴────────────────────────────────────────────────────────────┘
+byteSwap
+¶
+Reverses the byte order (endianness) of an integer value.
+Syntax
+¶
+byteSwap(a)
+Arguments
+¶
+a
+: The integer value whose bytes are to be swapped.
+Returns
+¶
+The integer with its bytes reversed. The return type is the same as the input type.
+Example
+¶
+byteSwap(3351772109)
+Result:
+┌─byteSwap(3351772109)─┐
+│           3455829959 │
+└──────────────────────┘
+The previous example can be followed in the following manner:
+Convert the base-10 integer to its equivalent hexadecimal format in big-endian format, for example
+3351772109 -> C7 C7 FB CD (4 bytes)
+.
+Reverse the bytes, for example
+C7 C7 FB CD -> CD FB C7 C7
+.
+Convert the result back to an integer assuming big-endian, for example
+CD FB C7 C7  -> 3455829959
+.
+A use case of this function is reversing IPv4s:
+┌─toIPv4(byteSwap(toUInt32(toIPv4('205.251.199.199'))))─┐
+│ 199.199.251.205                                       │
+└───────────────────────────────────────────────────────┘
+Updated
+3 weeks ago
+On this page
+Arithmetic functions
+plus
+minus
+multiply
+divide
+intDiv
+intDivOrZero
+isFinite
+isInfinite
+ifNotFinite
+isNaN
+modulo
+moduloOrZero
+positiveModulo
+negate
+abs
+gcd
+lcm
+max2
+min2
+multiplyDecimal
+divideDecimal
+byteSwap
+forward
+classic
+Ask AI

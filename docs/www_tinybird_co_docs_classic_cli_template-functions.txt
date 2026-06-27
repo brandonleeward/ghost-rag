@@ -1,0 +1,304 @@
+Source: https://www.tinybird.com/docs/classic/cli/template-functions
+
+Classic: Template functions · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Template functions
+¶
+Copy as MD
+The following template functions are available. You can use them in
+datafiles
+to accomplish different tasks. See
+Advanced templates
+for more information on templating.
+defined
+¶
+Checks whether a variable is defined.
+defined function
+%
+SELECT
+  date
+FROM my_table
+{% if defined(param) %}
+  WHERE ...
+{% end %}
+column
+¶
+Retrieves the column by its name from a variable.
+column function
+%
+{% set var_1 = 'name' %}
+SELECT
+  {{column(var_1)}}
+FROM my_table
+columns
+¶
+Retrieves columns by their name from a variable.
+columns function
+%
+{% set var_1 = 'name,age,address' %}
+SELECT
+  {{columns(var_1)}}
+FROM my_table
+date_diff_in_seconds
+¶
+Returns the absolute value of the difference in seconds between two
+DateTime
+. See
+DateTime
+.
+The function accepts the following parameters:
+date_1
+: the first date or DateTime.
+date_2
+: the second date or DateTime.
+date_format
+: (optional) the format of the dates. Defaults to
+'%Y-%m-%d %H:%M:%S'
+, so you can pass
+DateTime
+as
+YYYY-MM-DD hh:mm:ss
+when calling the function.
+backup_date_format
+: (optional) the format of the dates if the first format doesn't match. Use it when your default input format is a DateTime (
+2022-12-19 18:42:22
+) but you receive a date instead (
+2022-12-19
+).
+none_if_error
+: (optional) whether to return
+None
+if the dates don't match the provided formats. Defaults to
+False
+. Use it to provide an alternate logic in case any of the dates are specified in a different format.
+An example of how to use the function:
+date_diff_in_seconds('2022-12-19T18:42:23.521Z', '2022-12-19T18:42:23.531Z', date_format='%Y-%m-%dT%H:%M:%S.%fz')
+The following example shows how to use the function in a datafile:
+date_diff_in_seconds function
+%
+SELECT
+  date, events
+{% if date_diff_in_seconds(date_end, date_start, date_format="%Y-%m-%dT%H:%M:%Sz") < 3600 %}
+  FROM my_table_raw
+{% else %}
+  FROM my_table_hourly_agg
+{% end %}
+  WHERE date BETWEEN
+    parseDateTimeBestEffort({{String(date_start,'2023-01-11T12:24:04Z')}})
+    AND 
+    parseDateTimeBestEffort({{String(date_end,'2023-01-11T12:24:05Z')}})
+See
+working with time
+for more information on how to work with time in Tinybird.
+date_diff_in_minutes
+¶
+Same behavior as
+date_diff_in_seconds
+, but returns the difference in minutes.
+date_diff_in_hours
+¶
+Same behavior as
+date_diff_in_seconds
+, but returns the difference in hours.
+date_diff_in_days
+¶
+Returns the absolute value of the difference in days between two dates or DateTime.
+date_diff_in_days function
+%
+SELECT
+  date
+FROM my_table
+{% if date_diff_in_days(date_end, date_start) < 7 %}
+  WHERE ...
+{% end %}
+date_format
+is optional and defaults to
+'%Y-%m-%d
+, so you can pass DateTime as
+YYYY-MM-DD
+when calling the function.
+As with
+date_diff_in_seconds
+,
+date_diff_in_minutes
+, and
+date_diff_in_hours
+, other
+date_formats
+are supported.
+split_to_array
+¶
+Splits comma separated values into an array. The function accepts the following parameters:
+split_to_array(arr, default, separator=',')
+arr
+: the value to split.
+default
+: the default value to use if
+arr
+is empty.
+separator
+: the separator to use. Defaults to
+,
+.
+The following example splits
+code
+into an array of integers:
+split_to_array function
+%
+SELECT
+  arrayJoin(arrayMap(x -> toInt32(x), {{split_to_array(code, '')}})) as codes
+FROM my_table
+The following example splits
+param
+into an array of strings using
+|
+as the custom separator:
+split_to_array with a custom separator function
+%
+SELECT
+  {{split_to_array(String(param, 'hi, how are you|fine thanks'), separator='|')}}
+enumerate_with_last
+¶
+Creates an iterable array, returning a boolean value that allows to check if the current element is the last element in the array. You can use it alongside the
+split_to_array function
+.
+symbol
+¶
+Retrieves the value of a variable. The function accepts the following parameters:
+symbol(x, quote)
+For example:
+enumerate_with_last function
+%
+SELECT
+    {% for _last, _x in enumerate_with_last(split_to_array(attr, 'amount')) %}
+        sum({{symbol(_x)}}) as {{symbol(_x)}}
+        {% if not _last %}, {% end %}
+    {% end %}
+FROM my_table
+sql_and
+¶
+Creates a list of "WHERE" clauses, along with "AND" separated filters, that checks if a field (<column>) is or isn't (<op>) in a list/tuple (<transform_type_function>).
+The function accepts the following parameters:
+sql_and(<column>__<op>=<transform_type_function> [, ...] )
+<column>
+: any column in the table.
+<op>
+: one of:
+in
+,
+not_in
+,
+gt
+(>),
+lt
+(<),
+gte
+(>=),
+lte
+(<=)
+<transform_type_function>
+: any of the transform type functions (
+Array(param, 'Int8')
+,
+String(param)
+, etc.). If one parameter isn't specified, then the filter is ignored.
+For example:
+sql_and function
+%
+SELECT *
+FROM my_table
+WHERE 1
+{% if defined(param) or defined(param2_not_in) %}
+    AND {{sql_and(
+        param__in=Array(param, 'Int32', defined=False),
+        param2__not_in=Array(param2_not_in, 'String', defined=False))}}
+{% end %}
+If this is queried with
+param=1,2
+and
+param2_not_in=ab,bc,cd
+, it translates to:
+sql_and function - generated sql
+SELECT *
+FROM my_table
+WHERE 1
+    AND param  IN [1,2]
+    AND param2 NOT IN ['ab','bc','cd']
+If this is queried with
+param=1,2
+only, but
+param2_not_in
+isn't specified, it translates to:
+sql_and function - generated sql param missing
+SELECT *
+FROM my_table
+WHERE 1
+    AND param  IN [1,2]
+Transform types functions
+¶
+The following functions validate the type of a template variable and cast it to the desired data type. They also provide a default value if no value is passed.
+Boolean(x)
+DateTime64(x)
+DateTime(x)
+Date(x)
+Float32(x)
+Float64(x)
+Int8(x)
+Int16(x)
+Int32(x)
+Int64(x)
+Int128(x)
+Int256(x)
+UInt8(x)
+UInt16(x)
+UInt32(x)
+UInt64(x)
+UInt128(x)
+UInt256(x)
+String(x)
+Array(x)
+Each function accepts the following parameters:
+type(x, default, description=<description>, required=<true|false>)
+x
+: the parameter or value.
+default
+: (optional) the default value to use if
+x
+is empty.
+description
+: (optional) the description of the value.
+required
+: (optional) whether the value is required.
+For example,
+Int32
+in the following query,
+lim
+is the parameter to be cast to an
+Int32
+,
+10
+is the default value, and so on:
+transform_type_functions
+%
+SELECT * FROM TR LIMIT {{Int32(lim, 10, description="Limit the number of rows in the response", required=False)}}
+Updated
+3 weeks ago
+On this page
+Template functions
+defined
+column
+columns
+date_diff_in_seconds
+date_diff_in_minutes
+date_diff_in_hours
+date_diff_in_days
+split_to_array
+enumerate_with_last
+symbol
+sql_and
+Transform types functions
+classic
+Ask AI

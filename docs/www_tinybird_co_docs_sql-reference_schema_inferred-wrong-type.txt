@@ -1,0 +1,150 @@
+Source: https://www.tinybird.com/docs/sql-reference/schema/inferred-wrong-type
+
+Inferred wrong type troubleshooting · Tinybird Docs
+Sign In
+Sign Up
+Inferred wrong type troubleshooting
+¶
+Copy as MD
+Common issues and solutions for ClickHouse inferring wrong data types in Tinybird.
+Common issues
+¶
+String inferred as numeric
+¶
+Issue
+: ClickHouse infers string data as numeric type
+Solution
+: Explicitly specify string type in schema
+-- Explicitly specify string type
+CREATE TABLE events (
+  id UInt32,
+  user_id String,  -- Explicitly string, not inferred numeric
+  value Float64
+)
+Numeric inferred as string
+¶
+Issue
+: ClickHouse infers numeric data as string type
+Solution
+: Explicitly specify numeric type in schema
+-- Explicitly specify numeric type
+CREATE TABLE events (
+  id UInt32,
+  user_id UInt32,  -- Explicitly numeric, not inferred string
+  value Float64
+)
+Type inference problems
+¶
+Mixed data types
+¶
+Issue
+: Same column has mixed data types in sample
+Solution
+: Use consistent data types or handle in schema
+-- Handle mixed types in schema
+CREATE TABLE events (
+  id UInt32,
+  mixed_field String,  -- Use string to handle mixed types
+  value Float64
+)
+Date format confusion
+¶
+Issue
+: ClickHouse infers wrong date format
+Solution
+: Explicitly specify date type and format
+-- Explicitly specify date type
+CREATE TABLE events (
+  id UInt32,
+  timestamp DateTime,  -- Explicitly DateTime
+  date Date           -- Explicitly Date
+)
+Schema hints
+¶
+Using SCHEMA hints
+¶
+Issue
+: Need to override type inference
+Solution
+: Use SCHEMA hints in data source
+-- Use SCHEMA hints to override inference
+SCHEMA >
+  id UInt32,
+  user_id String,
+  timestamp DateTime,
+  value Float64
+Handling JSON fields
+¶
+Issue
+: JSON fields inferred incorrectly
+Solution
+: Use explicit JSON type handling
+-- Handle JSON fields explicitly
+CREATE TABLE events (
+  id UInt32,
+  data JSON,  -- Explicitly JSON type
+  metadata String  -- Keep as string if needed
+)
+Debugging type inference
+¶
+Using toTypeName()
+¶
+Issue
+: Need to check what type ClickHouse inferred
+Solution
+: Use toTypeName() function
+-- Check inferred types
+SELECT
+  toTypeName(column_name) as inferred_type,
+  column_name
+FROM events
+LIMIT 1
+Checking sample data
+¶
+Issue
+: Need to understand why wrong type was inferred
+Solution
+: Examine sample data
+-- Examine sample data to understand inference
+SELECT
+  column_name,
+  toTypeName(column_name) as type
+FROM events
+LIMIT 10
+Best practices
+¶
+Always specify types
+- Don't rely on type inference
+Use SCHEMA hints
+- Override inference when needed
+Check sample data
+- Understand what data is being ingested
+Use toTypeName()
+- Debug type inference issues
+Document expected types
+- Keep track of expected data types
+Related documentation
+¶
+Data types
+Data source configuration
+Updated
+4 weeks ago
+On this page
+Inferred wrong type troubleshooting
+Common issues
+String inferred as numeric
+Numeric inferred as string
+Type inference problems
+Mixed data types
+Date format confusion
+Schema hints
+Using SCHEMA hints
+Handling JSON fields
+Debugging type inference
+Using toTypeName()
+Checking sample data
+Best practices
+Related documentation
+forward
+classic
+Ask AI

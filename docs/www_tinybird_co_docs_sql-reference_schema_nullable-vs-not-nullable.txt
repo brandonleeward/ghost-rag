@@ -1,0 +1,140 @@
+Source: https://www.tinybird.com/docs/sql-reference/schema/nullable-vs-not-nullable
+
+Nullable vs not nullable troubleshooting · Tinybird Docs
+Sign In
+Sign Up
+Nullable vs not nullable troubleshooting
+¶
+Copy as MD
+Common issues and solutions for nullable vs not nullable column decisions in ClickHouse and Tinybird.
+When to use nullable
+¶
+Optional data
+¶
+Use case
+: Data that may not be available
+Example
+: User profile fields that are optional
+-- Use nullable for optional data
+CREATE TABLE users (
+  id UInt32,
+  name String,
+  email Nullable(String),  -- Optional field
+  phone Nullable(String)   -- Optional field
+)
+External data sources
+¶
+Use case
+: Data from external sources that may be incomplete
+Example
+: API responses with missing fields
+-- Handle incomplete external data
+CREATE TABLE api_events (
+  id UInt32,
+  user_id Nullable(UInt32),  -- May be missing
+  value Nullable(Float64)    -- May be missing
+)
+When to use not nullable
+¶
+Required fields
+¶
+Use case
+: Data that should always be present
+Example
+: Primary keys and required business fields
+-- Use not nullable for required fields
+CREATE TABLE events (
+  id UInt32,           -- Required
+  timestamp DateTime,   -- Required
+  event_type String    -- Required
+)
+Performance-critical columns
+¶
+Use case
+: Columns used in filters and joins
+Example
+: Frequently queried columns
+-- Use not nullable for performance
+CREATE TABLE events (
+  user_id UInt32,      -- Not nullable for performance
+  date Date,           -- Not nullable for performance
+  value Float64
+)
+Performance considerations
+¶
+Nullable performance impact
+¶
+Issue
+: Nullable columns are slower than non-nullable
+Solution
+: Use nullable only when necessary
+-- Avoid nullable for performance-critical columns
+-- Instead of: Nullable(UInt32) user_id
+-- Use: UInt32 user_id DEFAULT 0
+Index considerations
+¶
+Issue
+: Nullable columns in indexes can be inefficient
+Solution
+: Use non-nullable columns for indexes
+-- Use non-nullable for indexes
+-- Instead of indexing nullable_column
+-- Use a computed non-nullable column
+ALTER TABLE events ADD INDEX idx_safe_column
+  COALESCE(nullable_column, 'default') TYPE minmax GRANULARITY 1
+Migration strategies
+¶
+Adding nullable columns
+¶
+Issue
+: Adding nullable columns to existing tables
+Solution
+: Use ALTER TABLE with default values
+-- Add nullable column with default
+ALTER TABLE events ADD COLUMN optional_field Nullable(String) DEFAULT NULL
+Converting nullable to not nullable
+¶
+Issue
+: Converting nullable columns to not nullable
+Solution
+: Clean data first, then convert
+-- Clean data before conversion
+UPDATE events SET nullable_column = 'default' WHERE nullable_column IS NULL
+ALTER TABLE events MODIFY COLUMN nullable_column String
+Best practices
+¶
+Use nullable sparingly
+- Only for truly optional data
+Consider performance
+- Avoid nullable for frequently queried columns
+Use defaults
+- Consider default values instead of nullable
+Document decisions
+- Keep track of nullable vs not nullable choices
+Plan migrations
+- Consider impact when changing nullability
+Related documentation
+¶
+Data types
+Performance optimization
+Updated
+4 weeks ago
+On this page
+Nullable vs not nullable troubleshooting
+When to use nullable
+Optional data
+External data sources
+When to use not nullable
+Required fields
+Performance-critical columns
+Performance considerations
+Nullable performance impact
+Index considerations
+Migration strategies
+Adding nullable columns
+Converting nullable to not nullable
+Best practices
+Related documentation
+forward
+classic
+Ask AI

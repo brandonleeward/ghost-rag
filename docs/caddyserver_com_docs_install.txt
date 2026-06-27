@@ -1,0 +1,211 @@
+Source: https://caddyserver.com/docs/install
+
+Install — Caddy Documentation
+A
+Project
+Store
+Forum
+GitHub
+Theme:
+System
+Download
+Sponsor
+Install
+This page describes various methods for installing Caddy on your system.
+Official:
+Static binaries
+Debian, Ubuntu, Raspbian packages
+Fedora, RedHat, CentOS packages
+Arch Linux, Manjaro, Parabola packages
+Docker image
+Railway template
+Our
+official packages
+come only with the standard modules. If you need third-party plugins,
+build from source with
+xcaddy
+, use
+our download page
+, or
+deploy on Railway
+.
+Community-maintained:
+Gentoo
+Homebrew (Mac)
+Chocolatey (Windows)
+Scoop (Windows)
+Webi
+Ansible
+Termux
+Nix/Nixpkgs/NixOS
+Unikraft
+OPNsense
+Mise
+Static binaries
+If installing onto a production system, we recommend using our official package for your distro if available below.
+Obtain a Caddy binary:
+from releases on GitHub
+(expand "Assets")
+Refer to
+Verifying Asset Signatures
+for how to verify the asset signature
+from our download page
+by building from source
+(either with
+go
+or
+xcaddy
+)
+Install Caddy as a system service.
+This is strongly recommended, especially for production servers.
+Place the binary in one of your
+$PATH
+(or
+%PATH%
+on Windows) directories so you can run
+caddy
+without typing the full path of the executable file. (Run
+echo $PATH
+to see the list of directories that qualify.)
+You can upgrade static binaries by replacing them with newer versions and restarting Caddy. The
+caddy upgrade
+command
+can make this easy.
+Debian, Ubuntu, Raspbian
+Installing this package automatically starts and runs Caddy as a
+systemd service
+named
+caddy
+. It also comes with an optional
+caddy-api
+service which is
+not
+enabled by default, but should be used if you primarily configure Caddy via its API instead of config files.
+After installing, please read the
+service usage instructions
+.
+Stable releases:
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+sudo chmod o+r /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+sudo chmod o+r /etc/apt/sources.list.d/caddy-stable.list
+sudo apt update
+sudo apt install caddy
+Testing releases
+(includes betas and release candidates):
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/testing/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-testing-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/testing/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-testing.list
+sudo chmod o+r /usr/share/keyrings/caddy-testing-archive-keyring.gpg
+sudo chmod o+r /etc/apt/sources.list.d/caddy-testing.list
+sudo apt update
+sudo apt install caddy
+View the Cloudsmith repos
+If you wish to use the packaged support files (systemd services, bash completion and default configuration) with a custom Caddy build, instructions can be
+found here
+.
+Fedora, RedHat, CentOS
+This package comes with both of Caddy's
+systemd service
+unit files, but does not enable them by default. Using the service is recommended. If you do, please read the
+service usage instructions
+.
+Fedora:
+dnf install dnf5-plugins
+dnf copr enable @caddy/caddy
+dnf install caddy
+CentOS/RHEL:
+dnf install dnf-plugins-core
+dnf copr enable @caddy/caddy
+dnf install caddy
+View the Caddy COPR
+Arch Linux, Manjaro, Parabola
+This package comes with heavily modified versions of both of Caddy's
+systemd service
+unit files, but does not enable them by default.
+Those modifications include a custom start/stop behavior and additional sandboxing flags which are explained in
+systemd's exec documentation
+, which may lead to certain host directories not being available to the Caddy process.
+pacman -Syu caddy
+View Caddy in the Arch Linux repositories
+and
+the Arch Linux Wiki
+Docker
+docker pull caddy
+View on Docker Hub
+See our
+recommended Docker Compose configuration
+and usage instructions.
+Railway
+Through a sponsorship from
+Railway
+, we officially support this template:
+Gentoo
+Note: This is a community-maintained installation method.
+emerge www-servers/caddy
+View Gentoo Package
+Homebrew (Mac)
+Note: This is a community-maintained installation method.
+brew install caddy
+View the Homebrew formula
+Chocolatey (Windows)
+Note: This is a community-maintained installation method.
+choco install caddy
+View the Chocolatey package
+Scoop (Windows)
+Note: This is a community-maintained installation method.
+scoop install caddy
+View the Scoop manifest
+Webi
+Note: This is a community-maintained installation method.
+Linux and macOS:
+curl -sS https://webi.sh/caddy | sh
+Windows:
+curl.exe https://webi.ms/caddy | powershell
+You may need to adjust the Windows firewall rules to allow non-localhost incoming connections.
+View on Webi
+Ansible
+Note: This is a community-maintained installation method.
+ansible-galaxy install nvjacobo.caddy
+View the Ansible role repository
+Termux
+Note: This is a community-maintained installation method.
+pkg install caddy
+View the Termux build.sh file
+Nix/Nixpkgs/NixOS
+Note: This is a community-maintained installation method.
+Package name:
+caddy
+NixOS module:
+services.caddy
+View Caddy in the Nixpkgs search
+and
+the NixOS options search
+Unikraft
+Note: This is a community-maintained installation method.
+First install Unikraft's companion tool,
+kraft
+:
+curl --proto '=https' --tlsv1.2 -sSf https://get.kraftkit.sh | sh
+Then run Caddy with Unikraft using:
+kraft run --rm -p 2015:2015 --plat qemu --arch x86_64 -M 256M caddy:2.7
+To allow non-localhost incoming connections, you need to
+connect the unikernel instance to a network
+.
+View the Unikraft application catalog
+and
+the KraftCloud platform examples (powered by Unikraft)
+.
+OPNsense
+Note: This is a community-maintained installation method.
+pkg install os-caddy
+View the FreeBSD caddy-custom makefile
+and
+the os-caddy plugin source
+Mise
+Note: This is a community-maintained installation method.
+If you are using
+mise
+, the polyglot tool versions manager, you can use a command like this to install the last version:
+mise use -g caddy@latest

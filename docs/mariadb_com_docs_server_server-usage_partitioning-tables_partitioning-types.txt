@@ -1,0 +1,73 @@
+Source: https://mariadb.com/docs/server/server-usage/partitioning-tables/partitioning-types
+
+Partitioning Types | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Partitioning Overview
+Partition Pruning and Selection
+Partition Maintenance
+Partitioning Types
+Partitioning Types Overview
+HASH Partitioning Type
+KEY Partitioning Type
+LINEAR HASH Partitioning Type
+LINEAR KEY Partitioning Type
+LIST Partitioning Type
+RANGE COLUMNS and LIST COLUMNS Partitioning Types
+RANGE Partitioning Type
+Partitioning Limitations
+Partitions Files
+Partitions Metadata
+Stored Routines
+Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Partitioning Types
+Explore different partitioning types for MariaDB Server tables. Understand range, list, hash, and key partitioning to optimize data management and improve query performance.
+Partitioning Types Overview
+HASH Partitioning Type
+KEY Partitioning Type
+LINEAR HASH Partitioning Type
+LINEAR KEY Partitioning Type
+LIST Partitioning Type
+RANGE COLUMNS and LIST COLUMNS Partitioning Types
+RANGE Partitioning Type
+Previous
+Partition Maintenance
+Next
+Partitioning Types Overview
+Last updated
+1 year ago
+Was this helpful?
+Was this helpful?

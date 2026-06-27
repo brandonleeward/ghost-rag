@@ -1,0 +1,92 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/legacy-storage-engines/federated-storage-engine
+
+FEDERATED Storage Engine | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+FEDERATED Storage Engine
+Cassandra Storage Engine
+TokuDB
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+FEDERATED Storage Engine
+Legacy FEDERATED storage engine description.
+The FEDERATED Storage Engine is a legacy storage engine no longer being supported. A fork,
+FederatedX
+is being actively maintained. Since
+MariaDB 10.0
+, the
+CONNECT
+storage engine also permits accessing a remote database via MySQL or ODBC connection (table types:
+MYSQL
+,
+ODBC
+).
+The FEDERATED Storage Engine was originally designed to let one access data remotely without using clustering or replication, and perform local queries that automatically access the remote data.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Legacy Storage Engines
+Next
+Cassandra Storage Engine
+Last updated
+1 year ago
+Was this helpful?
+Was this helpful?

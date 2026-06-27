@@ -1,0 +1,252 @@
+Source: https://www.tinybird.com/docs/classic/get-data-in/connectors/redpanda
+
+Classic: Redpanda Connector · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Redpanda Connector
+¶
+Copy as MD
+The Redpanda Connector allows you to ingest data from your existing Redpanda cluster and load it into Tinybird so that you can quickly turn them into high-concurrency, low-latency REST APIs.
+The Redpanda Connector is fully managed and requires no additional tooling. Connect Tinybird to your Redpanda cluster, choose a topic, and Tinybird will automatically begin consuming messages from Redpanda.
+The Redpanda Connector is:
+Easy to use
+. Connect to your Redpanda cluster in seconds. Choose your topics, define your schema, and ingest millions of events per second into a fully-managed OLAP.
+SQL-based
+. Using nothing but SQL, query your Redpanda data and enrich it with dimensions from your database, warehouse, or files.
+Secure
+. Use Auth tokens to control access to API endpoints. Implement access policies as you need. Support for row-level security.
+Note that you need to grant READ permissions to both the Topic and the Consumer Group to ingest data from Redpanda into Tinybird.
+Using the UI
+¶
+To connect Tinybird to your Redpanda cluster, click the
++
+icon next to the data project section on the left navigation menu, select
+Data Source
+, and select
+Redpanda
+from the list of available Data Sources.
+Enter the following details:
+Connection name
+: A name for the Redpanda connection in Tinybird.
+Bootstrap Server
+: The comma-separated list of bootstrap servers (including Port numbers).
+Key
+: The
+Key
+component of the Redpanda API Key.
+Secret
+: The
+Secret
+component of the Redpanda API Key.
+Decode Avro messages with schema registry
+: Optionally, you can enable Schema Registry support to decode Avro messages. You will be prompted to enter the Schema Registry URL, username and password.
+Once you have entered the details, select
+Connect
+. This creates the connection between Tinybird and Redpanda. You will then see a list of your existing topics and can select the topic to consume from. Tinybird will create a
+Group ID
+that specifies the name of the consumer group this consumer belongs to. You can customize the Group ID, but ensure that your Group ID has
+read
+permissions to the topic.
+Once you have chosen a topic, you can select the starting offset to consume from. You can choose to consume from the
+latest
+offset or the
+earliest
+offset. If you choose to consume from the earliest offset, Tinybird will consume all messages from the beginning of the topic. If you choose to consume from the latest offset, Tinybird will only consume messages that are produced after the connection is created. Select the offset, and click
+Next
+.
+Tinybird will then consume a sample of messages from the topic and display the schema. You can adjust the schema and Data Source settings as needed, then click
+Create Data Source
+to create the Data Source.
+Tinybird will now begin consuming messages from the topic and loading them into the Data Source.
+Using .datasource files
+¶
+If you are managing your Tinybird resources in files, there are several settings available to configure the Redpanda Connector in .datasource files.
+See the
+datafiles docs
+for more information.
+The following is an example of Kafka .datasource file for an already existing connection:
+Example data source for Redpanda Connector
+SCHEMA >
+  `__value` String,
+  `__topic` LowCardinality(String),
+  `__partition` Int16,
+  `__offset` Int64,
+  `__timestamp` DateTime,
+  `__key` String
+  `__headers` Map(String,String)
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SORTING_KEY "timestamp"
+
+# Connection is already available. If you
+# need to create one, add the required fields
+# on an include file with the details.
+KAFKA_CONNECTION_NAME my_connection_name
+KAFKA_TOPIC my_topic
+KAFKA_GROUP_ID my_group_id
+KAFKA_STORE_HEADERS true
+Columns of the Data Source
+¶
+When you connect a Kafka producer to Tinybird, Tinybird consumes optional metadata columns from that Kafka record and writes them to the Data Source.
+The following fields represent the raw data received from Kafka:
+__value
+: A String representing the entire unparsed Kafka record inserted.
+__topic
+: The Kafka topic that the message belongs to.
+__partition
+: The kafka partition that the message belongs to.
+__offset
+: The Kafka offset of the message.
+__timestamp
+: The timestamp stored in the Kafka message received by Tinybird.
+__key
+: The key of the kafka message.
+__headers
+: Headers parsed from the incoming topic messages. See
+Using custom Kafka headers for advanced message processing
+.
+Metadata fields are optional. Omit the fields you don't need to reduce your data storage.
+Using INCLUDE to store connection settings
+¶
+To avoid configuring the same connection settings across many files, or to prevent leaking sensitive information, you can store connection details in an external file and use
+INCLUDE
+to import them into one or more .datasource files.
+You can find more information about
+INCLUDE
+in the
+Advanced Templates
+documentation.
+As an example, you may have two Redpanda .datasource files, which re-use the same Redpanda connection. You can create an INCLUDE file that stores the Redpanda connection details.
+The Tinybird project may use the following structure:
+Tinybird data project file structure
+ecommerce_data_project/
+├── datasources/
+│   └── connections/
+│       └── my_connector_name.incl
+│   └── my_kafka_datasource.datasource
+│   └── another_datasource.datasource
+├── endpoints/
+├── pipes/
+Where the file
+my_connector_name.incl
+has the following content:
+Include file containing Redpanda connection details
+KAFKA_CONNECTION_NAME my_connection_name
+KAFKA_BOOTSTRAP_SERVERS my_server:9092
+KAFKA_KEY my_username
+KAFKA_SECRET my_password
+And the Redpanda .datasource files look like the following:
+Data Source using includes for Redpanda connection details
+SCHEMA >
+    `value` String,
+    `topic` LowCardinality(String),
+    `partition` Int16,
+    `offset` Int64,
+    `timestamp` DateTime,
+    `key` String
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SORTING_KEY "timestamp"
+
+INCLUDE "connections/my_connection_name.incl"
+
+KAFKA_TOPIC my_topic
+KAFKA_GROUP_ID my_group_id
+When using
+tb pull
+to pull a Redpanda Data Source using the CLI, the
+KAFKA_KEY
+and
+KAFKA_SECRET
+settings will
+not
+be included in the file to avoid exposing credentials.
+Redpanda logs
+¶
+You can find global logs in the
+datasources_ops_log
+Service Data Source
+. Filter by
+datasource_id
+to select the correct Data Source, and by
+event_type='append-kafka'
+.
+For example, to select all Kafka related logs in the last day, run the following query:
+SELECT *
+FROM tinybird.datasources_ops_log
+WHERE datasource_id = 't_1234'
+  AND event_type = 'append-kafka'
+  AND timestamp > now() - INTERVAL 1 day
+ORDER BY timestamp DESC
+If you can't find logs in
+datasources_ops_log
+, the
+kafka_ops_log
+Service Data Source
+contains more detailed logs. Filter by
+datasource_id
+to select the correct Data Source, and use
+msg_type
+to select the desired log level (
+info
+,
+warning
+, or
+error
+).
+SELECT *
+FROM tinybird.kafka_ops_log
+WHERE datasource_id = 't_1234'
+  AND timestamp > now() - interval 1 day
+  AND msg_type IN ['info', 'warning', 'error']
+When your Data Source encounters a high rate of specific Kafka connection errors, we temporarily stop ingestion for exponentially increasing periods of time. This mechanism is called a Circuit Breaker. It prevents polluting your logs and our system and is only activated by the errors listed in
+this section
+.
+For example, if your Kafka brokers are unreachable, you will see a message in your logs similar to this: "We have opened a circuit breaker because your error rate is too high. Please, fix your connection and if you think everything is fine, contact support."
+If the connection issue persists through all retries, ingestion is paused. Tinybird automatically retries every 12 hours. If a retry succeeds, the Circuit Breaker resets and ingestion resumes from where it left off. After you fix the underlying connection problem, you can also run
+tb deploy
+to retry before the next automatic retry window.
+Kafka circuit breaker errors
+¶
+The following Kafka errors trigger the Circuit Breaker.
+Error
+Error message
+_ALL_BROKERS_DOWN
+Local: All broker connections are down
+_TRANSPORT
+Local: Broker transport failure
+_TIMED_OUT
+Local: Timed out
+_DESTROY
+Local: Broker handle destroyed
+_AUTHENTICATION
+Local: Authentication failure
+_RESOLVE
+Local: Host resolution failure
+_UNKNOWN_TOPIC
+Local: Unknown topic
+_UNKNOWN_PARTITION
+Local: Unknown partition
+SASL_AUTHENTICATION_FAILED
+Broker: SASL Authentication failed
+TOPIC_AUTHORIZATION_FAILED
+Broker: Topic authorization failed
+GROUP_AUTHORIZATION_FAILED
+Broker: Group authorization failed
+CLUSTER_AUTHORIZATION_FAILED
+Broker: Cluster authorization failed
+Updated
+3 weeks ago
+On this page
+Redpanda Connector
+Using the UI
+Using .datasource files
+Columns of the Data Source
+Using INCLUDE to store connection settings
+Redpanda logs
+classic
+Ask AI

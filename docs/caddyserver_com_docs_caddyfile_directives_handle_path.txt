@@ -1,0 +1,78 @@
+Source: https://caddyserver.com/docs/caddyfile/directives/handle_path
+
+handle_path (Caddyfile directive) — Caddy Documentation
+A
+Project
+Store
+Forum
+GitHub
+Theme:
+System
+Download
+Sponsor
+handle_path
+Works the same as the
+handle
+directive
+, but implicitly uses
+uri strip_prefix
+to strip the matched path prefix.
+Handling a request matching a certain path (while stripping that path from the request URI) is a common enough use case that it has its own directive for convenience.
+Syntax
+handle_path
+<path_matcher>
+{
+<directives...>
+}
+<directives...>
+is a list of HTTP handler directives or directive blocks, one per line, just like would be used outside of a
+handle_path
+block.
+Only a single
+path matcher
+is accepted, and is required; you cannot use named matchers with
+handle_path
+.
+Examples
+This configuration:
+handle_path
+/prefix/*
+{
+...
+}
+👆 is effectively the same as this 👇, but the
+handle_path
+form 👆 is slightly more succinct
+handle
+/prefix/*
+{
+uri
+strip_prefix
+/prefix
+...
+}
+A full Caddyfile example, where
+handle_path
+and
+handle
+are mutually exclusive; but, be aware of the
+subfolder problem
+example.com
+{
+# Serve your API, stripping the /api prefix
+handle_path
+/api/*
+{
+reverse_proxy
+localhost
+:
+9000
+}
+# Serve your static site
+handle
+{
+root
+/srv
+file_server
+}
+}

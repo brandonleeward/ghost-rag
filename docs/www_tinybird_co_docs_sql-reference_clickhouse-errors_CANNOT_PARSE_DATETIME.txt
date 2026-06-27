@@ -1,0 +1,203 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/CANNOT_PARSE_DATETIME
+
+CANNOT_PARSE_DATETIME ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+CANNOT_PARSE_DATETIME ClickHouse error
+¶
+Copy as MD
+This error usually means ClickHouse can't parse a string as a DateTime value. Check the format of your date/time strings and make sure they match the expected format.
+The
+CANNOT_PARSE_DATETIME
+error in ClickHouse (and Tinybird) happens when you try to convert a string to a DateTime value, but the string format doesn't match what ClickHouse expects. This is a common issue when working with date and time data from external sources.
+What causes this error
+¶
+You'll typically see it when:
+Using
+toDateTime()
+on strings with unexpected formats
+Working with date strings that don't match ClickHouse's default format
+Importing data with non-standard date/time formats
+Using date functions with incorrectly formatted strings
+Working with timestamps from different time zones
+Example errors
+¶
+Fails: invalid date string
+SELECT toDateTime('not a date')
+Fails: empty string
+SELECT toDateTime('')
+Fails: invalid date string
+SELECT toDateTime('not a date')
+Fails: non-date string
+SELECT toDateTime('abc')
+How to fix it
+¶
+Use the correct date format
+¶
+ClickHouse expects ISO format by default (YYYY-MM-DD HH:MM:SS):
+Fix: use ISO format
+SELECT toDateTime('2023-01-01 12:00:00')
+Use parseDateTimeBestEffort for flexible parsing
+¶
+Use
+parseDateTimeBestEffort()
+for free-form date parsing:
+Fix: use parseDateTimeBestEffort
+SELECT parseDateTimeBestEffort('2023/01/01 12:00:00')
+Handle date-only strings
+¶
+For strings that only contain dates, use
+toDate()
+:
+Fix: use toDate for date-only strings
+SELECT toDate('2023-01-01')  -- Works with YYYY-MM-DD format
+toDateTime('2023-01-01')
+is also valid - ClickHouse parses YYYY-MM-DD as midnight.
+Use parseDateTime for custom formats
+¶
+Use
+parseDateTime()
+with format strings:
+Fix: use parseDateTime
+SELECT parseDateTime('2023/01/01 12:00:00', '%Y/%m/%d %H:%M:%S')
+Common patterns and solutions
+¶
+Standard ISO format
+¶
+The most reliable format is ISO 8601:
+ISO format examples
+SELECT toDateTime('2023-01-01 12:00:00')  -- YYYY-MM-DD HH:MM:SS
+SELECT toDateTime('2023-01-01T12:00:00')  -- ISO 8601 with T
+SELECT toDateTime('2023-01-01 12:00:00.123')  -- With milliseconds
+Custom format strings
+¶
+Use format strings with parseDateTime for non-standard formats:
+Custom format examples
+SELECT parseDateTime('01/01/2023 12:00 PM', '%m/%d/%Y %I:%M %p')
+SELECT parseDateTime('2023.01.01 12:00:00', '%Y.%m.%d %H:%M:%S')
+SELECT parseDateTime('01-01-2023 12:00', '%d-%m-%Y %H:%M')
+Unix timestamps
+¶
+For Unix timestamps, use
+fromUnixTimestamp()
+:
+Unix timestamp conversion
+SELECT fromUnixTimestamp(1672531200)  -- Unix timestamp to DateTime
+Working with time zones
+¶
+Handle time zone information:
+Time zone handling
+SELECT toDateTime('2023-01-01 12:00:00', 'UTC')
+SELECT parseDateTime('2023-01-01 12:00:00 +05:00', '%Y-%m-%d %H:%M:%S %z')
+Advanced solutions
+¶
+Handling various date formats
+¶
+Create robust parsing for multiple formats:
+Multiple format handling
+SELECT CASE
+    WHEN length(date_string) = 10 THEN toDate(date_string)
+    WHEN length(date_string) = 19 THEN toDateTime(date_string)
+    WHEN length(date_string) = 23 THEN toDateTime(date_string, 'YYYY-MM-DD HH:MM:SS.SSS')
+    ELSE NULL
+END as parsed_date
+FROM events
+Working with JSON date strings
+¶
+Parse dates from JSON data:
+JSON date parsing
+SELECT
+    toDateTime(JSONExtractString(data, 'timestamp')) as event_time,
+    toDate(JSONExtractString(data, 'date')) as event_date
+FROM events
+Error handling with try functions
+¶
+Use
+try
+functions to handle parsing errors gracefully:
+Error handling with try
+SELECT
+    try(toDateTime(timestamp_string)) as parsed_time,
+    try(toDate(date_string)) as parsed_date
+FROM events
+Format string reference
+¶
+Common format specifiers for
+toDateTime()
+:
+YYYY
+- 4-digit year
+MM
+- 2-digit month (01-12)
+DD
+- 2-digit day (01-31)
+HH
+- 2-digit hour (00-23)
+MM
+- 2-digit minute (00-59)
+SS
+- 2-digit second (00-59)
+SSS
+- 3-digit millisecond (000-999)
+Tinybird-specific notes
+¶
+In Tinybird, this error often occurs when:
+Ingesting data with non-standard date formats
+Working with timestamps from different sources
+Using Materialized Views with date/time columns
+Processing JSON data with embedded timestamps
+To debug in Tinybird:
+Check your Data Source schema for date/time column types
+Use Schema Hints to specify date formats
+Add explicit date parsing in your Pipes
+Validate incoming date formats in Data Sources
+Best practices
+¶
+Standardize date formats
+¶
+Use ISO 8601 format (YYYY-MM-DD HH:MM:SS) when possible
+Specify time zones explicitly
+Handle milliseconds consistently
+Use appropriate precision for your use case
+Error handling
+¶
+Use
+try()
+functions for robust parsing
+Validate date strings before processing
+Provide fallback values for invalid dates
+Log parsing errors for debugging
+See also
+¶
+ClickHouse Date and Time Functions
+Working with Date and Time
+Common function errors
+Updated
+7 months ago
+On this page
+CANNOT_PARSE_DATETIME ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Use the correct date format
+Use parseDateTimeBestEffort for flexible parsing
+Handle date-only strings
+Use parseDateTime for custom formats
+Common patterns and solutions
+Standard ISO format
+Custom format strings
+Unix timestamps
+Working with time zones
+Advanced solutions
+Handling various date formats
+Working with JSON date strings
+Error handling with try functions
+Format string reference
+Tinybird-specific notes
+Best practices
+Standardize date formats
+Error handling
+See also
+forward
+classic
+Ask AI

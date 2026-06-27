@@ -1,0 +1,213 @@
+Source: https://www.tinybird.com/docs/forward/core-concepts/materialized-views
+
+Materialized views · Tinybird Docs
+Sign In
+Sign Up
+Materialized views
+¶
+Copy as MD
+A materialized view is the continuous, streaming result of a pipe saved as a new data source. As new data is ingested into the origin data source, the transformed results from the pipe are continually inserted in the new materialized view, which you can query as any other data source.
+Processing data at ingest time reduces latency and cost-per-query, and can significantly improve the performance of your queries. If your endpoint, MCP or regular query usually needs calculations such as counts, sums, averages, or arrays, or transformations like string manipulations or joins, materializations are the best optimization trick. Just materialize the operation and use the resulting materialized view as a data source of the published query.
+Typical use cases of Materialized views include:
+Improving the speed of a query that's taking too much time to run.
+Aggregating, sorting, or filtering data at ingest time.
+Simplifying query development by automating common filters and aggregations.
+Changing an existing schema for a different use case.
+Create materialized views
+¶
+Materialized views are defined with a target Data Source and a pipe that writes into it. Use the
+TYPE MATERIALIZED
+directive in
+.pipe
+files,
+defineMaterializedView
+in the TypeScript SDK, or
+define_materialized_view
+in the Python SDK.
+The following example starts with a
+page_views
+Data Source and creates a
+daily_page_views
+Data Source populated by a materialized view.
+When you define a materialized view target Data Source with an SDK, disable JSON paths on the target. The target receives rows from the materialized view, not raw JSON events from the Events API.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+datasources/page_views.datasource
+SCHEMA >
+    `timestamp` DateTime,
+    `pathname` String,
+    `session_id` String
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "pathname, timestamp"
+datasources/daily_page_views.datasource
+SCHEMA >
+    `date` Date,
+    `pathname` String,
+    `views` SimpleAggregateFunction(sum, UInt64)
+
+ENGINE "AggregatingMergeTree"
+ENGINE_SORTING_KEY "date, pathname"
+pipes/daily_page_views_mv.pipe
+NODE aggregate
+SQL >
+    SELECT
+        toDate(timestamp) AS date,
+        pathname,
+        count() AS views
+    FROM page_views
+    GROUP BY date, pathname
+
+TYPE materialized
+DATASOURCE daily_page_views
+See all syntax options in the
+Materialized pipes reference
+,
+TypeScript SDK reference
+, and
+Python SDK reference
+.
+Once you have the origin and destination data sources and the materialized pipe defined, deploy the project to apply the changes. Materialized views are populated automatically during deployment process.
+The order of columns in your transformation pipe's SELECT statement doesn't need to match the order defined in the destination data source schema. Tinybird maps columns by name, not by position. As long as the column names and data types are compatible, the materialization will work correctly.
+Populating materialized views
+¶
+Materialized Views destinations receive data on each insert on the origin data source. A populate is the process to move the data that was already in the origin data source to the destination data source.
+Materialized views are populated automatically when you deploy your project. The deployment process handles the initial population and subsequent data migrations.
+When you first deploy a project with a materialized view, Tinybird will create the view and populate it with all existing data from the origin data source. This process happens automatically and is managed by Tinybird's deployment system.
+Changing a materialized view
+¶
+If you need to make changes to a materialized view after deployment (such as changing its schema or engine settings), you'll need to follow the data source evolution process. This might require using a
+forward query
+to ensure historical data is properly migrated.
+Learn more about:
+Deployments in Tinybird
+to understand how deployments manage state changes
+Evolving data sources
+for details on making changes to materialized views after deployment
+Altering materialized views
+¶
+When you need to update the query logic of an existing materialized view without recreating the entire table, you can use the
+DEPLOYMENT_METHOD alter
+directive. This approach uses
+ALTER TABLE ... MODIFY QUERY
+instead of dropping and recreating the materialized view, which minimizes data movement and improves deployment performance.
+When to use ALTER
+¶
+Use the
+DEPLOYMENT_METHOD alter
+directive when you want to:
+Update the query logic of an existing materialized view
+Preserve existing data while modifying the transformation
+Minimize deployment time and resource usage
+Avoid data movement in production environments with large datasets
+Syntax
+¶
+Add the
+DEPLOYMENT_METHOD alter
+directive to your materialized pipe file:
+my_transformation.pipe
+NODE transformation_node
+SQL >
+    SELECT
+        id,
+        local_date,
+        name,
+        sum(count) as total_count
+    FROM
+        my_origin
+    WHERE
+        local_date >= today() - interval 90 day  -- Updated filter from 30 to 90 days
+    GROUP BY
+        id,
+        local_date,
+        name
+
+TYPE materialized
+DATASOURCE my_destination
+DEPLOYMENT_METHOD alter
+Limitations of ALTER usage
+¶
+Existing materialized views only
+: Can only be used on materialized views that already exist in the target environment
+Query changes only
+: The directive only works when there are actual changes to the SQL query
+No target changes
+: Cannot change the target data source (
+DATASOURCE
+directive)
+Deployment limitations
+: Staging ingestion and reads are not available during ALTER deployments
+Limitations
+¶
+As explained, materialized views work as insert triggers, which means a delete or truncate operation on your original data source doesn't affect the related materialized views. But be sure to understand
+materialized views iterations
+before deleting data or setting TTLs to the origin data source.
+As transformation and ingestion in the materialization is done on each block of inserted data in the original data source, some operations such as
+GROUP BY
+,
+ORDER BY
+,
+DISTINCT
+and
+LIMIT
+might need a specific
+engine
+, such as
+AggregatingMergeTree
+or
+SummingMergeTree
+, which can handle data aggregations.
+The data source resulting from a materialization generated using
+JOIN
+is automatically updated
+only
+if and when a new operation is performed over the data source in the
+FROM
+.
+You can't create Materialized Views that depend on the
+UNION
+of several Data Sources.
+Error messages
+¶
+The performance of this query is not compatible with realtime ingestion
+¶
+When you deploy a Materialized View, Tinybird validates that the transformation query runs fast enough to keep up with real-time ingestion. The validation works as follows:
+Tinybird replaces the source Data Source in your query with a subquery that reads a limited batch of rows (2,000 by default).
+It executes the batch query with tight resource constraints: a 1-second time limit and 2 threads.
+If the query times out, Tinybird retries once. If it times out again, deployment fails with this error.
+This check is a proactive guardrail. Rather than letting a slow Materialized View degrade your ingestion pipeline at runtime, Tinybird rejects it at deploy time.
+Common causes and fixes:
+Complex JOINs
+: Joins against large Data Sources are expensive to run per batch. Pre-aggregate the joined Data Source or restructure your query.
+Heavy aggregations or subqueries
+: Simplify the transformation logic. If the query is complex, break it into multiple chained Materialized Views.
+Expensive functions
+: Some ClickHouse functions are slow at scale, such as complex regular expressions or array operations on large arrays. Use simpler alternatives where possible.
+Too many columns
+: Selecting more columns than you need increases the work per batch. Select only the columns you need instead of
+SELECT *
+.
+Next steps
+¶
+Learn about
+Copy pipes
+.
+Publish your data with
+API Endpoints
+.
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Materialized views
+Create materialized views
+Populating materialized views
+Changing a materialized view
+Altering materialized views
+Limitations
+Error messages
+The performance of this query is not compatible with realtime ingestion
+Next steps
+forward
+Ask AI

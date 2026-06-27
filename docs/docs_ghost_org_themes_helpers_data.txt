@@ -1,0 +1,91 @@
+Source: https://docs.ghost.org/themes/helpers/data
+
+Data Helpers - Ghost Developer Docs
+Documentation Index
+Fetch the complete documentation index at:
+/llms.txt
+Use this file to discover all available pages before exploring further.
+Skip to main content
+Ghost Developer Docs
+home page
+Search...
+⌘
+K
+Search...
+Navigation
+Data
+Data Helpers
+Home
+Documentation
+Migration Guides
+Themes
+Helpers
+Data
+Data Helpers
+Data helpers are used to output data from your site. Use this reference list to discover what each handlebars helper can do when building a custom Ghost theme.
+Tag
+Description
+@config
+Provides access to global data properties
+@custom
+Provides access to custom theme settings
+@page
+Provides access to page settings
+@site
+Provides access to global settings
+@member
+Provides access to member data
+authors
+Outputs the post author(s)
+comments
+Outputs Ghost’s member-based commenting system
+content
+Outputs the full post content as HTML
+date
+Outputs the date in a format of your choosing
+excerpt
+Outputs the custom excerpt, or the post content with HTML stripped
+social_accounts
+Iterates the connected social accounts on a site or author
+social_url
+Outputs the full URL to a social profile
+img_url
+Outputs the correctly calculated URL for the provided image property
+link
+Creates links with dynamic classes
+meta_data
+Outputs structured data for SEO
+navigation
+Helper which outputs formatted HTML for navigation links
+post
+More
+object
+than helper – Contains all data for a specific post
+price
+Outputs a price with formatting options
+readable_url
+Returns a human-readable URL
+recommendations
+Outputs a list of recommended sites
+tags
+Outputs the post tags
+tiers
+Outputs the post tier(s)
+title
+The post title, when inside the
+post
+scope
+total_members
+Outputs the number of members, rounded and humanised
+total_paid_members
+Outputs the number of paying members, rounded and humanised
+url
+The post URL, when inside the
+post
+scope
+Suggest edits
+Raise issue
+unless
+@config
+⌘
+I

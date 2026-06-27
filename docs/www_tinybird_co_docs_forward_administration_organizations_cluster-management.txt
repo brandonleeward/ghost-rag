@@ -1,0 +1,264 @@
+Source: https://www.tinybird.co/docs/forward/administration/organizations/cluster-management
+
+Cluster management · Tinybird Docs
+Sign In
+Sign Up
+Cluster management
+¶
+Copy as MD
+If you're on an Enterprise plan with dedicated infrastructure, you can manage your ClickHouse® cluster replicas directly from the
+Plan & Billing
+page. This allows you to horizontally scale your cluster by adding or removing replicas and controlling how read and write workloads are distributed across them. For the available replica SKUs and plan details, see
+Dedicated infrastructure
+.
+Access Cluster Management
+¶
+To manage your cluster replicas:
+Navigate to
+Organization settings
+from the sidebar.
+Go to the
+Plan & Billing
+section.
+This opens the cluster management interface where you can view your current replicas and their configurations.
+Understanding replica configuration
+¶
+Each replica in your cluster has the following configuration:
+Setting
+Description
+Read weight
+Controls the proportion of query traffic this replica receives. Valid range:
+0-65535
+.
+Write weight
+Controls whether this replica handles data ingestion. Valid range:
+0-65535
+.
+Copy job weight
+Controls whether this replica handles copy jobs. Default and recommended value for all replicas:
+1
+. Valid range:
+0-65535
+.
+CPUs
+Number of virtual CPUs allocated to this replica.
+Memory
+Amount of memory allocated to this replica in gigabytes.
+Managing a Cluster
+¶
+Cluster operations like adding, removing or rebalancing replica weights may take a few minutes to complete. During this
+time, no other operations can be performed on your cluster. However, the cluster will continue to operate normally
+while operations are in progress.
+Managing a Cluster via API
+¶
+The following operations can also be performed programmatically using the
+Organizations API
+.
+API calls that modify replicas require an
+old_weights
+field to prevent conflicts from concurrent modifications. You must first
+GET
+the current configuration from the
+/v0/organizations/<organization_id>/clusters-configuration
+endpoint and use the returned weights when you add, delete, or rebalance replicas.
+Add a replica
+¶
+To add a new replica to your cluster:
+In the cluster management interface, select
+Add new replica
+.
+Configure the Read and Write weights
+Select the CPU and memory configuration from the dropdown.
+Review the cost impact shown below the configuration.
+Select
+Add replica
+.
+To add a replica programmatically, use the following endpoint from the
+Organizations API
+:
+curl -X POST \
+    -H "Authorization: Bearer <user_token>" \
+    -H "Content-Type: application/json" \
+    "https://<your_host>/v0/organizations/<organization_id>/clusters/<cluster_id>/replicas" \
+     -d '{
+        "replica_size": "4-16",
+        "existing_replicas": {
+            "old_weights": {
+                "copyjob": {"<replica-1-name>": 1, "<replica-2-name>": 1},
+                "writer": {"<replica-1-name>": 50, "<replica-2-name>": 50},
+                "reader": {"<replica-1-name>": 50, "<replica-2-name>": 50}
+            },
+            "new_weights": {
+                "copyjob": {"<replica-1-name>": 1, "<replica-2-name>": 1},
+                "writer": {"<replica-1-name>": 30,  "<replica-2-name>": 40},
+                "reader": {"<replica-1-name>": 40,  "<replica-2-name>": 40}
+            }
+        },
+        "new_replica": {
+            "copyjob": 1,
+            "writer": 30,
+            "reader": 20
+        }
+    }'
+Cost implications
+¶
+Adding replicas increases your monthly credit consumption. The exact cost depends on the CPU and memory configuration
+you select. Cost estimates are displayed in the interface before you add a replica.
+Remove a replica
+¶
+To remove a replica from your cluster:
+In the cluster management interface, locate the replica you want to remove.
+Click the
+×
+icon next to the replica.
+Adjust the replica weights to redistribute traffic across remaining replicas.
+Confirm the removal by selecting
+Delete replica
+.
+Removing a replica may affect traffic distribution and cluster stability, so make sure you reassign its weights to
+other replicas to maintain performance and that the remaining replicas can handle the load.
+Resize your cluster
+¶
+To resize your cluster, replace existing replicas with new ones of the desired size. You do this through the replica management workflow:
+Add new replicas
+with the target CPU and memory configuration.
+Rebalance traffic
+by setting read and write weights to route traffic to the new replicas.
+Remove the old replicas
+once all traffic has been rerouted.
+Before removing the larger replicas, verify that the new replicas can handle your workload. Monitor query performance and ingestion throughput after rerouting traffic.
+Downtime considerations
+¶
+Resizing through replica management is a zero-downtime operation. Your cluster continues to serve traffic throughout the process because the old replicas remain active until you explicitly remove them.
+Cost implications
+¶
+During the transition, you're billed for both old and new replicas. To minimize costs, complete the migration promptly and remove the old replicas as soon as traffic is fully rerouted. Review the cost estimates in the cluster management interface before adding new replicas.
+Rebalance traffic across replicas
+¶
+You can control how your workload is distributed across replicas by adjusting their weights:
+Modify the Read weights to control query traffic distribution.
+Adjust Write weights to control which replicas handle data ingestion.
+Select
+Save changes
+to apply the new configuration.
+How Weight Distribution Works
+¶
+Weights determine the proportional distribution of traffic across replicas using a weighted round-robin approach:
+Read weights
+: Query traffic is distributed proportionally based on each replica's read weight relative to the
+total of all read weights. At least one replica must have a non-zero read weight. If a replica has a read weight of 0,
+it will not receive any query traffic.
+Write weights
+: Ingestion traffic from the Events API and Kafka is distributed proportionally based
+on each replica's write weight. At least one replica must have a non-zero write weight. If a replica has a write
+weight of 0,
+it will not receive any ingestion traffic.
+Copy job weights
+: Copy job execution is distributed proportionally based on each replica's weight. The recommended value for all replicas is 1.
+Valid range
+: Each weight must be between 0 and 65535.
+Required minimums
+: At least one replica must have a non-zero read weight, and at least one replica must have a
+non-zero write weight.
+Proportional distribution of write traffic applies only to the Events API and Kafka. It is not guaranteed for other
+ingestion sources, such as file imports or Copy Pipes.
+Weight distribution examples
+¶
+Read traffic distribution
+¶
+Example 1
+: equal distribution of query traffic across replicas (useful when all replicas have the same size)
+replica-a [R: 1]
+, replica will receive 50% of query traffic
+replica-b [R: 1]
+, replica will receive 50% of query traffic
+Example 2
+: non-equal distribution of query traffic across replicas (useful when replicas have different sizes)
+replica-a [R: 1]
+, replica will receive 33% of query traffic (1/3)
+replica-b [R: 2]
+, replica will receive 67% of query traffic (2/3)
+Example 3
+: non-equal distribution of query traffic across replicas (useful when replicas have different sizes)
+replica-a [R: 10]
+, replica will receive 17% of query traffic (1/6)
+replica-b [R: 20]
+, replica will receive 33% of query traffic (2/6)
+replica-c [R: 30]
+, replica will receive 50% of query traffic (3/6)
+Write traffic distribution
+¶
+Example 1
+: single writer replica
+replica-a [W: 1]
+, replica will receive 100% of ingestion traffic
+replica-b [W: 0]
+, replica will receive 0% of ingestion traffic
+replica-c [W: 0]
+, replica will receive 0% of ingestion traffic
+Example 2
+: equal distribution of ingestion traffic across replicas
+replica-a [W: 1]
+, replica will receive 50% of ingestion traffic
+replica-b [W: 1]
+, replica will receive 50% of ingestion traffic
+Example 3
+: unequal distribution of ingestion traffic across replicas
+replica-a [W: 1]
+, replica will receive 33% of ingestion traffic (1/3)
+replica-b [W: 2]
+, replica will receive 67% of ingestion traffic (2/3)
+Example cluster traffic distribution
+¶
+Replica name
+Read weight
+Write weight
+Explanation
+replica-a
+0
+1
+Receive no query traffic and 100% of ingestion traffic
+replica-b
+1
+0
+Receive 17% of query traffic and no ingestion traffic
+replica-c
+1
+0
+Receive 17% of query traffic and no ingestion traffic
+replica-d
+2
+0
+Receive 33% of query traffic and no ingestion traffic
+replica-e
+2
+0
+Receive 33% of query traffic and no ingestion traffic
+Copy job weight
+¶
+copyjob
+controls where copy job workloads (triggered by Copy Pipes) run across replicas.
+Set
+copyjob
+to
+1
+on all replicas by default.
+This ensures copy job execution remains available on all replicas and avoids unintentionally excluding replicas from processing.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Cluster management
+Access Cluster Management
+Understanding replica configuration
+Managing a Cluster
+Managing a Cluster via API
+Add a replica
+Remove a replica
+Resize your cluster
+Rebalance traffic across replicas
+How Weight Distribution Works
+Weight distribution examples
+Copy job weight
+forward
+Ask AI

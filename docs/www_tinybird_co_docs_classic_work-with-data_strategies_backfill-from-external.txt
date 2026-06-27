@@ -1,0 +1,88 @@
+Source: https://www.tinybird.com/docs/classic/work-with-data/strategies/backfill-from-external
+
+Classic: Backfill from external sources · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Backfill data into Tinybird from external sources
+¶
+Copy as MD
+You can efficiently backfill data into Tinybird from external systems, or migrate data between Tinybird clusters, by following these best practices.
+Use Parquet for optimal ingestion
+¶
+The most efficient way to ingest data into Tinybird from external sources is to use the Parquet format. See
+NDJSON and Parquet files
+.
+When preparing your data, generate Parquet files sized between 1 GB and 5 GB. This file size range ensures optimal throughput.
+Use the S3 Connector
+¶
+Using the
+S3 Connector
+is the preferred way to ingest the data for backfills from external sources due to its ease of use.
+First, prepare the Parquet files by uploading them to your S3 bucket. Then, set up the S3 Connector in Tinybird to automatically ingest files from that bucket.
+This approach streamlines the process and manages rate limits automatically, reducing manual workload.
+CLI or API as an alternative
+¶
+If using S3 isn't an option, you can use the Tinybird CLI or the Tinybird API:
+Tinybird CLI
+: The CLI simplifies ingestion and automatically handles rate limits, making it a reliable alternative.
+Tinybird API
+: When using the API directly, manage
+rate limits
+manually to prevent throttling.
+Migrate data between Tinybird clusters
+¶
+If you need to migrate data from a shared Tinybird cluster to a new Tinybird cluster:
+Use
+Tinybird Sinks
+to export data as Parquet files.
+Configure the sink to export the Parquet files to an S3 bucket.
+Use the
+S3 Connector
+in the new Tinybird cluster to ingest the data efficiently.
+This method leverages Tinybird tools to ensure a smooth migration while preserving the efficiency of the backfill process.
+Ingest only to the landing layer
+¶
+When backfilling data from external sources:
+Ingest raw data directly into the landing layer to keep ingestion and transformation steps separate.
+Separate downstream
+materializations
+: Avoid triggering downstream materializations during this process. If you already have materializations configured, consider unlinking them temporarily to simplify the ingestion step.
+Maximize throughput
+¶
+Monitor the throughput during the backfill process. If you find it insufficient or notice underutilization of your dedicated cluster:
+Monitor jobs
+and also your
+dedicated cluster
+.
+Reach out to Tinybird support. Support can help adjust rate limits or scale components, if allowed by your configuration.
+Address memory errors
+¶
+If memory errors occur during the ingestion or migration process:
+Consider
+optimizing
+the use case, for example by adjusting transformations, splitting large files into smaller chunks, and so on.
+If optimizations don't resolve the issue, evaluate the need for a cluster upgrade to meet resource demands.
+Summary
+¶
+For backfilling or migrating data into Tinybird:
+Use Parquet files for efficient ingestion.
+Leverage the S3 Connector for simplicity and rate limit management.
+To migrate between Tinybird clusters, use Sinks to export data to S3, and reingest the Sink into the new cluster.
+Target the landing layer to separate ingestion from downstream processing.
+Monitor performance and contact support if you need adjustments to rate limits or cluster capacity.
+Updated
+1 year ago
+On this page
+Backfill data into Tinybird from external sources
+Use Parquet for optimal ingestion
+Use the S3 Connector
+CLI or API as an alternative
+Migrate data between Tinybird clusters
+Ingest only to the landing layer
+Maximize throughput
+Address memory errors
+Summary
+classic
+Ask AI

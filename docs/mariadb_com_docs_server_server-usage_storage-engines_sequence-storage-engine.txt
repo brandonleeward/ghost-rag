@@ -1,0 +1,346 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/sequence-storage-engine
+
+SEQUENCE Storage Engine | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+SEQUENCE Storage Engine
+The Sequence engine generates virtual tables of number sequences on the fly, useful for generating series of integers without storing data.
+This article is about the Sequence storage engine. For details about sequence objects, see
+Sequences
+.
+A
+Sequence
+engine allows the creation of ascending or descending sequences of numbers (positive integers) with a given starting value, ending value and increment.
+It creates completely virtual, ephemeral tables automatically when you need them. There is no way to create a Sequence table explicitly. Nor are they ever written to disk or create
+.frm
+files. They are read-only,
+transactional
+, and
+support XA
+.
+Installing
+The Sequence engine is installed by default, and
+SHOW ENGINES
+will list the Sequence storage engine as supported:
+Copy
+SHOW ENGINES\G
+...
+***************************
+5
+.
+row
+***************************
+Engine: MyISAM
+Support: YES
+Comment: MyISAM storage engine
+Transactions:
+NO
+XA:
+NO
+Savepoints:
+NO
+***************************
+6
+.
+row
+***************************
+Engine:
+SEQUENCE
+Support: YES
+Comment:
+Generated
+tables filled
+with
+sequential
+values
+Transactions: YES
+XA: YES
+Savepoints: YES
+***************************
+7
+.
+row
+***************************
+Engine: MRG_MyISAM
+Support: YES
+Comment:
+Collection
+of identical MyISAM tables
+Transactions:
+NO
+XA:
+NO
+Savepoints:
+NO
+...
+Usage and Examples
+To use a Sequence table, you simply select from it, as in
+To use a sequence in a statement, you select from the table named by a pattern
+seq_
+FROM
+to
+TO
+or
+seq_
+FROM
+to
+TO
+step
+STEP
+.
+In the case of an odd step, the sequence will commence with the
+FROM
+, and end at the final result before
+TO
+.
+A sequence can go backwards too. In this case the final value will always be the
+TO
+value, so that a descending sequence has the same values as an ascending sequence:
+This engine is particularly useful with joins and subqueries. For example, this query finds all prime numbers below 50:
+And almost (without 2, the only even prime number) the same result with joins:
+Sequence tables can also be useful in date calculations. For example, to find the day of the week that a particular date has fallen on over a 40 year period (perhaps for birthday planning ahead!):
+Although Sequence tables can only directly make use of positive integers, they can indirectly be used to return negative results by making use of the
+CAST
+statement:
+CAST
+is required to avoid a
+BIGINT UNSIGNED value is out of range
+error.
+Sequence tables, while virtual, are still tables, so they must be in a database. This means that a default database must be selected (for example, via the
+USE
+command) to be able to query a Sequence table. The
+information_schema
+database cannot be used as the default for a Sequence table.
+Table Name Conflicts
+If the SEQUENCE storage engine is installed, it is not possible to create a table with a name which follows the SEQUENCE pattern:
+However, a SEQUENCE table can be converted to another engine and the new table can be referred in any statement:
+While a SEQUENCE table cannot be dropped, it is possible to drop the converted table. The SEQUENCE table with the same name will still exist:
+A temporary table with a SEQUENCE-like name can always be created and used:
+See Also
+For details about sequence objects, see
+Sequences
+.
+Sometimes its the little things
+- Dean Ellis tries out the Sequence engine.
+MariaDB’s Sequence Storage Engine
+- Federico Razzoli writes more in-depth on the engine.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+PERFORMANCE_SCHEMA
+Next
+S3 Storage Engine
+Last updated
+11 months ago
+Was this helpful?
+Installing
+Usage and Examples
+Table Name Conflicts
+See Also
+Was this helpful?
+Copy
+SELECT * FROM seq_1_to_5;
++-----+
+| seq |
++-----+
+|   1 |
+|   2 |
+|   3 |
+|   4 |
+|   5 |
++-----+
+Copy
+SELECT * FROM seq_1_to_15_step_3;
++-----+
+| seq |
++-----+
+|   1 |
+|   4 |
+|   7 |
+|  10 |
+|  13 |
++-----+
+Copy
+SELECT * FROM seq_5_to_1_step_2;
++-----+
+| seq |
++-----+
+|   5 |
+|   3 |
+|   1 |
++-----+
+Copy
+SELECT * FROM seq_15_to_1_step_3;
++-----+
+| seq |
++-----+
+|  13 |
+|  10 |
+|   7 |
+|   4 |
+|   1 |
++-----+
+Copy
+SELECT * FROM seq_15_to_2_step_3;
++-----+
+| seq |
++-----+
+|  14 |
+|  11 |
+|   8 |
+|   5 |
+|   2 |
++-----+
+Copy
+SELECT seq FROM seq_2_to_50 s1 WHERE 0 NOT IN
+(SELECT s1.seq % s2.seq FROM seq_2_to_50 s2 WHERE s2.seq <= sqrt(s1.seq));
++-----+
+| seq |
++-----+
+|   2 |
+|   3 |
+|   5 |
+|   7 |
+|  11 |
+|  13 |
+|  17 |
+|  19 |
+|  23 |
+|  29 |
+|  31 |
+|  37 |
+|  41 |
+|  43 |
+|  47 |
++-----+
+Copy
+SELECT s1.seq FROM seq_2_to_50 s1 JOIN seq_2_to_50 s2
+WHERE s1.seq > s2.seq AND s1.seq % s2.seq <> 0
+GROUP BY s1.seq HAVING s1.seq - COUNT(*) = 2;
++-----+
+| seq |
++-----+
+|   3 |
+|   5 |
+|   7 |
+|  11 |
+|  13 |
+|  17 |
+|  19 |
+|  23 |
+|  29 |
+|  31 |
+|  37 |
+|  41 |
+|  43 |
+|  47 |
++-----+
+Copy
+SELECT DAYNAME('1980-12-05' + INTERVAL (seq) YEAR) day,
+'1980-12-05' + INTERVAL (seq) YEAR DATE FROM seq_0_to_40;
++-----------+------------+
+| day       | date       |
++-----------+------------+
+| Friday    | 1980-12-05 |
+| Saturday  | 1981-12-05 |
+| Sunday    | 1982-12-05 |
+...
+| Friday    | 2014-12-05 |
+| Saturday  | 2015-12-05 |
+| Monday    | 2016-12-05 |
+| Tuesday   | 2017-12-05 |
+| Wednesday | 2018-12-05 |
+| Thursday  | 2019-12-05 |
+| Saturday  | 2020-12-05 |
++-----------+------------+
+Copy
+SELECT CAST(seq AS INT) - 5 x FROM seq_5_to_1;
++----+
+| x  |
++----+
+|  0 |
+| -1 |
+| -2 |
+| -3 |
+| -4 |
++----+
+Copy
+CREATE TABLE seq_1_to_100 (col INT) ENGINE = InnoDB;
+ERROR 1050 (42S01): Table 'seq_1_to_100' already exists
+Copy
+ALTER TABLE seq_1_to_100 ENGINE = BLACKHOLE;
+SELECT * FROM seq_1_to_100;
+Empty set (0.00 sec)
+Copy
+DROP TABLE seq_1_to_100;
+SELECT COUNT(*) FROM seq_1_to_100;
++----------+
+| COUNT(*) |
++----------+
+|      100 |
++----------+
+1 row in set (0.00 sec)
+Copy
+CREATE TEMPORARY TABLE seq_1_to_100 (col INT) ENGINE = InnoDB;
+SELECT * FROM seq_1_to_100;
+Empty set (0.00 sec)

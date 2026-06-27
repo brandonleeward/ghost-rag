@@ -1,0 +1,162 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/compiling-mariadb-from-source/legacy-guides/building-mariadb-from-a-source-rpm
+
+Building MariaDB from a Source RPM | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Compiling MariaDB From Source: The Master Guide
+Building MariaDB on Windows
+Cross-compiling MariaDB
+Compiling MariaDB with Extra Modules/Options
+Legacy Guides
+Build Environment Setup for macOS
+Building MariaDB on Gentoo
+Creating a Debian Repository
+Creating the MariaDB Source Tarball
+Build Environment Setup for Linux
+Building MariaDB from a Source RPM
+Building MariaDB From Source Using musl-based GNU/Linux
+Building MariaDB on CentOS
+Building MariaDB on Debian
+Building MariaDB on Fedora
+Building MariaDB on FreeBSD
+Building MariaDB on Solaris and OpenSolaris
+Building MariaDB on Ubuntu
+Building RPM Packages From Source
+Compile and Using MariaDB with Sanitizers (ASAN, UBSAN, TSAN, MSAN)
+Creating the MariaDB Binary Tarball
+Compiling with the InnoDB Plugin from Oracle
+Compiling MariaDB with Vanilla XtraDB
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Building MariaDB from a Source RPM
+Instructions for building MariaDB binaries from a source RPM package using tools like `rpmbuild`, `yum`, or `dnf`.
+For some distributions you can build MariaDB from a source RPM. (See also
+Why Source RPMs (SRPMs) Aren't Packaged For Some Platforms
+).
+You can build it as follows:
+using
+dnf
+On RHEL8 you might need to start with:
+Copy
+sudo
+dnf
+config-manager
+--set-enabled
+codeready-builder-beta-for-rhel-8-x86_64-rpms
+Then, on all
+dnf
+distributions:
+Copy
+sudo
+dnf
+install
+rpm-build
+perl-generators
+dnf
+download
+--source
+MariaDB
+sudo
+dnf
+builddep
+MariaDB-
+*
+.src.rpm
+rpmbuild
+--rebuild
+MariaDB-
+*
+.src.rpm
+using
+yum
+Copy
+sudo
+yum
+install
+rpm-build
+yum-utils
+yumdownloader
+--source
+MariaDB
+sudo
+yum-builddep
+MariaDB-
+*
+.src.rpm
+rpmbuild
+--rebuild
+MariaDB-
+*
+.src.rpm
+using
+zypper
+Copy
+sudo
+zypper
+in
+rpm-build
+sudo
+zypper
+si
+MariaDB
+sudo
+rpmbuild
+-bb
+/usr/src/packages/SPECS/MariaDB.spec
+Or (to avoid building as root):
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Build Environment Setup for Linux
+Next
+Building MariaDB From Source Using musl-based GNU/Linux
+Last updated
+3 months ago
+Was this helpful?
+using dnf
+using yum
+using zypper
+Was this helpful?
+Copy
+sudo zypper in rpm-build
+sudo zypper si -d MariaDB
+zypper --pkg-cache-dir=`pwd` si --download-only MariaDB
+rpmbuild --rebuild mariadb/srpms/MariaDB-*.src.rpm

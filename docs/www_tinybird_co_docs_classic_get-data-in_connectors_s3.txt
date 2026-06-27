@@ -1,0 +1,593 @@
+Source: https://www.tinybird.com/docs/classic/get-data-in/connectors/s3
+
+Classic: S3 Connector · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+S3 Connector
+¶
+Copy as MD
+Use the S3 Connector to ingest files from your Amazon S3 buckets into Tinybird so that you can turn them into high-concurrency, low-latency REST APIs. You can load a full bucket or load files that match a pattern. In both cases you can also set an update date from which the files are loaded.
+With the S3 Connector you can load your CSV, NDJSON, or Parquet files into your S3 buckets and turn them into APIs. Tinybird detects new files in your buckets and ingests them automatically. You can then run serverless transformations using Data Pipes or implement auth tokens in your API Endpoints.
+Prerequisites
+¶
+The S3 Connector requires permissions to access objects in your Amazon S3 bucket. The IAM Role needs the following permissions:
+s3:GetObject
+s3:ListBucket
+s3:GetBucketNotification
+s3:PutBucketNotification
+s3:GetBucketLocation
+The following is an example of AWS Access Policy:
+When configuring the connector, the UI, CLI and API all provide the necessary policy templates.
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:GetBucketNotification",
+          "s3:PutBucketNotification",
+          "s3:GetBucketLocation"
+        ],
+        "Resource": [
+          "arn:aws:s3:::{bucket-name}",
+          "arn:aws:s3:::{bucket-name}/*"
+        ]
+      }
+    ]
+}
+The following is an example trust policy:
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "sts:AssumeRole",
+            "Principal": {
+                "AWS": "arn:aws:iam::473819111111111:root"
+            },
+            "Condition": {
+                "StringEquals": {
+                    "sts:ExternalId": "ab3caaaa-01aa-4b95-bad3-fff9b2ac789f8a9"
+                }
+            }
+        }
+    ]
+}
+Supported file types
+¶
+The S3 Connector supports the following file types:
+File type
+Accepted extensions
+Compression formats supported
+CSV
+.csv
+,
+.csv.gz
+gzip
+NDJSON
+.ndjson
+,
+.ndjson.gz
+gzip
+.jsonl
+,
+.jsonl.gz
+.json
+,
+.json.gz
+Parquet
+.parquet
+,
+.parquet.gz
+snappy
+,
+gzip
+,
+lzo
+,
+brotli
+,
+lz4
+,
+zstd
+You can upload files with .json extension, provided they follow the Newline Delimited JSON (NDJSON) format. Each line must be a valid JSON object and every line has to end with a
+\n
+character.
+Parquet schemas use the same format as NDJSON schemas, using
+JSONPath
+syntax.
+S3 file URI
+¶
+Due to a limitation in Amazon S3, you can't create different S3 data sources with file path expressions that collide. For example:
+s3://my_bucket/**/*.csv
+and
+s3://my_bucket/transactions/*.csv
+.
+Use the full S3 File URI and wildcards to select multiple files.
+The S3 Connector supports the following wildcard patterns:
+Single Asterisk (
+*
+): matches zero or more characters within a single directory level, excluding
+/
+. It doesn't cross directory boundaries. For example,
+s3://bucket-name/*.ndjson
+matches all
+.ndjson
+files in the root of your bucket but doesn't match files in subdirectories.
+Double Asterisk (
+**
+): matches zero or more characters across multiple directory levels, including
+/
+. It can cross directory boundaries recursively. For example:
+s3://bucket-name/**/*.ndjson
+matches all
+.ndjson
+files in the bucket, regardless of their directory depth.
+The file extension is required to accurately match the desired files in your pattern.
+Examples
+¶
+The following are examples of patterns you can use and whether they'd match the example file path:
+File path
+S3 File URI
+Will match?
+example.ndjson
+s3://bucket-name/*.ndjson
+Yes. Matches files in the root directory with the
+.ndjson
+extension.
+example.ndjson.gz
+s3://bucket-name/**/*.ndjson.gz
+Yes. Recursively matches
+.ndjson.gz
+files anywhere in the bucket.
+example.ndjson
+s3://bucket-name/example.ndjson
+Yes. Exact match to the file path.
+pending/example.ndjson
+s3://bucket-name/*.ndjson
+No.
+*
+doesn't cross directory boundaries.
+pending/example.ndjson
+s3://bucket-name/**/*.ndjson
+Yes. Recursively matches
+.ndjson
+files in any subdirectory.
+pending/example.ndjson
+s3://bucket-name/pending/example.ndjson
+Yes. Exact match to the file path.
+pending/example.ndjson
+s3://bucket-name/pending/*.ndjson
+Yes. Matches
+.ndjson
+files within the
+pending
+directory.
+pending/example.ndjson
+s3://bucket-name/pending/**/*.ndjson
+Yes. Recursively matches
+.ndjson
+files within
+pending
+and all its subdirectories.
+pending/example.ndjson
+s3://bucket-name/**/pending/example.ndjson
+Yes. Matches the exact path to
+pending/example.ndjson
+within any preceding directories.
+pending/example.ndjson
+s3://bucket-name/other/example.ndjson
+No. Does not match because the path includes directories which aren't part of the file's actual path.
+pending/example.ndjson.gz
+s3://bucket-name/pending/*.csv.gz
+No. The file extension
+.ndjson.gz
+doesn't match
+.csv.gz
+pending/o/inner/example.ndjson
+s3://bucket-name/*.ndjson
+No.
+*
+doesn't cross directory boundaries.
+pending/o/inner/example.ndjson
+s3://bucket-name/**/*.ndjson
+Yes. Recursively matches
+.ndjson
+files anywhere in the bucket.
+pending/o/inner/example.ndjson
+s3://bucket-name/**/inner/example.ndjson
+Yes. Matches the exact path to
+inner/example.ndjson
+within any preceding directories.
+pending/o/inner/example.ndjson
+s3://bucket-name/**/ex*.ndjson
+Yes. Recursively matches
+.ndjson
+files starting with
+ex
+at any depth.
+pending/o/inner/example.ndjson
+s3://bucket-name/**/**/*.ndjson
+Yes. Matches
+.ndjson
+files at any depth, even with multiple
+**
+wildcards.
+pending/o/inner/example.ndjson
+s3://bucket-name/pending/**/*.ndjson
+Yes. Matches
+.ndjson
+files within
+pending
+and all its subdirectories.
+pending/o/inner/example.ndjson
+s3://bucket-name/inner/example.ndjson
+No. Does not match because the path includes directories which aren't part of the file's actual path.
+pending/o/inner/example.ndjson
+s3://bucket-name/pending/example.ndjson
+No. Does not match because the path includes directories which aren't part of the file's actual path.
+pending/o/inner/example.ndjson.gz
+s3://bucket-name/pending/*.ndjson.gz
+No.
+*
+doesn't cross directory boundaries.
+pending/o/inner/example.ndjson.gz
+s3://bucket-name/other/example.ndjson.gz
+No. Does not match because the path includes directories which aren't part of the file's actual path.
+Considerations
+¶
+When using patterns:
+Use specific directory names or even specific file URIs to limit the scope of your search. The more specific your pattern, the narrower the search.
+Combine wildcards: you can combine
+**
+with other patterns to match files in subdirectories selectively. For example,
+s3://bucket-name/**/logs/*.ndjson
+matches
+.ndjson
+files within any logs directory at any depth.
+Avoid unintended matches: be cautious with
+**
+as it can match a large number of files, which might impact performance and return partial matches.
+To test your patterns and see a sample of your matching files before proceeding, use the
+Preview
+step in the Connector.
+Sample file URL
+¶
+When files that match the pattern you've provided exceed the file size limits of your plan, or when the preview step reaches request limits, Tinybird prompts you to provide a sample file URL.
+The sample file is used to infer the schema of the data, ensuring compatibility with the ingestion process. After the schema is inferred, all files matching the initial pattern are ingested.
+A sample file URL must point to a single file and must follow the full S3 URI format, including the bucket name and directory path. For example, if the initial bucket URI is
+s3://example-bucket-name/data/**/*.ndjson
+then the Sample file URL would be
+s3://example-bucket-name/data/2024-12-01/sample-file.ndjson
+.
+The following considerations apply:
+Make sure the sample file is representative of the overall dataset to avoid mismatched schemas during ingestion or quarantined data.
+When using compression format, for example .gz, make sure that the sample file is compressed in the same way as the other files in the dataset.
+After the preview, all files matching the pattern are ingested, not just the ones processed for the preview.
+Set up the connection
+¶
+You can set up an S3 connection using the UI or the CLI. The steps are as follows:
+Create a new Data Source in Tinybird.
+Create the AWS S3 connection.
+Configure the scheduling options and path/file names.
+Start ingesting the data.
+Load files using the CLI
+¶
+Before you can load files from Amazon S3 into Tinybird using the CLI, you must create a connection. Creating a connection grants your Tinybird Workspace the appropriate permissions to view files in Amazon S3.
+To create a connection, you need to use the Tinybird CLI version 3.8.3 or higher.
+Authenticate your CLI
+and switch to the desired Workspace.
+Follow these steps to create a connection:
+Run
+tb connection create s3_iamrole --policy read
+command and press
+y
+to confirm.
+Copy the suggested policy and replace the bucket placeholder
+<bucket>
+with your bucket name.
+In AWS, create a new policy in
+IAM
+,
+Policies (JSON)
+using the edited policy.
+Return to the Tinybird CLI, press
+y
+, and copy the next policy.
+In AWS, go to
+IAM
+,
+Roles
+and copy the new custom trust policy. Attach the policy you edited in the previous step.
+Return to the CLI, press
+y
+, and paste the ARN of the role you've created in the previous step.
+Enter the region of the bucket. For example,
+us-east-1
+.
+Provide a name for your connection in Tinybird.
+The
+--policy
+flag allows to switch between write (sink) and read (ingest) policies.
+Now that you've created a connection, you can add a Data Source to configure the import of files from Amazon S3.
+Configure the Amazon S3 import using the following options in your .datasource file:
+IMPORT_SERVICE
+: name of the import service to use, in this case,
+s3_iamrole
+.
+IMPORT_SCHEDULE
+: either
+@auto
+to ingest new files automatically, or
+@once
+to only execute manually.
+IMPORT_BUCKET_URI
+: a full bucket path, including the
+s3://
+protocol , bucket name, object path and an optional pattern to match against object keys. You can use patterns in the path to filter objects. For example, ending the path with
+*.csv
+matches all objects that end with the
+.csv
+suffix.
+IMPORT_CONNECTION_NAME
+: name of the S3 connection to use.
+IMPORT_FROM_TIMESTAMP
+: (optional) set the date and time from which to start ingesting files. Format is
+YYYY-MM-DDTHH:MM:SSZ
+.
+When Tinybird discovers new files, it appends the data to the existing data in the Data Source. Replacing data isn't supported.
+We don't support changing these settings after the data source is created. If you need to do that, you must:
+Remove the connection from the data source.
+Deploy the changes.
+Add the connection again with the new values.
+Deploy again.
+The following is an example of a .datasource file for S3:
+s3.datasource file
+DESCRIPTION >
+    Analytics events landing data source
+
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `session_id` String `json:$.session_id`,
+    `action` LowCardinality(String) `json:$.action`,
+    `version` LowCardinality(String) `json:$.version`,
+    `payload` String `json:$.payload`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SORTING_KEY "timestamp"
+ENGINE_TTL "timestamp + toIntervalDay(60)"
+
+IMPORT_SERVICE s3_iamrole
+IMPORT_CONNECTION_NAME connection_name
+IMPORT_BUCKET_URI s3://bucket-name/*.csv
+IMPORT_SCHEDULE @auto
+With your connection created and Data Source defined, you can now push your project to Tinybird using:
+tb push
+Load files using the UI
+¶
+1. Create a new Data Source
+¶
+In Tinybird, go to
+Data Sources
+and select
+Create Data Source
+.
+Select
+Amazon S3
+and enter the bucket name and region, then select
+Continue
+.
+2. Create the AWS S3 connection
+¶
+Follow these steps to create the connection:
+Open the AWS console and navigate to IAM.
+Create and name the policy using the provided copyable option.
+Create and name the role with the trust policy using the provided copyable option.
+Select
+Connect
+.
+Paste the connection name and ARN.
+3. Select the data
+¶
+Select the data you want to ingest by providing the
+S3 File URI
+and selecting
+Preview
+.
+You can also set the ingestion to start from a specific date and time, so that the ingestion process ignores all files added or updated before the set date and time:
+Select
+Ingest since ISO date and time
+.
+Write the desired date or datetime in the input, following the format
+YYYY-MM-DDTHH:MM:SSZ
+.
+4. Select scheduling option
+¶
+Select the way you want to get your data updated. Here you have two options:
+on-demand: Run the initial backfill. You can always trigger this process manually in both the UI and CLI, and Tinybird will perform another sync, starting from where you left it. This way, there will be no duplicate records in your data source.
+auto: Besides the initial backfill, Tinybird will detect new files uploaded to the bucket, upserts included.
+5. Preview and create
+¶
+The next screen shows a preview of the incoming data. You can review and modify any of the incoming columns, adjust their names, change their types, or delete them. You can also configure the name of the Data Source.
+After reviewing your incoming data, select
+Create Data Source
+. On the Data Source details page, you can see the sync history in the tracker chart and the current status of the connection.
+Syncing your data
+¶
+In case you go with the "on-demand" option for your scheduling, you can always trigger a "Sync now" event. You can trigger this action from the UI or from the CLI.
+Be careful when using
+IMPORT_SCHEDULE
+with
+@once
+. If you trigger a
+sync now
+event while simultaneously uploading a large file to S3, a race condition may cause data loss.
+When a file starts uploading, its
+creation_time
+is unset until the upload completes. If a sync
+runs during the upload, the file won't be processed. When the upload completes,
+creation_time
+is
+set to the time when the file started uploading, and thus future syncs won't process it as its
+creation_time
+is earlier than when the last sync ran.
+UI: Go to the
+Data Sources
+pane and select your S3 data source. Select
+More actions (⋯)
+and then select
+Sync now
+.
+CLI: Run
+tb datasource sync <datasource_name>
+. The command asks you if you really want to sync the data. Enter
+y
+.
+Schema evolution
+¶
+The S3 Connector supports adding new columns to the schema of the Data Source using the CLI.
+Non-backwards compatible changes, such as dropping, renaming, or changing the type of columns, aren't supported. Any rows from these files are sent to the
+quarantine Data Source
+.
+Iterate an S3 data source
+¶
+To iterate an S3 Data Source, use the Tinybird CLI and the
+version control integration
+to handle your resources.
+Create a connection using the CLI:
+tb auth # use the main Workspace admin Token
+tb connection create s3_iamrole
+To iterate an S3 Data Source through a Branch, create the Data Source using a connector that already exists. The S3 Connector doesn't ingest any data, as it isn't configured to work in Branches. To test it on CI, you can directly append the files to the Data Source.
+After you've merged it and are running CD checks, run
+tb datasource sync <datasource_name>
+to force the sync in the main Workspace.
+Best practices
+¶
+Choose the right ingestion method based on your data volume and frequency requirements:
+Use S3 connector when:
+¶
+File size
+: Your files are 1 GB or larger (minimum recommended)
+Frequency
+: You have less frequent batch ingestion needs
+Format
+: You're working with CSV, Parquet, or NDJSON files stored in S3
+Use case
+: Historical data loads, periodic batch processing, or large dataset ingestion
+Use Events API or Kafka connector when:
+¶
+Frequency
+: You need high-frequency, real-time data ingestion
+Throughput
+: You're sending thousands of requests per second
+File size
+: You're working with smaller, frequent data updates
+Use case
+: Real-time analytics, streaming data, or event-driven architectures
+The S3 connector uses Tinybird's
+ingestion API (
+/v0/datasources
+)
+, which isn't optimized for small, frequent inserts. For streaming use cases, consider:
+Events API
+: Direct HTTP ingestion for real-time events
+Kafka connector
+: For existing Kafka infrastructure
+Limits
+¶
+The following limits apply to the S3 Connector:
+When using the
+auto
+mode, Tinybird automatically detects new files uploaded to the bucket, upserts included.
+Tinybird ingests a maximum of 5 files per minute by default. This is a Workspace-level limit applied, so it's shared across all Data Sources. See
+Ingestion limits
+.
+The following limits apply to file size per type, per plan tier:
+File type
+Free/Dev plan
+Developer/Enterprise
+CSV
+10 GB
+32 GB
+NDJSON
+10 GB
+32 GB
+Parquet
+1 GB
+5 GB
+Monitoring
+¶
+If a sync finishes unsuccessfully, Tinybird adds a new event to
+datasources_ops_log
+:
+If all the files in the sync failed, the event has the
+result
+field set to
+error
+.
+If some files failed and some succeeded, the event has the
+result
+field set to
+partial-ok
+.
+Failures in syncs are atomic, meaning that if one file fails, no data from that file is ingested.
+A JSON object with the list of files that failed is included in the
+error
+field. Some errors can happen before the file list can be retrieved (for instance, an AWS connection failure), in which case there are no files in the
+error
+field. Instead, the
+error
+field contains the error message and the files to be retried in the next execution.
+In scheduled runs, Tinybird retries all failed files in the next executions, so that rate limits or temporary issues don't cause data loss. In on-demand runs, since there is no next execution, truncate the Data Source and sync again.
+You can distinguish between individual failed files and failed syncs by looking at the
+error
+field:
+If the
+error
+field contains a JSON object, the sync failed and the object contains the error message with the list of files that failed.
+If the
+error
+field contains a string, a file failed to ingest and the string contains the error message. You can see the file that failed by looking at the
+Options.Values
+field.
+For example, you can use the following query to see the sync error messages for the last day:
+SELECT JSONExtractString(error, 'message') message, *
+FROM tinybird.datasources_ops_log
+WHERE
+    datasource_id = '<datasource_id>'
+    AND timestamp > now() - INTERVAL 1 day
+    AND message IS NOT NULL
+ORDER BY timestamp DESC
+Updated
+3 weeks ago
+On this page
+S3 Connector
+Prerequisites
+Supported file types
+S3 file URI
+Examples
+Considerations
+Sample file URL
+Set up the connection
+Load files using the CLI
+Load files using the UI
+1. Create a new Data Source
+2. Create the AWS S3 connection
+3. Select the data
+4. Select scheduling option
+5. Preview and create
+Syncing your data
+Schema evolution
+Iterate an S3 data source
+Best practices
+Use S3 connector when:
+Use Events API or Kafka connector when:
+Limits
+Monitoring
+classic
+Ask AI

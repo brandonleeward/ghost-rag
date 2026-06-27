@@ -1,0 +1,296 @@
+Source: https://www.tinybird.co/docs/forward/get-data-in/connectors/gcs
+
+GCS Connector · Tinybird Docs
+Sign In
+Sign Up
+GCS connector
+¶
+Copy as MD
+You can set up a GCS connector to load your CSV, NDJSON, or Parquet files into Tinybird from any GCS bucket. Tinybird automatically ingests matching files on the first deployment, but does
+not
+detect new files afterwards. You must trigger subsequent ingestion manually.
+Setting up the GCS connector requires:
+Configuring a
+Service Account
+with these
+permissions
+in GCP.
+Defining a GCS Connection in your Tinybird project.
+Defining a Data Source that uses this Connection.
+Environment considerations
+¶
+In the Tinybird Cloud environment, Tinybird uses the Service Account credentials you provide to access your GCS bucket. When you deploy to your main Cloud Workspace, use
+tb --cloud deploy
+as usual.
+When you test GCS connector Data Sources in a Cloud Branch, include
+--with-connections
+so Tinybird creates the connector data linkers in the branch:
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb build --with-connections
+In branches and Tinybird Local, use sample imports to validate schemas and pipelines without syncing every matching file. See
+Import sample data
+.
+GCS permissions
+¶
+To authenticate Tinybird with GCS, you need a GCP service account key in JSON format with the
+Object Storage Viewer
+role.
+In the Google Cloud Console, create or use an existing service account.
+Assign the
+roles/storage.objectViewer
+role.
+Generate a JSON key file and download it.
+Store the key as a Tinybird secret in a
+.env.local
+file to work in local:
+GCS_KEY='<your-json-key-content>'
+Store the key in Cloud as a Tinybird secret:
+tb --cloud secret set GCS_KEY '<your-json-key-content>'
+Set up the connector
+¶
+1
+Create a GCS connection
+¶
+Define the GCS Connection in your project. For Tinybird CLI datafile projects,
+tb connection create gcs
+is a useful helper for generating a
+.connection
+file you can edit.
+Run the following command to create a connection:
+tb connection create gcs
+You will be prompted to enter:
+A name for your Connection.
+The GCS bucket name.
+The service account credentials (JSON key file). You can check
+Google Cloud docs
+for mode details.
+Whether to create the connection for your Cloud environment.
+You can also define the Connection manually:
+Tinybird CLI
+TypeScript SDK
+Python SDK
+connections/gcs_sample.connection
+TYPE gcs
+GCS_SERVICE_ACCOUNT_CREDENTIALS_JSON {{ tb_secret("GCS_KEY") }}
+Ensure your GCP Service Account has the
+roles/storage.objectViewer
+role.
+Use different Service Account keys for each environment leveraging
+Tinybird Secrets
+.
+2
+Create a GCS Data Source
+¶
+After setting up the Connection, create a Data Source that uses it. For Tinybird CLI datafile projects,
+tb datasource create --gcs
+is a useful helper for generating the
+.datasource
+file.
+tb datasource create --gcs
+Define the Data Source schema as with any other Data Source, then attach the GCS Connection. The connection name or object must match the Connection you created in the previous step.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+datasources/gcs_sample.datasource
+DESCRIPTION >
+    Analytics events landing data source
+
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `session_id` String `json:$.session_id`,
+    `action` LowCardinality(String) `json:$.action`,
+    `version` LowCardinality(String) `json:$.version`,
+    `payload` String `json:$.payload`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SORTING_KEY "timestamp"
+ENGINE_TTL "timestamp + toIntervalDay(60)"
+
+IMPORT_CONNECTION_NAME gcs_sample
+IMPORT_BUCKET_URI gs://my-bucket/*.csv
+IMPORT_SCHEDULE '@on-demand'
+3
+Sync data
+¶
+On the first deployment, Tinybird automatically ingests all files that match the
+IMPORT_BUCKET_URI
+pattern.
+@auto
+mode is not supported, so you must manually trigger subsequent syncs to ingest new files.
+To trigger a manual sync, use the API or the CLI.
+Using the API
+¶
+curl -X POST "https://<your_host>/v0/datasources/<datasource_name>/scheduling/runs" \
+  -H "Authorization: Bearer <your-tinybird-token>"
+Using the CLI
+¶
+tb datasource sync <datasource_name>
+.connection settings
+¶
+The GCS connector uses the following settings in .connection files:
+Instruction
+Required
+Description
+GCS_SERVICE_ACCOUNT_CREDENTIALS_JSON
+Yes
+Service Account Key in JSON format, inlined. We recommend using
+Tinybird Secrets
+.
+Once a Connection is used in a Data Source, you can't change the Service Account Key. To modify it, you must:
+Remove the Connection from the Data Source.
+Deploy the changes.
+Add the Connection again with the new values.
+.datasource settings
+¶
+The GCS connector uses the following settings in .datasource files:
+Instruction
+Required
+Description
+IMPORT_CONNECTION_NAME
+Yes
+Name given to the Connection inside Tinybird. For example,
+'my_connection'
+. This is the name of the connection file you created in the previous step.
+IMPORT_BUCKET_URI
+Yes
+Full bucket path, including the
+gs://
+protocol, bucket name, object path, and an optional pattern to match against object keys. For example,
+gs://my-bucket/my-path
+discovers all files in the bucket
+my-bucket
+under the prefix
+/my-path
+. You can use patterns in the path to filter objects, for example, ending the path with
+*.csv
+matches all objects that end with the
+.csv
+suffix.
+IMPORT_SCHEDULE
+Yes
+Use
+@on-demand
+to sync new files as needed. On the first deployment, Tinybird automatically ingests all matching files. After the initial ingestion, when you manually trigger a sync, Tinybird appends only the files added since the last execution. You can also use
+@once
+, which behaves the same as
+@on-demand
+.
+@auto
+mode is not supported; if you use this option, Tinybird only executes the initial sync.
+IMPORT_FROM_TIMESTAMP
+No
+Sets the date and time from which to start ingesting files on an GCS bucket. The format is
+YYYY-MM-DDTHH:MM:SSZ
+.
+We don't support changing these settings after the data source is created. If you need to do that, you must:
+Remove the Connection from the Data Source.
+Deploy the changes.
+Add the Connection again with the new values.
+Deploy again.
+Import sample data
+¶
+In branches and Tinybird Local, you can import a sample of files from GCS using the API. This is useful for validating schemas and testing pipelines without syncing all files from the bucket.
+curl -X POST "https://<your_host>/v0/datasources/my_datasource/sample" \
+  -H "Authorization: Bearer $TB_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"max_files": 1}'
+The sample import starts an asynchronous job that imports up to
+max_files
+files (maximum 10). The response includes a
+job_id
+that you can use to track progress:
+curl "https://<your_host>/v0/jobs/{job_id}?token=$TB_TOKEN"
+The sample import runs as a separate job and doesn't affect production sync state or offsets.
+GCS file URI
+¶
+Use GCS wildcards to match multiple files:
+*
+(single asterisk): Matches files at one directory level.
+Example:
+gs://bucket-name/*.ndjson
+(matches all
+.ndjson
+files in the root directory, but not in subdirectories).
+**
+(double asterisk): Recursively matches files across multiple directory levels.
+Example:
+gs://bucket-name/**/*.ndjson
+(matches all
+.ndjson
+files anywhere in the bucket).
+GCS does not allow overlapping ingestion paths. For example, you cannot have:
+gs://my_bucket/**/*.csv
+gs://my_bucket/transactions/*.csv
+Supported file types
+¶
+The GCS Connector supports the following formats:
+File Type | Accepted Extensions | Supported Compression
+CSV |
+.csv
+,
+.csv.gz
+|
+gzip
+NDJSON |
+.ndjson
+,
+.ndjson.gz
+,
+.jsonl
+,
+.jsonl.gz
+|
+gzip
+Parquet |
+.parquet
+,
+.parquet.gz
+|
+snappy
+,
+gzip
+,
+lzo
+,
+brotli
+,
+lz4
+,
+zstd
+JSON files must follow the
+Newline Delimited JSON (NDJSON)
+format. Each line must be a valid JSON object and must end with a
+\n
+character.
+Limitations
+¶
+No
+@auto
+mode
+: After the initial ingestion on first deployment, you must trigger subsequent ingestion manually.
+File format support
+: Only CSV, NDJSON, and Parquet are supported.
+Permissions
+: Ensure your service account has the correct role assigned.
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+GCS connector
+Environment considerations
+GCS permissions
+Set up the connector
+Create a GCS connection
+Create a GCS Data Source
+Sync data
+.connection settings
+.datasource settings
+Import sample data
+GCS file URI
+Supported file types
+Limitations
+forward
+Ask AI

@@ -1,0 +1,83 @@
+Source: https://www.tinybird.com/docs/classic/monitoring/latency
+
+Classic: Measure API endpoint latency · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Measure API endpoint latency
+¶
+Copy as MD
+Latency is the time it takes for a request to travel from the client to the server and back; the time it takes for a request to be sent and received. Latency is usually measured in seconds or milliseconds (ms). The lower the latency, the faster the response time.
+Latency is an essential metric to monitor in real-time applications. Read on to learn how latency is measured in Tinybird, and how to monitor and visualize the latency of your API endpoints when data is being retrieved.
+How latency is measured
+¶
+When measuring latency in an end-to-end application, you consider data ingestion, data transformation, and data retrieval. In Tinybird, latency is measured as the time it takes for a request to be sent, and the response to be sent back to the client.
+When calling an API endpoint, you can check this metric defined as
+elapsed
+in the
+statistics
+object of the response:
+Statistics object within an example Tinybird API endpoint call
+{
+  "meta": [ ... ],
+  "data": [ ... ],
+  "rows": 10,
+  "statistics": {
+    "elapsed": 0.001706275,
+    "rows_read": 10,
+    "bytes_read": 180
+  }
+}
+Monitor latency
+¶
+To monitor the latency of your API endpoints, use the
+pipe_stats_rt
+and
+pipe_stats
+Service data sources
+:
+pipe_stats_rt
+consists of the real-time statistics of your API endpoints, and has a
+duration
+field that encapsulates the latency time in seconds.
+pipe_stats
+contains the
+aggregated
+statistics of your API endpoints by date, and presents a
+avg_duration_state
+field which is the average duration of the API endpoint by day in seconds.
+Because the
+avg_duration_state
+field is an intermediate state, you'd need to merge it when querying the data source using something like
+avgMerge
+.
+For details on building pipes and endpoints that monitor the performance of your API endpoints using the
+pipe_stats_rt
+and
+pipe_stats
+data sources, follow the
+API endpoint performance guide
+.
+Visualize latency
+¶
+In your workspace, go to
+Time Series
+and select
+Endpoint performance
+to visualize the latency of your API endpoints over time.
+Next steps
+¶
+Read this blog on
+Monitoring global API latency
+.
+Updated
+4 weeks ago
+On this page
+Measure API endpoint latency
+How latency is measured
+Monitor latency
+Visualize latency
+Next steps
+classic
+Ask AI

@@ -1,0 +1,269 @@
+Source: https://www.tinybird.com/docs/classic/cli/data-projects
+
+Classic: Organize files in data projects · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Organize files in data projects
+¶
+Copy as MD
+A data project is a set of files that describes how your data must be stored, processed, and exposed through APIs.
+In the same way you maintain source code files in a repository, use a CI, make deployments, run tests, and so on, Tinybird provides tools to work following a similar pattern but with data pipelines. The source code of your project are the
+datafiles
+in Tinybird.
+With a data project you can:
+Define how the data should flow, from schemas to API Endpoints.
+Manage your datafiles using version control.
+Branch your datafiles.
+Run tests.
+Deploy data projects.
+Ecommerce site example
+¶
+Consider an ecommerce site where you have events from users and a list of products with their attributes. Your goal is to expose several API endpoints to return sales per day and top product per day.
+The data project file structure would look like the following:
+ecommerce_data_project/
+    datasources/
+        events.datasource
+        products.datasource
+        fixtures/
+            events.csv
+            products.csv
+    pipes/
+        top_product_per_day.pipe
+
+    endpoints/
+        sales.pipe
+        top_products.pipe
+To follow this tutorial, download and open the example using the following commands:
+Clone demo
+git clone https://github.com/tinybirdco/ecommerce_data_project.git
+cd ecommerce_data_project
+Upload the project
+¶
+You can push the whole project to your Tinybird account to check everything is fine. The
+tb push
+command uploads the data to Tinybird, previously checking the project dependencies and the SQL syntax. In this case, use the
+--push-deps
+flag to push everything:
+Push dependencies
+tb push --push-deps
+After the upload completes, the endpoints defined in our project,
+sales
+and
+top_products
+, are available and you can start pushing data to the different Data Sources.
+Define Data Sources
+¶
+Data Sources define how your data is ingested and stored. You can add data to Data Sources using the
+Data Sources API
+.
+Each Data Source is defined by a schema and other properties. See
+Datasource files
+.
+The following snippet shows the content of the
+event.datasource
+file from the ecommerce example:
+DESCRIPTION >
+    # Events from users
+    This contains all the events produced by Kafka, there are 4 fixed columns.
+    plus a `json` column which contains the rest of the data for that event.
+    See [documentation](url_for_docs) for the different events.
+
+SCHEMA >
+    timestamp DateTime,
+    product String,
+    user_id String,
+    action String
+    json String
+
+ENGINE MergeTree
+ENGINE_SORTING_KEY timestamp
+The file describes the schema and how the data is sorted. In this case, the access pattern is most of the time by the
+timestamp
+column. If no
+SORTING_KEY
+is set, Tinybird picks one by default, date or datetime columns in most cases.
+To push the Data Source, run:
+Push the events Data Source
+tb push datasources/events.datasource
+You can't override Data Sources. If you try to push a Data Source that already exists in your account you get an error. To override a Data Source, remove it or upload a new one with a different name.
+Define data Pipes
+¶
+The content of the
+pipes/top_product_per_day.pipe
+file creates a data Pipe that transforms the data as it's inserted:
+NODE only_buy_events
+DESCRIPTION >
+    filters all the buy events
+
+SQL >
+    SELECT
+        toDate(timestamp) date,
+        product,
+        JSONExtractFloat(json, 'price') AS price
+    FROM events
+    WHERE action = 'buy'
+
+
+NODE top_per_day
+SQL >
+   SELECT date,
+          topKState(10)(product) top_10,
+          sumState(price) total_sales
+    FROM only_buy_events
+    GROUP BY date
+
+TYPE materialized
+DATASOURCE top_per_day_mv
+ENGINE AggregatingMergeTree
+ENGINE_SORTING_KEY date
+Each Pipe can have one or more nodes. The previous Pipe defines two nodes,
+only_buy_events
+and
+top_per_day
+.
+The first node filters
+buy
+events and extracts some data from the
+json
+column.
+The second node runs the aggregation.
+In general, use
+NODE
+to start a new node and then use
+SQL >
+to define the SQL for that Node. You can use other nodes inside the SQL. In this case, the second node uses the first one
+only_buy_events
+.
+To push the Pipe, run:
+Populate
+tb push pipes/top_product_per_day.pipe --populate
+If you want to populate with the existing data in
+events
+table, use the
+--populate
+flag.
+When using the
+--populate
+flag you get a job URL so you can check the status of the job by checking the URL provided. See
+Populate and copy data
+for more information on how populate jobs work.
+Define API Endpoints
+¶
+API Endpoints are the way you expose the data to be consumed.
+The following snippet shows the content of the
+endpoints/top_products.pipe
+file:
+NODE endpoint
+DESCRIPTION >
+    returns top 10 products for the last week
+SQL >
+    SELECT
+        date,
+        topKMerge(10)(top_10) AS top_10
+    FROM top_per_day
+    WHERE date > today() - interval 7 day
+    GROUP BY date
+The syntax is the same as in the data transformation Pipes, though you can access the results through the
+{% user("apiHost") %}/v0/top_products.json?token=TOKEN
+endpoint.
+When you push an endpoint a Token with
+PIPE:READ
+permissions is automatically created. You can see it from the
+Tokens UI
+or directly from the CLI with the command
+tb pipe token_read <endpoint_name>
+.
+Alternatively, you can use the
+TOKEN token_name READ
+command to automatically create a Token with name
+token_name
+with
+READ
+permissions over the endpoint or add
+READ
+permissions to the existing
+token_name
+over the endpoint. For example:
+TOKEN public_read_token READ
+
+NODE endpoint
+DESCRIPTION >
+    returns top 10 products for the last week
+SQL >
+    SELECT
+        date,
+        topKMerge(10)(top_10) AS top_10
+    FROM top_per_day
+    WHERE date > today() - interval 7 day
+    GROUP BY date
+To push the endpoint, run:
+Push the top products Pipe
+tb push endpoints/top_products.pipe
+The Token
+public_read_token
+was created automatically and it's provided in the test URL.
+You can add parameters to any endpoint. For example, parametrize the dates to be able to filter the data between two dates:
+NODE endpoint
+DESCRIPTION >
+    returns top 10 products for the last week
+SQL >
+    %
+    SELECT
+        date,
+        topKMerge(10)(top_10) AS top_10
+    FROM top_per_day
+    WHERE date between {{Date(start)}} AND {{Date(end)}}
+    GRUP BY date
+Now, the endpoint can receive
+start
+and
+end
+parameters:
+{% user("apiHost") %}/v0/top_products.json?start=2018-09-07&end=2018-09-17&token=TOKEN
+.
+You can print the results from the CLI using the
+pipe data
+command. For instance, for the previous example:
+Print the results of the top products endpoint
+tb pipe data top_products --start '2018-09-07' --end '2018-09-17' --format CSV
+For the parameters templating to work you need to start your NODE SQL definition using the character
+%
+.
+Override an endpoint or a data Pipe
+¶
+When working on a project, you might need to push several versions of the same file. You can override a Pipe that has already been pushed using the
+--force
+flag. For example:
+Override the Pipe
+tb push endpoints/top_products_params.pipe --force
+If the endpoint has been called before, it runs regression tests with the most frequent requests. If the new version doesn't return the same data, then it's not pushed. You can see in the example how to run all the requests tested.
+You can force the push without running the checks using the
+--no-check
+flag if needed. For example:
+Force override
+tb push endpoints/top_products_params.pipe --force --no-check
+Downloading datafiles from Tinybird
+¶
+You can download datafiles using the
+pull
+command. For example:
+Pull a specific file
+tb pull --match endpoint_im_working_on
+The previous command downloads the
+endpoint_im_working_on.pipe
+to the current folder.
+Updated
+3 weeks ago
+On this page
+Organize files in data projects
+Ecommerce site example
+Upload the project
+Define Data Sources
+Define data Pipes
+Define API Endpoints
+Override an endpoint or a data Pipe
+Downloading datafiles from Tinybird
+classic
+Ask AI

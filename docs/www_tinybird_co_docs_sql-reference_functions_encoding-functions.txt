@@ -1,0 +1,615 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/encoding-functions
+
+Encoding Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Encoding functions
+¶
+Copy as MD
+These functions are used to encode and decode data.
+char
+¶
+Constructs a string from a sequence of numeric byte values. Each number is treated as a byte, and the function concatenates these bytes to form a string. If an argument's value is outside the range of a
+UInt8
+data type, it is converted with potential rounding or overflow.
+Syntax
+¶
+char(number_1, [number_2, ..., number_n])
+Arguments
+¶
+number_1, number_2, ..., number_n
+: Numerical arguments interpreted as integers. Types:
+Int
+,
+Float
+.
+Returns
+¶
+A string of given bytes.
+String
+.
+Example
+¶
+SELECT char(104.1, 101, 108.9, 108.9, 111) AS hello
+Result:
+┌─hello─┐
+│ hello │
+└───────┘
+hex
+¶
+Converts a given value into its hexadecimal string representation. The output uses uppercase letters A-F and does not include prefixes like
+0x
+.
+Syntax
+¶
+hex(arg)
+Arguments
+¶
+arg
+: A value to convert to hexadecimal. Types:
+String
+,
+UInt
+,
+Float
+,
+Decimal
+,
+Date
+or
+DateTime
+.
+Returns
+¶
+A string with the hexadecimal representation of the argument.
+String
+.
+Example
+¶
+SELECT hex(1)
+Result:
+┌─hex(1)─┐
+│ 01     │
+└────────┘
+unhex
+¶
+Converts a hexadecimal string back into its original binary string representation. It processes pairs of hexadecimal digits, interpreting them as byte values.
+Alias:
+UNHEX
+.
+Syntax
+¶
+unhex(arg)
+Arguments
+¶
+arg
+: A string containing any number of hexadecimal digits.
+String
+,
+FixedString
+.
+Returns
+¶
+A binary string (BLOB).
+String
+.
+Example
+¶
+SELECT unhex('303132'), UNHEX('4D7953514C')
+Result:
+┌─unhex('303132')─┬─unhex('4D7953514C')─┐
+│ 012             │ MySQL               │
+└─────────────────┴─────────────────────┘
+bin
+¶
+Converts a given value into its binary string representation. The output consists of '0's and '1's, representing the byte values.
+Alias:
+BIN
+.
+Syntax
+¶
+bin(arg)
+Arguments
+¶
+arg
+: A value to convert to binary.
+String
+,
+FixedString
+,
+UInt
+,
+Float
+,
+Decimal
+,
+Date
+, or
+DateTime
+.
+Returns
+¶
+A string with the binary representation of the argument.
+String
+.
+Example
+¶
+SELECT bin(14)
+Result:
+┌─bin(14)──┐
+│ 00001110 │
+└──────────┘
+unbin
+¶
+Converts a binary string back into its original binary string representation. It processes sequences of binary digits, interpreting them as byte values.
+Alias:
+UNBIN
+.
+Syntax
+¶
+unbin(arg)
+Arguments
+¶
+arg
+: A string containing any number of binary digits.
+String
+.
+Returns
+¶
+A binary string (BLOB).
+String
+.
+Example
+¶
+SELECT unbin('001100000011000100110010'), UNBIN('0100110101111001010100110101000101001100')
+Result:
+┌─unbin('001100000011000100110010')─┬─unbin('0100110101111001010100110101000101001100')─┐
+│ 012                               │ MySQL                                             │
+└───────────────────────────────────┴───────────────────────────────────────────────────┘
+bitPositionsToArray
+¶
+Takes an integer and returns an array containing the positions of all set (1) bits within its unsigned binary representation, ordered from least significant to most significant.
+Syntax
+¶
+bitPositionsToArray(arg)
+Arguments
+¶
+arg
+: Integer value.
+Int/UInt
+.
+Returns
+¶
+An array containing a list of positions of bits that equal
+1
+, in ascending order.
+Array
+(
+UInt64
+).
+Example
+¶
+SELECT bitPositionsToArray(toInt8(1)) AS bit_positions
+Result:
+┌─bit_positions─┐
+│ [0]           │
+└───────────────┘
+mortonEncode
+¶
+Calculates the Morton code (Z-order curve) for a set of unsigned integer coordinates. This function maps multi-dimensional data to a single dimension while preserving locality.
+The function has two modes of operation:
+Simple
+Expanded
+Simple mode
+¶
+Accepts up to 8 unsigned integers as arguments and produces a
+UInt64
+code.
+Syntax
+¶
+mortonEncode(args)
+Arguments
+¶
+args
+: Up to 8
+unsigned integers
+.
+Returns
+¶
+A
+UInt64
+code.
+Example
+¶
+SELECT mortonEncode(1, 2, 3)
+Result:
+┌─mortonEncode(1, 2, 3)─┐
+│                    53 │
+└───────────────────────┘
+Expanded mode
+¶
+Accepts a range mask (
+tuple
+) as a first argument and up to 8
+unsigned integers
+as other arguments. Each number in the mask configures the amount of range expansion (1x to 8x).
+Syntax
+¶
+mortonEncode(range_mask, args)
+Arguments
+¶
+range_mask
+: A
+tuple
+of integers (1-8) specifying expansion factors for each argument.
+args
+: Up to 8
+unsigned integers
+.
+Returns
+¶
+A
+UInt64
+code.
+Example
+¶
+SELECT mortonEncode((1,2), 1024, 16)
+Result:
+┌─mortonEncode(tuple(1, 2), 1024, 16)─┐
+│                             1572864 │
+└─────────────────────────────────────┘
+mortonDecode
+¶
+Decodes a Morton code (Z-order curve) back into its original unsigned integer coordinates. This is the inverse operation of
+mortonEncode
+.
+The function has two modes of operation:
+Simple
+Expanded
+Simple mode
+¶
+Accepts a resulting tuple size as the first argument and the code as the second argument.
+Syntax
+¶
+mortonDecode(tuple_size, code)
+Arguments
+¶
+tuple_size
+: An integer (1-8) indicating the number of dimensions to decode.
+code
+: The
+UInt64
+Morton code to decode.
+Returns
+¶
+A
+tuple
+of the specified size containing
+UInt64
+coordinates.
+Example
+¶
+SELECT mortonDecode(3, 53)
+Result:
+┌─mortonDecode(3, 53)─┐
+│ (1,2,3)             │
+└─────────────────────┘
+Expanded mode
+¶
+Accepts a range mask (
+tuple
+) as a first argument and the code as the second argument. Each number in the mask configures the amount of range shrink (1x to 8x).
+Syntax
+¶
+mortonDecode(range_mask, code)
+Arguments
+¶
+range_mask
+: A
+tuple
+of integers (1-8) specifying shrink factors for each dimension.
+code
+: The
+UInt64
+Morton code to decode.
+Returns
+¶
+A
+tuple
+of the specified size containing
+UInt64
+coordinates.
+Example
+¶
+SELECT mortonDecode(tuple(2), 32768)
+Result:
+┌─mortonDecode(tuple(2), 32768)─┐
+│ (128)                         │
+└───────────────────────────────┘
+hilbertEncode
+¶
+Calculates the Hilbert curve index for a set of up to two unsigned integer coordinates. This function maps multi-dimensional data to a single dimension, aiming to preserve locality better than Morton codes.
+The function has two modes of operation:
+Simple
+Expanded
+Simple mode
+¶
+Accepts up to 2 unsigned integers as arguments and produces a
+UInt64
+code.
+Syntax
+¶
+hilbertEncode(args)
+Arguments
+¶
+args
+: Up to 2
+unsigned integers
+.
+Returns
+¶
+A
+UInt64
+code.
+Example
+¶
+SELECT hilbertEncode(3, 4)
+Result:
+┌─hilbertEncode(3, 4)─┐
+│                  31 │
+└─────────────────────┘
+Expanded mode
+¶
+Accepts a range mask (
+tuple
+) as a first argument and up to 2
+unsigned integers
+as other arguments. Each number in the mask configures the number of bits by which the corresponding argument will be shifted left, effectively scaling the argument within its range.
+Syntax
+¶
+hilbertEncode(range_mask, args)
+Arguments
+¶
+range_mask
+: A
+tuple
+of integers specifying bit shifts for each argument.
+args
+: Up to 2
+unsigned integers
+.
+Returns
+¶
+A
+UInt64
+code.
+Example
+¶
+SELECT hilbertEncode((10,6), 1024, 16)
+Result:
+┌─hilbertEncode(tuple(10, 6), 1024, 16)─┐
+│                         4031541586602 │
+└───────────────────────────────────────┘
+hilbertDecode
+¶
+Decodes a Hilbert curve index back into a tuple of unsigned integers, representing coordinates in multi-dimensional space. This is the inverse operation of
+hilbertEncode
+.
+The function has two modes of operation:
+Simple
+Expanded
+Simple mode
+¶
+Accepts a resulting tuple size as the first argument and the code as the second argument.
+Syntax
+¶
+hilbertDecode(tuple_size, code)
+Arguments
+¶
+tuple_size
+: An integer (1-2) indicating the number of dimensions to decode.
+code
+: The
+UInt64
+Hilbert code to decode.
+Returns
+¶
+A
+tuple
+of the specified size containing
+UInt64
+coordinates.
+Example
+¶
+SELECT hilbertDecode(2, 31)
+Result:
+┌─hilbertDecode(2, 31)─┐
+│ (3,4)                │
+└──────────────────────┘
+Expanded mode
+¶
+Accepts a range mask (
+tuple
+) as a first argument and the code as the second argument. Each number in the mask configures the number of bits by which the corresponding argument will be shifted right, effectively scaling the argument within its range.
+Syntax
+¶
+hilbertDecode(range_mask, code)
+Arguments
+¶
+range_mask
+: A
+tuple
+of integers specifying bit shifts for each dimension.
+code
+: The
+UInt64
+Hilbert code to decode.
+Returns
+¶
+A
+tuple
+of the specified size containing
+UInt64
+coordinates.
+Example
+¶
+SELECT hilbertDecode(tuple(2), 32768)
+Result:
+┌─hilbertDecode(tuple(2), 32768)─┐
+│ (128)                          │
+└────────────────────────────────┘
+bitmapAnd
+¶
+Computes the logical conjunction of two bitmaps.
+Syntax
+¶
+bitmapAnd(bitmap, bitmap)
+Arguments
+¶
+bitmap
+– Bitmap object.
+Example
+¶
+SELECT bitmapToArray(bitmapAnd(bitmapBuild([1,2,3]),bitmapBuild([3,4,5]))) AS res
+Result:
+┌─res─┐
+│ [3] │
+└─────┘
+bitmapOr
+¶
+Computes the logical disjunction of two bitmaps.
+Syntax
+¶
+bitmapOr(bitmap, bitmap)
+Arguments
+¶
+bitmap
+– Bitmap object.
+Example
+¶
+SELECT bitmapToArray(bitmapOr(bitmapBuild([1,2,3]),bitmapBuild([3,4,5]))) AS res
+Result:
+┌─res─────────┐
+│ [1,2,3,4,5] │
+└─────────────┘
+bitmapXor
+¶
+Xor-s two bitmaps.
+Syntax
+¶
+bitmapXor(bitmap, bitmap)
+Arguments
+¶
+bitmap
+– Bitmap object.
+Example
+¶
+SELECT bitmapToArray(bitmapXor(bitmapBuild([1,2,3]),bitmapBuild([3,4,5]))) AS res
+Result:
+┌─res───────┐
+│ [1,2,4,5] │
+└───────────┘
+bitmapAndnot
+¶
+Computes the logical conjunction of two bitmaps and negates the result.
+Syntax
+¶
+bitmapAndnot(bitmap, bitmap)
+Arguments
+¶
+bitmap
+– Bitmap object.
+Example
+¶
+SELECT bitmapToArray(bitmapAndnot(bitmapBuild([1,2,3]),bitmapBuild([3,4,5]))) AS res
+Result:
+┌─res───┐
+│ [1,2] │
+└───────┘
+bitmapAndCardinality
+¶
+Returns the cardinality of the logical conjunction of two bitmaps.
+Syntax
+¶
+bitmapAndCardinality(bitmap, bitmap)
+Arguments
+¶
+bitmap
+– Bitmap object.
+Example
+¶
+SELECT bitmapAndCardinality(bitmapBuild([1,2,3]),bitmapBuild([3,4,5])) AS res
+Result:
+┌─res─┐
+│   1 │
+└─────┘
+bitmapOrCardinality
+¶
+Returns the cardinality of the logical disjunction of two bitmaps.
+bitmapOrCardinality(bitmap, bitmap)
+Arguments
+¶
+bitmap
+– Bitmap object.
+Example
+¶
+SELECT bitmapOrCardinality(bitmapBuild([1,2,3]),bitmapBuild([3,4,5])) AS res
+Result:
+┌─res─┐
+│   5 │
+└─────┘
+bitmapXorCardinality
+¶
+Returns the cardinality of the XOR of two bitmaps.
+bitmapXorCardinality(bitmap, bitmap)
+Arguments
+¶
+bitmap
+– Bitmap object.
+Example
+¶
+SELECT bitmapXorCardinality(bitmapBuild([1,2,3]),bitmapBuild([3,4,5])) AS res
+Result:
+┌─res─┐
+│   4 │
+└─────┘
+bitmapAndnotCardinality
+¶
+Returns the cardinality of the AND-NOT operation of two bitmaps.
+bitmapAndnotCardinality(bitmap, bitmap)
+Arguments
+¶
+bitmap
+– Bitmap object.
+Example
+¶
+SELECT bitmapAndnotCardinality(bitmapBuild([1,2,3]),bitmapBuild([3,4,5])) AS res
+Result:
+┌─res─┐
+│   2 │
+└─────┘
+Updated
+3 weeks ago
+On this page
+Encoding functions
+char
+hex
+unhex
+bin
+unbin
+bitPositionsToArray
+mortonEncode
+mortonDecode
+hilbertEncode
+hilbertDecode
+bitmapAnd
+bitmapOr
+bitmapXor
+bitmapAndnot
+bitmapAndCardinality
+bitmapOrCardinality
+bitmapXorCardinality
+bitmapAndnotCardinality
+forward
+classic
+Ask AI

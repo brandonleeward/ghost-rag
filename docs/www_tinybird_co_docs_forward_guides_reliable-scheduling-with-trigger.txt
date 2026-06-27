@@ -1,0 +1,92 @@
+Source: https://www.tinybird.com/docs/forward/guides/reliable-scheduling-with-trigger
+
+Reliable scheduling with Trigger.dev · Tinybird Docs
+Sign In
+Sign Up
+Reliable scheduling with Trigger.dev
+¶
+Copy as MD
+Trigger.dev
+is an open source background job platform. With Trigger.dev you can easily create, schedule, and manage background jobs using code.
+Read on to learn how to create complex, reliable scheduling with Trigger.dev.
+Before you start
+¶
+Before you start, ensure:
+You have a
+Trigger.dev account
+.
+You have a
+Tinybird workspace
+.
+Create your first trigger task
+¶
+The
+tinybird-trigger-tasks package
+implements tasks for Tinybird copy pipes and the Query API. You can
+find the source code in the @sdairs/tinybird-trigger repo
+.
+Create a working directory, and run
+npx trigger.dev@latest init
+to connect the project to Trigger.dev.
+Inside the
+trigger
+directory, install the npm package with
+npm install @sdairs/tinybird-trigger-tasks
+.
+Create a new file called
+myTask.ts
+and add the following code:
+import { task } from "@trigger.dev/sdk/v3";
+import { tinybirdCopyTask } from "@sdairs/tinybird-trigger-tasks";
+
+export const exampleExecutor = task({
+    id: "example-executor",
+    run: async (payload, { ctx }) => {
+        console.log("Example executor task is running");
+
+        // Run a copy job
+        const copyResult = await tinybirdCopyTask.triggerAndWait({ pipeId: <COPY_PIPE_ID> });
+        console.log(copyResult);
+
+    },
+});
+Create a new pipe using the following SQL:
+SELECT number + 1 AS value
+FROM numbers(100)
+Name the pipe
+my_copy
+and deploy the changes.
+Update
+myTask.ts
+, replacing
+<COPY_PIPE_ID>
+with the name of your pipe,
+my_copy
+in this case.
+Create a
+.env
+file in your directory root.
+Go to your Tinybird workspace and copy the Admin Token, then add it to the
+.env
+file as follows:
+TINYBIRD_TOKEN=p.eyJ...
+Run
+npx trigger.dev@latest dev
+to push the task to Trigger.dev.
+Go to your Trigger.dev dashboard, and perform a test run to trigger the task and the copy pipe.
+Go to your Tinybird workspace and check the copy pipe results.
+See also
+¶
+Trigger.dev quick start
+tinybird-trigger repo
+YouTube: Using Trigger.dev with Tinybird for code-first background job execution
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Reliable scheduling with Trigger.dev
+Before you start
+Create your first trigger task
+See also
+forward
+Ask AI

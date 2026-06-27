@@ -1,0 +1,162 @@
+Source: https://www.tinybird.com/docs/classic/get-started/tinybird-101-tutorial
+
+Classic: Tinybird 101 Tutorial · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Tinybird 101
+¶
+Copy as MD
+Tinybird provides you with a simple way to ingest and query large amounts of data with low latency, and instantly create API Endpoints to consume those queries. This means you can easily build fast and scalable applications that query your data.
+Example use case: ecommerce
+¶
+This walkthrough demonstrates how to build an API Endpoint that returns the top 10 most searched products in an ecommerce website. It follows the process of "ingest > query > publish".
+First, you ingest a set of ecommerce events based on user actions, such as viewing an item, adding items to their cart, or going through the checkout. This data is available as a CSV file with 50 million rows.
+Next, you write queries to filter, aggregate, and transform the data into the top 10 list.
+Finally, you publish that top 10 result as an HTTP Tinybird API Endpoint.
+Your first Workspace
+¶
+After
+creating your account
+, select a region, and name your Workspace. You can call the Workspace whatever you want. Leave the template menu blank.
+1
+Create a Data Source
+¶
+Tinybird can import data from many different sources. Start with a CSV file that Tinybird has posted online for you.
+In your Workspace, find the
+Data Sources
+section and select the
++
+icon to add a new Data Source.
+In the dialog that opens, select the
+Remote URL
+connector. Make sure that
+csv
+is selected, then paste the following URL into the text box:
+https://storage.googleapis.com/tinybird-assets/datasets/guides/events_50M_1.csv
+Select
+Add
+and give the Data Source a name and description. Tinybird also shows you a preview of the schema and data.
+Change the name to something more descriptive, for example
+shopping_data
+.
+Start the data import
+¶
+After setting the name of your first Data Source, select
+Create Data Source
+to start importing the data.
+You've ingested your first data. Now you can move on to creating your first Pipe.
+2
+Create a Pipe
+¶
+In Tinybird, SQL queries are written inside Pipes. One Pipe can be made up of many individual SQL queries called nodes. Each node is a single SQL SELECT statement. A node can query the output of another node in the same Pipe. This means that you can break large queries down into a multiple smaller, more modular, queries and chain them together.
+Add a new Pipe by selecting the
++
+icon next to the Pipes category. This adds a new Pipe with an auto-generated default name. Select the name and description to change it. Call this Pipe
+top_10_searched_products
+.
+Filter the data
+¶
+At the top of your new Pipe is the first node, which is prepopulated with a simple SELECT over the data in your Data Source. Before you start modifying the query in the node, select
+Run
+. Hitting
+Run
+executes the query in the node, and shows a preview of the query result. You can execute any node in your Pipe to see the result.
+In this Pipe, you want to create a list of the top 10 most searched products. If you take a look at the data, you might notice an
+event
+column, which describes what kind of event happened. This column has various values, including
+view
+,
+search
+, and
+buy
+. You are only interested in rows where the
+event
+is
+search
+, so modify the query to filter the rows.
+Replace the node SQL with the following query:
+SELECT * 
+FROM shopping_data
+WHERE event == 'search'
+Select
+Run
+again. The node is now applying a filter to the data, so you only see the rows of interest. Call this node
+search_events
+.
+Aggregate the data
+¶
+Next, you want to work out how many times each individual product has been searched for. To do this, you need to count and aggregate by the product id. To keep your queries simpler, create a second node to do this aggregation.
+Use the following query for the next node:
+SELECT product_id, count() as total 
+FROM search_events
+GROUP BY product_id
+ORDER BY total DESC
+Select
+Run
+again to see the results of the query. Call this node
+aggregate_by_product_id
+.
+3
+Transform the result
+¶
+Finally, create the last node that you are going to use to publish as a Tinybird API Endpoint and limit the results to the top 10 products.
+Create a third node and use the following query:
+SELECT product_id, total 
+FROM aggregate_by_product_id
+LIMIT 10
+Follow the common convention to name this node
+endpoint
+. Select
+Run
+to preview the results.
+4
+Publish and use your API Endpoint
+¶
+Tinybird API Endpoints are published directly from selected nodes. API Endpoints come with an extensive feature set, including support for dynamic query parameters and auto-generated docs complete with code samples.
+To publish a node as an API Endpoint, select
+Create API Endpoint
+, then select
+Endpoint
+.
+Test the API Endpoint
+¶
+On your API overview page, scroll down to the
+Sample
+usage section, and copy the HTTP URL from the snippet box. Open this URL in a new tab in your browser.
+Hitting the API Endpoint triggers your Pipe to execute, and you get a JSON formatted response with the results.
+5
+Build Charts showing your data
+¶
+On your API overview page, select
+Create Chart
+.
+You can also build Charts to embed in your own application. See the
+Charts documentation
+for more.
+6
+Celebrate
+¶
+Congrats! You have finished creating your first API Endpoint in Tinybird!
+You have imported 50 million events, built a variety of queries with latencies measured in milliseconds, and stood up an API Endpoint that can serve thousands of concurrent requests.
+Next steps
+¶
+Tinybird provides built-in connectors to easily ingest data from Kafka, Confluent Cloud, Big Query, and Amazon S3. If you want to stream data over HTTP, you can send data directly to Tinybird's
+Events API
+with no additional infrastructure.
+Updated
+1 month ago
+On this page
+Tinybird 101
+Example use case: ecommerce
+Your first Workspace
+Create a Data Source
+Create a Pipe
+Transform the result
+Publish and use your API Endpoint
+Build Charts showing your data
+Celebrate
+Next steps
+classic
+Ask AI

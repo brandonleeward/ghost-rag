@@ -1,0 +1,536 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/innodb/innodb-strict-mode
+
+InnoDB Strict Mode | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+InnoDB Introduction
+InnoDB File Format
+InnoDB Limitations
+AUTO_INCREMENT Handling in InnoDB
+Binary Log Group Commit and InnoDB Flushing Performance
+InnoDB Asynchronous I/O
+InnoDB Buffer Pool
+InnoDB Change Buffering
+InnoDB Data Scrubbing
+InnoDB Doublewrite Buffer
+InnoDB Flush Method
+InnoDB Lock Modes
+InnoDB Log Archiving
+InnoDB Monitors
+InnoDB Page Compression
+InnoDB Page Flushing
+InnoDB Purge
+InnoDB Undo Log
+InnoDB Redo Log
+InnoDB Strict Mode
+InnoDB System Variables
+InnoDB Versions
+InnoDB Architecture for MariaDB Enterprise Server
+InnoDB Online DDL
+InnoDB Row Formats
+InnoDB Tablespaces
+InnoDB Troubleshooting
+MariaDB Enterprise Server InnoDB Operations
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+InnoDB Strict Mode
+InnoDB Strict Mode enforces stricter SQL compliance, returning errors instead of warnings for invalid CREATE TABLE options or potential data loss.
+InnoDB
+strict mode is similar to
+SQL strict mode
+. When it is enabled, certain InnoDB warnings become errors instead.
+Configuring InnoDB Strict Mode
+InnoDB strict mode is enabled by default.
+InnoDB strict mode can be enabled or disabled by configuring the
+innodb_strict_mode
+server system variable.
+Its global value can be changed dynamically with
+SET GLOBAL
+:
+Copy
+SET
+GLOBAL
+innodb_strict_mode
+=
+ON
+;
+Its value for the current session can also be changed dynamically with
+SET SESSION
+:
+Copy
+SET
+SESSION
+innodb_strict_mode
+=
+ON
+;
+It can also be set in a server
+option group
+in an
+option file
+prior to starting up the server:
+Copy
+[mariadb]
+...
+innodb_strict_mode
+=
+ON
+InnoDB Strict Mode Errors
+Wrong Create Options
+If InnoDB strict mode is enabled, and if a DDL statement is executed and invalid or conflicting
+table options
+are specified, then an error is raised. The error will only be a generic error that says the following:
+However, more details about the error can be found by executing
+SHOW WARNINGS
+.
+For example, the error is raised in the following cases:
+The
+KEY_BLOCK_SIZE
+table option is set to a non-zero value, but the
+ROW_FORMAT
+table option is set to some row format other than the
+COMPRESSED
+row format:
+The
+KEY_BLOCK_SIZE
+table option is set to a non-zero value, but the configured value is larger than either
+16
+or the value of the
+innodb_page_size
+system variable, whichever is smaller.
+The
+KEY_BLOCK_SIZE
+table option is set to a non-zero value, but the
+innodb_file_per_table
+system variable is not set to
+ON
+.
+The
+KEY_BLOCK_SIZE
+table option is set to a non-zero value, but it is not set to one of the supported values: [1, 2, 4, 8, 16].
+The
+ROW_FORMAT
+table option is set to the
+COMPRESSED
+row format, but the
+innodb_file_per_table
+system variable is not set to
+ON
+.
+The
+ROW_FORMAT
+table option is set to a value, but it is not set to one of the values supported by InnoDB:
+REDUNDANT
+,
+COMPACT
+,
+DYNAMIC
+, and
+COMPRESSED
+.
+Either the
+KEY_BLOCK_SIZE
+table option is set to a non-zero value or the
+ROW_FORMAT
+table option is set to the
+COMPRESSED
+row format, but the
+innodb_page_size
+system variable is set to a value greater than
+16k
+.
+The
+DATA DIRECTORY
+table option is set, but the
+innodb_file_per_table
+system variable is not set to
+ON
+.
+The
+DATA DIRECTORY
+table option is set, but the table is a
+temporary table
+.
+The
+INDEX DIRECTORY
+table option is set.
+The
+PAGE_COMPRESSED
+table option is set to
+1
+, so
+InnoDB page compression
+is enabled, but the
+ROW_FORMAT
+table option is set to some row format other than the
+COMPACT
+or
+DYNAMIC
+row formats.
+The
+PAGE_COMPRESSED
+table option is set to
+1
+, so
+InnoDB page compression
+is enabled, but the
+innodb_file_per_table
+system variable is not set to
+ON
+.
+The
+PAGE_COMPRESSED
+table option is set to
+1
+, so
+InnoDB page compression
+is enabled, but the
+KEY_BLOCK_SIZE
+table option is also specified.
+The
+PAGE_COMPRESSION_LEVEL
+table option is set, but
+the
+PAGE_COMPRESSED
+table option is set to
+0
+, so
+InnoDB page compression
+is disabled.
+COMPRESSED Row Format
+If InnoDB strict mode is enabled, and if a table uses the
+COMPRESSED
+row format, and if the table's
+KEY_BLOCK_SIZE
+is too small to contain a row, then an error is returned by the statement.
+Row Size Too Large
+If InnoDB strict mode is enabled, and if a table exceeds its row format's
+maximum row size
+, then InnoDB will return an error.
+See
+Troubleshooting Row Size Too Large Errors with InnoDB
+for more information.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+InnoDB Redo Log
+Next
+InnoDB System Variables
+Last updated
+6 months ago
+Was this helpful?
+Configuring InnoDB Strict Mode
+InnoDB Strict Mode Errors
+Wrong Create Options
+COMPRESSED Row Format
+Row Size Too Large
+Was this helpful?
+Copy
+ERROR 1005 (HY000): Can't create table `db1`.`tab` (errno: 140 "Wrong create options")
+Copy
+SET SESSION innodb_strict_mode=ON;
+CREATE OR REPLACE TABLE tab (
+id INT PRIMARY KEY,
+str VARCHAR(50)
+)
+KEY_BLOCK_SIZE=4
+ROW_FORMAT=DYNAMIC;
+ERROR 1005 (HY000): Can't create table `db1`.`tab` (errno: 140 "Wrong create options")
+SHOW WARNINGS;
++---------+------+--------------------------------------------------------------------+
+| Level   | Code | Message                                                            |
++---------+------+--------------------------------------------------------------------+
+| Warning | 1478 | InnoDB: cannot specify ROW_FORMAT = DYNAMIC with KEY_BLOCK_SIZE.   |
+| Error   | 1005 | Can't create table `db1`.`tab` (errno: 140 "Wrong create options") |
+| Warning | 1030 | Got error 140 "Wrong create options" from storage engine InnoDB    |
++---------+------+--------------------------------------------------------------------+
+3 rows in set (0.000 sec)
+Copy
+SET SESSION innodb_strict_mode=ON;
+CREATE OR REPLACE TABLE tab (
+id INT PRIMARY KEY,
+str VARCHAR(50)
+)
+KEY_BLOCK_SIZE=16;
+ERROR 1005 (HY000): Can't create table `db1`.`tab` (errno: 140 "Wrong create options")
+SHOW WARNINGS;
++---------+------+--------------------------------------------------------------------+
+| Level   | Code | Message                                                            |
++---------+------+--------------------------------------------------------------------+
+| Warning | 1478 | InnoDB: KEY_BLOCK_SIZE=16 cannot be larger than 8.                 |
+| Error   | 1005 | Can't create table `db1`.`tab` (errno: 140 "Wrong create options") |
+| Warning | 1030 | Got error 140 "Wrong create options" from storage engine InnoDB    |
++---------+------+--------------------------------------------------------------------+
+3 rows in set (0.000 sec)
+Copy
+SET GLOBAL innodb_file_per_table=OFF;
+SET SESSION innodb_strict_mode=ON;
+CREATE OR REPLACE TABLE tab (
+id INT PRIMARY KEY,
+str VARCHAR(50)
+)
+KEY_BLOCK_SIZE=4;
+ERROR 1005 (HY000): Can't create table `db1`.`tab` (errno: 140 "Wrong create options")
+SHOW WARNINGS;
++---------+------+--------------------------------------------------------------------+
+| Level   | Code | Message                                                            |
++---------+------+--------------------------------------------------------------------+
+| Warning | 1478 | InnoDB: KEY_BLOCK_SIZE requires innodb_file_per_table.             |
+| Error   | 1005 | Can't create table `db1`.`tab` (errno: 140 "Wrong create options") |
+| Warning | 1030 | Got error 140 "Wrong create options" from storage engine InnoDB    |
++---------+------+--------------------------------------------------------------------+
+3 rows in set (0.000 sec)
+Copy
+SET SESSION innodb_strict_mode=ON;
+CREATE OR REPLACE TABLE tab (
+id INT PRIMARY KEY,
+str VARCHAR(50)
+)
+KEY_BLOCK_SIZE=5;
+ERROR 1005 (HY000): Can't create table `db1`.`tab` (errno: 140 "Wrong create options")
+SHOW WARNINGS;
++---------+------+-----------------------------------------------------------------------+
+| Level   | Code | Message                                                               |
++---------+------+-----------------------------------------------------------------------+
+| Warning | 1478 | InnoDB: invalid KEY_BLOCK_SIZE = 5. Valid values are [1, 2, 4, 8, 16] |
+| Error   | 1005 | Can't create table `db1`.`tab` (errno: 140 "Wrong create options")    |
+| Warning | 1030 | Got error 140 "Wrong create options" from storage engine InnoDB       |
++---------+------+-----------------------------------------------------------------------+
+3 rows in set (0.000 sec)
+Copy
+SET GLOBAL innodb_file_per_table=OFF;
+SET SESSION innodb_strict_mode=ON;
+CREATE OR REPLACE TABLE tab (
+id INT PRIMARY KEY,
+str VARCHAR(50)
+)
+ROW_FORMAT=COMPRESSED;
+ERROR 1005 (HY000): Can't create table `db1`.`tab` (errno: 140 "Wrong create options")
+SHOW WARNINGS;
++---------+------+--------------------------------------------------------------------+
+| Level   | Code | Message                                                            |
++---------+------+--------------------------------------------------------------------+
+| Warning | 1478 | InnoDB: ROW_FORMAT=COMPRESSED requires innodb_file_per_table.      |
+| Error   | 1005 | Can't create table `db1`.`tab` (errno: 140 "Wrong create options") |
+| Warning | 1030 | Got error 140 "Wrong create options" from storage engine InnoDB    |
++---------+------+--------------------------------------------------------------------+
+3 rows in set (0.000 sec)
+Copy
+SET SESSION innodb_strict_mode=ON;
+CREATE OR REPLACE TABLE tab (
+id INT PRIMARY KEY,
+str VARCHAR(50)
+)
+ROW_FORMAT=PAGE;
+ERROR 1005 (HY000): Can't create table `db1`.`tab` (errno: 140 "Wrong create options")
+SHOW WARNINGS;
++---------+------+--------------------------------------------------------------------+
+| Level   | Code | Message                                                            |
++---------+------+--------------------------------------------------------------------+
+| Warning | 1478 | InnoDB: invalid ROW_FORMAT specifier.                              |
+| Error   | 1005 | Can't create table `db1`.`tab` (errno: 140 "Wrong create options") |
+| Warning | 1030 | Got error 140 "Wrong create options" from storage engine InnoDB    |
++---------+------+--------------------------------------------------------------------+
+3 rows in set (0.000 sec)
+Copy
+SET SESSION innodb_strict_mode=ON;
+CREATE OR REPLACE TABLE tab (
+id INT PRIMARY KEY,
+str VARCHAR(50)
+)
+ROW_FORMAT=COMPRESSED;
+ERROR 1005 (HY000): Can't create table `db1`.`tab` (errno: 140 "Wrong create options")
+SHOW WARNINGS;
++---------+------+-----------------------------------------------------------------------+
+| Level   | Code | Message                                                               |
++---------+------+-----------------------------------------------------------------------+
+| Warning | 1478 | InnoDB: Cannot create a COMPRESSED table when innodb_page_size > 16k. |
+| Error   | 1005 | Can't create table `db1`.`tab` (errno: 140 "Wrong create options")    |
+| Warning | 1030 | Got error 140 "Wrong create options" from storage engine InnoDB       |
++---------+------+-----------------------------------------------------------------------+
+3 rows in set (0.00 sec)
+Copy
+SET GLOBAL innodb_file_per_table=OFF;
+SET SESSION innodb_strict_mode=ON;
+CREATE OR REPLACE TABLE tab (
+id INT PRIMARY KEY,
+str VARCHAR(50)
+)
+DATA DIRECTORY='/mariadb';
+ERROR 1005 (HY000): Can't create table `db1`.`tab` (errno: 140 "Wrong create options")
+SHOW WARNINGS;
++---------+------+--------------------------------------------------------------------+
+| Level   | Code | Message                                                            |
++---------+------+--------------------------------------------------------------------+
+| Warning | 1478 | InnoDB: DATA DIRECTORY requires innodb_file_per_table.             |
+| Error   | 1005 | Can't create table `db1`.`tab` (errno: 140 "Wrong create options") |
+| Warning | 1030 | Got error 140 "Wrong create options" from storage engine InnoDB    |
++---------+------+--------------------------------------------------------------------+
+3 rows in set (0.000 sec)
+Copy
+SET SESSION innodb_strict_mode=ON;
+CREATE OR REPLACE TEMPORARY TABLE tab (
+id INT PRIMARY KEY,
+str VARCHAR(50)
+)
+DATA DIRECTORY='/mariadb';
+ERROR 1005 (HY000): Can't create table `db1`.`tab` (errno: 140 "Wrong create options")
+SHOW WARNINGS;
++---------+------+--------------------------------------------------------------------+
+| Level   | Code | Message                                                            |
++---------+------+--------------------------------------------------------------------+
+| Warning | 1478 | InnoDB: DATA DIRECTORY cannot be used for TEMPORARY tables.        |
+| Error   | 1005 | Can't create table `db1`.`tab` (errno: 140 "Wrong create options") |
+| Warning | 1030 | Got error 140 "Wrong create options" from storage engine InnoDB    |
++---------+------+--------------------------------------------------------------------+
+3 rows in set (0.000 sec)
+Copy
+SET SESSION innodb_strict_mode=ON;
+CREATE OR REPLACE TABLE tab (
+id INT PRIMARY KEY,
+str VARCHAR(50)
+)
+INDEX DIRECTORY='/mariadb';
+ERROR 1005 (HY000): Can't create table `db1`.`tab` (errno: 140 "Wrong create options")
+SHOW WARNINGS;
++---------+------+--------------------------------------------------------------------+
+| Level   | Code | Message                                                            |
++---------+------+--------------------------------------------------------------------+
+| Warning | 1478 | InnoDB: INDEX DIRECTORY is not supported                           |
+| Error   | 1005 | Can't create table `db1`.`tab` (errno: 140 "Wrong create options") |
+| Warning | 1030 | Got error 140 "Wrong create options" from storage engine InnoDB    |
++---------+------+--------------------------------------------------------------------+
+3 rows in set (0.000 sec)
+Copy
+SET SESSION innodb_strict_mode=ON;
+CREATE OR REPLACE TABLE tab (
+id INT PRIMARY KEY,
+str VARCHAR(50)
+)
+PAGE_COMPRESSED=1
+ROW_FORMAT=COMPRESSED;
+ERROR 1005 (HY000): Can't create table `db1`.`tab` (errno: 140 "Wrong create options")
+SHOW WARNINGS;
++---------+------+--------------------------------------------------------------------+
+| Level   | Code | Message                                                            |
++---------+------+--------------------------------------------------------------------+
+| Warning |  140 | InnoDB: PAGE_COMPRESSED table can't have ROW_TYPE=COMPRESSED       |
+| Error   | 1005 | Can't create table `db1`.`tab` (errno: 140 "Wrong create options") |
+| Warning | 1030 | Got error 140 "Wrong create options" from storage engine InnoDB    |
++---------+------+--------------------------------------------------------------------+
+3 rows in set (0.000 sec)
+Copy
+SET GLOBAL innodb_file_per_table=OFF;
+SET SESSION innodb_strict_mode=ON;
+CREATE OR REPLACE TABLE tab (
+id INT PRIMARY KEY,
+str VARCHAR(50)
+)
+PAGE_COMPRESSED=1;
+ERROR 1005 (HY000): Can't create table `db1`.`tab` (errno: 140 "Wrong create options")
+SHOW WARNINGS;
++---------+------+--------------------------------------------------------------------+
+| Level   | Code | Message                                                            |
++---------+------+--------------------------------------------------------------------+
+| Warning |  140 | InnoDB: PAGE_COMPRESSED requires innodb_file_per_table.            |
+| Error   | 1005 | Can't create table `db1`.`tab` (errno: 140 "Wrong create options") |
+| Warning | 1030 | Got error 140 "Wrong create options" from storage engine InnoDB    |
++---------+------+--------------------------------------------------------------------+
+3 rows in set (0.000 sec)
+Copy
+SET SESSION innodb_strict_mode=ON;
+CREATE OR REPLACE TABLE tab (
+id INT PRIMARY KEY,
+str VARCHAR(50)
+)
+PAGE_COMPRESSED=1
+KEY_BLOCK_SIZE=4;
+ERROR 1005 (HY000): Can't create table `db1`.`tab` (errno: 140 "Wrong create options")
+SHOW WARNINGS;
++---------+------+--------------------------------------------------------------------+
+| Level   | Code | Message                                                            |
++---------+------+--------------------------------------------------------------------+
+| Warning |  140 | InnoDB: PAGE_COMPRESSED table can't have key_block_size            |
+| Error   | 1005 | Can't create table `db1`.`tab` (errno: 140 "Wrong create options") |
+| Warning | 1030 | Got error 140 "Wrong create options" from storage engine InnoDB    |
++---------+------+--------------------------------------------------------------------+
+3 rows in set (0.000 sec)
+Copy
+SET SESSION innodb_strict_mode=ON;
+CREATE OR REPLACE TABLE tab (
+id INT PRIMARY KEY,
+str VARCHAR(50)
+)
+PAGE_COMPRESSED=0
+PAGE_COMPRESSION_LEVEL=9;
+ERROR 1005 (HY000): Can't create table `db1`.`tab` (errno: 140 "Wrong create options")
+SHOW WARNINGS;
++---------+------+--------------------------------------------------------------------+
+| Level   | Code | Message                                                            |
++---------+------+--------------------------------------------------------------------+
+| Warning |  140 | InnoDB: PAGE_COMPRESSION_LEVEL requires PAGE_COMPRESSED            |
+| Error   | 1005 | Can't create table `db1`.`tab` (errno: 140 "Wrong create options") |
+| Warning | 1030 | Got error 140 "Wrong create options" from storage engine InnoDB    |
++---------+------+--------------------------------------------------------------------+
+3 rows in set (0.000 sec)
+Copy
+ERROR 1118 (42000): Row size too large (> 8126). Changing some columns to
+TEXT OR BLOB may help. IN current row format, BLOB prefix of 0 bytes IS stored inline.

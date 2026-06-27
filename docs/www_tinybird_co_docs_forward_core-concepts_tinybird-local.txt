@@ -1,0 +1,151 @@
+Source: https://www.tinybird.com/docs/forward/core-concepts/tinybird-local
+
+Tinybird Local · Tinybird Docs
+Sign In
+Sign Up
+Tinybird Local
+¶
+Copy as MD
+Tinybird Local is a containerized Tinybird runtime for development, testing, and CI. It runs on your machine and gives you the same project model you use in Tinybird Cloud: Data Sources, Pipes, Endpoints, Tokens, APIs, and local services.
+Use Tinybird Local when you want a fast, isolated environment with fixture data. Use
+Cloud Branches
+when you need a shared Cloud environment, production-like data, or connector validation before deployment.
+Prerequisites
+¶
+To install and run Tinybird Local, you need:
+A
+Tinybird account
+.
+Linux or macOS.
+A container runtime, such as Docker or OrbStack.
+OrbStack containers do not require extra configuration. Docker users should check the following settings:
+Apple Silicon
+: Enable Rosetta in
+Docker Desktop > Settings > General > Use Rosetta for x86/amd64 emulation on Apple Silicon
+. Without Rosetta, Docker falls back to QEMU emulation, which can be slower and less stable.
+Memory
+: Set Docker memory to at least 8 GB in
+Docker Desktop > Settings > Advanced > Memory
+.
+Install Tinybird
+¶
+Install the Tinybird CLI and Tinybird Local:
+For macOS and Linux
+For Windows
+curl https://tinybird.co | sh
+Authenticate with Tinybird Cloud:
+tb login
+This opens a browser window where you can sign in to Tinybird Cloud. If you need a specific region, see
+Regions and endpoints
+and pass the host to
+tb login
+.
+Start Tinybird Local
+¶
+Start Tinybird Local with the CLI:
+tb local start
+Run it in the background with
+--daemon
+:
+tb local start --daemon
+The CLI waits until the local services are ready. Do not start building your project until you see
+Tinybird Local is ready!
+.
+Stop Tinybird Local with
+Ctrl+C
+if it is running in the foreground, or with:
+tb local stop
+If Tinybird Local becomes unhealthy, restart it:
+tb local restart
+Services
+¶
+Tinybird Local starts the services needed to run a Tinybird project locally:
+ClickHouse: Stores data and runs queries.
+Redis: Stores user and Workspace metadata.
+Kafka consumer: Ingests data from Kafka topics into Data Sources.
+Events API server: Ingests HTTP events into Data Sources.
+Tinybird server: Exposes Tinybird APIs, such as authentication and Endpoints.
+Project server: Exposes your project to Tinybird UI.
+MCP server: Exposes your Workspace as tools for agents.
+The local API base URL is:
+http://localhost:7181/v0/
+For example, you can write to a local Events API Data Source:
+curl \
+  -X POST 'http://localhost:7181/v0/events?name=<your_datasource>' \
+  -H "Authorization: Bearer <your_token>" \
+  -d $'<your_data>'
+Persist local data
+¶
+By default, local state is tied to the Tinybird Local container. To persist data between development sessions, pass a custom volume path:
+tb local start --volumes-path <your/path>
+tb local stop
+does not remove local data.
+tb local restart
+recreates the local runtime. To return to an earlier local state, restart with a previous volume path:
+tb local restart --volumes-path ./tb_previous_snapshot
+Run with Docker directly
+¶
+The CLI is the recommended way to start Tinybird Local. If you need to run the container directly, use Docker:
+docker run --platform linux/amd64 -p 7181:7181 --name tinybird-local -d tinybirdco/tinybird-local:latest
+To connect the
+tb
+CLI to a manually started container, create a
+.tinyb
+file in your project directory:
+{
+  "name": "<your_workspace_name>"
+}
+Run with Docker Compose
+¶
+Use Docker Compose when you want explicit volume mounts for ClickHouse and metadata storage:
+docker-compose.yaml
+version: "3.8"
+services:
+  tinybird-local:
+    image: tinybirdco/tinybird-local:latest
+    container_name: tinybird-local
+    platform: linux/amd64
+    ports:
+      - "7181:7181"
+    volumes:
+      - ./data/data:/var/lib/clickhouse
+      - ./data/metadata:/redis-data
+    restart: unless-stopped
+Start it:
+docker compose up -d
+The
+./data/data
+directory stores ClickHouse data. The
+./data/metadata
+directory stores internal metadata.
+Local Tokens
+¶
+Tinybird Local can generate default user and Workspace Tokens for development and tests:
+tb local generate-tokens
+Pass generated Token values when starting Tinybird Local:
+tb local start --user-token=<USER_TOKEN> --workspace-token=<WORKSPACE_TOKEN>
+See
+Tinybird Local Tokens
+.
+Next steps
+¶
+Local development
+Cloud Branches
+Test your project
+Tinybird CLI commands
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Tinybird Local
+Prerequisites
+Install Tinybird
+Start Tinybird Local
+Services
+Persist local data
+Run with Docker directly
+Run with Docker Compose
+Local Tokens
+Next steps
+forward
+Ask AI

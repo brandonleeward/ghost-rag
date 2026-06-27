@@ -1,0 +1,150 @@
+Source: https://www.tinybird.com/docs/sql-reference/performance/merge-aggregations
+
+Merge aggregations troubleshooting · Tinybird Docs
+Sign In
+Sign Up
+Merge aggregations troubleshooting
+¶
+Copy as MD
+Common issues and solutions for merge aggregation performance in ClickHouse and Tinybird.
+ClickHouse SQL Reference
+: The examples in this page use standard ClickHouse SQL syntax and settings. Some statements like
+CREATE TABLE
+,
+CREATE MATERIALIZED VIEW
+,
+INSERT
+, and
+SETTINGS
+clauses are not supported in Tinybird. For Tinybird-specific guidance, see the
+Tinybird optimization guides
+.
+Found an issue with this documentation? Report it via the chat widget in the bottom right corner.
+Common issues
+¶
+Inefficient merge operations
+¶
+Issue
+: Merging large datasets without proper optimization
+Solution
+: Use appropriate merge strategies
+-- Use optimized merge for large datasets
+SELECT
+  user_id,
+  sumMerge(value_sum) as total_value,
+  countMerge(value_count) as total_count
+FROM aggregated_events
+GROUP BY user_id
+Memory pressure during merges
+¶
+Issue
+: Merge operations consuming too much memory
+Solution
+: Process merges in chunks by filtering data
+-- Process merges in chunks by date ranges
+SELECT * FROM aggregated_events
+WHERE date BETWEEN '2023-01-01' AND '2023-01-07'
+Performance optimization
+¶
+Pre-aggregation strategies
+¶
+Issue
+: Aggregating data at query time instead of ingestion time
+Solution
+: Use Materialized Views to pre-aggregate at ingestion time
+-- Create Materialized View to pre-aggregate on ingestion
+CREATE MATERIALIZED VIEW daily_stats
+ENGINE = SummingMergeTree()
+ORDER BY (user_id, date)
+AS SELECT
+  user_id,
+  toDate(timestamp) as date,
+  sum(value) as daily_value,
+  count() as daily_count
+FROM events
+GROUP BY user_id, toDate(timestamp)
+This shifts aggregation from query time to ingestion time, significantly improving query performance.
+Using materialized views
+¶
+Issue
+: Complex merge operations on large datasets
+Solution
+: Use materialized views for common aggregations
+-- Create materialized view for common aggregations
+CREATE MATERIALIZED VIEW daily_stats
+ENGINE = SummingMergeTree()
+ORDER BY (user_id, date)
+AS SELECT
+  user_id,
+  toDate(timestamp) as date,
+  sum(value) as total_value,
+  count() as event_count
+FROM events
+GROUP BY user_id, toDate(timestamp)
+Merge patterns
+¶
+Handling duplicates
+¶
+Issue
+: Duplicate data in merge operations
+Solution
+: Use appropriate merge engines
+-- Use ReplacingMergeTree for deduplication
+CREATE TABLE events_deduped
+ENGINE = ReplacingMergeTree()
+ORDER BY (user_id, timestamp)
+AS SELECT * FROM events
+Using -Merge functions efficiently
+¶
+Issue
+: Using -Merge functions too early in the pipeline
+Solution
+: Use -Merge functions as late as possible in the query pipeline
+-- Use -Merge late in pipeline, after filtering
+SELECT
+  user_id,
+  countMerge(event_count) as total_events,
+  sumMerge(value_sum) as total_value
+FROM aggregated_events
+WHERE date >= today() - 7
+GROUP BY user_id
+The -Merge operation computes aggregated results from intermediate states. Using it late reduces the amount of data processed during the merge operation.
+Best practices
+¶
+Pre-aggregate with Materialized Views
+- Shift aggregations from query time to ingestion time
+Use -Merge functions late
+- Apply -Merge combinators as late as possible in the query pipeline
+Use appropriate engines
+- Choose merge engines (SummingMergeTree, AggregatingMergeTree) based on use case
+Filter before merging
+- Apply WHERE clauses before using -Merge functions
+Monitor merge performance
+- Track merge operation metrics and read_bytes/write_bytes ratios
+Related documentation
+¶
+Fix common mistakes
+- Source of truth for pre-aggregation
+SQL best practices
+- Best practices for merge aggregate functions
+Query optimization
+Performance monitoring
+Common error patterns
+Updated
+4 weeks ago
+On this page
+Merge aggregations troubleshooting
+Common issues
+Inefficient merge operations
+Memory pressure during merges
+Performance optimization
+Pre-aggregation strategies
+Using materialized views
+Merge patterns
+Handling duplicates
+Using -Merge functions efficiently
+Best practices
+Related documentation
+forward
+classic
+Ask AI

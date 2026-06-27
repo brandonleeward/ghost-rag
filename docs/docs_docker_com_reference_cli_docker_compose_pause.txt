@@ -1,0 +1,29 @@
+Source: https://docs.docker.com/reference/cli/docker/compose/pause/
+
+docker compose pause | Docker Docs
+Gordon
+Gordon, your AI assistant for Docker docs
+Search
+Start a new chat
+When enabled, Gordon considers the current page you're viewing
+to provide more relevant answers.
+Share feedback
+Answers are generated based on the documentation.
+Back
+Reference
+Get started
+Guides
+Manuals
+docker compose pause
+Ask Gordon
+Copy Markdown
+View Markdown
+Description
+Pause services
+Usage
+docker compose pause [SERVICE...]
+Description
+Pauses running containers of a service. They can be unpaused with
+docker compose unpause
+.
+Table of contents

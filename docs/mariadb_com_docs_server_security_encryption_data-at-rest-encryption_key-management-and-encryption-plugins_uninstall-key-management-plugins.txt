@@ -1,0 +1,78 @@
+Source: https://mariadb.com/docs/server/security/encryption/data-at-rest-encryption/key-management-and-encryption-plugins/uninstall-key-management-plugins
+
+Uninstall Key Management Plugins | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Security
+Securing MariaDB
+Encryption
+TLS and Cryptography Libraries
+Data-in-Transit Encryption
+Data-at-Rest Encryption
+Data-at-Rest Encryption (TDE) Fundamentals
+Managing Binary Log Encryption
+Aria Encryption
+InnoDB Encryption
+Key Management and Encryption Plugins
+Encryption Key Management
+File Key Management Encryption Plugin
+AWS Key Management Encryption Plugin
+Amazon Web Services (AWS) Key Management Service (KMS) Encryption Plugin Advanced Usage
+Amazon Web Services (AWS) Key Management Service (KMS) Encryption Plugin Setup Guide
+Hashicorp Key Management Plugin
+Uninstall Key Management Plugins
+User Account Management
+Authentication with Enterprise Server
+Limiting Size of Created Disk Temporary Files and Tables
+Security Vulnerabilities (CVE) Fixed in MariaDB
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Uninstall Key Management Plugins
+Final step of removing key management plugins from the configuration once all data and logs have been confirmed as unencrypted.
+Once all data and logs have been decrypted, you can safely remove key management plugins, if desired. For example, if using the file key management plugin:
+Copy
+#
+Comment out or remove the following lines
+plugin_load_add
+=
+file_key_management
+file_key_management_filename
+=
+/etc/mysql/encryption/keyfile
+Restart the server after editing the configuration.
+Ensure that all tables no longer report encryption in
+CREATE_OPTIONS
+.
+Confirm that redo logs and binary logs are unencrypted by checking server variables and log headers.
+Confirm that no key management plugin is loaded:
+Copy
+SHOW PLUGINS;
+Previous
+Hashicorp Key Management Plugin
+Next
+User Account Management
+Last updated
+2 months ago
+Was this helpful?
+Was this helpful?

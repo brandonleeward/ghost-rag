@@ -1,0 +1,214 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-datasource
+
+tb datasource · Tinybird Docs
+Sign In
+Sign Up
+tb datasource
+¶
+Copy as MD
+Manages data sources. Global options apply to this command. See
+Global options
+.
+The following subcommands are available:
+Subcommand
+Description
+create [OPTIONS]
+Creates a new .datasource file from a URL, local file or a connector.
+analyze URL_OR_FILE
+Analyzes a URL or a file before creating a new data source.
+append DATASOURCE_NAME [OPTIONS]
+Appends data to an existing data source from URL, local file or via Events API. For example,
+tb datasource append my_datasource --url https://my_url.com
+.
+data
+Prints data from a data source.
+delete [OPTIONS] DATASOURCE_NAME
+Deletes specific rows from a data source given a SQL condition.
+export [OPTIONS] DATASOURCE_NAME
+Exports data from a data source to a local file in CSV or NDJSON format.
+ls [OPTIONS]
+Lists data sources.
+replace DATASOURCE_NAME URL
+Replaces the data in a data source from a URL, local file or a connector.
+start DATASOURCE_NAME
+Starts Kafka ingestion for a Data Source.
+stop DATASOURCE_NAME
+Stops Kafka ingestion for a Data Source.
+sync [OPTIONS] DATASOURCE_NAME
+Syncs from connector defined in .datasource file.
+truncate [OPTIONS] DATASOURCE_NAME
+Truncates a data source.
+tb datasource create
+¶
+Creates a new .datasource file. Opens a wizard if no arguments are provided.
+Option
+Description
+--name TEXT
+Name of the data source
+--blank
+Create a blank data source
+--file TEXT
+Create a data source from a local file
+--url TEXT
+Create a data source from a remote URL
+--connection-name TEXT
+Create a data source from a connection
+--s3
+Create a data source from a S3 connection
+--gcs
+Create a data source from a GCS connection
+--kafka
+Create a data source from a Kafka connection
+tb datasource analyze
+¶
+Analyzes a URL or a local file before creating a new data source. It prints the column names, data type and nullable status of each column, and the SQL schema of the data file.
+For example,
+tb datasource analyze telemetry.ndjson
+will return the following:
+name
+type
+nullable
+altitude
+Float64
+false
+latitude
+Float32
+false
+longitude
+Float32
+false
+name
+String
+false
+timestamp
+DateTime64
+false
+altitude Float64 `json:$.altitude`, latitude Float32 `json:$.latitude`, longitude Float32 `json:$.longitude`, name String `json:$.name`, timestamp DateTime64 `json:$.timestamp`
+tb datasource append
+¶
+Appends data to an existing data source from URL, local file  or a connector.
+Option
+Description
+--url TEXT
+URL to append data from
+--file TEXT
+Local file to append data from
+--events TEXT
+Events to append data from TEXT in NDJSON format
+-h, --help
+Explains append command and options
+tb datasource data
+¶
+Prints data from a data source.
+Option
+Description
+--limit INTEGER
+Limits the number of rows to return
+tb datasource delete
+¶
+Deletes rows from a data source with SQL condition. For example:
+tb datasource delete [datasource_name] --sql-condition "country='ES'"
+Option
+Description
+--yes
+Does not ask for confirmation
+--wait
+Waits for delete job to finish
+--dry-run
+Runs the command without deleting anything
+tb datasource export
+¶
+Exports data from a data source to a local file in CSV or NDJSON format.
+For example:
+Export all rows as CSV:
+tb datasource export my_datasource
+Export 1000 rows as NDJSON:
+tb datasource export my_datasource --format ndjson --rows 1000
+Export to specific file:
+tb datasource export my_datasource --target ./data/export.csv
+Option
+Description
+--format [csv|ndjson]
+Output format (CSV or NDJSON)
+--rows INTEGER
+Number of rows to export (default: 100)
+--where TEXT
+Condition to filter data
+--target TEXT
+Target file path. Default is
+datasource_name.{format}
+-h, --help
+Explains export commmand and options
+tb datasource ls
+¶
+Lists data sources.
+Option
+Description
+--match TEXT
+Retrieves any resource matching the pattern
+--format [json]
+Returns the results in the specified format
+tb datasource sync
+¶
+Sync data source to S3 bucket.
+Option
+Description
+--yes
+Does not ask for confirmation
+tb datasource start
+¶
+Starts Kafka ingestion for a Data Source. Only available for Kafka-connected Data Sources in branches or Tinybird Local.
+Once started, data is ingested from the Kafka topic. In branches, this creates a new consumer group and starts ingestion from the latest offset. In Tinybird Local, ingestion resumes from the last committed offset.
+tb [--branch=BRANCH_NAME] datasource start my_kafka_datasource
+Because each start creates a new consumer group, previous consumer groups become orphaned. Depending on your Kafka cluster's consumer group TTL (
+offsets.retention.minutes
+), these orphan groups may persist until they expire. This is expected behavior for ephemeral branch environments.
+tb datasource stop
+¶
+Stops Kafka ingestion for a Data Source. Only available for Kafka-connected Data Sources in branches or Tinybird Local.
+Once stopped, no new data is ingested from the Kafka topic until the Data Source is started again.
+tb [--branch=BRANCH_NAME] datasource stop my_kafka_datasource
+tb datasource truncate
+¶
+Truncates a data source. For example,
+tb datasource truncate my_datasource
+.
+Option
+Description
+--yes
+Does not ask for confirmation
+--cascade
+Truncates the dependent data source attached in cascade to the given data source
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✓ Yes (default)
+Manages data sources in Tinybird Local.
+--cloud
+✓ Yes
+Manages data sources in Tinybird Cloud.
+--branch=BRANCH_NAME
+✓ Yes
+Manages data sources in a branch.
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+tb datasource
+tb datasource create
+tb datasource analyze
+tb datasource append
+tb datasource data
+tb datasource delete
+tb datasource export
+tb datasource ls
+tb datasource sync
+tb datasource start
+tb datasource stop
+tb datasource truncate
+Environment support
+forward
+Ask AI

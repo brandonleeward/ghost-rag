@@ -1,0 +1,179 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/machine-learning-with-mindsdb
+
+Machine Learning with MindsDB | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Machine Learning with MindsDB
+Learn how to integrate MindsDB with MariaDB to train and query machine learning models directly using standard SQL commands.
+Overview
+MindsDB
+is a third-party application that interfaces with MariaDB Server to provide Machine Learning capabilities through SQL. The interface is done via the
+Connect Storage Engine
+.
+Installation
+To get a functional MariaDB - MindsDB installation, one needs to install the following components:
+MindsDB: follow the instructions in the project's
+official documentation
+.
+Connect Storage Engine must be enabled for the integration to work. See
+installing the connect storage engine
+.
+MindsDB connects to MariaDB Server via a regular user to setup a dedicated database called
+mindsdb
+. Which user are used is specified within MindsDB's
+configuration file
+.
+For example, if MindsDB is installed locally, one can create a user called
+mindsdb@localhost
+. MindsDB only authenticates via the
+mysql_native_password
+plugin, hence one must set a password for the user:
+Copy
+CREATE
+USER
+mindsdb
+@localhost;
+SET
+PASSWORD
+FOR
+mindsdb@localhost
+=
+PASSWORD
+(
+"
+password
+"
+);
+The user must be granted the global
+FILE
+privilege and all privileges on the
+mindsdb
+database.
+Copy
+GRANT
+FILE
+ON
+*
+.
+*
+TO
+mindsdb@localhost;
+GRANT
+ALL
+ON
+mindsdb.
+*
+TO
+mindsdb@localhost;
+Assuming MindsDB is in the python path one can start up MindsDB with the following parameters:
+Copy
+python
+-m
+mindsdb
+--config=
+$CONFIG_PATH
+--api=http,mysql
+Make sure
+$CONFIG_PATH
+points to the appropriate MindsDB configuration file.
+Usage
+Always consult the project's
+official documentation
+for up-to-date usage scenarios as MindsDB is an actively developed project.
+For a step-by-step example, you can consult the following
+blog post
+.
+If the connection between MindsDB and MariaDB is successful, you should see the
+mindsdb
+database present and two tables within it:
+commands
+and
+predictors
+.
+MindsDB, as an AutoML framework does all the work when it comes to training the AI model. What is necessary is to pass it the initial data, which MindsDB retrieves via a SELECT statement. This can be done by inserting into the
+predictors
+table.
+The values inserted into predictors act as a command instructing MindsDB to:
+Train a model called 'bikes_model'
+From the input data, learn to predict the 'count' column.
+The input data is generated via the select statement 'SELECT * FROM test.bike_data'.
+The
+select_data_query
+should be a valid select that MindsDB can run against MariaDB.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Converting Tables from MyISAM to InnoDB
+Next
+Legacy Storage Engines
+Last updated
+5 months ago
+Was this helpful?
+Overview
+Installation
+Usage
+Was this helpful?
+Copy
+INSERT INTO `predictors`
+(`name`, `predict`, `select_data_query`)
+VALUES ('bikes_model', 'count', 'SELECT * FROM test.bike_data');

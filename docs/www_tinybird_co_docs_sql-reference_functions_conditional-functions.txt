@@ -1,0 +1,320 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/conditional-functions
+
+Conditional Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Conditional functions
+¶
+Copy as MD
+The following functions are used to perform conditional logic.
+if
+¶
+This function evaluates a condition and returns one of two expressions based on whether the condition is true or false. It provides a way to implement basic conditional logic within a query.
+Syntax
+¶
+if(cond, then, else)
+Alias:
+cond ? then : else
+(ternary operator)
+Arguments
+¶
+cond
+: The condition to evaluate. It should resolve to a
+UInt8
+,
+Nullable(UInt8)
+, or
+NULL
+. A non-zero value is considered true, while zero or
+NULL
+is considered false.
+then
+: The expression to return if
+cond
+is true.
+else
+: The expression to return if
+cond
+is false or
+NULL
+.
+Returns
+¶
+The result of either the
+then
+or
+else
+expression, depending on the evaluation of
+cond
+. The return type will be a common supertype of
+then
+and
+else
+expressions.
+Example
+¶
+SELECT if(1, plus(2, 2), plus(2, 6))
+Result:
+┌─plus(2, 2)─┐
+│          4 │
+└────────────┘
+multiIf
+¶
+This function allows for multiple conditional checks, similar to a
+CASE
+statement, returning the result of the first condition that evaluates to true. If no conditions are met, it returns a default
+else
+value.
+Syntax
+¶
+multiIf(cond_1, then_1, cond_2, then_2, ..., else)
+Arguments
+¶
+The function accepts
+2N+1
+parameters:
+cond_N
+: The N-th condition to evaluate.
+then_N
+: The expression to return if
+cond_N
+is true and all preceding conditions were false.
+else
+: The expression to return if none of the
+cond_N
+conditions are true.
+Returns
+¶
+The result of the
+then_N
+expression corresponding to the first true
+cond_N
+, or the
+else
+expression if no conditions are met. The return type will be a common supertype of all
+then_N
+and
+else
+expressions.
+Example
+¶
+Assuming this table:
+┌─left─┬─right─┐
+│ ᴺᵁᴸᴸ │     4 │
+│    1 │     3 │
+│    2 │     2 │
+│    3 │     1 │
+│    4 │  ᴺᵁᴸᴸ │
+└──────┴───────┘
+SELECT
+    left,
+    right,
+    multiIf(left < right, 'left is smaller', left > right, 'left is greater', left = right, 'Both equal', 'Null value') AS result
+FROM LEFT_RIGHT
+Result:
+┌─left─┬─right─┬─result──────────┐
+│ ᴺᵁᴸᴸ │     4 │ Null value      │
+│    1 │     3 │ left is smaller │
+│    2 │     2 │ Both equal      │
+│    3 │     1 │ left is greater │
+│    4 │  ᴺᵁᴸᴸ │ Null value      │
+└──────┴───────┴─────────────────┘
+Using Conditional Results Directly
+¶
+Conditional expressions in Tinybird, such as comparisons (
+<
+,
+>
+,
+=
+), always resolve to
+0
+(false),
+1
+(true), or
+NULL
+. This allows you to use the direct result of a conditional expression where a boolean or integer value is expected.
+Example
+¶
+SELECT left < right AS is_small
+FROM LEFT_RIGHT
+Result:
+┌─is_small─┐
+│     ᴺᵁᴸᴸ │
+│        1 │
+│        0 │
+│        0 │
+│     ᴺᵁᴸᴸ │
+└──────────┘
+NULL Values in Conditionals
+¶
+When
+NULL
+values are involved in conditional comparisons, the result of the comparison will typically also be
+NULL
+. This behavior is important to consider when constructing queries, especially with
+Nullable
+data types, as
+NULL
+does not equal
+NULL
+and
+NULL
+is not less than or greater than any value.
+Example
+¶
+SELECT
+    NULL < 1,
+    2 < NULL,
+    NULL < NULL,
+    NULL = NULL
+Result:
+┌─less(NULL, 1)─┬─less(2, NULL)─┬─less(NULL, NULL)─┬─equals(NULL, NULL)─┐
+│ ᴺᵁᴸᴸ          │ ᴺᵁᴸᴸ          │ ᴺᵁᴸᴸ             │ ᴺᵁᴸᴸ               │
+└───────────────┴───────────────┴──────────────────┴────────────────────┘
+The following example demonstrates how
+NULL
+values can affect
+multiIf
+if not handled explicitly:
+SELECT
+    left,
+    right,
+    multiIf(left < right, 'left is smaller', left > right, 'right is smaller', 'Both equal') AS faulty_result
+FROM LEFT_RIGHT
+Result:
+┌─left─┬─right─┬─faulty_result────┐
+│ ᴺᵁᴸᴸ │     4 │ Both equal       │
+│    1 │     3 │ left is smaller  │
+│    2 │     2 │ Both equal       │
+│    3 │     1 │ right is smaller │
+│    4 │  ᴺᵁᴸᴸ │ Both equal       │
+└──────┴───────┴──────────────────┘
+greatest
+¶
+This function returns the largest value from a list of input expressions. All provided values must be of comparable data types.
+Syntax
+¶
+greatest(value1, value2, ...)
+Arguments
+¶
+value1, value2, ...
+: Multiple expressions of comparable types.
+Returns
+¶
+The greatest value among the inputs. The return type will be the common supertype to which all input values are promoted for comparison.
+Example
+¶
+SELECT greatest(1, 2, toUInt8(3), 3.) result,  toTypeName(result) type
+Result:
+┌─result─┬─type────┐
+│      3 │ Float64 │
+└────────┴─────────┘
+The type returned is a Float64 as the UInt8 must be promoted to 64 bit for the comparison.
+SELECT greatest(['hello'], ['there'], ['world'])
+Result:
+┌─greatest(['hello'], ['there'], ['world'])─┐
+│ ['world']                                 │
+└───────────────────────────────────────────┘
+SELECT greatest(toDateTime32(now() + toIntervalDay(1)), toDateTime64(now(), 3))
+Result:
+┌─greatest(toDateTime32(plus(now(), toIntervalDay(1))), toDateTime64(now(), 3))─┐
+│                                                       2023-05-12 01:16:59.000 │
+└──---──────────────────────────────────────────────────────────────────────────┘
+The type returned is a DateTime64 as the DateTime32 must be promoted to 64 bit for the comparison.
+least
+¶
+This function returns the smallest value from a list of input expressions. All provided values must be of comparable data types.
+Syntax
+¶
+least(value1, value2, ...)
+Arguments
+¶
+value1, value2, ...
+: Multiple expressions of comparable types.
+Returns
+¶
+The least value among the inputs. The return type will be the common supertype to which all input values are promoted for comparison.
+Example
+¶
+SELECT least(1, 2, toUInt8(3), 3.) result,  toTypeName(result) type
+Result:
+┌─result─┬─type────┐
+│      1 │ Float64 │
+└────────┴─────────┘
+The type returned is a Float64 as the UInt8 must be promoted to 64 bit for the comparison.
+SELECT least(['hello'], ['there'], ['world'])
+Result:
+┌─least(['hello'], ['there'], ['world'])─┐
+│ ['hello']                              │
+└────────────────────────────────────────┘
+SELECT least(toDateTime32(now() + toIntervalDay(1)), toDateTime64(now(), 3))
+Result:
+┌─least(toDateTime32(plus(now(), toIntervalDay(1))), toDateTime64(now(), 3))─┐
+│                                                    2023-05-12 01:16:59.000 │
+└────────────────────────────────────────────────────────────────────────────┘
+The type returned is a DateTime64 as the DateTime32 must be promoted to 64 bit for the comparison.
+clamp
+¶
+This function constrains an input
+value
+to be within a specified minimum and maximum range. If the
+value
+falls outside this range, it returns the nearest boundary; otherwise, it returns the original
+value
+.
+Syntax
+¶
+clamp(value, min, max)
+Arguments
+¶
+value
+: The input value to be constrained.
+min
+: The lower bound of the desired range.
+max
+: The upper bound of the desired range.
+Returns
+¶
+If
+value
+is less than
+min
+,
+min
+is returned. If
+value
+is greater than
+max
+,
+max
+is returned. Otherwise,
+value
+is returned. The return type will be a common supertype of
+value
+,
+min
+, and
+max
+.
+Example
+¶
+SELECT clamp(1, 2, 3) result,  toTypeName(result) type
+Result:
+┌─result─┬─type────┐
+│      2 │ Float64 │
+└────────┴─────────┘
+Updated
+3 weeks ago
+On this page
+Conditional functions
+if
+multiIf
+Using Conditional Results Directly
+NULL Values in Conditionals
+greatest
+least
+clamp
+forward
+classic
+Ask AI

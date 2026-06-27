@@ -1,0 +1,158 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/spider/spider-functions/spider_bg_direct_sql
+
+SPIDER_BG_DIRECT_SQL | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+Spider Storage Engine Overview
+Spider Storage Engine Introduction
+Spider Differences Between SpiderForMySQL and MariaDB
+Spider Feature Matrix
+Spider Use Cases
+Spider Installation
+Spider Cluster Management
+Spider Case Studies
+Spider Benchmarks
+Information Schema SPIDER_WRAPPER_PROTOCOLS Table
+Spider Storage Engine Core Concepts
+Spider System Variables
+Spider Table Parameters
+Spider Functions
+SPIDER_BG_DIRECT_SQL
+SPIDER_COPY_TABLES
+SPIDER_DIRECT_SQL
+SPIDER_FLUSH_TABLE_MON_CACHE
+Spider FAQ
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+SPIDER_BG_DIRECT_SQL
+This UDF allows you to execute SQL statements on remote data nodes in the background, enabling concurrent processing and non-blocking operations.
+Syntax
+Copy
+SPIDER_BG_DIRECT_SQL('sql', 'tmp_table_list', 'parameters')
+Description
+Executes the given SQL statement in the background on the remote server, as defined in the parameters listing. If the query returns a result-set, it sttores the results in the given temporary table. When the given SQL statement executes successfully, this function returns the number of called UDF's. It returns
+0
+when the given SQL statement fails.
+This function is a
+UDF
+installed with the
+Spider
+storage engine.
+Examples
+Copy
+SELECT
+SPIDER_BG_DIRECT_SQL(
+'
+SELECT * FROM example_table
+'
+,
+''
+,
+'
+srv "node1", port "8607"
+'
+)
+AS
+"
+Direct Query
+"
+;
++
+--
+------------+
+| Direct Query |
++
+--
+------------+
+|
+1
+|
++
+--
+------------+
+Parameters
+error_rw_mode
+Description: Returns empty results on network error.
+0
+: Return error on getting network error.
+1
+: Return 0 records on getting network error.
+Default Table Value:
+0
+DSN Parameter Name:
+erwm
+See also
+SPIDER_DIRECT_SQL
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Spider Functions
+Next
+SPIDER_COPY_TABLES
+Last updated
+1 year ago
+Was this helpful?
+Syntax
+Description
+Examples
+Parameters
+See also
+Was this helpful?

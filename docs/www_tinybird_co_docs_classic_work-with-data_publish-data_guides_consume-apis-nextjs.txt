@@ -1,0 +1,345 @@
+Source: https://www.tinybird.com/docs/classic/work-with-data/publish-data/guides/consume-apis-nextjs
+
+Classic: Consume APIs in a Next.js frontend with JWTs · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Consume APIs in a Next.js frontend with JWTs
+¶
+Copy as MD
+In this guide, you'll learn how to generate self-signed JWTs from your backend, and call Tinybird APIs directly from your frontend, using Next.js.
+JWTs are signed tokens that allow you to securely authorize and share data between your application and Tinybird.
+You can view the
+live demo
+or browse the
+GitHub repo (guide-nextjs-jwt-auth)
+.
+Prerequisites
+¶
+This guide assumes that you have a Tinybird account, and you are familiar with creating a Tinybird workspace and pushing resources to it.
+Make sure you understand the concept of Tinybird's
+Static Tokens
+.
+You need a working familiarity with JWTs, JavaScript, and Next.js.
+Run the demo
+¶
+These steps cover running the GitHub demo locally.
+Skip to the next section
+for a breakdown of the code.
+1. Clone the GitHub repo
+¶
+Clone the
+GitHub repo (guide-nextjs-jwt-auth)
+to your local machine.
+2. Push Tinybird resources
+¶
+The repo includes two sample Tinybird resources:
+events.datasource
+: The data source for incoming events.
+top_airlines.pipe
+: An API endpoint giving a list of top 10 airlines by booking volume.
+3. Generate some fake data
+¶
+Use
+Mockingbird
+to generate fake data for the
+events
+data source.
+Using this link ^ provides a pre-configured schema, but you will need to enter your workspace admin Token and Host. When configured, scroll down and select
+Start Generating!
+.
+In the Tinybird UI, confirm that the
+events
+data source is successfully receiving data.
+4. Install dependencies
+¶
+Navigate to the cloned repo and install the dependencies with
+npm install
+.
+5. Configure .env
+¶
+First create a new file
+.env.local
+cp .env.example .env.local
+Copy your
+Tinybird host
+and admin Token (used as the
+TINYBIRD_SIGNING_TOKEN
+) to the
+.env.local
+file:
+TINYBIRD_SIGNING_TOKEN="TINYBIRD_SIGNING_TOKEN>" # Use your Admin Token as the signing Token
+TINYBIRD_WORKSPACE="YOUR_WORKSPACE_ID"  # The UUID of your workspace
+NEXT_PUBLIC_TINYBIRD_HOST="YOUR_TINYBIRD_API_REGION e.g. https://api.tinybird.co" # Your regional API host
+The API host in the following examples must match your Workspace's region. See the full list of
+regions and hosts
+Run the demo app
+¶
+Run it locally:
+npm run dev
+Then open
+localhost:3000
+with your browser.
+Understand the code
+¶
+This section breaks down the key parts of code from the example.
+.env
+¶
+The
+.env
+file
+contains the environment variables used in the application.
+.env file
+TINYBIRD_SIGNING_TOKEN="YOUR SIGNING TOKEN"
+TINYBIRD_WORKSPACE="YOUR WORKSPACE ID"
+NEXT_PUBLIC_TINYBIRD_HOST="YOUR API HOST e.g. https://api.tinybird.co"
+TINYBIRD_SIGNING_TOKEN
+¶
+TINYBIRD_SIGNING_TOKEN
+is the token used to sign JWTs.
+You must use your admin Token
+. It is a shared secret between your application and Tinybird. Your application uses this Token to sign JWTs, and Tinybird uses it to verify the JWTs. It should be kept secret, as exposing it could allow unauthorized access to your Tinybird resources. It is best practice to store this in an environment variable instead of hardcoding it in your application.
+TINYBIRD_WORKSPACE
+¶
+TINYBIRD_WORKSPACE
+is the ID of your workspace. It is used to identify the workspace that the JWT is generated for. The workspace ID is included inside the JWT payload. workspace IDs are UUIDs and can be found using the CLI
+tb workspace current
+command or from the Tinybird UI.
+NEXT_PUBLIC_TINYBIRD_HOST
+¶
+NEXT_PUBLIC_TINYBIRD_HOST
+is the base URL of the Tinybird API. It is used to construct the URL for the Tinybird API endpoints. You must use the correct URL for
+your Tinybird region
+. The
+NEXT_PUBLIC_
+prefix is required for Next.js to expose the variable to the client side.
+token.ts
+¶
+The
+token.ts
+file
+contains the logic to generate and sign JWTs. It uses the
+jsonwebtoken
+library to create the Token.
+token.ts
+"use server";
+
+import jwt from "jsonwebtoken";
+
+const TINYBIRD_SIGNING_TOKEN = process.env.TINYBIRD_SIGNING_TOKEN ?? "";
+const WORKSPACE_ID = process.env.TINYBIRD_WORKSPACE ?? "";
+const PIPE_ID = "top_airlines"; 
+
+export async function generateJWT() {
+  const next10minutes = new Date();
+  next10minutes.setTime(next10minutes.getTime() + 1000 * 60 * 10);
+
+  const payload = {
+    workspace_id: WORKSPACE_ID,
+    name: "my_demo_jwt",
+    exp: Math.floor(next10minutes.getTime() / 1000),
+    scopes: [
+      {
+        type: "PIPES:READ",
+        resource: PIPE_ID,
+      },
+    ],
+  };
+
+  return jwt.sign(payload, TINYBIRD_SIGNING_TOKEN, {noTimestamp: true});
+}
+This code runs on the backend to generate JWTs without exposing secrets to the user.
+It pulls in the
+TINYBIRD_SIGNING_TOKEN
+and
+WORKSPACE_ID
+from the environment variables.
+As this example only exposes a single API endpoint (
+top_airlines.pipe
+), the
+PIPE_ID
+is hardcoded to its deployed ID. If you had multiple API endpoints, you would need to create an item in the
+scopes
+array for each one.
+The
+generateJWT
+function handles creation of the JWT. A JWT has various
+required fields
+.
+The
+exp
+field sets the expiration time of the JWT in the form a UTC timestamp. In this case, it's set to 10 minutes in the future. You can adjust this value to suit your needs.
+The
+name
+field is a human-readable name for the JWT. This value is only used for logging.
+The
+scopes
+field defines what the JWT can access. This is an array, which allows you create one JWT that can access multiple API endpoints. In this case, you only have one API endpoint. Under
+scopes
+, the
+type
+field is always
+PIPES:READ
+for reading data from a pipe. The
+resource
+field is the ID or name of the pipe you want to access. If required, you can also add
+fixed_parameters
+here to supply parameters to the API endpoint.
+Finally, the payload is signed using the
+jsonwebtoken
+library and the
+TINYBIRD_SIGNING_TOKEN
+.
+useFetch.tsx
+¶
+The
+useFetch.tsx
+file
+contains a custom React hook that fetches data from the Tinybird API using a JWT. It also handles refreshing the token if it expires.
+useFetch.tsx
+import { generateJWT } from "@/server/token";
+import { useState } from "react";
+
+export function useFetcher() {
+  const [token, setToken] = useState("");
+
+  const refreshToken = async () => {
+    const newToken = await generateJWT();
+    setToken(newToken);
+    return newToken;
+  };
+
+  return async (url: string) => {
+    let currentToken = token;
+    if (!currentToken) {
+      currentToken = await refreshToken();
+    }
+    const response = await fetch(url + "?token=" + currentToken);
+
+    if (response.status === 200) {
+      return response.json();
+    }
+    if (response.status === 403) {
+      const newToken = await refreshToken();
+      return fetch(url + "?token=" + newToken).then((res) => res.json());
+    }
+  };
+}
+This code runs on the client side and is used to fetch data from the Tinybird API.
+It uses the
+generateJWT
+function from the
+token.ts
+file
+to get a JWT. The JWT is stored in the
+token
+state.
+Most importantly, it uses the standard
+fetch
+API to make requests to the Tinybird API. The JWT is passed as a
+token
+query parameter in the URL.
+If the request returns a
+403
+status code, the hook then calls
+refreshToken
+to get a new JWT and retries the request. However, note that this is a simple implementation and there are other reasons why a request might fail with a
+403
+status code (e.g., the JWT is invalid, the API endpoint has been removed, etc.).
+page.tsx
+¶
+The
+page.tsx
+file
+contains the main logic for the Next.js page. It is responsible for initiating the call to the Tinybird API endpoints and rendering the data into a chart.
+page.tsx
+"use client";
+
+import { BarChart, Card, Subtitle, Text, Title } from "@tremor/react";
+import useSWR from "swr";
+import { getEndpointUrl } from "@/utils";
+import { useFetcher } from "@/hooks/useFetch";
+
+const REFRESH_INTERVAL_IN_MILLISECONDS = 5000; // five seconds
+
+export default function Dashboard() {
+  const endpointUrl = getEndpointUrl();
+  const fetcher = useFetcher();
+
+  let top_airline, latency, errorMessage;
+
+  const { data } = useSWR(endpointUrl, fetcher, {
+    refreshInterval: REFRESH_INTERVAL_IN_MILLISECONDS,
+    onError: (error) => (errorMessage = error),
+  });
+
+  if (!data) return;
+
+  if (data?.error) {
+    errorMessage = data.error;
+    return;
+  }
+
+  top_airline = data.data;
+  latency = data.statistics?.elapsed;
+
+  return (
+    <Card>
+      <Title>Top airlines by bookings</Title>
+      <Subtitle>Ranked from highest to lowest</Subtitle>
+      {top_airline && (
+        <BarChart
+          className="mt-6"
+          data={top_airline}
+          index="airline"
+          categories={["bookings"]}
+          colors={["blue", "red"]}
+          yAxisWidth={48}
+          showXAxis={true}
+        />
+      )}
+      {latency && <Text>Latency: {latency * 1000} ms</Text>}
+      {errorMessage && (
+        <div className="mt-4 text-red-600">
+          <p>
+            Oops, something happens: <strong>{errorMessage}</strong>
+          </p>
+          <p className="text-sm">Check your console for more information</p>
+        </div>
+      )}
+    </Card>
+  );
+}
+It uses
+SWR
+and the
+useFetcher
+hook from
+useFetch.tsx
+to fetch data from the Tinybird API.
+When the API endpoint returns data, it's rendered as bar chart using the
+BarChart
+component from the
+@tremor/react
+library
+.
+Updated
+4 weeks ago
+On this page
+Consume APIs in a Next.js frontend with JWTs
+Prerequisites
+Run the demo
+1. Clone the GitHub repo
+2. Push Tinybird resources
+3. Generate some fake data
+4. Install dependencies
+5. Configure .env
+Run the demo app
+Understand the code
+.env
+token.ts
+useFetch.tsx
+page.tsx
+classic
+Ask AI

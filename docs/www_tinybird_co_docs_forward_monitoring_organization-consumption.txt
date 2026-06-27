@@ -1,0 +1,249 @@
+Source: https://www.tinybird.com/docs/forward/monitoring/organization-consumption
+
+Advanced Organization Consumption Monitoring · Tinybird Docs
+Sign In
+Sign Up
+Advanced Organization Consumption Monitoring
+¶
+Copy as MD
+While Tinybird provides built-in graphs and metrics in the UI for monitoring your organization's resource consumption, some use cases require more detailed insights. This guide explains how to use SQL queries to monitor your consumption in detail, specifically for organizations using shared infrastructure.
+This monitoring approach is only applicable for customers on shared infrastructure (Developer and SaaS plans). If you're on a dedicated infrastructure plan, please contact your account manager for specific monitoring solutions.
+Prerequisites
+¶
+You must be an organization administrator to run these queries
+Your organization must be on shared infrastructure (Developer or SaaS plans)
+Basic understanding of SQL and Tinybird's Data Sources
+Understanding Organization Usage
+¶
+By default, Tinybird provides usage graphs in the UI that show:
+Resource consumption over the last 7 days
+A usage table displaying resources consuming the most vCPU
+While these built-in visualizations are sufficient for most use cases, you might need more granular control and insight into your consumption patterns.
+Advanced vCPU Monitoring
+¶
+vCPU active minutes are only tracked for Developer and SaaS plans on shared infrastructure. These metrics are stored in organization service data sources, which are only accessible to organization administrators.
+Important Notes About vCPU Metrics
+¶
+Materialized Views currently show 0 for direct vCPU time
+The landing Data Source includes both its own CPU time and the CPU time of its associated Materialized Views
+Detailed CPU Usage Analysis
+¶
+You can analyze detailed CPU consumption across different operations using several service data sources:
+API and SQL Operations
+¶
+Using
+pipe_stats
+and
+pipe_stats_rt
+service data sources, you can monitor CPU usage for API endpoints and SQL queries:
+Here's an example query that shows vCPU consumption by Pipe for the last 7 days:
+Monitor vCPU consumption by Pipe for last 7 days
+SELECT 
+  pipe_name,
+  round(sum(cpu_time), 2) as total_cpu_seconds,
+  count() as total_requests
+FROM organization.pipe_stats_rt
+WHERE 
+  start_datetime >= (now() - interval 7 day)
+GROUP BY pipe_name
+ORDER BY total_cpu_seconds DESC
+Data Source Operations
+¶
+The
+datasources_ops_log
+service data source provides CPU metrics for operations on your Data Sources.
+Here's an example query that shows vCPU consumption by Data Source and operation type:
+Monitor Data Source operations vCPU consumption
+SELECT 
+  datasource_name,
+  event_type,
+  round(sum(cpu_time), 2) as total_cpu_seconds,
+  count() as total_operations
+FROM organization.datasources_ops_log
+WHERE 
+  timestamp >= (now() - interval 7 day)
+GROUP BY 
+  datasource_name,
+  event_type
+ORDER BY total_cpu_seconds DESC
+Sinks Operations
+¶
+Monitor CPU usage in your Sinks using the
+sinks_ops_log
+service data source:
+Here's an example query that shows vCPU consumption by Sink:
+Monitor Sinks operations vCPU consumption
+SELECT 
+  pipe_name,
+  round(sum(cpu_time), 2) as total_cpu_seconds,
+  count() as total_operations
+FROM organization.sinks_ops_log
+WHERE 
+  timestamp >= (now() - interval 7 day)
+GROUP BY pipe_name
+ORDER BY total_cpu_seconds DESC
+vCPU Active Minutes Consumption
+¶
+For tracking your overall vCPU active minutes consumption, which is directly related to billing, use the
+shared_infra_active_minutes
+service data source. This provides aggregated consumption data that aligns with your plan's limits.
+Here's an example query that shows all active minutes for the current day:
+Monitor active minutes for current day
+SELECT * FROM organization.shared_infra_active_minutes
+WHERE
+  toStartOfDay(minute) = today()
+ORDER BY minute DESC
+Storage Monitoring
+¶
+Storage consumption is a key billing metric that measures the amount of data stored in your Data Sources. You can monitor storage usage using the
+datasources_storage
+service data source.
+Storage is billed based on two factors:
+The maximum total storage used by your organization each day (including quarantined data)
+The average of those daily maximums throughout your billing cycle
+Storage for data in quarantine is included in your billing calculations. When monitoring storage for costs, always consider both regular and quarantined data.
+Current Storage Usage
+¶
+Here's an example query that shows current storage usage by Data Source, including both regular and quarantined data:
+Monitor current storage usage by Data Source
+SELECT 
+  datasource_name,
+  round((bytes + bytes_quarantine)//1000000000, 2) as total_storage_gb,
+  round(bytes_quarantine//1000000000, 2) as quarantine_storage_gb,
+  rows + rows_quarantine as total_rows,
+  rows_quarantine as quarantine_rows
+FROM organization.datasources_storage
+WHERE timestamp >= (now() - interval 2 hour)
+ORDER BY total_storage_gb DESC
+LIMIT 1 BY datasource_name
+Billing Period Storage Analysis
+¶
+To analyze your storage consumption for billing purposes, use this query that calculates the average of daily maximum storage across your billing period:
+Calculate average storage for billing period
+SELECT 
+    greatest(avg(daily_max_org_storage_gb), 0) as avg_storage_gb,
+    greatest(avg(daily_max_org_storage_rows), 0) as avg_storage_rows
+FROM (
+  SELECT 
+    sum(floor(max_total_bytes_by_ds/1000000000, 6)) as daily_max_org_storage_gb,
+    sum(max_total_rows_by_ds) as daily_max_org_storage_rows
+  FROM (
+    SELECT 
+        toDate(timestamp) as date, 
+        max(bytes + bytes_quarantine) as max_total_bytes_by_ds,
+        max(rows + rows_quarantine) AS max_total_rows_by_ds
+    FROM organization.datasources_storage
+    WHERE 1= 1
+        AND date >= '2025-04-XX' -- beginning of term
+        AND date <= '2025-04-xx' -- end of term
+    GROUP BY date, datasource_id
+  )
+  GROUP BY date
+)
+Replace the date placeholders (
+'2025-04-XX'
+) with your actual billing period start and end dates to get accurate billing metrics.
+QPS (Queries Per Second) Monitoring
+¶
+You can monitor your QPS consumption using two different data sources, each providing different insights into your usage:
+Detailed Query Analysis (Last 7 Days)
+¶
+Using the
+pipe_stats_rt
+service data source, you can analyze detailed information about your API endpoints and SQL queries usage. This data source provides rich information about each query but is limited to the last 7 days due to TTL.
+The
+pipe_stats_rt
+data source has a 7-day TTL (Time To Live), so historical analysis is limited to this timeframe.
+Here's an example query that shows the number of requests per Pipe over the last hour:
+Monitor QPS by pipe for the last hour
+SELECT 
+  start_datetime, 
+  pipe_name, 
+  count() total 
+FROM organization.pipe_stats_rt
+WHERE 
+  start_datetime BETWEEN (now() - interval 1 hour) AND now()
+GROUP BY 
+  start_datetime, pipe_name
+ORDER BY 
+  start_datetime DESC
+Historical QPS and Overages
+¶
+For longer-term analysis of QPS consumption and overages, you can use the
+shared_infra_qps_overages
+service data source. This provides aggregated QPS data and overage information per second, though with less detail about individual queries.
+Here's an example query that shows daily QPS overages for the current month:
+Monitor daily QPS overages for current month
+SELECT 
+  toStartOfDay(start_datetime) day, 
+  sum(overages) total_overages 
+FROM organization.shared_infra_qps_overages
+WHERE 
+  toStartOfMonth(start_datetime) = toStartOfMonth(now())
+GROUP BY day
+ORDER BY day DESC
+Data Transfer Monitoring
+¶
+Data transfer metrics track the amount of data moved through Sinks in your organization. The cost varies depending on whether data is transferred within the same region (Intra) or between different regions (Inter).
+Sinks Data Transfer
+¶
+Monitor data transfer costs for Sinks using the
+data_transfer
+service data source:
+Monitor Sinks data transfer by type
+SELECT 
+  toStartOfDay(timestamp) as day,
+  workspace_id,
+  kind,
+  round(sum(bytes)/1000000000, 2) as transferred_gb,
+  count() as operations
+FROM organization.data_transfer
+WHERE 
+  timestamp >= (now() - interval 30 day)
+  AND kind IN ('intra', 'inter')
+GROUP BY 
+  day,
+  workspace_id,
+  kind
+ORDER BY 
+  day DESC,
+  kind ASC
+Best Practices
+¶
+Regular Monitoring
+: Set up a routine to check these metrics, especially if you're approaching your plan limits
+Alert Setup
+: Consider setting up alerts using these queries to proactively monitor consumption
+Resource Optimization
+: Use these insights to identify opportunities for query optimization or resource reallocation
+Additional Resources
+¶
+Organizations
+- Learn about organization management and monitoring
+Pricing plans
+- Compare billing models and SKUs across Free, Developer, SaaS, and Enterprise plans
+Resource Limits
+- Learn about the storage, QPS, and other resource limits for different plans
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Advanced Organization Consumption Monitoring
+Prerequisites
+Understanding Organization Usage
+Advanced vCPU Monitoring
+Important Notes About vCPU Metrics
+Detailed CPU Usage Analysis
+vCPU Active Minutes Consumption
+Storage Monitoring
+Current Storage Usage
+Billing Period Storage Analysis
+QPS (Queries Per Second) Monitoring
+Detailed Query Analysis (Last 7 Days)
+Historical QPS and Overages
+Data Transfer Monitoring
+Sinks Data Transfer
+Best Practices
+Additional Resources
+forward
+Ask AI

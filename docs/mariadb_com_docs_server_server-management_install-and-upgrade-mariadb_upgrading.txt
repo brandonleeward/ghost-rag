@@ -1,0 +1,57 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading
+
+Upgrading MariaDB | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Platform Specific Upgrade Guides
+MariaDB Community Server Upgrade Paths
+MariaDB Enterprise Server Upgrade Paths
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Upgrading MariaDB
+Complete MariaDB upgrade guide. Complete migration reference with version compatibility, backup procedures, and rollback strategies for production use.
+Platform Specific Upgrade Guides
+MariaDB Community Server Upgrade Paths
+MariaDB Enterprise Server Upgrade Paths
+Last updated
+1 year ago
+Was this helpful?
+Was this helpful?

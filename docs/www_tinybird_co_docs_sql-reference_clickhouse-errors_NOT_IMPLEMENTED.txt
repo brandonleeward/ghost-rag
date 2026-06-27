@@ -1,0 +1,273 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/NOT_IMPLEMENTED
+
+NOT_IMPLEMENTED ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+NOT_IMPLEMENTED ClickHouse error
+¶
+Copy as MD
+This error usually means you're trying to use a feature or operation that isn't implemented in ClickHouse. This can happen when using features from other database systems or newer ClickHouse features in older versions.
+The
+NOT_IMPLEMENTED
+error in ClickHouse (and Tinybird) happens when you try to use a feature, function, or operation that isn't implemented in ClickHouse or isn't available in your version. This commonly occurs when using features from other database systems or trying to use newer ClickHouse features in older versions.
+What causes this error
+¶
+You'll typically see it when:
+Using features from other database systems (MySQL, PostgreSQL, etc.)
+Using newer ClickHouse features in older versions
+Using unsupported SQL operations
+Using client-specific features that aren't implemented
+Using deprecated or removed functionality
+Example errors
+¶
+Fails: MySQL-specific feature
+SELECT * FROM events FOR UPDATE
+Fails: PostgreSQL-specific feature
+SELECT * FROM events OFFSET 10 ROWS FETCH NEXT 5 ROWS ONLY
+Fails: unsupported operation
+UPDATE events SET event_type = 'click' WHERE user_id = 123
+ClickHouse has no general-purpose UPDATE or DELETE. Only lightweight updates/deletes are available on MergeTree tables with
+allow_experimental_lightweight_delete=1
+or
+allow_experimental_lightweight_update=1
+.
+Fails: newer ClickHouse feature
+SELECT * FROM events USING SAMPLE 0.1
+How to fix it
+¶
+Use ClickHouse-compatible syntax
+¶
+Replace unsupported features with ClickHouse equivalents:
+Fix: use ClickHouse pagination
+SELECT * FROM events LIMIT 5 OFFSET 10
+Use supported operations
+¶
+Replace unsupported operations with supported alternatives:
+Fix: use INSERT for updates
+INSERT INTO events_new SELECT * FROM events WHERE user_id != 123
+INSERT INTO events_new (user_id, event_type) VALUES (123, 'click')
+Check ClickHouse version
+¶
+Verify feature support in your ClickHouse version:
+Check ClickHouse version
+SELECT version()
+Use alternative approaches
+¶
+Find alternative ways to achieve the same result:
+Fix: use alternative approach
+SELECT * FROM events SAMPLE 0.1
+Common patterns and solutions
+¶
+Pagination
+¶
+ClickHouse pagination syntax:
+Correct pagination
+SELECT * FROM events ORDER BY timestamp DESC LIMIT 10 OFFSET 20
+Data modification
+¶
+ClickHouse doesn't support UPDATE/DELETE like other databases:
+Alternative to UPDATE
+-- Use INSERT with deduplication
+INSERT INTO events_new SELECT * FROM events WHERE user_id != 123
+INSERT INTO events_new (user_id, event_type) VALUES (123, 'click')
+Using MergeTree engines for "updates"
+¶
+ReplacingMergeTree for updates
+CREATE TABLE events_replacing (
+    user_id UInt32,
+    event_type String,
+    timestamp DateTime
+) ENGINE = ReplacingMergeTree() ORDER BY user_id
+
+-- Insert new row to "update"
+INSERT INTO events_replacing VALUES (123, 'click', now())
+Use
+CollapsingMergeTree
+or
+ReplacingMergeTree
+for "update by inserting new rows" patterns.
+Sampling
+¶
+ClickHouse sampling syntax:
+Correct sampling
+SELECT * FROM events SAMPLE 0.1
+SELECT * FROM events SAMPLE 1000 ROWS
+Transactions
+¶
+ClickHouse has limited transaction support:
+ClickHouse transaction approach
+-- Use atomic operations where possible
+-- Consider using Materialized Views for complex updates
+Advanced solutions
+¶
+Using Materialized Views
+¶
+For complex data modifications:
+Materialized View for updates
+CREATE MATERIALIZED VIEW events_updated AS
+SELECT
+    user_id,
+    CASE WHEN user_id = 123 THEN 'click' ELSE event_type END as event_type,
+    timestamp
+FROM events
+Using INSERT with deduplication
+¶
+For data replacement:
+INSERT with deduplication
+INSERT INTO events_new
+SELECT
+    user_id,
+    CASE WHEN user_id = 123 THEN 'click' ELSE event_type END as event_type,
+    timestamp
+FROM events
+Using window functions
+¶
+For complex aggregations:
+Window functions for complex logic
+SELECT
+    user_id,
+    event_type,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY timestamp) as row_num
+FROM events
+Using
+WITH TOTALS
+or settings
+allow_experimental_window_functions = 1
+may be required for window functions.
+ClickHouse-specific features
+¶
+Using ReplacingMergeTree
+¶
+For handling updates:
+ReplacingMergeTree example
+CREATE TABLE events_replacing (
+    user_id UInt32,
+    event_type String,
+    timestamp DateTime,
+    version UInt32
+) ENGINE = ReplacingMergeTree(version)
+ORDER BY (user_id, timestamp)
+Using CollapsingMergeTree
+¶
+For handling deletes:
+CollapsingMergeTree example
+CREATE TABLE events_collapsing (
+    user_id UInt32,
+    event_type String,
+    timestamp DateTime,
+    sign Int8
+) ENGINE = CollapsingMergeTree(sign)
+ORDER BY (user_id, timestamp)
+Feature compatibility
+¶
+MySQL to ClickHouse
+¶
+MySQL Feature
+ClickHouse Alternative
+Description
+FOR UPDATE
+Not supported
+Use appropriate table engines
+LIMIT x,y
+LIMIT y OFFSET x
+Pagination syntax
+UPDATE
+INSERT
+with deduplication
+Data modification
+DELETE
+INSERT
+with sign column
+Data deletion
+PostgreSQL to ClickHouse
+¶
+PostgreSQL Feature
+ClickHouse Alternative
+Description
+OFFSET x ROWS FETCH NEXT y ROWS
+LIMIT y OFFSET x
+Pagination syntax
+JSONB
+String
+with JSON functions
+JSON handling
+UPDATE
+INSERT
+with deduplication
+Data modification
+RETURNING
+Not supported
+Use separate SELECT
+Tinybird-specific notes
+¶
+In Tinybird, this error often occurs when:
+Using unsupported ClickHouse features in Pipes
+Trying to use features not available in Tinybird's ClickHouse version
+Using client-specific methods that aren't supported
+Working with Materialized Views that use unsupported operations
+To debug in Tinybird:
+Check Tinybird's ClickHouse version and supported features
+Use the Query Builder to test operations
+Consult Tinybird documentation for supported features
+Use alternative approaches for unsupported operations
+Best practices
+¶
+Feature compatibility
+¶
+Check ClickHouse documentation before using new features
+Test operations in development environment first
+Use version-specific feature checks
+Keep up with ClickHouse updates and changes
+Alternative approaches
+¶
+Use Materialized Views for complex data modifications
+Implement logic in application layer when needed
+Use INSERT with deduplication for updates
+Consider using specialized table engines
+Error handling
+¶
+Implement proper error handling for unsupported features
+Have fallback approaches ready
+Log unsupported feature attempts
+Document workarounds for common issues
+See also
+¶
+ClickHouse Table Engines
+Working with Data Sources
+Common function errors
+Updated
+4 weeks ago
+On this page
+NOT_IMPLEMENTED ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Use ClickHouse-compatible syntax
+Use supported operations
+Check ClickHouse version
+Use alternative approaches
+Common patterns and solutions
+Pagination
+Data modification
+Using MergeTree engines for "updates"
+Sampling
+Transactions
+Advanced solutions
+Using Materialized Views
+Using INSERT with deduplication
+Using window functions
+ClickHouse-specific features
+Using ReplacingMergeTree
+Using CollapsingMergeTree
+Feature compatibility
+MySQL to ClickHouse
+PostgreSQL to ClickHouse
+Tinybird-specific notes
+Best practices
+Feature compatibility
+Alternative approaches
+Error handling
+See also
+forward
+classic
+Ask AI

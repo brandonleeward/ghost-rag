@@ -1,0 +1,65 @@
+Source: https://www.tinybird.com/docs/classic/work-with-data/process-and-copy/populate-data
+
+Classic: Populate and copy data between Data Sources · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Populate and copy data between Data Sources
+¶
+Copy as MD
+You can use Tinybird to populate Data Sources using existing data through the Populate and Copy operations. Both are often used in similar scenarios, with the main distinction being that you can schedule Copy jobs, and that they have more restrictions.
+Read on to learn how populating data within Tinybird works, including the details of reingesting data and important considerations for maintaining data integrity.
+Populate by partition
+¶
+Populating data by partition requires as many steps as partitions in the origin Data Source. You can use this approach for progress tracking and dynamic resource recalculation while the job is in progress. You can also retry steps in case of a memory limit error, which is safer and more reliable.
+The following diagram shows a populate scenario that involves two Data Sources:
+Given that Data Source A has 3 partitions:
+The job processes the data partition by partition from the source,
+Data Source A
+After the data has been processed, it updates the data on the destination,
+Data Source B
+Understanding the Data Flow
+¶
+As a use case expands, it might develop a complex Data Flow. Here are three key points to consider:
+Data is processed by partition from the origin: each step handles data from a single partition of the origin Data Source.
+When more than one Materialized Pipe exists for the same Data Source, the execution order isn't deterministic.
+Destination Data Sources in the Data Flow only use the data from the specific partition being processed.
+The following examples illustrates the behavior of Populate jobs in different scenarios.
+Case 1: Joining data from a Data Source that isn't a destination in the Data Flow
+¶
+When using a Data Source (Data Source C) in a Materialized Pipe query, if Data Source C isn't a destination Data Source for any other Materialized Pipe in the Data Flow, it uses all available data in Data Source C at that moment.
+Case 2: Joining data from a Data Source that is a destination in the same Materialized View
+¶
+When using the destination Data Source
+Data Source B
+in the Materialized Pipe query,
+Data Source B
+doesn't join any data. This occurs because the data is processed by partition, and the required partition isn't available in the destination at that time.
+Case 3: Joining data from a Data Source that is a destination in another Materialized View
+¶
+When using a Data Source (Data Source C) in a Materialized Pipe (Materialized Pipe 3) query that is the destination of another Materialized Pipe (Materialized Pipe 2) in the Data Flow, it retrieves the data ingested during the process.
+Whether Data Source C contains data before the view on Materialized Pipe 3 runs isn't deterministic. Because the order depends on the internal ID, you can't determine which Data Source is updated first.
+To control the order of the Data Flow, run each populate operation separately:
+Run a populate over Materialized Pipe 1 to populate the data from Data Source A to Data Source B. To prevent automatic data propagation through the rest of the Materialized Views, either unlink the views or truncate the dependent Data Sources if they are repopulated.
+Perform separate populate operations on Materialized Pipe 2 and Materialized Pipe 3, instead of a single operation on Materialized Pipe 1.
+Learn more
+¶
+Before you use Populate and Copy operations for different
+backfill strategies
+, understand how they work within the Data Flow and its limitations.
+Read also the
+Materialized Views guide
+: populating data while continuing ingestion into the origin Data Source might lead to duplicated data.
+Updated
+1 year ago
+On this page
+Populate and copy data between Data Sources
+Populate by partition
+Understanding the Data Flow
+Case 1: Joining data from a Data Source that isn't a destination in the Data Flow
+Case 2: Joining data from a Data Source that is a destination in the same Materialized View
+Case 3: Joining data from a Data Source that is a destination in another Materialized View
+Learn more
+classic
+Ask AI

@@ -1,0 +1,350 @@
+Source: https://www.tinybird.co/docs/forward/get-started/quick-start-python-sdk
+
+Quickstart: Python SDK · Tinybird Docs
+Sign In
+Sign Up
+Quickstart: Python SDK
+¶
+Copy as MD
+This quickstart walks through creating a Tinybird project with the Python SDK. You define Data Sources and Endpoints in Python, use the CLI to build and deploy, and call your Endpoint from application code.
+Looking for other ways to start? See
+Quickstarts
+.
+If you use a coding agent like Cursor, Claude Code, Amp, or Open Code, install Tinybird agent skills so your agent understands Tinybird project structure and workflows:
+npx skills add tinybirdco/tinybird-agent-skills
+Before you begin
+¶
+To get started, you need:
+Python 3.11, 3.12, or 3.13
+A Tinybird Workspace
+git
+uv
+(recommended
+Python package manager
+)
+Python 3.14 is not supported yet for this workflow. The Python SDK relies on the Tinybird CLI under the hood, and current CLI support covers Python 3.11 to 3.13.
+Initialize a Python project and add the SDK
+¶
+Create a new directory and initialize a Python SDK project:
+mkdir tinybird-python-quickstart
+cd tinybird-python-quickstart
+git init
+
+uv init --name tinybird-sdk-python-sample --python 3.13
+uv add tinybird-sdk python-dotenv
+
+uv run tinybird init --folder src/tinybird/
+This creates:
+tinybird.config.json
+with an
+include
+path for Python resources
+.env.local
+for your Tinybird credentials
+Check your config file
+¶
+In
+tinybird.config.json
+,
+"include"
+points to the folder with your Python resource definitions. The default
+"devMode"
+is
+"branch"
+to develop in Tinybird Cloud Branches, although you can use
+"local"
+too with Tinybird Local.
+Check your Tinybird token
+¶
+Create a
+.env.local
+file with your Tinybird token if it doesn't exist yet:
+TINYBIRD_TOKEN=p.your_token_here
+TINYBIRD_URL=https://api.tinybird.co
+The CLI reads
+.env.local
+automatically.
+Define resources in Python
+¶
+Create
+src/tinybird/tinybird_resources.py
+. The schema and engine stay the same regardless of how you ingest data. The difference is how data arrives: via the Events API, from a Kafka topic, or from an S3 bucket.
+Data source
+¶
+Events
+Kafka
+S3
+from tinybird_sdk import define_datasource, engine, t
+
+page_views = define_datasource(
+    "page_views",
+    {
+        "description": "Page view tracking data",
+        "schema": {
+            "timestamp": t.date_time(),
+            "session_id": t.string(),
+            "pathname": t.string(),
+            "referrer": t.string().nullable(),
+        },
+        "engine": engine.merge_tree(
+            {
+                "sorting_key": ["pathname", "timestamp"],
+            }
+        ),
+    },
+)
+Endpoint
+¶
+The endpoint reads from the Data Source regardless of how data is ingested:
+from tinybird_sdk import define_endpoint, node, p, t
+
+top_pages = define_endpoint(
+    "top_pages",
+    {
+        "description": "Get the most visited pages",
+        "params": {
+            "start_date": p.date_time(),
+            "end_date": p.date_time(),
+            "limit": p.int32().optional(10),
+        },
+        "nodes": [
+            node(
+                {
+                    "name": "aggregated",
+                    "sql": """
+                        SELECT pathname, count() AS views
+                        FROM page_views
+                        WHERE timestamp >= {{DateTime(start_date)}}
+                          AND timestamp <= {{DateTime(end_date)}}
+                        GROUP BY pathname
+                        ORDER BY views DESC
+                        LIMIT {{Int32(limit, 10)}}
+                    """,
+                }
+            )
+        ],
+        "output": {
+            "pathname": t.string(),
+            "views": t.uint64(),
+        },
+    },
+)
+Create
+src/tinybird/client.py
+:
+import os
+
+from tinybird_sdk import Tinybird
+from src.tinybird.tinybird_resources import page_views, top_pages
+
+tinybird = Tinybird(
+    {
+        "datasources": {"page_views": page_views},
+        "pipes": {"top_pages": top_pages},
+        "base_url": os.getenv("TINYBIRD_URL", "https://api.tinybird.co"),
+        "token": os.getenv("TINYBIRD_TOKEN"),
+    }
+)
+Build the project
+¶
+Commit your project files and check out a new git branch:
+pyproject.toml
+— project metadata and dependencies
+uv.lock
+— pinned dependency versions (like
+package-lock.json
+)
+.python-version
+— ensures consistent Python version
+.gitignore
+Your source code and tests
+git add pyproject.toml uv.lock .python-version .gitignore src/ tinybird.config.json main.py
+git commit -m "Initial commit"
+git checkout -b tinybird_intro
+Run a build to create your resources in your Tinybird development environment:
+uv run tinybird build
+Git integration
+¶
+You may have noticed that the quickstart example had a
+git checkout -b tinybird_intro
+. If Tinybird detects you are in a Git repository, it creates a branch with the git branch name in your Tinybird development environment.
+Ingest data and query
+¶
+Ingest
+¶
+Use the runtime client to send events via the Events API:
+from datetime import datetime, timezone
+from src.tinybird.client import tinybird
+
+now = datetime.now(timezone.utc).isoformat(timespec="milliseconds")
+
+tinybird.page_views.ingest(
+    {
+        "timestamp": now,
+        "session_id": "abc123",
+        "pathname": "/home",
+        "referrer": "https://google.com",
+    }
+)
+If you configured a Kafka or S3 connector, data is ingested automatically after you deploy. You don't need to call
+ingest
+manually.
+Query
+¶
+Query the endpoint from your application code:
+result = tinybird.top_pages.query(
+    {
+        "start_date": "2026-01-01 00:00:00",
+        "end_date": now,
+        "limit": 5,
+    }
+)
+
+for row in result["data"]:
+    print(row["pathname"], row["views"])
+Iterate in a branch
+¶
+Add a materialized view in another branch, test the app against that branch, and deploy to Tinybird Cloud when you're finished.
+git checkout -b materialization
+Edit
+tinybird_resources.py
+to add a new Data Source, a new materialized view, and update the Endpoint to read from the materialized view.
+from tinybird_sdk import (
+    define_datasource,
+    define_endpoint,
+    define_materialized_view,
+    engine,
+    node,
+    p,
+    t,
+)
+
+page_views = define_datasource(
+    "page_views",
+    {
+        "description": "Page view tracking data",
+        "schema": {
+            "timestamp": t.date_time(),
+            "session_id": t.string(),
+            "pathname": t.string(),
+            "referrer": t.string().nullable(),
+        },
+        "engine": engine.merge_tree(
+            {
+                "sorting_key": ["pathname", "timestamp"],
+            }
+        ),
+    },
+)
+
+daily_page_views_ds = define_datasource(
+    "daily_page_views_ds",
+    {
+        "description": "Daily page view counts populated by a materialized view",
+        "schema": {
+            "date": t.date(),
+            "pathname": t.string(),
+            "views": t.simple_aggregate_function("sum", t.uint64()),
+        },
+        "engine": engine.aggregating_merge_tree(
+            {
+                "sorting_key": ["date", "pathname"],
+            }
+        ),
+        "json_paths": False,
+    },
+)
+
+daily_page_views_mv = define_materialized_view(
+    "daily_page_views_mv",
+    {
+        "description": "Materialized rollup of page views by day and pathname",
+        "datasource": daily_page_views_ds,
+        "nodes": [
+            node(
+                {
+                    "name": "aggregate",
+                    "sql": """
+                        SELECT
+                            toDate(timestamp) AS date,
+                            pathname,
+                            count() AS views
+                        FROM page_views
+                        GROUP BY date, pathname
+                    """,
+                }
+            )
+        ],
+    },
+)
+
+top_pages = define_endpoint(
+    "top_pages",
+    {
+        "description": "Get the most visited pages from MV-backed datasource",
+        "params": {
+            "start_date": p.date_time(),
+            "end_date": p.date_time(),
+            "limit": p.int32().optional(10),
+        },
+        "nodes": [
+            node(
+                {
+                    "name": "aggregated",
+                    "sql": """
+                        SELECT
+                            pathname,
+                            sum(views) AS views
+                        FROM daily_page_views_ds
+                        WHERE date >= toDate({{DateTime(start_date)}})
+                          AND date <= toDate({{DateTime(end_date)}})
+                        GROUP BY pathname
+                        ORDER BY views DESC
+                        LIMIT {{Int32(limit, 10)}}
+                    """,
+                }
+            )
+        ],
+        "output": {
+            "pathname": t.string(),
+            "views": t.uint64(),
+        },
+    },
+)
+Build against the branch:
+uv run tinybird build
+Once validated, you can deploy to Tinybird Cloud with
+uv run tinybird deploy
+if you haven't set up a CI/CD script.
+Next steps
+¶
+Learn Tinybird concepts:
+Core concepts
+Review Python resource definitions:
+Python SDK resources
+Review command options:
+Python SDK CLI commands
+Configure branches and deployments:
+Development workflow
+Review the SDK repository for advanced usage:
+tinybird-sdk-python
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Quickstart: Python SDK
+Before you begin
+Initialize a Python project and add the SDK
+Check your config file
+Check your Tinybird token
+Define resources in Python
+Data source
+Endpoint
+Build the project
+Ingest data and query
+Ingest
+Query
+Iterate in a branch
+Next steps
+forward
+Ask AI

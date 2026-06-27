@@ -1,0 +1,23 @@
+Source: https://www.tinybird.com/docs/classic/administration
+
+Classic: Platform · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Administration
+¶
+Copy as MD
+Effective administration of your Tinybird account involves managing several key components:
+Organizations
+: Create and manage organizations to group workspaces and team members.
+Workspaces
+: Set up isolated environments for your data projects.
+Auth Tokens
+: Generate and control access tokens for secure API authentication.
+Updated
+4 weeks ago
+On this page
+Administration
+classic
+Ask AI

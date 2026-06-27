@@ -1,0 +1,51 @@
+Source: https://12factor.net/tr/backing-services
+
+The Twelve-Factor App Türkçe çeviri
+The Twelve-Factor App
+Blog
+Community
+GitHub
+IV. Yardımcı servisler
+Yardımcı servisleri iliştirilmiş kaynaklar olarak ele almak
+Bir
+yardımcı servis
+uygulamanın kendi işlevselliğinin bir parçası olarak ağ üzerinden tükettiği herhangi bir servistir. Yardımcı servislere örnek olarak; veritabanları (
+MySQL
+veya
+CouchDB
+gibi), mesajlaşma/kuyruk sistemleri (
+RabbitMQ
+veya
+Beanstalkd
+), e-posta göndermek için SMTP servisleri (
+Postfix
+gibi) ve önbellekleme sistemleri (
+Memcached
+gibi) gösterilebilir.
+Veritabanları gibi yardımcı servisler, geleneksel olarak uygulamayı da yöneten sistem yöneticileri tarafından yönetilirler. Ancak bu yerel servislere ilave olarak, uygulama üçüncü parti uygulamalar tarafından sağlanan ve yönetilen servislere de sahip olabilirler. Bunlardan bazıları; SMTP servisleri (
+Postmark
+gibi), metrik toplama servisleri (
+New Relic
+veya
+Loggly
+gibi), statik içerik barındırma servisleri (
+Amazon S3
+gibi) ve hatta API-erişilebilir tüketici servisleridir (
+Twitter
+,
+Google Maps
+, ve
+Last.fm
+gibi).
+On iki faktör uygulamaları için bir servisin yerel veya üçüncü parti olmasının farkı yoktur.
+Uygulama için, her ikisi de ek kaynaktır ve
+yapılandırmada
+saklanmış URL’ler veya yer belirleyici ve kimlik bilgileri ikilisi aracılığıyla erişilir. On iki faktör uygulamasının bir dağıtımı, uygulama kodunda hiçbir değişiklik yapmak zorunda kalmadan yerel bir MySQL veritabanı kullanmaktan üçüncü parti bir veritabanı (
+Amazon RDS
+gibi) kullanmaya geçebilmelidir. Aynı şekilde yerel bir SMTP servisinden (Postmark gibi), kod değişikliği olmaksızın bir üçüncü parti SMTP servisine geçiş yapılabilir. Her iki durumda da, değişmesi gereken şey sadece yapılandırma ayarlarındaki bağlantı bilgileridir.
+Her bir destek servisi bir
+kaynaktır
+. Örneğin, bir MySQL veritabanı bir kaynaktır; iki MySQL veritabanı (uygulama katmanında parçalanma [İng. sharding] için kullanılan) iki farklı kaynak olarak nitelendirilir. On iki faktör uygulaması bu veritabanlarına, bağlı oldukları dağıtımlara gevşek bağlaşımlarını belirten
+ek kaynak
+olarak davranır.
+Kaynaklar dağıtımlara istenilen zamanda eklenilip çıkartılabilir. Örneğin, eğer uygulamanın veritabanı donanımsal sorunlar yaşıyorsa, uygulamanın yöneticisi son yedeklemeden geri yüklenmiş yeni bir veritabanı sunucusu oluşturabilir. Problemli veritabanının uygulamadan bağlantısı kesilip, yeni veritabanı bağlanabilir, hem de hiçbir kod değişikliği olmadan.

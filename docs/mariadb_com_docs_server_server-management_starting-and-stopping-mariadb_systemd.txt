@@ -1,0 +1,108 @@
+Source: https://mariadb.com/docs/server/server-management/starting-and-stopping-mariadb/systemd
+
+systemd (Linux) | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+Starting & Stopping
+Starting and Stopping Overview
+launchd (macOS)
+systemd (Linux)
+Starting MariaDB on systemd
+Configuring MariaDB for systemd
+sysVinit
+mariadbd-safe
+mariadbd-multi
+mariadbd Options
+mariadbd
+mysql.server
+Running MariaDB From the Build Directory
+Running Multiple MariaDB Server Processes
+Specifying Permissions for Schema (Data) Directories and Tables
+Switching Between Different Installed MariaDB Versions
+What to Do if MariaDB Doesn't Start
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+systemd (Linux)
+MariaDB on systemd (Linux): overview, supported distributions, and links to operational and configuration guidance.
+systemd
+is a
+sysVinit
+replacement that is the default service manager on the following Linux distributions:
+RHEL 7 and above
+CentOS 7 and above
+Fedora 15 and above
+Debian 8 and above
+Ubuntu 15.04 and above
+SLES 12 and above
+OpenSUSE 12.2 and above
+MariaDB's
+systemd
+unit file is included in the server packages for
+RPMs
+and
+DEBs
+. It is also included in certain
+binary tarballs
+.
+The service name is
+mariadb.service
+.
+In this Section
+Starting MariaDB on systemd
+— installing, starting, stopping, restarting, and inspecting the MariaDB service, including multi-instance setups, Galera Cluster integration, and the systemd journal.
+Configuring MariaDB for systemd
+— drop-in configuration files, timeouts, open-file and core-size limits,
+LimitMEMLOCK
+(
+io_uring
+and
+aio
+), error-log redirection, home-directory access, umask, data directory, socket activation, and converting
+mariadbd-safe
+options to
+systemd
+options. Also includes a quick-setup script for developers running MariaDB from a build directory.
+Contents of the MariaDB Service's Unit File
+The contents of the
+mariadb.service
+file can be examined with
+systemctl show mariadb.service
+.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+launchd (macOS)
+Next
+Starting MariaDB on systemd
+Last updated
+1 month ago
+Was this helpful?
+In this Section
+Contents of the MariaDB Service's Unit File
+Was this helpful?

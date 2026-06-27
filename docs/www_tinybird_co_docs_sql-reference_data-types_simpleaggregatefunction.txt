@@ -1,0 +1,76 @@
+Source: https://www.tinybird.com/docs/sql-reference/data-types/simpleaggregatefunction
+
+SimpleAggregateFunction Data Type reference · Tinybird Docs
+Sign In
+Sign Up
+SimpleAggregateFunction
+¶
+Copy as MD
+This data type isn't supported at ingest. It is only supported at query time and to create Copy Data Sources or Materialized View Data Sources.
+The
+SimpleAggregateFunction(name, types_of_arguments...)
+data type stores an intermediate state of an aggregate function, similar to
+AggregateFunction
+, but in a more optimized way. It is suitable for aggregate functions where the final result can be computed by combining partial results without needing the full historical state. This means that applying the function
+f
+to a combined dataset
+S1 UNION ALL S2
+is equivalent to applying
+f
+to
+S1
+, then
+f
+to
+S2
+, and finally applying
+f
+to the results of those two operations:
+f(S1 UNION ALL S2) = f(f(S1) UNION ALL f(S2))
+. This property allows for efficient aggregation by only storing the current value.
+Syntax
+¶
+SimpleAggregateFunction(aggregate_function_name, types_of_arguments...)
+Parameters
+¶
+aggregate_function_name
+: The name of the aggregate function to be used.
+types_of_arguments
+: The data types of the arguments that the aggregate function will process.
+Supported functions
+¶
+The following aggregate functions are supported with
+SimpleAggregateFunction
+:
+any
+anyLast
+min
+max
+sum
+sumWithOverflow
+groupBitAnd
+groupBitOr
+groupBitXor
+groupArrayArray
+groupUniqArrayArray
+sumMap
+minMap
+maxMap
+Values of
+SimpleAggregateFunction(func, Type)
+are stored and behave like their underlying
+Type
+. This means you do not need to apply special combinators like
+-Merge
+or
+-State
+to retrieve the final value. This data type generally offers better performance compared to
+AggregateFunction
+for the same aggregation functions due to its optimized storage of intermediate states.
+Updated
+4 months ago
+On this page
+SimpleAggregateFunction
+forward
+classic
+Ask AI

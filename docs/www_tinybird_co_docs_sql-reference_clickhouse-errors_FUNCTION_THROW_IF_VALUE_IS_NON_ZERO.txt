@@ -1,0 +1,362 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/FUNCTION_THROW_IF_VALUE_IS_NON_ZERO
+
+FUNCTION_THROW_IF_VALUE_IS_NON_ZERO ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+FUNCTION_THROW_IF_VALUE_IS_NON_ZERO ClickHouse error
+¶
+Copy as MD
+This error occurs when a function encounters a non-zero value and throws an exception as designed. It's common with validation functions, error checking, or conditional logic that intentionally throws errors.
+The
+FUNCTION_THROW_IF_VALUE_IS_NON_ZERO
+error in ClickHouse (and Tinybird) happens when a function is designed to throw an exception when it encounters a non-zero value. This is intentional behavior for functions that perform validation, error checking, or conditional logic that requires throwing errors under specific conditions.
+What causes this error
+¶
+You'll typically see it when:
+Using validation functions that check for error conditions
+Calling functions designed to throw on non-zero values
+Using error checking functions in conditional logic
+Functions that validate data integrity
+Error handling functions that propagate errors
+Functions that check business logic conditions
+Validation functions for data quality checks
+This error is often intentional behavior. Check the function documentation to understand when and why it throws errors.
+Example errors
+¶
+Fails: validation function with non-zero value
+SELECT throwIf(1, 'Value is non-zero')
+-- Error: FUNCTION_THROW_IF_VALUE_IS_NON_ZERO: Value is non-zero
+Fails: error checking function
+SELECT throwIf(COUNT(*) > 0, 'Table has data')
+FROM empty_table
+-- Error: FUNCTION_THROW_IF_VALUE_IS_NON_ZERO: Table has data
+Fails: business logic validation
+SELECT throwIf(user_count > 1000, 'Too many users')
+FROM (SELECT COUNT(*) as user_count FROM users)
+-- Error: FUNCTION_THROW_IF_VALUE_IS_NON_ZERO: Too many users
+Fails: data quality check
+SELECT throwIf(invalid_count > 0, 'Data quality issue detected')
+FROM (
+    SELECT COUNT(*) as invalid_count
+    FROM events
+    WHERE user_id = 0 OR user_id IS NULL
+)
+-- Error: FUNCTION_THROW_IF_VALUE_IS_NON_ZERO: Data quality issue detected
+How to fix it
+¶
+Understand the function behavior
+¶
+Check what triggers the error:
+Check function behavior
+-- Understand when throwIf throws errors
+-- throwIf(condition, message) throws when condition is non-zero
+SELECT
+    CASE
+        WHEN 0 THEN 'Zero - no error'
+        WHEN 1 THEN 'One - will cause error'
+        ELSE 'Other value'
+    END as condition_value
+Use conditional logic
+¶
+Handle the condition before calling the function:
+Fix: conditional handling
+-- Instead of throwing error, handle condition
+SELECT
+    CASE
+        WHEN COUNT(*) > 0 THEN 'Table has data'
+        ELSE 'Table is empty'
+    END as table_status
+FROM empty_table
+Use alternative functions
+¶
+Replace throwing functions with non-throwing alternatives:
+Fix: use non-throwing alternatives
+-- Instead of throwIf, use if
+SELECT if(COUNT(*) > 0, 'Table has data', 'Table is empty') as status
+FROM empty_table
+
+-- Or use CASE statement
+SELECT
+    CASE
+        WHEN COUNT(*) > 0 THEN 'Table has data'
+        ELSE 'Table is empty'
+    END as status
+FROM empty_table
+Handle errors gracefully
+¶
+Implement error handling in your application:
+Fix: error handling
+-- In your application, handle the error gracefully
+-- Example pseudo-code:
+--
+-- try:
+--     result = execute_query("SELECT throwIf(1, 'Error')")
+-- except FunctionThrowIfValueIsNonZero as e:
+--     # Handle the error condition
+--     logger.warning(f"Validation failed: {e}")
+--     # Take appropriate action
+Common patterns and solutions
+¶
+Data validation
+¶
+Use validation functions appropriately:
+Data validation approach
+-- Validate data without throwing errors
+SELECT
+    COUNT(*) as total_rows,
+    COUNT(CASE WHEN user_id = 0 OR user_id IS NULL THEN 1 END) as invalid_rows,
+    if(invalid_rows > 0, 'Data quality issues found', 'Data quality OK') as status
+FROM events
+WHERE timestamp >= '2024-01-01'
+Business logic checks
+¶
+Implement business logic without throwing errors:
+Business logic handling
+-- Check business rules without throwing
+SELECT
+    user_id,
+    COUNT(*) as event_count,
+    CASE
+        WHEN event_count > 1000 THEN 'High activity user'
+        WHEN event_count > 100 THEN 'Active user'
+        ELSE 'Regular user'
+    END as user_category
+FROM events
+GROUP BY user_id
+Error condition handling
+¶
+Handle error conditions gracefully:
+Error condition handling
+-- Instead of throwing, return error status
+SELECT
+    CASE
+        WHEN COUNT(*) = 0 THEN 'No data available'
+        WHEN COUNT(*) > 10000 THEN 'Too much data'
+        ELSE 'Data available'
+    END as data_status,
+    COUNT(*) as row_count
+FROM events
+WHERE timestamp >= '2024-01-01'
+Conditional validation
+¶
+Use conditional validation logic:
+Conditional validation
+-- Validate only when conditions are met
+SELECT
+    user_id,
+    event_type,
+    CASE
+        WHEN user_id = 0 THEN 'Invalid user ID'
+        WHEN event_type = '' THEN 'Empty event type'
+        ELSE 'Valid record'
+    END as validation_status
+FROM events
+WHERE timestamp >= '2024-01-01'
+Tinybird-specific notes
+¶
+In Tinybird, FUNCTION_THROW_IF_VALUE_IS_NON_ZERO errors often occur when:
+Pipe transformations use validation functions
+Materialized Views have error checking logic
+API endpoints implement data validation
+Data quality checks are implemented
+To debug in Tinybird:
+Review Pipe transformation logic for validation functions
+Check Materialized View definitions for error conditions
+Review API endpoint validation logic
+Ensure data quality checks are appropriate
+In Tinybird, use the Data Source preview to test validation logic before implementing it in Pipes.
+Best practices
+¶
+Function usage
+¶
+Understand when functions throw errors
+Use non-throwing alternatives when possible
+Implement proper error handling
+Document expected function behavior
+Error handling
+¶
+Handle errors gracefully in your application
+Provide meaningful error messages
+Implement fallback logic when possible
+Log errors for debugging
+Validation logic
+¶
+Use appropriate validation functions
+Implement business logic without throwing errors
+Provide clear feedback on validation failures
+Consider performance implications of validation
+Configuration options
+¶
+Error handling settings
+¶
+Error handling configuration
+-- Check error handling settings
+SELECT
+    name,
+    value,
+    description
+FROM system.settings
+WHERE name LIKE '%error%' OR name LIKE '%throw%'
+Function behavior settings
+¶
+Function behavior settings
+-- Configure function behavior
+SET function_throw_on_error = 0;  -- Disable throwing on errors
+SET function_throw_on_zero = 0;   -- Disable throwing on zero values
+Validation settings
+¶
+Validation settings
+-- Configure validation behavior
+SET validate_data = 1;            -- Enable data validation
+SET strict_validation = 0;        -- Disable strict validation
+Alternative solutions
+¶
+Use non-throwing functions
+¶
+Replace throwing functions with alternatives:
+Non-throwing alternatives
+-- Instead of throwIf, use if
+SELECT if(condition, 'true_value', 'false_value') as result
+
+-- Instead of throwIf, use CASE
+SELECT
+    CASE
+        WHEN condition THEN 'true_value'
+        ELSE 'false_value'
+    END as result
+
+-- Instead of throwIf, use multiIf
+SELECT multiIf(
+    condition1, 'value1',
+    condition2, 'value2',
+    'default_value'
+) as result
+Implement custom validation
+¶
+Create custom validation logic:
+Custom validation
+-- Create custom validation without throwing
+SELECT
+    user_id,
+    event_type,
+    timestamp,
+    CASE
+        WHEN user_id = 0 THEN 'INVALID_USER_ID'
+        WHEN event_type = '' THEN 'INVALID_EVENT_TYPE'
+        WHEN timestamp = '1970-01-01' THEN 'INVALID_TIMESTAMP'
+        ELSE 'VALID'
+    END as validation_status
+FROM events
+WHERE timestamp >= '2024-01-01'
+Use error aggregation
+¶
+Collect errors without throwing:
+Error aggregation
+-- Aggregate validation errors
+SELECT
+    'user_id' as field,
+    COUNT(CASE WHEN user_id = 0 OR user_id IS NULL THEN 1 END) as error_count
+FROM events
+WHERE timestamp >= '2024-01-01'
+
+UNION ALL
+
+SELECT
+    'event_type' as field,
+    COUNT(CASE WHEN event_type = '' OR event_type IS NULL THEN 1 END) as error_count
+FROM events
+WHERE timestamp >= '2024-01-01'
+Monitoring and prevention
+¶
+Error tracking
+¶
+Error monitoring
+-- Track function throwing errors
+-- Example pseudo-code:
+--
+-- def track_function_error(function_name, error_message, condition_value):
+--     logger.error(f"Function {function_name} threw error: {error_message}")
+--     logger.error(f"Condition value: {condition_value}")
+--
+--     # Track error metrics
+--     increment_counter('function_throw_errors', {
+--         'function': function_name,
+--         'error_message': error_message,
+--         'condition_value': condition_value
+--     })
+Validation monitoring
+¶
+Validation monitoring
+-- Monitor validation failures
+SELECT
+    validation_field,
+    COUNT(*) as total_records,
+    COUNT(CASE WHEN validation_status != 'VALID' THEN 1 END) as invalid_records,
+    COUNT(CASE WHEN validation_status = 'VALID' THEN 1 END) as valid_records
+FROM (
+    SELECT
+        user_id,
+        CASE
+            WHEN user_id = 0 OR user_id IS NULL THEN 'INVALID_USER_ID'
+            ELSE 'VALID'
+        END as validation_status,
+        'user_id' as validation_field
+    FROM events
+    WHERE timestamp >= '2024-01-01'
+)
+GROUP BY validation_field
+Performance monitoring
+¶
+Performance monitoring
+-- Monitor validation performance
+SELECT
+    validation_function,
+    COUNT(*) as calls,
+    AVG(execution_time) as avg_execution_time,
+    MAX(execution_time) as max_execution_time
+FROM validation_log
+WHERE timestamp >= now() - INTERVAL 1 HOUR
+GROUP BY validation_function
+See also
+¶
+Conditional Functions
+Error Handling
+Data Validation
+Function Reference
+Updated
+4 weeks ago
+On this page
+FUNCTION_THROW_IF_VALUE_IS_NON_ZERO ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Understand the function behavior
+Use conditional logic
+Use alternative functions
+Handle errors gracefully
+Common patterns and solutions
+Data validation
+Business logic checks
+Error condition handling
+Conditional validation
+Tinybird-specific notes
+Best practices
+Function usage
+Error handling
+Validation logic
+Configuration options
+Error handling settings
+Function behavior settings
+Validation settings
+Alternative solutions
+Use non-throwing functions
+Implement custom validation
+Use error aggregation
+Monitoring and prevention
+Error tracking
+Validation monitoring
+Performance monitoring
+See also
+forward
+classic
+Ask AI

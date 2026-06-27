@@ -1,0 +1,87 @@
+Source: https://www.tinybird.com/docs/forward/guides/ingest-litellm
+
+Send LiteLLM Events to Tinybird · Tinybird Docs
+Sign In
+Sign Up
+Send LiteLLM events to Tinybird
+¶
+Copy as MD
+LiteLLM
+is an LLM gateway that provides AI models access, fallbacks, and spend tracking across 100+ LLMs. It's a popular choice for many developers and organizations.
+LiteLLM is open source and can be self-hosted.
+To start sending LiteLLM events to Tinybird, first create a data source with this schema:
+SCHEMA >
+    `model` LowCardinality(String) `json:$.model` DEFAULT 'unknown',
+    `messages` Array(Map(String, String)) `json:$.messages[:]` DEFAULT [],
+    `user` String `json:$.user` DEFAULT 'unknown',
+    `start_time` DateTime `json:$.start_time` DEFAULT now(),
+    `end_time` DateTime `json:$.end_time` DEFAULT now(),
+    `id` String `json:$.id` DEFAULT '',
+    `stream` Bool `json:$.stream` DEFAULT false,
+    `call_type` LowCardinality(String) `json:$.call_type` DEFAULT 'unknown',
+    `provider` LowCardinality(String) `json:$.provider` DEFAULT 'unknown',
+    `api_key` String `json:$.api_key` DEFAULT '',
+    `log_event_type` LowCardinality(String) `json:$.log_event_type` DEFAULT 'unknown',
+    `llm_api_duration_ms` Float32 `json:$.llm_api_duration_ms` DEFAULT 0,
+    `cache_hit` Bool `json:$.cache_hit` DEFAULT false,
+    `response_status` LowCardinality(String) `json:$.standard_logging_object_status` DEFAULT 'unknown',
+    `response_time` Float32 `json:$.standard_logging_object_response_time` DEFAULT 0,
+    `proxy_metadata` String `json:$.proxy_metadata` DEFAULT '',
+    `organization` String `json:$.proxy_metadata.organization` DEFAULT '',
+    `environment` String `json:$.proxy_metadata.environment` DEFAULT '',
+    `project` String `json:$.proxy_metadata.project` DEFAULT '',
+    `chat_id` String `json:$.proxy_metadata.chat_id` DEFAULT '',
+    `response` String `json:$.response` DEFAULT '',
+    `response_id` String `json:$.response.id`,
+    `response_object` String `json:$.response.object` DEFAULT 'unknown',
+    `response_choices` Array(String) `json:$.response.choices[:]` DEFAULT [],
+    `completion_tokens` UInt16 `json:$.response.usage.completion_tokens` DEFAULT 0,
+    `prompt_tokens` UInt16 `json:$.response.usage.prompt_tokens` DEFAULT 0,
+    `total_tokens` UInt16 `json:$.response.usage.total_tokens` DEFAULT 0,
+    `cost` Float32 `json:$.cost` DEFAULT 0,
+    `exception` String `json:$.exception` DEFAULT '',
+    `traceback` String `json:$.traceback` DEFAULT '',
+    `duration` Float32 `json:$.duration` DEFAULT 0
+
+
+ENGINE MergeTree
+ENGINE_SORTING_KEY start_time, organization, project, model
+ENGINE_PARTITION_KEY toYYYYMM(start_time)
+Install the Tinybird AI Python SDK:
+pip install tinybird-python-sdk[ai]
+Finally, use the following handler in your app:
+import litellm
+from litellm import acompletion
+from tb.litellm.handler import TinybirdLitellmAsyncHandler
+
+customHandler = TinybirdLitellmAsyncHandler(
+    api_url="https://api.us-east.aws.tinybird.co",
+    tinybird_token=os.getenv("TINYBIRD_TOKEN"),
+    datasource_name="litellm"
+)
+
+litellm.callbacks = [customHandler]
+
+response = await acompletion(
+    model="gpt-3.5-turbo",
+    messages=[{"role": "user", "content": "Hi 👋 - i'm openai"}],
+    stream=True
+)
+AI analytics template
+¶
+Use the
+LLM tracker template
+to bootstrap a multi-tenant, user-facing AI analytics dashboard and LLM cost calculator for your AI models. You can fork it and make it your own.
+See also
+¶
+Events API
+LiteLLM docs
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Send LiteLLM events to Tinybird
+AI analytics template
+See also
+forward
+Ask AI

@@ -1,0 +1,35 @@
+Source: https://www.tinybird.com/docs/live/usage-based-pricing-build-vs-buy
+
+Should you build or buy Usage-based Pricing? · Tinybird
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+← Back to Live
+Should you build or buy Usage-based Pricing?
+Developers at API-first companies have a question to answer: Should we build usage-based pricing on our own or buy a SaaS tool off the shelf? Join us as we discuss the pros and cons of each approach with Alex Dovenmuehle, a usage-based pricing expert who has built UBP systems for both Heroku and Mattermost.
+In this livestream, we'll help you answer the build vs. buy question for usage-based pricing (UBP) by answering the following questions:
+What is the SaaS landscape for usage-based pricing? Who are the players to consider and what do they offer?
+What is the basic architecture of a usage-based pricing system?
+Why should you build UBP on your own?
+Why should you
+not
+build UBP on your own?
+How should you approach the question of build vs. buy for your own application?
+Have questions?
+Join us on Slack
+Start building
+Live coding session
+When:
+July 27, 2022 at 15:00 UTC
+Duration:
+1 hour
+Who:
+Alasdair Brown
+Developer Advocate
+Alex Dovenmuehle
+Co-Founder at Big Time Data
+Start building
+Ask AI
+Search...

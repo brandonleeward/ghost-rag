@@ -1,0 +1,24 @@
+Source: https://www.tinybird.com/docs/classic
+
+Classic: Overview of Tinybird · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Tinybird Classic
+¶
+Copy as MD
+Tinybird is data infrastructure for software teams, giving you the tooling and infra you need to ship analytics features in your application while minimizing external dependencies.
+This section contains documentation for Tinybird Classic. For documentation on Tinybird Forward, see the
+Tinybird Forward documentation
+.
+Core concepts
+Quick start
+Tinybird 101
+Use cases
+Updated
+1 year ago
+On this page
+Tinybird Classic
+classic
+Ask AI

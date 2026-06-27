@@ -1,0 +1,50 @@
+Source: https://www.tinybird.com/docs/classic/analytics-agents
+
+Classic: AI agents · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+AI agents
+¶
+Copy as MD
+Apart from manually creating your projects and integrating them in your app, you can use AI agents to both, build and consume, Tinybird projects.
+Build Tinybird projects with agents
+¶
+Use agents to generate, refine, and test Tinybird projects as code.
+Agent skills
+add Tinybird-specific guidance to your coding agents.
+Query Tinybird data with agents
+¶
+Every Tinybird workspace is a fully managed remote MCP server you can connect to.
+The Tinybird remote MCP server enables AI agents to connect directly to your workspace to use endpoints as tools or execute queries. The
+Model Context Protocol
+gives AI assistants access to your analytics APIs, data sources, and endpoints through a standardized interface.
+This integration is ideal when you want AI agents to autonomously query your data, call your analytics endpoints, or build data-driven applications without requiring manual API integration.
+Our server only supports Streamable HTTP as the transport protocol. If your MCP client doesn't support it, you'll need to use the
+mcp-remote
+package as a bridge.
+For practical examples and guardrails, see
+MCP examples
+and
+MCP best practices
+.
+See also
+¶
+Learn about the
+MCP server
+tools
+Check some
+example snippets
+Learn about
+best practices
+to use MCP server for AI agents.
+Updated
+4 weeks ago
+On this page
+AI agents
+Build Tinybird projects with agents
+Query Tinybird data with agents
+See also
+classic
+Ask AI

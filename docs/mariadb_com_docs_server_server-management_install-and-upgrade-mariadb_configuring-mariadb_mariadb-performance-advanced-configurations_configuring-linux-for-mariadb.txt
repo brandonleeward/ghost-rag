@@ -1,0 +1,195 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/configuring-mariadb/mariadb-performance-advanced-configurations/configuring-linux-for-mariadb
+
+Configuring Linux for MariaDB | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Configuring MariaDB with Option Files
+MariaDB Environment Variables
+Advanced Configuration
+Atomic Write Support
+Configuring Linux for MariaDB
+Configuring MariaDB for Optimal Performance
+Configuring Swappiness
+Fusion-io
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Configuring Linux for MariaDB
+Guidance on tuning Linux kernel settings for MariaDB performance, including I/O schedulers (using `none` or `mq-deadline`), open file limits, and core file sizes.
+Linux kernel settings
+IO scheduler
+For optimal IO performance running a database on modern hardware we recommend using the
+none
+(previously called
+noop
+) scheduler.
+Recommended schedulers are
+none
+, for SSDs and NVMes, and
+mq-deadline
+(previously called
+deadline
+) for hard disks.
+You can check your scheduler setting with:
+Copy
+cat
+/sys/block/
+${
+DEVICE
+}
+/queue/scheduler
+For instance, it should look like this output:
+Copy
+cat
+/sys/block/vdb/queue/scheduler
+[
+none
+]
+mq-deadline kyber bfq
+Older kernels may look like:
+Copy
+cat
+/sys/block/sda/queue/scheduler
+[
+noop
+]
+deadline cfq
+Writing the new scheduler name to the same
+/sys
+node will change the scheduler:
+Copy
+echo
+noop
+>
+/sys/block/vdb/queue/scheduler
+The impact of schedulers depend significantly on workload and hardware. You can measure the IO-latency using the
+biolatency
+bcc-tools script with an aim to keep the mean as low as possible.
+Resource Limits
+Configuring the Open Files Limit
+By default, the system limits how many open file descriptors a process can have open at one time. It has both a soft and hard limit. On many systems, both the soft and hard limit default to 1024. On an active database server, it is very easy to exceed 1024 open file descriptors. Therefore, you may need to increase the soft and hard limits. There are a few ways to do so.
+If you are using
+mysqld_safe or mariadbd-safe
+to start
+mysqld
+, then see the instructions at
+mariadbd-safe: Configuring the Open Files Limit
+.
+If you are using
+systemd
+to start
+mysqld
+, then see the instructions at
+systemd: Configuring the Open Files Limit
+.
+Otherwise, you can set the soft and hard limits for the
+mysql
+user account by adding the following lines to
+/etc/security/limits.conf
+:
+After the system is rebooted, the
+mysql
+user should use the new limits, and the user's
+ulimit
+output should look like the following:
+Configuring the Core File Size
+By default, the system limits the size of core files that could be created. It has both a soft and hard limit. On many systems, the soft limit defaults to 0. If you want to
+enable core dumps
+, then you may need to increase this. Therefore, you may need to increase the soft and hard limits. There are a few ways to do so.
+If you are using
+mysqld_safe or mariadbd-safe
+to start
+mysqld
+, then see the instructions at
+mariadb-safe: Configuring the Core File Size
+.
+If you are using
+systemd
+to start
+mysqld
+, then see the instructions at
+systemd: Configuring the Core File Size
+.
+Otherwise, you can set the soft and hard limits for the
+mysql
+user account by adding the following lines to
+/etc/security/limits.conf
+:
+After the system is rebooted, the
+mysql
+user should use the new limits, and the user's
+ulimit
+output should look like the following:
+Swappiness
+See
+configuring swappiness
+.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Atomic Write Support
+Next
+Configuring MariaDB for Optimal Performance
+Last updated
+1 month ago
+Was this helpful?
+Linux kernel settings
+IO scheduler
+Resource Limits
+Configuring the Open Files Limit
+Configuring the Core File Size
+Swappiness
+Was this helpful?
+Copy
+mysql soft nofile 65535
+mysql hard nofile 65535
+Copy
+$ ulimit -Sn
+65535
+$ ulimit -Hn
+65535
+Copy
+mysql soft core unlimited
+mysql hard core unlimited
+Copy
+$ ulimit -Sc
+unlimited
+$ ulimit -Hc
+unlimited

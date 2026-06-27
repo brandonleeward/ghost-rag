@@ -1,0 +1,225 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/storage-engines-storage-engines-overview
+
+Storage Engines Overview | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Storage Engines Overview
+An introduction to MariaDB's pluggable storage engine architecture, highlighting key engines like InnoDB, MyISAM, and Aria for different workloads.
+Overview
+MariaDB features pluggable storage engines to allow per-table workload optimization.
+A storage engine is a type of
+plugin
+for MariaDB:
+Different storage engines may be optimized for different workloads, such as transactional workloads, analytical workloads, or high throughput workloads.
+Different storage engines may be designed for different use cases, such as federated table access, table sharding, and table archiving in the cloud.
+Different tables on the same server may use different storage engines.
+Engine
+Target
+Optimization
+Availability
+Aria
+Read-Heavy
+Reads
+ES 10.5+
+ColumnStore
+Analytics, HTAP
+Big Data, Analytical
+ES 10.5+
+InnoDB
+General Purpose
+Mixed Read/Write
+ES 10.5+
+Memory
+Cache, Temp
+Temporary Data
+ES 10.5+
+MyISAM
+Reads
+Reads
+ES 10.5+
+MyRocks
+Write-Heavy
+I/O Reduction, SSD
+ES 10.5+
+S3
+Cloud
+Read-Only
+ES 10.5+
+Spider
+Federation
+Sharding, Interlink
+ES 10.5+
+Examples
+Identify the Default Storage Engine
+Identify the server's global default storage engine by using
+SHOW GLOBAL VARIABLES
+to query the
+default_storage_engine
+system variable:
+Identify the session's default storage engine by using
+SHOW SESSION VARIABLES
+:
+Set the Default Storage Engine
+Global default storage engine:
+Session default storage engine supersedes global default during this session:
+Configure the Default Storage Engine
+Identify Available Storage Engines
+Choose Storage Engine for a New Table
+Storage engine is specified at time of table creation using a ENGINE = parameter.
+Resources
+Engines for System Tables
+Standard MariaDB storage engines are used for System Table storage:
+Aria Storage Engine
+MyISAM Storage Engine
+FAQ
+Can I use more than one storage engine on a server?
+Yes, different tables can use different storage engines on the same server.
+To create a table with a specific storage engine, specify the ENGINE table option to the
+CREATE TABLE
+statement.
+Can I use more than one storage engine in a single query?
+Yes, a single query can reference tables that use multiple storage engines.
+In some cases, special configuration may be required. For example, ColumnStore requires cross engine joins to be configured.
+What storage engine should I use for transactional or OLTP workloads?
+InnoDB
+is the recommended storage engine for transactional or OLTP workloads.
+What storage engine should I use for analytical or OLAP workloads?
+ColumnStore
+is the recommended storage engine for analytical or OLAP workloads.
+What storage engine should I use if my application performs both transactional and analytical queries?
+An application that performs both transactional and analytical queries is known as
+hybrid transactional-analytical processing (HTAP)
+.
+HTAP can be implemented with MariaDB by using
+InnoDB
+for transactional queries and
+ColumnStore
+for analytical queries.
+Reference
+MariaDB Server Reference
+Plugins
+.
+Information Schema ENGINES table
+, which shows available storage engines.
+Information Schema TABLES table
+, which shows storage engine by table.
+This page is: Copyright © 2025 MariaDB. All rights reserved.
+spinner
+Previous
+Storage Engines
+Next
+Choosing the Right Storage Engine
+Last updated
+5 months ago
+Was this helpful?
+Overview
+Examples
+Identify the Default Storage Engine
+Set the Default Storage Engine
+Configure the Default Storage Engine
+Identify Available Storage Engines
+Choose Storage Engine for a New Table
+Resources
+Engines for System Tables
+FAQ
+Can I use more than one storage engine on a server?
+Can I use more than one storage engine in a single query?
+What storage engine should I use for transactional or OLTP workloads?
+What storage engine should I use for analytical or OLAP workloads?
+What storage engine should I use if my application performs both transactional and analytical queries?
+Reference
+MariaDB Server Reference
+Was this helpful?
+Copy
+SHOW GLOBAL VARIABLES LIKE 'default_storage_engine';
+Copy
++------------------------+--------+
+| Variable_name          | Value  |
++------------------------+--------+
+| default_storage_engine | InnoDB |
++------------------------+--------+
+Copy
+SHOW SESSION VARIABLES LIKE 'default_storage_engine';
+Copy
++------------------------+--------+
+| Variable_name          | Value  |
++------------------------+--------+
+| default_storage_engine | InnoDB |
++------------------------+--------+
+Copy
+SET GLOBAL default_storage_engine='MyRocks';
+Copy
+SET SESSION default_storage_engine='MyRocks';
+Copy
+[mariadb]
+...
+default_storage_engine=MyRocks
+Copy
+SHOW ENGINES;
+Copy
+CREATE TABLE accounts.messages (
+id INT PRIMARY KEY AUTO_INCREMENT,
+sender_id INT,
+receiver_id INT,
+message TEXT
+) ENGINE = MyRocks;

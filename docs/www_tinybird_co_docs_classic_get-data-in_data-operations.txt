@@ -1,0 +1,27 @@
+Source: https://www.tinybird.com/docs/classic/get-data-in/data-operations
+
+Classic: Data operations · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Data operations
+¶
+Copy as MD
+After ingesting data into Tinybird, you might need to perform various operations to maintain and optimize your data.
+This section covers common data operations like:
+Replacing and deleting data
+: Update or remove data selectively or entirely from your Data Sources.
+Iterating a Data Source
+: Make schema changes and evolve your Data Sources over time.
+Scheduling data operations
+: Automate data operations using cron jobs or GitHub Actions.
+Recovering from quarantine
+: Handle and fix data that didn't match your schema during ingestion.
+These operations help you maintain data quality, adapt to changing requirements, and ensure your data pipeline runs smoothly. Whether you need to fix data issues, modify schemas, or automate routine tasks, Tinybird provides the tools to manage your data effectively.
+Updated
+1 year ago
+On this page
+Data operations
+classic
+Ask AI

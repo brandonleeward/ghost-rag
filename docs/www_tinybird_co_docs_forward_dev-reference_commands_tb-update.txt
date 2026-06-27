@@ -1,0 +1,41 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-update
+
+tb update · Tinybird Docs
+Sign In
+Sign Up
+tb update
+¶
+Copy as MD
+Updates the CLI to the latest version. Requires
+tb local start
+.
+tb update
+
+» Updating Tinybird CLI...
+✓ Tinybird CLI updated
+If you can't update for some reason, manually reinstall the CLI:
+For macOS and Linux
+For Windows
+curl https://tinybird.co | sh
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✗ No
+Updates the CLI binary globally.
+--cloud
+✗ No
+Updates the CLI binary globally.
+--branch=BRANCH_NAME
+✗ No
+Updates the CLI binary globally.
+Updated
+6 months ago
+Looking for Classic docs?
+On this page
+tb update
+Environment support
+forward
+Ask AI

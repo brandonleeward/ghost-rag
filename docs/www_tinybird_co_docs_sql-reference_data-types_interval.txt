@@ -1,0 +1,61 @@
+Source: https://www.tinybird.com/docs/sql-reference/data-types/interval
+
+Interval Data Type reference · Tinybird Docs
+Sign In
+Sign Up
+Interval
+¶
+Copy as MD
+This data type isn't supported at ingest. It is only supported at query time and to create Copy Data Sources or Materialized View Data Sources.
+The family of data types representing time and date intervals. The resulting types of the INTERVAL operator.
+Structure:
+Time interval as an unsigned integer value.
+Type of an interval.
+Supported interval types:
+NANOSECOND
+MICROSECOND
+MILLISECOND
+SECOND
+MINUTE
+HOUR
+DAY
+WEEK
+MONTH
+QUARTER
+YEAR
+For each interval type, there is a separate data type. For example, the
+DAY
+interval corresponds to the
+IntervalDay
+data type:
+SELECT toTypeName(INTERVAL 4 DAY)
+┌─toTypeName(toIntervalDay(4))─┐
+│ IntervalDay                  │
+└──────────────────────────────┘
+Considerations
+¶
+You can use
+Interval
+-type values in arithmetical operations with Date and DateTime-type values. For example, you can add 4 days to the current time:
+SELECT now() as current_date_time, current_date_time + INTERVAL 4 DAY
+┌───current_date_time─┬─plus(now(), toIntervalDay(4))─┐
+│ 2019-10-23 10:58:45 │           2019-10-27 10:58:45 │
+└─────────────────────┴───────────────────────────────┘
+You can use multiple intervals simultaneously:
+SELECT now() AS current_date_time, current_date_time + (INTERVAL 4 DAY + INTERVAL 3 HOUR)
+┌───current_date_time─┬─plus(current_date_time, plus(toIntervalDay(4), toIntervalHour(3)))─┐
+│ 2024-08-08 18:31:39 │                                                2024-08-12 21:31:39 │
+└─────────────────────┴────────────────────────────────────────────────────────────────────┘
+And to compare values with different intervals:
+SELECT toIntervalMicrosecond(3600000000) = toIntervalHour(1)
+┌─less(toIntervalMicrosecond(179999999), toIntervalMinute(3))─┐
+│                                                           1 │
+└─────────────────────────────────────────────────────────────┘
+Updated
+1 year ago
+On this page
+Interval
+Considerations
+forward
+classic
+Ask AI

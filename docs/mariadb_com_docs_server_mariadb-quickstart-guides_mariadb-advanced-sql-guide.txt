@@ -1,0 +1,555 @@
+Source: https://mariadb.com/docs/server/mariadb-quickstart-guides/mariadb-advanced-sql-guide
+
+Essential Queries Guide | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Installing MariaDB Server Guide
+Adding & Changing Data Guide
+Essential Queries Guide
+Basics Guide
+Altering Tables Guide
+Connecting to MariaDB Guide
+Troubleshooting Connection Issues Guide
+Doing Time Guide
+Importing Data Guide
+Essentials of an Index Guide
+Getting Started with Indexes Guide
+Joining Tables with JOIN Clauses
+Advanced Joins
+Configuring MariaDB for Remote Client Access Guide
+Getting Data Guide
+Basic SQL Statements Guide
+Basic SQL Debugging Guide
+MariaDB String Functions Guide
+Restoring Data from Dump Files Guide
+Changing Times in MariaDB
+System & Status Variables Guide
+Making Backups with mariadb-dump Guide
+A MariaDB Primer Guide
+Creating & Using Views Guide
+Database Applications
+Server Usage
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Essential Queries Guide
+Learn how to perform essential SQL operations such as creating tables, inserting data, and using aggregate functions like MAX, MIN, and AVG.
+The Essential Queries Guide offers a concise collection of commonly-used SQL queries. It's designed to help developers and database administrators quickly find syntax and examples for typical database operations, from table creation and data insertion to effective data retrieval and manipulation.
+Creating a Table
+To create new tables:
+Copy
+CREATE
+TABLE
+t1
+( a
+INT
+);
+Copy
+CREATE
+TABLE
+t2
+( b
+INT
+);
+Copy
+CREATE
+TABLE
+student_tests
+(
+name
+CHAR
+(
+10
+), test
+CHAR
+(
+10
+),
+score
+TINYINT
+, test_date
+DATE
+);
+For more details, see the official
+CREATE TABLE
+documentation.
+Inserting Records
+To add data into your tables:
+Copy
+INSERT INTO
+t1
+VALUES
+(
+1
+), (
+2
+), (
+3
+);
+Copy
+INSERT INTO
+t2
+VALUES
+(
+2
+), (
+4
+);
+Copy
+INSERT INTO
+student_tests
+(
+name
+, test, score, test_date)
+VALUES
+(
+'
+Chun
+'
+,
+'
+SQL
+'
+,
+75
+,
+'
+2012-11-05
+'
+),
+(
+'
+Chun
+'
+,
+'
+Tuning
+'
+,
+73
+,
+'
+2013-06-14
+'
+),
+(
+'
+Esben
+'
+,
+'
+SQL
+'
+,
+43
+,
+'
+2014-02-11
+'
+),
+(
+'
+Esben
+'
+,
+'
+Tuning
+'
+,
+31
+,
+'
+2014-02-09
+'
+),
+(
+'
+Kaolin
+'
+,
+'
+SQL
+'
+,
+56
+,
+'
+2014-01-01
+'
+),
+(
+'
+Kaolin
+'
+,
+'
+Tuning
+'
+,
+88
+,
+'
+2013-12-29
+'
+),
+(
+'
+Tatiana
+'
+,
+'
+SQL
+'
+,
+87
+,
+'
+2012-04-28
+'
+),
+(
+'
+Tatiana
+'
+,
+'
+Tuning
+'
+,
+83
+,
+'
+2013-09-30
+'
+);
+For more information, see the official INSERT documentation.
+Using AUTO_INCREMENT
+The
+AUTO_INCREMENT
+attribute automatically generates a unique identity for new rows.
+Create a table with an
+AUTO_INCREMENT
+column:
+When inserting, omit the
+id
+field; it will be automatically generated:
+Verify the inserted records:
+For more details, see the
+AUTO_INCREMENT
+documentation.
+Querying from two tables on a common value (JOIN)
+To combine rows from two tables based on a related column:
+This type of query is a join. For more details, consult the documentation on
+JOINS
+.
+Finding the Maximum Value
+To find the maximum value in a column:
+See the
+MAX() function
+documentation. For a grouped example, refer to
+Finding the Maximum Value and Grouping the Results
+below.
+Finding the Minimum Value
+To find the minimum value in a column:
+See the MIN() function documentation.
+Finding the Average Value
+To calculate the average value of a column:
+See the
+AVG() function
+documentation.
+Finding the Maximum Value and Grouping the Results
+To find the maximum value within groups:
+Further details are available in the MAX() function documentation.
+Ordering Results
+To sort your query results (e.g., in descending order):
+For more options, see the
+ORDER BY
+documentation.
+Finding the Row with the Minimum of a Particular Column
+To find the entire row containing the minimum value of a specific column across all records:
+Finding Rows with the Maximum Value of a Column by Group
+To retrieve the full record for the maximum value within each group (e.g., highest score per student):
+Calculating Age
+Use the
+TIMESTAMPDIFF
+function to calculate age from a birth date.
+To see the current date (optional, for reference):
+To calculate age as of a specific date (e.g., '2014-08-02'):
+To calculate current age, replace the specific date string (e.g., '2014-08-02') with CURDATE().
+See the
+TIMESTAMPDIFF()
+documentation for more.
+Using User-defined Variables
+User-defined variables
+can store values for use in subsequent queries within the same session.
+Example: Set a variable for the average score and use it to filter results.
+Example: Add an incremental counter to a result set.
+See
+User-defined Variables
+for more.
+View Tables in Order of Size
+To list all tables in the current database, ordered by their size (data + index) in megabytes:
+Removing Duplicates
+To remove duplicate rows based on specific column values, while keeping one instance (e.g., the instance with the highest
+id
+).
+This example assumes
+id
+is a unique primary key and duplicates are identified by the values in column
+f1
+. It keeps the row with the maximum
+id
+for each distinct
+f1
+value.
+Setup sample table and data:
+To delete duplicate rows, keeping the one with the highest
+id
+for each group of
+f1
+values:
+This query targets rows for deletion (
+t_del
+) where their
+f1
+value matches an
+f1
+in a subquery (
+t_keep
+) that has duplicates, and their
+id
+is less than the maximum
+id
+found for that
+f1
+group.
+Verify results after deletion:
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Adding & Changing Data Guide
+Next
+Basics Guide
+Last updated
+10 months ago
+Was this helpful?
+Creating a Table
+Inserting Records
+Using AUTO_INCREMENT
+Querying from two tables on a common value (JOIN)
+Finding the Maximum Value
+Finding the Minimum Value
+Finding the Average Value
+Finding the Maximum Value and Grouping the Results
+Ordering Results
+Finding the Row with the Minimum of a Particular Column
+Finding Rows with the Maximum Value of a Column by Group
+Calculating Age
+Using User-defined Variables
+View Tables in Order of Size
+Removing Duplicates
+Was this helpful?
+Copy
+CREATE TABLE student_details (
+id INT NOT NULL AUTO_INCREMENT, name CHAR(10),
+date_of_birth DATE, PRIMARY KEY (id)
+);
+Copy
+INSERT INTO student_details (name,date_of_birth) VALUES
+('Chun', '1993-12-31'),
+('Esben','1946-01-01'),
+('Kaolin','1996-07-16'),
+('Tatiana', '1988-04-13');
+Copy
+SELECT * FROM student_details;
+Copy
++----+---------+---------------+
+| id | name    | date_of_birth |
++----+---------+---------------+
+|  1 | Chun    | 1993-12-31    |
+|  2 | Esben   | 1946-01-01    |
+|  3 | Kaolin  | 1996-07-16    |
+|  4 | Tatiana | 1988-04-13    |
++----+---------+---------------+
+Copy
+SELECT * FROM t1 INNER JOIN t2 ON t1.a = t2.b;
+Copy
+SELECT MAX(a) FROM t1;
+Copy
++--------+
+| MAX(a) |
++--------+
+|      3 |
++--------+
+Copy
+SELECT MIN(a) FROM t1;
+Copy
++--------+
+| MIN(a) |
++--------+
+|      1 |
++--------+
+Copy
+SELECT AVG(a) FROM t1;
+Copy
++--------+
+| AVG(a) |
++--------+
+| 2.0000 |
++--------+
+Copy
+SELECT name, MAX(score) FROM student_tests GROUP BY name;
+Copy
++---------+------------+
+| name    | MAX(score) |
++---------+------------+
+| Chun    |         75 |
+| Esben   |         43 |
+| Kaolin  |         88 |
+| Tatiana |         87 |
++---------+------------+
+Copy
+SELECT name, test, score FROM student_tests
+ORDER BY score DESC; -- Use ASC for ascending order
+Copy
++---------+--------+-------+
+| name    | test   | score |
++---------+--------+-------+
+| Kaolin  | Tuning |    88 |
+| Tatiana | SQL    |    87 |
+| Tatiana | Tuning |    83 |
+| Chun    | SQL    |    75 |
+| Chun    | Tuning |    73 |
+| Kaolin  | SQL    |    56 |
+| Esben   | SQL    |    43 |
+| Esben   | Tuning |    31 |
++---------+--------+-------+
+Copy
+SELECT name, test, score FROM student_tests
+WHERE score = (SELECT MIN(score) FROM student_tests);
+Copy
++-------+--------+-------+
+| name  | test   | score |
++-------+--------+-------+
+| Esben | Tuning |    31 |
++-------+--------+-------+
+Copy
+SELECT name, test, score FROM student_tests st1
+WHERE score = (SELECT MAX(st2.score) FROM student_tests st2 WHERE st1.name = st2.name);
+Copy
++---------+--------+-------+
+| name    | test   | score |
++---------+--------+-------+
+| Chun    | SQL    |    75 |
+| Esben   | SQL    |    43 |
+| Kaolin  | Tuning |    88 |
+| Tatiana | SQL    |    87 |
++---------+--------+-------+
+Copy
+SELECT CURDATE() AS today;
+Copy
++------------+
+| today      |
++------------+
+| 2014-02-17 | -- Example output; actual date will vary
++------------+
+Copy
+SELECT name, date_of_birth, TIMESTAMPDIFF(YEAR, date_of_birth, '2014-08-02') AS age
+FROM student_details;
+Copy
++---------+---------------+------+
+| name    | date_of_birth | age  |
++---------+---------------+------+
+| Chun    | 1993-12-31    |   20 |
+| Esben   | 1946-01-01    |   68 |
+| Kaolin  | 1996-07-16    |   18 |
+| Tatiana | 1988-04-13    |   26 |
++---------+---------------+------+
+Copy
+SELECT @avg_score := AVG(score) FROM student_tests;
+Copy
++-------------------------+
+| @avg_score:= AVG(score) |
++-------------------------+
+|            67.000000000 |
++-------------------------+
+Copy
+SELECT * FROM student_tests WHERE score > @avg_score;
+Copy
++---------+--------+-------+------------+
+| name    | test   | score | test_date  |
++---------+--------+-------+------------+
+| Chun    | SQL    |    75 | 2012-11-05 |
+| Chun    | Tuning |    73 | 2013-06-14 |
+| Kaolin  | Tuning |    88 | 2013-12-29 |
+| Tatiana | SQL    |    87 | 2012-04-28 |
+| Tatiana | Tuning |    83 | 2013-09-30 |
++---------+--------+-------+------------+
+Copy
+SET @count = 0;
+Copy
+SELECT @count := @count + 1 AS counter, name, date_of_birth FROM student_details;
+Copy
++---------+---------+---------------+
+| counter | name    | date_of_birth |
++---------+---------+---------------+
+|       1 | Chun    | 1993-12-31    |
+|       2 | Esben   | 1946-01-01    |
+|       3 | Kaolin  | 1996-07-16    |
+|       4 | Tatiana | 1988-04-13    |
++---------+---------+---------------+
+Copy
+SELECT table_schema AS `DB`, table_name AS `TABLE`,
+ROUND(((data_length + index_length) / 1024 / 1024), 2) `Size (MB)`
+FROM information_schema.TABLES
+WHERE table_schema = DATABASE() -- This clause restricts results to the current database
+ORDER BY (data_length + index_length) DESC;
+Copy
++--------------------+---------------------------------------+-----------+
+| DB                 | Table                                 | Size (MB) | -- Example Output
++--------------------+---------------------------------------+-----------+
+| your_db_name       | some_large_table                      |      7.05 |
+| your_db_name       | another_table                         |      6.59 |
+...
++--------------------+---------------------------------------+-----------+
+Copy
+CREATE TABLE t (id INT, f1 VARCHAR(2));
+Copy
+INSERT INTO t VALUES (1,'a'), (2,'a'), (3,'b'), (4,'a');
+Copy
+DELETE t_del FROM t AS t_del
+INNER JOIN (
+SELECT f1, MAX(id) AS max_id
+FROM t
+GROUP BY f1
+HAVING COUNT(*) > 1 -- Identify groups with actual duplicates
+) AS t_keep ON t_del.f1 = t_keep.f1 AND t_del.id < t_keep.max_id;
+Copy
+SELECT * FROM t;
+Copy
++------+------+
+| id   | f1   |
++------+------+
+|    3 | b    |
+|    4 | a    |
++------+------+

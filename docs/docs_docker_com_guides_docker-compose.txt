@@ -1,0 +1,76 @@
+Source: https://docs.docker.com/guides/docker-compose/
+
+Defining and running multi-container applications with Docker Compose | Docker Docs
+Gordon
+Gordon, your AI assistant for Docker docs
+Search
+Start a new chat
+When enabled, Gordon considers the current page you're viewing
+to provide more relevant answers.
+Share feedback
+Answers are generated based on the documentation.
+Back
+Guides
+Get started
+Manuals
+Reference
+Defining and running multi-container applications with Docker Compose
+Simplify the process of defining, configuring, and running multi-container
+Docker applications.
+Product demo
+10 minutes
+1
+Why Docker Compose?
+2
+Demo: set up and use Docker Compose
+3
+Common challenges and questions
+Resources:
+Overview of Docker Compose CLI
+Overview of Docker Compose
+How Compose works
+Using profiles with Compose
+Control startup and shutdown order with Compose
+Compose Build Specification
+« Back to all guides
+Defining and running multi-container applications with Docker Compose
+Table of contents
+Simplify the process of defining, configuring, and running multi-container
+Docker applications.
+Time to complete
+10 minutes
+Developers face challenges with multi-container Docker applications, including
+complex configuration, dependency management, and maintaining consistent
+environments. Networking, resource allocation, data persistence, logging, and
+monitoring add to the difficulty. Security concerns and troubleshooting issues
+further complicate the process, requiring effective tools and practices for
+efficient management.
+Docker Compose solves the problem of managing multi-container Docker
+applications by providing a simple way to define, configure, and run all the
+containers needed for an application using a single YAML file. This approach
+helps developers to easily set up, share, and maintain consistent development,
+testing, and production environments, ensuring that complex applications can be
+deployed with all their dependencies and services properly configured and
+orchestrated.
+What youâll learn
+What Docker Compose is and what it does
+How to define services
+Use cases for Docker Compose
+How things would be different without Docker Compose
+Whoâs this for?
+Developers and DevOps engineers who need to define, manage, and orchestrate
+multi-container Docker applications efficiently across multiple environments.
+Development teams that want to increase productivity by streamlining
+development workflows and reducing setup time.
+Tools integration
+Works well with Docker CLI, CI/CD tools, and container orchestration tools.
+Modules
+Why Docker Compose?
+Learn how Docker Compose can help you simplify app development.
+Demo: set up and use Docker Compose
+Learn how to get started with Docker Compose.
+Common challenges and questions
+Explore common challenges and questions related to Docker Compose.
+Edit this page
+Request changes
+Table of contents

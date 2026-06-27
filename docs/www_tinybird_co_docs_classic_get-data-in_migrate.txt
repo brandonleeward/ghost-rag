@@ -1,0 +1,31 @@
+Source: https://www.tinybird.com/docs/classic/get-data-in/migrate
+
+Classic: Migrate data into Tinybird · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Migrate data into Tinybird
+¶
+Copy as MD
+Tinybird provides several options for migrating data from external platforms. Whether you're moving from a managed service like DoubleCloud, a real-time analytics platform like Rockset, or a traditional database like PostgreSQL, Tinybird offers migration paths to help you transition your data and workloads.
+Each migration guide provides detailed, step-by-step instructions for:
+Moving your existing data into Tinybird.
+Understanding how concepts and features map between platforms.
+Setting up equivalent functionality in Tinybird.
+Maintaining data consistency during the migration.
+The guides also cover important considerations like:
+Data volume and performance requirements.
+Schema management and data types.
+Authentication and security.
+Monitoring and observability.
+Select your current platform to get started with your migration to Tinybird.
+Migrate from DoubleCloud
+Migrate from Postgres
+Migrate from Rockset
+Updated
+1 year ago
+On this page
+Migrate data into Tinybird
+classic
+Ask AI

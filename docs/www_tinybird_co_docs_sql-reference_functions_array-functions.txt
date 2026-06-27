@@ -1,0 +1,2345 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/array-functions
+
+Array Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Array functions
+¶
+Copy as MD
+The following functions are used to manipulate arrays.
+empty
+¶
+Checks if an array contains any elements.
+Syntax
+¶
+empty(x)
+Arguments
+¶
+x
+: The input array. Array.
+Returns
+¶
+1
+if the array is empty,
+0
+otherwise. UInt8.
+Example
+¶
+SELECT empty([])
+Result:
+┌─empty(array())─┐
+│              1 │
+└────────────────┘
+notEmpty
+¶
+Checks if an array contains at least one element.
+Syntax
+¶
+notEmpty(x)
+Arguments
+¶
+x
+: The input array. Array.
+Returns
+¶
+1
+if the array is not empty,
+0
+otherwise. UInt8.
+Example
+¶
+SELECT notEmpty([1,2])
+Result:
+┌─notEmpty([1, 2])─┐
+│                1 │
+└──────────────────┘
+length
+¶
+Returns the total number of elements in an array.
+Alias:
+OCTET_LENGTH
+Syntax
+¶
+length(x)
+Arguments
+¶
+x
+: The input array. Array.
+Returns
+¶
+The number of elements in the array. UInt64.
+Example
+¶
+SELECT length([1, 2, 3, 4, 5])
+Result:
+┌─length([1, 2, 3, 4, 5])─┐
+│                       5 │
+└─────────────────────────┘
+emptyArrayUInt8
+¶
+Creates and returns an empty array of type UInt8.
+Syntax
+¶
+emptyArrayUInt8()
+Arguments
+¶
+None.
+Returns
+¶
+An empty array of UInt8 elements. Array(UInt8).
+Example
+¶
+SELECT emptyArrayUInt8()
+Result:
+[]
+emptyArrayUInt16
+¶
+Creates and returns an empty array of type UInt16.
+Syntax
+¶
+emptyArrayUInt16()
+Arguments
+¶
+None.
+Returns
+¶
+An empty array of UInt16 elements. Array(UInt16).
+Example
+¶
+SELECT emptyArrayUInt16()
+Result:
+[]
+emptyArrayUInt32
+¶
+Creates and returns an empty array of type UInt32.
+Syntax
+¶
+emptyArrayUInt32()
+Arguments
+¶
+None.
+Returns
+¶
+An empty array of UInt32 elements. Array(UInt32).
+Example
+¶
+SELECT emptyArrayUInt32()
+Result:
+[]
+emptyArrayUInt64
+¶
+Creates and returns an empty array of type UInt64.
+Syntax
+¶
+emptyArrayUInt64()
+Arguments
+¶
+None.
+Returns
+¶
+An empty array of UInt64 elements. Array(UInt64).
+Example
+¶
+SELECT emptyArrayUInt64()
+Result:
+[]
+emptyArrayInt8
+¶
+Creates and returns an empty array of type Int8.
+Syntax
+¶
+emptyArrayInt8()
+Arguments
+¶
+None.
+Returns
+¶
+An empty array of Int8 elements. Array(Int8).
+Example
+¶
+SELECT emptyArrayInt8()
+Result:
+[]
+emptyArrayInt16
+¶
+Creates and returns an empty array of type Int16.
+Syntax
+¶
+emptyArrayInt16()
+Arguments
+¶
+None.
+Returns
+¶
+An empty array of Int16 elements. Array(Int16).
+Example
+¶
+SELECT emptyArrayInt16()
+Result:
+[]
+emptyArrayInt32
+¶
+Creates and returns an empty array of type Int32.
+Syntax
+¶
+emptyArrayInt32()
+Arguments
+¶
+None.
+Returns
+¶
+An empty array of Int32 elements. Array(Int32).
+Example
+¶
+SELECT emptyArrayInt32()
+Result:
+[]
+emptyArrayInt64
+¶
+Creates and returns an empty array of type Int64.
+Syntax
+¶
+emptyArrayInt64()
+Arguments
+¶
+None.
+Returns
+¶
+An empty array of Int64 elements. Array(Int64).
+Example
+¶
+SELECT emptyArrayInt64()
+Result:
+[]
+emptyArrayFloat32
+¶
+Creates and returns an empty array of type Float32.
+Syntax
+¶
+emptyArrayFloat32()
+Arguments
+¶
+None.
+Returns
+¶
+An empty array of Float32 elements. Array(Float32).
+Example
+¶
+SELECT emptyArrayFloat32()
+Result:
+[]
+emptyArrayFloat64
+¶
+Creates and returns an empty array of type Float64.
+Syntax
+¶
+emptyArrayFloat64()
+Arguments
+¶
+None.
+Returns
+¶
+An empty array of Float64 elements. Array(Float64).
+Example
+¶
+SELECT emptyArrayFloat64()
+Result:
+[]
+emptyArrayDate
+¶
+Creates and returns an empty array of type Date.
+Syntax
+¶
+emptyArrayDate()
+Arguments
+¶
+None.
+Returns
+¶
+An empty array of Date elements. Array(Date).
+Example
+¶
+SELECT emptyArrayDate()
+Result:
+[]
+emptyArrayDateTime
+¶
+Creates and returns an empty array of type DateTime.
+Syntax
+¶
+emptyArrayDateTime()
+Arguments
+¶
+None.
+Returns
+¶
+An empty array of DateTime elements. Array(DateTime).
+Example
+¶
+SELECT emptyArrayDateTime()
+Result:
+[]
+emptyArrayString
+¶
+Creates and returns an empty array of type String.
+Syntax
+¶
+emptyArrayString()
+Arguments
+¶
+None.
+Returns
+¶
+An empty array of String elements. Array(String).
+Example
+¶
+SELECT emptyArrayString()
+Result:
+[]
+emptyArrayToSingle
+¶
+Transforms an empty array into a single-element array containing the default value for its data type.
+Syntax
+¶
+emptyArrayToSingle(array)
+Arguments
+¶
+array
+: An empty array. Array.
+Returns
+¶
+A single-element array with the default value. Array.
+Example
+¶
+SELECT emptyArrayToSingle(emptyArrayInt32())
+Result:
+┌─emptyArrayToSingle(emptyArrayInt32())─┐
+│ [0]                                   │
+└───────────────────────────────────────┘
+range
+¶
+Generates an array of numbers within a specified range, with an optional step.
+Syntax
+¶
+range([start, ] end [, step])
+Arguments
+¶
+start
+: The starting value for the sequence. Optional. Defaults to 0.
+end
+: The upper bound (exclusive) for the sequence. Required.
+step
+: The increment between numbers. Optional. Defaults to 1.
+Returns
+¶
+An array of numbers. Array.
+Example
+¶
+SELECT range(5), range(1, 5), range(1, 10, 2)
+Result:
+┌─range(5)────┬─range(1, 5)─┬─range(1, 10, 2)─┐
+│ [0,1,2,3,4] │ [1,2,3,4]   │ [1,3,5,7,9]     │
+└─────────────┴─────────────┴─────────────────┘
+array
+¶
+Constructs an array from a list of provided arguments.
+Alias:
+[]
+operator
+Syntax
+¶
+array(x1, x2, ...)
+Arguments
+¶
+x1, x2, ...
+: One or more values of any type. All arguments must be convertible to a common data type.
+Returns
+¶
+An array containing the provided values. Array.
+Example
+¶
+SELECT array(1, 2, 3, 4) AS my_array
+Result:
+┌─my_array───┐
+│ [1,2,3,4]  │
+└────────────┘
+arrayWithConstant
+¶
+Creates an array of a specified length, where all elements are the same constant value.
+Syntax
+¶
+arrayWithConstant(length, elem)
+Arguments
+¶
+length
+: The desired number of elements in the array. UInt.
+elem
+: The constant value to fill the array with. Any type.
+Returns
+¶
+An array filled with the specified constant value. Array.
+Example
+¶
+SELECT arrayWithConstant(3, 'hello') AS greeting_array
+Result:
+┌─greeting_array──────────┐
+│ ['hello','hello','hello'] │
+└─────────────────────────┘
+arrayConcat
+¶
+Combines multiple arrays into a single array.
+Syntax
+¶
+arrayConcat(arr1, arr2, ...)
+Arguments
+¶
+arr1, arr2, ...
+: Two or more arrays to concatenate. Array.
+Returns
+¶
+A new array containing all elements from the input arrays in order. Array.
+Example
+¶
+SELECT arrayConcat([1, 2], [3, 4], [5, 6]) AS res
+Result:
+┌─res───────────┐
+│ [1,2,3,4,5,6] │
+└───────────────┘
+arrayElement
+¶
+Retrieves an element from an array at a specified index.
+Alias:
+arr[n]
+operator
+Syntax
+¶
+arrayElement(arr, n)
+Arguments
+¶
+arr
+: The input array. Array.
+n
+: The 1-based index of the element to retrieve. Negative values count from the end of the array (
+-1
+is the last element). Int.
+Returns
+¶
+The element at the specified index. The type matches the array's element type.
+Example
+¶
+SELECT arrayElement([10, 20, 30, 40], 2) AS second_element, arrayElement(['a', 'b', 'c'], -1) AS last_element
+Result:
+┌─second_element─┬─last_element─┐
+│             20 │ c            │
+└────────────────┴──────────────┘
+has
+¶
+Checks if an array contains a specific element.
+Syntax
+¶
+has(arr, elem)
+Arguments
+¶
+arr
+: The array to search within. Array.
+elem
+: The element to search for. Any type.
+Returns
+¶
+1
+if the element is found,
+0
+otherwise. UInt8.
+NULL
+values are treated as distinct values.
+Example
+¶
+SELECT has([1, 2, 3, NULL], 2) AS found_two, has([1, 2, 3, NULL], 4) AS found_four, has([1, 2, 3, NULL], NULL) AS found_null
+Result:
+┌─found_two─┬─found_four─┬─found_null─┐
+│         1 │          0 │          1 │
+└───────────┴────────────┴────────────┘
+arrayElementOrNull
+¶
+Retrieves an element from an array at a specified index, returning
+NULL
+if the index is out of bounds.
+Syntax
+¶
+arrayElementOrNull(arr, n)
+Arguments
+¶
+arr
+: The input array. Array.
+n
+: The 1-based index of the element to retrieve. Negative values count from the end of the array (
+-1
+is the last element). Int.
+Returns
+¶
+The element at the specified index, or
+NULL
+if the index is invalid. Nullable(T).
+Example
+¶
+SELECT arrayElementOrNull([1, 2, 3], 2) AS valid_index, arrayElementOrNull([1, 2, 3], 4) AS out_of_bounds
+Result:
+┌─valid_index─┬─out_of_bounds─┐
+│           2 │          ᴺᵁᴸᴸ │
+└─────────────┴───────────────┘
+hasAll
+¶
+Determines if all elements of one array are present in another array.
+Syntax
+¶
+hasAll(set, subset)
+Arguments
+¶
+set
+: The array to check against. Array.
+subset
+: The array whose elements are checked for presence in
+set
+. Array.
+Returns
+¶
+1
+if all elements in
+subset
+are found in
+set
+,
+0
+otherwise. UInt8.
+Example
+¶
+SELECT hasAll([1, 2, 3, 4], [2, 4]) AS all_present, hasAll([1, 2, 3], [2, 4]) AS not_all_present
+Result:
+┌─all_present─┬─not_all_present─┐
+│           1 │               0 │
+└─────────────┴─────────────────┘
+hasAny
+¶
+Checks if at least one element from one array is present in another array.
+Syntax
+¶
+hasAny(array1, array2)
+Arguments
+¶
+array1
+: The first array. Array.
+array2
+: The second array. Array.
+Returns
+¶
+1
+if there is at least one common element between
+array1
+and
+array2
+,
+0
+otherwise. UInt8.
+Example
+¶
+SELECT hasAny([1, 2, 3], [3, 4, 5]) AS common_element, hasAny([1, 2], [4, 5]) AS no_common_element
+Result:
+┌─common_element─┬─no_common_element─┐
+│              1 │                 0 │
+└────────────────┴───────────────────┘
+hasSubstr
+¶
+Checks if one array is a contiguous sub-sequence of another array, maintaining element order.
+Syntax
+¶
+hasSubstr(array1, array2)
+Arguments
+¶
+array1
+: The array to search within. Array.
+array2
+: The sub-sequence array to search for. Array.
+Returns
+¶
+1
+if
+array2
+is found as a contiguous sub-sequence in
+array1
+with matching order,
+0
+otherwise. UInt8.
+Example
+¶
+SELECT hasSubstr([1, 2, 3, 4, 5], [2, 3]) AS found_subsequence, hasSubstr([1, 2, 3, 4, 5], [3, 2]) AS order_mismatch
+Result:
+┌─found_subsequence─┬─order_mismatch─┐
+│                 1 │              0 │
+└───────────────────┴────────────────┘
+indexOf
+¶
+Returns the 1-based index of the first occurrence of a specified element in an array.
+Syntax
+¶
+indexOf(arr, x)
+Arguments
+¶
+arr
+: The array to search within. Array.
+x
+: The element to search for. Any type.
+Returns
+¶
+The 1-based index of the first match, or
+0
+if the element is not found. UInt64.
+Example
+¶
+SELECT indexOf([10, 20, 30, 20, 40], 20) AS first_occurrence, indexOf([1, 2, 3], 5) AS not_found
+Result:
+┌─first_occurrence─┬─not_found─┐
+│                2 │         0 │
+└──────────────────┴───────────┘
+indexOfAssumeSorted
+¶
+Returns the 1-based index of the first occurrence of a specified element in a sorted array, using an optimized search.
+Syntax
+¶
+indexOfAssumeSorted(arr, x)
+Arguments
+¶
+arr
+: The array to search within, which must be sorted in ascending order. Array.
+x
+: The element to search for. Any type.
+Returns
+¶
+The 1-based index of the first match, or
+0
+if the element is not found. UInt64.
+Example
+¶
+SELECT indexOfAssumeSorted([1, 3, 3, 3, 4, 4, 5], 4) AS found_index
+Result:
+┌─found_index─┐
+│           5 │
+└─────────────┘
+arrayCount
+¶
+Counts elements in an array that satisfy a condition or are non-zero.
+Syntax
+¶
+arrayCount([func,] arr1, ...)
+Arguments
+¶
+func
+: An optional lambda function to apply to each element. If omitted, counts non-zero elements. Lambda function.
+arr1, ...
+: One or more arrays. Array.
+Returns
+¶
+The number of elements that satisfy the condition or are non-zero. UInt64.
+Example
+¶
+SELECT arrayCount([0, 1, 0, 2, 0]) AS non_zero_count, arrayCount(x -> x > 10, [5, 15, 8, 20]) AS greater_than_ten
+Result:
+┌─non_zero_count─┬─greater_than_ten─┐
+│              2 │                2 │
+└────────────────┴──────────────────┘
+arrayDotProduct
+¶
+Calculates the dot product (scalar product) of two numeric arrays or tuples.
+Alias:
+scalarProduct
+,
+dotProduct
+Syntax
+¶
+arrayDotProduct(vector1, vector2)
+Arguments
+¶
+vector1
+: The first array or tuple of numeric values. Array or Tuple.
+vector2
+: The second array or tuple of numeric values. Array or Tuple.
+Returns
+¶
+The dot product of the two vectors. Numeric.
+Example
+¶
+SELECT arrayDotProduct([1, 2, 3], [4, 5, 6]) AS res
+Result:
+┌─res─┐
+│  32 │
+└─────┘
+countEqual
+¶
+Counts the number of elements in an array that are equal to a specified value.
+Syntax
+¶
+countEqual(arr, x)
+Arguments
+¶
+arr
+: The array to search within. Array.
+x
+: The value to compare elements against. Any type.
+Returns
+¶
+The number of elements in
+arr
+that are equal to
+x
+. UInt64.
+Example
+¶
+SELECT countEqual([1, 2, NULL, 2, NULL], 2) AS count_twos, countEqual([1, 2, NULL, 2, NULL], NULL) AS count_nulls
+Result:
+┌─count_twos─┬─count_nulls─┐
+│          2 │           2 │
+└────────────┴─────────────┘
+arrayEnumerate
+¶
+Generates an array of 1-based indices corresponding to the elements of an input array.
+Syntax
+¶
+arrayEnumerate(arr)
+Arguments
+¶
+arr
+: The input array. Array.
+Returns
+¶
+An array of integers
+[1, 2, ..., length(arr)]
+. Array(UInt64).
+Example
+¶
+SELECT arrayEnumerate(['a', 'b', 'c']) AS indices
+Result:
+┌─indices───┐
+│ [1,2,3]   │
+└───────────┘
+arrayEnumerateUniq
+¶
+Assigns a rank to each element within an array based on its uniqueness, resetting the count for each distinct value.
+Syntax
+¶
+arrayEnumerateUniq(arr1, ...)
+Arguments
+¶
+arr1, ...
+: One or more arrays of the same size. Array.
+Returns
+¶
+An array of the same size as the input, where each element indicates its position among elements with the same value. Array(UInt64).
+Example
+¶
+SELECT arrayEnumerateUniq([10, 20, 10, 30, 20]) AS ranks
+Result:
+┌─ranks───────┐
+│ [1,1,2,1,2] │
+└─────────────┘
+arrayEnumerateUniqRanked
+¶
+Assigns a uniqueness rank to elements in a multi-dimensional array, with control over the depth of enumeration.
+Syntax
+¶
+arrayEnumerateUniqRanked(clear_depth, arr, max_array_depth)
+Arguments
+¶
+clear_depth
+: The depth level at which to restart the enumeration for unique elements. Positive Int.
+arr
+: The N-dimensional array to enumerate. Array.
+max_array_depth
+: The maximum effective depth of the array for enumeration. Positive Int.
+Returns
+¶
+An array of the same structure as
+arr
+, containing uniqueness ranks. Array.
+Example
+¶
+SELECT arrayEnumerateUniqRanked(1, [[1,2,3],[2,2,1],[3]], 2) AS ranked_array
+Result:
+┌─ranked_array──────┐
+│ [[1,1,1],[2,3,2],[2]] │
+└───────────────────┘
+arrayPopBack
+¶
+Removes the last element from an array.
+Syntax
+¶
+arrayPopBack(array)
+Arguments
+¶
+array
+: The input array. Array.
+Returns
+¶
+A new array with the last element removed. Array.
+Example
+¶
+SELECT arrayPopBack([1, 2, 3]) AS res
+Result:
+┌─res───┐
+│ [1,2] │
+└───────┘
+arrayPopFront
+¶
+Removes the first element from an array.
+Syntax
+¶
+arrayPopFront(array)
+Arguments
+¶
+array
+: The input array. Array.
+Returns
+¶
+A new array with the first element removed. Array.
+Example
+¶
+SELECT arrayPopFront([1, 2, 3]) AS res
+Result:
+┌─res───┐
+│ [2,3] │
+└───────┘
+arrayPushBack
+¶
+Adds a single value to the end of an array.
+Syntax
+¶
+arrayPushBack(array, single_value)
+Arguments
+¶
+array
+: The array to append to. Array.
+single_value
+: The value to add. Its type must be compatible with the array's elements. Any type.
+Returns
+¶
+A new array with the value appended. Array.
+Example
+¶
+SELECT arrayPushBack(['a'], 'b') AS res
+Result:
+┌─res───────┐
+│ ['a','b'] │
+└───────────┘
+arrayPushFront
+¶
+Adds a single value to the beginning of an array.
+Syntax
+¶
+arrayPushFront(array, single_value)
+Arguments
+¶
+array
+: The array to prepend to. Array.
+single_value
+: The value to add. Its type must be compatible with the array's elements. Any type.
+Returns
+¶
+A new array with the value prepended. Array.
+Example
+¶
+SELECT arrayPushFront(['b'], 'a') AS res
+Result:
+┌─res───────┐
+│ ['a','b'] │
+└───────────┘
+arrayResize
+¶
+Changes the length of an array, truncating or extending it with default or specified values.
+Syntax
+¶
+arrayResize(array, size[, extender])
+Arguments
+¶
+array
+: The input array. Array.
+size
+: The desired new length of the array. Int.
+extender
+: An optional value to use for padding if the array is extended. If omitted, the default value for the array's element type is used. Any type.
+Returns
+¶
+A new array with the specified length. Array.
+Example
+¶
+SELECT arrayResize([1, 2], 5) AS extended_default, arrayResize([1, 2, 3, 4, 5], 3) AS truncated, arrayResize([1, 2], 4, 99) AS extended_custom
+Result:
+┌─extended_default─┬─truncated─┬─extended_custom─┐
+│ [1,2,0,0,0]      │ [1,2,3]   │ [1,2,99,99]     │
+└──────────────────┴───────────┴─────────────────┘
+arraySlice
+¶
+Extracts a portion (slice) of an array.
+Syntax
+¶
+arraySlice(array, offset[, length])
+Arguments
+¶
+array
+: The input array. Array.
+offset
+: The 1-based starting position of the slice. Positive values count from the beginning, negative values count from the end. Int.
+length
+: The optional number of elements to include in the slice. If omitted, the slice extends to the end of the array. Negative values specify the end position relative to the end of the array. Int.
+Returns
+¶
+A new array containing the specified slice. Array.
+Example
+¶
+SELECT arraySlice([1, 2, 3, 4, 5], 2, 3) AS middle_slice, arraySlice([1, 2, 3, 4, 5], 3) AS slice_to_end, arraySlice([1, 2, 3, 4, 5], -3, 2) AS slice_from_end
+Result:
+┌─middle_slice─┬─slice_to_end─┬─slice_from_end─┐
+│ [2,3,4]      │ [3,4,5]      │ [3,4]          │
+└──────────────┴──────────────┴────────────────┘
+arrayShingles
+¶
+Generates an array of consecutive sub-arrays (shingles) from an input array.
+Syntax
+¶
+arrayShingles(array, length)
+Arguments
+¶
+array
+: The input array. Array.
+length
+: The desired length of each shingle. UInt.
+Returns
+¶
+An array of arrays, where each inner array is a shingle. Array(Array(T)).
+Example
+¶
+SELECT arrayShingles([1,2,3,4,5], 3) AS res
+Result:
+┌─res─────────────────┐
+│ [[1,2,3],[2,3,4],[3,4,5]] │
+└─────────────────────┘
+arraySort
+¶
+Sorts the elements of an array in ascending order. Can use a lambda function for custom sorting logic.
+Syntax
+¶
+arraySort([func,] arr, ...)
+Arguments
+¶
+func
+: An optional lambda function that defines the sorting key or comparison logic. Lambda function.
+arr, ...
+: One or more arrays to sort. If multiple arrays are provided with a lambda, the first array's elements are sorted based on keys derived from all arrays. Array.
+Returns
+¶
+A new array with elements sorted in ascending order. Array.
+Example
+¶
+SELECT arraySort([3, 1, 4, 1, 5, 9]) AS sorted_numbers, arraySort(['banana', 'apple', 'cherry']) AS sorted_strings
+Result:
+┌─sorted_numbers─┬─sorted_strings──────────┐
+│ [1,1,3,4,5,9]  │ ['apple','banana','cherry'] │
+└────────────────┴─────────────────────────┘
+arrayPartialSort
+¶
+Partially sorts an array, ensuring that elements up to a specified limit are in ascending order.
+Syntax
+¶
+arrayPartialSort([func,] limit, arr, ...)
+Arguments
+¶
+func
+: An optional lambda function for custom sorting logic. Lambda function.
+limit
+: The number of elements from the beginning of the array to sort. UInt.
+arr, ...
+: One or more arrays. Array.
+Returns
+¶
+An array where the first
+limit
+elements are sorted, and the remaining elements are in an unspecified order. Array.
+Example
+¶
+SELECT arrayPartialSort(3, [5, 1, 4, 2, 8, 3]) AS partially_sorted
+Result:
+┌─partially_sorted─┐
+│ [1,2,3,5,8,4]    │
+└──────────────────┘
+arrayReverseSort
+¶
+Sorts the elements of an array in descending order. Can use a lambda function for custom sorting logic.
+Syntax
+¶
+arrayReverseSort([func,] arr, ...)
+Arguments
+¶
+func
+: An optional lambda function that defines the sorting key or comparison logic. Lambda function.
+arr, ...
+: One or more arrays to sort. If multiple arrays are provided with a lambda, the first array's elements are sorted based on keys derived from all arrays. Array.
+Returns
+¶
+A new array with elements sorted in descending order. Array.
+Example
+¶
+SELECT arrayReverseSort([3, 1, 4, 1, 5, 9]) AS reverse_sorted_numbers, arrayReverseSort(['banana', 'apple', 'cherry']) AS reverse_sorted_strings
+Result:
+┌─reverse_sorted_numbers─┬─reverse_sorted_strings──────────┐
+│ [9,5,4,3,1,1]          │ ['cherry','banana','apple']     │
+└────────────────────────┴─────────────────────────────────┘
+arrayPartialReverseSort
+¶
+Partially sorts an array, ensuring that elements up to a specified limit are in descending order.
+Syntax
+¶
+arrayPartialReverseSort([func,] limit, arr, ...)
+Arguments
+¶
+func
+: An optional lambda function for custom sorting logic. Lambda function.
+limit
+: The number of elements from the beginning of the array to sort in reverse. UInt.
+arr, ...
+: One or more arrays. Array.
+Returns
+¶
+An array where the first
+limit
+elements are sorted in descending order, and the remaining elements are in an unspecified order. Array.
+Example
+¶
+SELECT arrayPartialReverseSort(3, [5, 1, 4, 2, 8, 3]) AS partially_reverse_sorted
+Result:
+┌─partially_reverse_sorted─┐
+│ [8,5,4,1,2,3]            │
+└──────────────────────────┘
+arrayShuffle
+¶
+Randomly reorders the elements within an array.
+Syntax
+¶
+arrayShuffle(arr[, seed])
+Arguments
+¶
+arr
+: The array to shuffle. Array.
+seed
+: An optional integer seed for the random number generator to ensure reproducible results. UInt or Int.
+Returns
+¶
+A new array with its elements in a random order. Array.
+Example
+¶
+SELECT arrayShuffle([1, 2, 3, 4, 5], 42) AS shuffled_array
+Result:
+┌─shuffled_array─┐
+│ [5,1,4,2,3]    │
+└────────────────┘
+arrayPartialShuffle
+¶
+Randomly shuffles a specified number of elements at the beginning of an array, leaving the rest in their original positions.
+Syntax
+¶
+arrayPartialShuffle(arr[, limit[, seed]])
+Arguments
+¶
+arr
+: The array to partially shuffle. Array.
+limit
+: The number of elements from the beginning of the array to shuffle. UInt or Int.
+seed
+: An optional integer seed for the random number generator. UInt or Int.
+Returns
+¶
+A new array with the first
+limit
+elements shuffled and the rest unchanged. Array.
+Example
+¶
+SELECT arrayPartialShuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3, 123) AS partially_shuffled
+Result:
+┌─partially_shuffled─┐
+│ [3,1,2,4,5,6,7,8,9,10] │
+└────────────────────┘
+arrayUniq
+¶
+Counts the number of distinct elements in an array or distinct tuples across multiple arrays.
+Syntax
+¶
+arrayUniq(arr, ...)
+Arguments
+¶
+arr, ...
+: One or more arrays. Array.
+Returns
+¶
+The count of unique elements or unique tuples. UInt64.
+Example
+¶
+SELECT arrayUniq([1, 2, 2, 3, 1, 4]) AS unique_elements_count
+Result:
+┌─unique_elements_count─┐
+│                     4 │
+└───────────────────────┘
+arrayJoin
+¶
+This is a special function used in the
+ARRAY JOIN
+clause to flatten arrays into multiple rows. For more details, refer to the
+ARRAY JOIN documentation
+.
+Syntax
+¶
+arrayJoin(arr)
+Arguments
+¶
+arr
+: The array to flatten. Array.
+Returns
+¶
+This function is used in the
+ARRAY JOIN
+clause and does not return a direct value in a
+SELECT
+statement.
+Example
+¶
+-- This function is typically used in an ARRAY JOIN clause, not directly in SELECT.
+-- Example usage in a Pipe:
+-- SELECT
+--    id,
+--    element
+-- FROM my_data_source
+-- ARRAY JOIN my_array_column AS element
+arrayDifference
+¶
+Calculates the differences between adjacent elements in a numeric array.
+Syntax
+¶
+arrayDifference(array)
+Arguments
+¶
+array
+: An array of numeric values. Array.
+Returns
+¶
+An array where the first element is 0, and subsequent elements are the difference between the current and previous element of the input array. Array(Numeric).
+Example
+¶
+SELECT arrayDifference([1, 2, 5, 7, 10]) AS differences
+Result:
+┌─differences─┐
+│ [0,1,3,2,3] │
+└─────────────┘
+arrayDistinct
+¶
+Returns a new array containing only the unique elements from the input array, preserving their original order of first appearance.
+Syntax
+¶
+arrayDistinct(array)
+Arguments
+¶
+array
+: The input array. Array.
+Returns
+¶
+An array with duplicate elements removed. Array.
+Example
+¶
+SELECT arrayDistinct([1, 2, 2, 3, 1, 4]) AS distinct_elements
+Result:
+┌─distinct_elements─┐
+│ [1,2,3,4]         │
+└───────────────────┘
+arrayEnumerateDense
+¶
+Assigns a dense rank to each element in an array, indicating its first appearance order among distinct values.
+Syntax
+¶
+arrayEnumerateDense(arr)
+Arguments
+¶
+arr
+: The input array. Array.
+Returns
+¶
+An array of the same size as the input, where each element represents the 1-based rank of its first occurrence. Array(UInt64).
+Example
+¶
+SELECT arrayEnumerateDense([10, 20, 10, 30, 20]) AS dense_ranks
+Result:
+┌─dense_ranks─┐
+│ [1,2,1,3,2] │
+└─────────────┘
+arrayEnumerateDenseRanked
+¶
+Assigns a dense rank to elements in a multi-dimensional array, with control over the depth of enumeration.
+Syntax
+¶
+arrayEnumerateDenseRanked(clear_depth, arr, max_array_depth)
+Arguments
+¶
+clear_depth
+: The depth level at which to restart the dense enumeration. Positive Int.
+arr
+: The N-dimensional array to enumerate. Array.
+max_array_depth
+: The maximum effective depth of the array for enumeration. Positive Int.
+Returns
+¶
+An array of the same structure as
+arr
+, containing dense ranks. Array.
+Example
+¶
+SELECT arrayEnumerateDenseRanked(1, [[10,10,30,20],[40,50,10,30]], 2) AS dense_ranked_array
+Result:
+┌─dense_ranked_array──┐
+│ [[1,1,2,3],[4,5,1,2]] │
+└─────────────────────┘
+arrayUnion
+¶
+Combines multiple arrays into a single array containing all unique elements from the input arrays.
+Syntax
+¶
+arrayUnion(arr1, arr2, ..., arrN)
+Arguments
+¶
+arr1, arr2, ..., arrN
+: Two or more arrays to combine. Array.
+Returns
+¶
+A new array containing all distinct elements from the input arrays. Array.
+Example
+¶
+SELECT arrayUnion([1, 2], [2, 3], [3, 4]) AS combined_unique
+Result:
+┌─combined_unique─┐
+│ [1,2,3,4]       │
+└─────────────────┘
+arrayIntersect
+¶
+Finds the common unique elements present in all provided arrays.
+Syntax
+¶
+arrayIntersect(arr1, arr2, ..., arrN)
+Arguments
+¶
+arr1, arr2, ..., arrN
+: Two or more arrays to find common elements from. Array.
+Returns
+¶
+A new array containing only the distinct elements that appear in all input arrays. Array.
+Example
+¶
+SELECT arrayIntersect([1, 2, 3], [2, 3, 4], [3, 4, 5]) AS common_elements
+Result:
+┌─common_elements─┐
+│ [3]             │
+└─────────────────┘
+arraySymmetricDifference
+¶
+Returns an array of unique elements that are not present in all of the input arrays.
+Syntax
+¶
+arraySymmetricDifference(arr1, arr2, ..., arrN)
+Arguments
+¶
+arr1, arr2, ..., arrN
+: Two or more arrays. Array.
+Returns
+¶
+An array containing distinct elements that appear in some, but not all, of the input arrays. Array.
+Example
+¶
+SELECT arraySymmetricDifference([1, 2, 3], [1, 2, 4], [1, 5]) AS diff_elements
+Result:
+┌─diff_elements─┐
+│ [2,3,4,5]     │
+└───────────────┘
+arrayJaccardIndex
+¶
+Calculates the Jaccard index (similarity coefficient) between two arrays.
+Syntax
+¶
+arrayJaccardIndex(arr1, arr2)
+Arguments
+¶
+arr1
+: The first array. Array.
+arr2
+: The second array. Array.
+Returns
+¶
+A floating-point number representing the Jaccard index, ranging from 0 to 1. Float64.
+Example
+¶
+SELECT arrayJaccardIndex([1, 2, 3], [2, 3, 4]) AS res
+Result:
+┌─res────────────────┐
+│ 0.5                │
+└────────────────────┘
+arrayReduce
+¶
+Applies an aggregate function to the elements of one or more arrays.
+Syntax
+¶
+arrayReduce(agg_func, arr1, arr2, ..., arrN)
+Arguments
+¶
+agg_func
+: The name of an aggregate function as a constant string (e.g.,
+'sum'
+,
+'max'
+,
+'uniqUpTo(5)'
+). String.
+arr1, arr2, ..., arrN
+: One or more arrays whose elements will be aggregated. Array.
+Returns
+¶
+The result of the aggregate function applied to the array elements. The return type depends on the aggregate function.
+Example
+¶
+SELECT arrayReduce('sum', [1, 2, 3, 4]) AS total_sum, arrayReduce('max', [10, 5, 20, 8]) AS max_value
+Result:
+┌─total_sum─┬─max_value─┐
+│        10 │        20 │
+└───────────┴───────────┘
+arrayReduceInRanges
+¶
+Applies an aggregate function to specified ranges within arrays and returns an array of results.
+Syntax
+¶
+arrayReduceInRanges(agg_func, ranges, arr1, arr2, ..., arrN)
+Arguments
+¶
+agg_func
+: The name of an aggregate function as a constant string. String.
+ranges
+: An array of tuples, where each tuple
+(index, length)
+defines a range within the input arrays. Array(Tuple(Int, Int)).
+arr1, arr2, ..., arrN
+: One or more arrays to apply the aggregation to. Array.
+Returns
+¶
+An array where each element is the result of the aggregate function for the corresponding range. Array.
+Example
+¶
+SELECT arrayReduceInRanges(
+    'sum',
+    [(1, 2), (3, 2)],
+    [10, 20, 30, 40, 50]
+) AS range_sums
+Result:
+┌─range_sums─┐
+│ [30,70]    │
+└────────────┘
+arrayFold
+¶
+Applies a lambda function iteratively to array elements, accumulating a single result.
+Syntax
+¶
+arrayFold(lambda_function, arr1, arr2, ..., accumulator)
+Arguments
+¶
+lambda_function
+: A lambda function that takes the current accumulator value and the current array element(s) as arguments, returning the new accumulator value. Lambda function.
+arr1, arr2, ...
+: One or more arrays to iterate over. Array.
+accumulator
+: The initial value for the accumulator. Any type.
+Returns
+¶
+The final accumulated value after iterating through all array elements. The return type matches the accumulator's type.
+Example
+¶
+SELECT arrayFold((acc, x) -> acc + x, [1, 2, 3, 4], 0) AS sum_of_elements
+Result:
+┌─sum_of_elements─┐
+│              10 │
+└─────────────────┘
+arrayReverse
+¶
+Reverses the order of elements in an array.
+Syntax
+¶
+arrayReverse(arr)
+Arguments
+¶
+arr
+: The input array. Array.
+Returns
+¶
+A new array with elements in reverse order. Array.
+Example
+¶
+SELECT arrayReverse([1, 2, 3, 4]) AS reversed_array
+Result:
+┌─reversed_array─┐
+│ [4,3,2,1]      │
+└────────────────┘
+reverse
+¶
+Synonym for
+arrayReverse
+. Reverses the order of elements in an array.
+Syntax
+¶
+reverse(arr)
+Arguments
+¶
+arr
+: The input array. Array.
+Returns
+¶
+A new array with elements in reverse order. Array.
+Example
+¶
+SELECT reverse(['a', 'b', 'c']) AS reversed_strings
+Result:
+┌─reversed_strings─┐
+│ ['c','b','a']    │
+└──────────────────┘
+arrayFlatten
+¶
+Converts an array of arrays into a single, flat array.
+Alias:
+flatten
+Syntax
+¶
+arrayFlatten(array_of_arrays)
+Arguments
+¶
+array_of_arrays
+: An array containing other arrays. Array(Array(T)).
+Returns
+¶
+A new, one-dimensional array containing all elements from the nested arrays. Array.
+Example
+¶
+SELECT arrayFlatten([[1, 2], [3, 4, 5], [6]]) AS flattened_array
+Result:
+┌─flattened_array─┐
+│ [1,2,3,4,5,6]   │
+└─────────────────┘
+arrayCompact
+¶
+Removes consecutive duplicate elements from an array, preserving the order of the first occurrence.
+Syntax
+¶
+arrayCompact(arr)
+Arguments
+¶
+arr
+: The input array. Array.
+Returns
+¶
+A new array with consecutive duplicates removed. Array.
+Example
+¶
+SELECT arrayCompact([1, 1, 2, 3, 3, 3, 4, 4]) AS compacted_array
+Result:
+┌─compacted_array─┐
+│ [1,2,3,4]       │
+└─────────────────┘
+arrayZip
+¶
+Combines multiple arrays into a single array of tuples, where each tuple contains corresponding elements from the input arrays.
+Syntax
+¶
+arrayZip(arr1, arr2, ..., arrN)
+Arguments
+¶
+arr1, arr2, ..., arrN
+: Two or more arrays of equal size. Array.
+Returns
+¶
+An array of tuples, where each tuple
+(arr1[i], arr2[i], ...)
+combines elements at the same index. Array(Tuple).
+Example
+¶
+SELECT arrayZip(['a', 'b', 'c'], [1, 2, 3]) AS zipped_arrays
+Result:
+┌─zipped_arrays─────────────┐
+│ [('a',1),('b',2),('c',3)] │
+└───────────────────────────┘
+arrayZipUnaligned
+¶
+Combines multiple arrays into a single array of tuples, padding shorter arrays with
+NULL
+values to match the longest array.
+Syntax
+¶
+arrayZipUnaligned(arr1, arr2, ..., arrN)
+Arguments
+¶
+arr1, arr2, ..., arrN
+: Two or more arrays, which can have different sizes. Array.
+Returns
+¶
+An array of tuples, where each tuple
+(arr1[i], arr2[i], ...)
+combines elements at the same index. Shorter arrays are padded with
+NULL
+. Array(Tuple).
+Example
+¶
+SELECT arrayZipUnaligned(['a', 'b'], [1, 2, 3, 4]) AS zipped_unaligned
+Result:
+┌─zipped_unaligned──────────────┐
+│ [('a',1),('b',2),(NULL,3),(NULL,4)] │
+└───────────────────────────────┘
+arrayROCAUC
+¶
+Calculates the Area Under the Receiver Operating Characteristic (ROC) Curve for predicted scores and actual labels.
+Alias:
+arrayAUC
+Syntax
+¶
+arrayROCAUC(arr_scores, arr_labels[, scale[, arr_partial_offsets]])
+Arguments
+¶
+arr_scores
+: An array of predicted scores. Array(Int or Float).
+arr_labels
+: An array of actual labels (typically 0 or 1). Array(Int or Enum).
+scale
+: Optional. A boolean indicating whether to return the normalized area (default:
+true
+). Boolean.
+arr_partial_offsets
+: Optional. An array of four non-negative integers
+[higher_partitions_tp, higher_partitions_fp, total_positives, total_negatives]
+for distributed computation of partial AUC. Array(Int).
+Returns
+¶
+The ROC AUC value, a floating-point number between 0 and 1. Float64.
+Example
+¶
+SELECT arrayROCAUC([0.1, 0.4, 0.35, 0.8], [0, 0, 1, 1]) AS roc_auc_score
+Result:
+┌─roc_auc_score─┐
+│          0.75 │
+└───────────────┘
+arrayAUCPR
+¶
+Calculates the Area Under the Precision-Recall (PR) Curve for predicted scores and actual labels.
+Alias:
+arrayPRAUC
+Syntax
+¶
+arrayAUCPR(arr_scores, arr_labels[, arr_partial_offsets])
+Arguments
+¶
+arr_scores
+: An array of predicted scores. Array(Int or Float).
+arr_labels
+: An array of actual labels (typically 0 or 1). Array(Int or Enum).
+arr_partial_offsets
+: Optional. An array of three non-negative integers
+[higher_partitions_tp, higher_partitions_fp, total_positives]
+for distributed computation of partial AUC. Array(Int).
+Returns
+¶
+The PR AUC value, a floating-point number between 0 and 1. Float64.
+Example
+¶
+SELECT arrayAUCPR([0.1, 0.4, 0.35, 0.8], [0, 0, 1, 1]) AS pr_auc_score
+Result:
+┌─pr_auc_score───────┐
+│ 0.8333333333333333 │
+└────────────────────┘
+arrayMap
+¶
+Applies a lambda function to each element (or corresponding elements from multiple arrays) and returns a new array with the results.
+Syntax
+¶
+arrayMap(func, arr1, ...)
+Arguments
+¶
+func
+: A lambda function to apply. It takes one argument for each input array. Lambda function.
+arr1, ...
+: One or more arrays of the same length. Array.
+Returns
+¶
+A new array containing the results of applying
+func
+to each element. Array.
+Example
+¶
+SELECT arrayMap(x -> x * 2, [1, 2, 3]) AS doubled_array, arrayMap((x, y) -> x + y, [1, 2, 3], [10, 20, 30]) AS summed_arrays
+Result:
+┌─doubled_array─┬─summed_arrays─┐
+│ [2,4,6]       │ [11,22,33]    │
+└───────────────┴───────────────┘
+arrayFilter
+¶
+Filters elements from an array based on a condition defined by a lambda function.
+Syntax
+¶
+arrayFilter(func, arr1, ...)
+Arguments
+¶
+func
+: A lambda function that returns a non-zero value (true) for elements to keep. Lambda function.
+arr1, ...
+: One or more arrays. Elements from
+arr1
+are filtered based on the condition. Array.
+Returns
+¶
+A new array containing only the elements from
+arr1
+for which
+func
+returned true. Array.
+Example
+¶
+SELECT arrayFilter(x -> x > 2, [1, 2, 3, 4, 5]) AS filtered_array
+Result:
+┌─filtered_array─┐
+│ [3,4,5]        │
+└────────────────┘
+arrayFill
+¶
+Fills
+NULL
+or conditional values in an array by propagating the last non-
+NULL
+or conditional value forward.
+Syntax
+¶
+arrayFill(func, arr1, ...)
+Arguments
+¶
+func
+: A lambda function that returns
+0
+(false) for elements that should be filled. Lambda function.
+arr1, ...
+: One or more arrays.
+arr1
+is the array to be filled. Array.
+Returns
+¶
+A new array where elements satisfying
+func
+'s false condition are replaced by the preceding element that satisfied
+func
+'s true condition. Array.
+Example
+¶
+SELECT arrayFill(x -> not isNull(x), [1, NULL, 3, NULL, NULL, 5]) AS filled_array
+Result:
+┌─filled_array─────┐
+│ [1,1,3,3,3,5]    │
+└──────────────────┘
+arrayReverseFill
+¶
+Fills
+NULL
+or conditional values in an array by propagating the next non-
+NULL
+or conditional value backward.
+Syntax
+¶
+arrayReverseFill(func, arr1, ...)
+Arguments
+¶
+func
+: A lambda function that returns
+0
+(false) for elements that should be filled. Lambda function.
+arr1, ...
+: One or more arrays.
+arr1
+is the array to be filled. Array.
+Returns
+¶
+A new array where elements satisfying
+func
+'s false condition are replaced by the succeeding element that satisfied
+func
+'s true condition. Array.
+Example
+¶
+SELECT arrayReverseFill(x -> not isNull(x), [1, NULL, 3, NULL, NULL, 5]) AS reverse_filled_array
+Result:
+┌─reverse_filled_array─┐
+│ [1,3,3,5,5,5]        │
+└──────────────────────┘
+arraySplit
+¶
+Splits an array into multiple sub-arrays based on a condition.
+Syntax
+¶
+arraySplit(func, arr1, ...)
+Arguments
+¶
+func
+: A lambda function that returns a non-zero value (true) at points where the array should be split. Lambda function.
+arr1, ...
+: One or more arrays.
+arr1
+is the array to be split. Array.
+Returns
+¶
+An array of arrays, where
+arr1
+is divided into segments based on the
+func
+condition. Array(Array(T)).
+Example
+¶
+SELECT arraySplit(x -> x = 3, [1, 2, 3, 4, 5, 3, 6]) AS split_array
+Result:
+┌─split_array─────────┐
+│ [[1,2],[3,4,5],[3,6]] │
+└─────────────────────┘
+arrayReverseSplit
+¶
+Splits an array into multiple sub-arrays from right to left based on a condition.
+Syntax
+¶
+arrayReverseSplit(func, arr1, ...)
+Arguments
+¶
+func
+: A lambda function that returns a non-zero value (true) at points where the array should be split. Lambda function.
+arr1, ...
+: One or more arrays.
+arr1
+is the array to be split. Array.
+Returns
+¶
+An array of arrays, where
+arr1
+is divided into segments based on the
+func
+condition, processing from right to left. Array(Array(T)).
+Example
+¶
+SELECT arrayReverseSplit(x -> x = 3, [1, 2, 3, 4, 5, 3, 6]) AS reverse_split_array
+Result:
+┌─reverse_split_array─┐
+│ [[1,2,3],[4,5,3],[6]] │
+└─────────────────────┘
+arrayExists
+¶
+Checks if at least one element in an array satisfies a given condition.
+Syntax
+¶
+arrayExists([func,] arr1, ...)
+Arguments
+¶
+func
+: An optional lambda function defining the condition. If omitted, checks for any non-zero element. Lambda function.
+arr1, ...
+: One or more arrays. Array.
+Returns
+¶
+1
+if any element satisfies the condition,
+0
+otherwise. UInt8.
+Example
+¶
+SELECT arrayExists(x -> x > 5, [1, 2, 6, 4]) AS exists_greater_than_five, arrayExists([0, 0, 0]) AS exists_non_zero
+Result:
+┌─exists_greater_than_five─┬─exists_non_zero─┐
+│                        1 │               0 │
+└──────────────────────────┴─────────────────┘
+arrayAll
+¶
+Checks if all elements in an array satisfy a given condition.
+Syntax
+¶
+arrayAll([func,] arr1, ...)
+Arguments
+¶
+func
+: An optional lambda function defining the condition. If omitted, checks if all elements are non-zero. Lambda function.
+arr1, ...
+: One or more arrays. Array.
+Returns
+¶
+1
+if all elements satisfy the condition,
+0
+otherwise. UInt8.
+Example
+¶
+SELECT arrayAll(x -> x > 0, [1, 2, 3]) AS all_positive, arrayAll(x -> x > 0, [1, 0, 3]) AS not_all_positive
+Result:
+┌─all_positive─┬─not_all_positive─┐
+│            1 │                0 │
+└──────────────┴──────────────────┘
+arrayFirst
+¶
+Returns the first element in an array that satisfies a given condition.
+Syntax
+¶
+arrayFirst(func, arr1, ...)
+Arguments
+¶
+func
+: A lambda function defining the condition. Lambda function.
+arr1, ...
+: One or more arrays.
+arr1
+is the array from which to return the element. Array.
+Returns
+¶
+The first element from
+arr1
+that satisfies the condition. The return type matches the element type of
+arr1
+.
+Example
+¶
+SELECT arrayFirst(x -> x > 2, [1, 2, 3, 4, 5]) AS first_match
+Result:
+┌─first_match─┐
+│           3 │
+└─────────────┘
+arrayFirstOrNull
+¶
+Returns the first element in an array that satisfies a given condition, or
+NULL
+if no element matches.
+Syntax
+¶
+arrayFirstOrNull(func, arr1, ...)
+Arguments
+¶
+func
+: A lambda function defining the condition. Lambda function.
+arr1, ...
+: One or more arrays.
+arr1
+is the array from which to return the element. Array.
+Returns
+¶
+The first element from
+arr1
+that satisfies the condition, or
+NULL
+. Nullable(T).
+Example
+¶
+SELECT arrayFirstOrNull(x -> x > 5, [1, 2, 3, 4]) AS no_match, arrayFirstOrNull(x -> x > 2, [1, 2, 3, 4]) AS first_match
+Result:
+┌─no_match─┬─first_match─┐
+│     ᴺᵁᴸᴸ │           3 │
+└──────────┴─────────────┘
+arrayLast
+¶
+Returns the last element in an array that satisfies a given condition.
+Syntax
+¶
+arrayLast(func, arr1, ...)
+Arguments
+¶
+func
+: A lambda function defining the condition. Lambda function.
+arr1, ...
+: One or more arrays.
+arr1
+is the array from which to return the element. Array.
+Returns
+¶
+The last element from
+arr1
+that satisfies the condition. The return type matches the element type of
+arr1
+.
+Example
+¶
+SELECT arrayLast(x -> x < 4, [1, 5, 2, 6, 3]) AS last_match
+Result:
+┌─last_match─┐
+│          3 │
+└────────────┘
+arrayLastOrNull
+¶
+Returns the last element in an array that satisfies a given condition, or
+NULL
+if no element matches.
+Syntax
+¶
+arrayLastOrNull(func, arr1, ...)
+Arguments
+¶
+func
+: A lambda function defining the condition. Lambda function.
+arr1, ...
+: One or more arrays.
+arr1
+is the array from which to return the element. Array.
+Returns
+¶
+The last element from
+arr1
+that satisfies the condition, or
+NULL
+. Nullable(T).
+Example
+¶
+SELECT arrayLastOrNull(x -> x > 5, [1, 2, 3, 4]) AS no_match, arrayLastOrNull(x -> x < 4, [1, 5, 2, 6, 3]) AS last_match
+Result:
+┌─no_match─┬─last_match─┐
+│     ᴺᵁᴸᴸ │          3 │
+└──────────┴────────────┘
+arrayFirstIndex
+¶
+Returns the 1-based index of the first element in an array that satisfies a given condition.
+Syntax
+¶
+arrayFirstIndex(func, arr1, ...)
+Arguments
+¶
+func
+: A lambda function defining the condition. Lambda function.
+arr1, ...
+: One or more arrays.
+arr1
+is the array to search. Array.
+Returns
+¶
+The 1-based index of the first matching element. UInt64.
+Example
+¶
+SELECT arrayFirstIndex(x -> x > 2, [1, 2, 3, 4, 5]) AS first_index
+Result:
+┌─first_index─┐
+│           3 │
+└─────────────┘
+arrayLastIndex
+¶
+Returns the 1-based index of the last element in an array that satisfies a given condition.
+Syntax
+¶
+arrayLastIndex(func, arr1, ...)
+Arguments
+¶
+func
+: A lambda function defining the condition. Lambda function.
+arr1, ...
+: One or more arrays.
+arr1
+is the array to search. Array.
+Returns
+¶
+The 1-based index of the last matching element. UInt64.
+Example
+¶
+SELECT arrayLastIndex(x -> x < 4, [1, 5, 2, 6, 3]) AS last_index
+Result:
+┌─last_index─┐
+│          5 │
+└────────────┘
+arrayMin
+¶
+Returns the minimum value among the elements of an array. Can apply a lambda function before finding the minimum.
+Syntax
+¶
+arrayMin([func,] arr)
+Arguments
+¶
+func
+: An optional lambda function to apply to each element before finding the minimum. Lambda function.
+arr
+: The input array. Array.
+Returns
+¶
+The minimum value. The return type matches the array's element type or the lambda function's return type.
+Example
+¶
+SELECT arrayMin([5, 1, 8, 2]) AS min_value, arrayMin(x -> -x, [5, 1, 8, 2]) AS min_of_negatives
+Result:
+┌─min_value─┬─min_of_negatives─┐
+│         1 │               -8 │
+└───────────┴──────────────────┘
+arrayMax
+¶
+Returns the maximum value among the elements of an array. Can apply a lambda function before finding the maximum.
+Syntax
+¶
+arrayMax([func,] arr)
+Arguments
+¶
+func
+: An optional lambda function to apply to each element before finding the maximum. Lambda function.
+arr
+: The input array. Array.
+Returns
+¶
+The maximum value. The return type matches the array's element type or the lambda function's return type.
+Example
+¶
+SELECT arrayMax([5, 1, 8, 2]) AS max_value, arrayMax(x -> -x, [5, 1, 8, 2]) AS max_of_negatives
+Result:
+┌─max_value─┬─max_of_negatives─┐
+│         8 │               -1 │
+└───────────┴──────────────────┘
+arraySum
+¶
+Calculates the sum of all numeric elements in an array. Can apply a lambda function before summing.
+Syntax
+¶
+arraySum([func,] arr)
+Arguments
+¶
+func
+: An optional lambda function to apply to each element before summing. Lambda function.
+arr
+: The input array of numeric values. Array.
+Returns
+¶
+The sum of the elements. The return type depends on the input numeric types (e.g., Int64, Float64, Decimal128).
+Example
+¶
+SELECT arraySum([1, 2, 3, 4]) AS total_sum, arraySum(x -> x * x, [1, 2, 3]) AS sum_of_squares
+Result:
+┌─total_sum─┬─sum_of_squares─┐
+│        10 │             14 │
+└───────────┴────────────────┘
+arrayAvg
+¶
+Calculates the average of all numeric elements in an array. Can apply a lambda function before averaging.
+Syntax
+¶
+arrayAvg([func,] arr)
+Arguments
+¶
+func
+: An optional lambda function to apply to each element before averaging. Lambda function.
+arr
+: The input array of numeric values. Array.
+Returns
+¶
+The average of the elements. Float64.
+Example
+¶
+SELECT arrayAvg([1, 2, 3, 4, 5]) AS average_value, arrayAvg(x -> x * 2, [1, 2, 3]) AS average_doubled
+Result:
+┌─average_value─┬─average_doubled─┐
+│             3 │               4 │
+└───────────────┴─────────────────┘
+arrayCumSum
+¶
+Calculates the cumulative (running) sum of elements in a numeric array.
+Syntax
+¶
+arrayCumSum([func,] arr1, ...)
+Arguments
+¶
+func
+: An optional lambda function to apply to elements before calculating the cumulative sum. Lambda function.
+arr1, ...
+: One or more arrays of numeric values. Array.
+Returns
+¶
+An array where each element is the sum of all preceding elements (including itself) from the input array. Array(Numeric).
+Example
+¶
+SELECT arrayCumSum([1, 2, 3, 4]) AS cumulative_sum
+Result:
+┌─cumulative_sum─┐
+│ [1,3,6,10]     │
+└────────────────┘
+arrayCumSumNonNegative
+¶
+Calculates the cumulative sum of elements in a numeric array, resetting the sum to zero if it drops below zero.
+Syntax
+¶
+arrayCumSumNonNegative([func,] arr1, ...)
+Arguments
+¶
+func
+: An optional lambda function to apply to elements before calculating the cumulative sum. Lambda function.
+arr1, ...
+: One or more arrays of numeric values. Array.
+Returns
+¶
+An array of non-negative cumulative sums. Array(Numeric).
+Example
+¶
+SELECT arrayCumSumNonNegative([1, 1, -4, 1, 5]) AS non_negative_cumulative_sum
+Result:
+┌─non_negative_cumulative_sum─┐
+│ [1,2,0,1,6]                 │
+└─────────────────────────────┘
+arrayProduct
+¶
+Calculates the product of all numeric elements in an array.
+Syntax
+¶
+arrayProduct(arr)
+Arguments
+¶
+arr
+: The input array of numeric values. Array.
+Returns
+¶
+The product of the array's elements. Float64.
+Example
+¶
+SELECT arrayProduct([1, 2, 3, 4]) AS product_value
+Result:
+┌─product_value─┐
+│            24 │
+└───────────────┘
+arrayRotateLeft
+¶
+Rotates the elements of an array to the left by a specified number of positions.
+Syntax
+¶
+arrayRotateLeft(arr, n)
+Arguments
+¶
+arr
+: The input array. Array.
+n
+: The number of positions to rotate elements to the left. A negative value rotates to the right. Int.
+Returns
+¶
+A new array with its elements rotated. Array.
+Example
+¶
+SELECT arrayRotateLeft([1, 2, 3, 4, 5], 2) AS rotated_left, arrayRotateLeft([1, 2, 3, 4, 5], -1) AS rotated_right
+Result:
+┌─rotated_left─┬─rotated_right─┐
+│ [3,4,5,1,2]  │ [5,1,2,3,4]   │
+└──────────────┴───────────────┘
+arrayRotateRight
+¶
+Rotates the elements of an array to the right by a specified number of positions.
+Syntax
+¶
+arrayRotateRight(arr, n)
+Arguments
+¶
+arr
+: The input array. Array.
+n
+: The number of positions to rotate elements to the right. A negative value rotates to the left. Int.
+Returns
+¶
+A new array with its elements rotated. Array.
+Example
+¶
+SELECT arrayRotateRight([1, 2, 3, 4, 5], 2) AS rotated_right, arrayRotateRight([1, 2, 3, 4, 5], -1) AS rotated_left
+Result:
+┌─rotated_right─┬─rotated_left─┐
+│ [4,5,1,2,3]   │ [2,3,4,5,1]  │
+└───────────────┴──────────────┘
+arrayShiftLeft
+¶
+Shifts the elements of an array to the left by a specified number of positions, filling new positions with a default or custom value.
+Syntax
+¶
+arrayShiftLeft(arr, n[, default])
+Arguments
+¶
+arr
+: The input array. Array.
+n
+: The number of positions to shift elements to the left. A negative value shifts to the right. Int.
+default
+: Optional. The value to fill new positions created by the shift. If omitted, the default value for the array's element type is used. Any type.
+Returns
+¶
+A new array with its elements shifted. Array.
+Example
+¶
+SELECT arrayShiftLeft([1, 2, 3, 4, 5], 2) AS shifted_left_default, arrayShiftLeft([1, 2, 3, 4, 5], -2, 99) AS shifted_right_custom
+Result:
+┌─shifted_left_default─┬─shifted_right_custom─┐
+│ [3,4,5,0,0]          │ [99,99,1,2,3]        │
+└──────────────────────┴──────────────────────┘
+arrayShiftRight
+¶
+Shifts the elements of an array to the right by a specified number of positions, filling new positions with a default or custom value.
+Syntax
+¶
+arrayShiftRight(arr, n[, default])
+Arguments
+¶
+arr
+: The input array. Array.
+n
+: The number of positions to shift elements to the right. A negative value shifts to the left. Int.
+default
+: Optional. The value to fill new positions created by the shift. If omitted, the default value for the array's element type is used. Any type.
+Returns
+¶
+A new array with its elements shifted. Array.
+Example
+¶
+SELECT arrayShiftRight([1, 2, 3, 4, 5], 2) AS shifted_right_default, arrayShiftRight([1, 2, 3, 4, 5], -2, 99) AS shifted_left_custom
+Result:
+┌─shifted_right_default─┬─shifted_left_custom─┐
+│ [0,0,1,2,3]           │ [3,4,5,99,99]       │
+└───────────────────────┴─────────────────────┘
+arrayRandomSample
+¶
+Returns a random subset of elements from an array.
+Syntax
+¶
+arrayRandomSample(arr, samples)
+Arguments
+¶
+arr
+: The input array from which to sample elements. Array.
+samples
+: The number of random elements to include in the result. UInt.
+Returns
+¶
+An array containing a random sample of elements. Array.
+Example
+¶
+SELECT arrayRandomSample(['apple', 'banana', 'cherry', 'date'], 2) AS random_fruits
+Result:
+┌─random_fruits──────┐
+│ ['cherry','apple'] │
+└────────────────────┘
+arrayNormalizedGini
+¶
+Calculates the normalized Gini coefficient for predicted values against actual labels.
+Syntax
+¶
+arrayNormalizedGini(predicted, label)
+Arguments
+¶
+predicted
+: An array of predicted values. Array.
+label
+: An array of actual values. Array.
+Returns
+¶
+A tuple containing the Gini coefficient of predicted values, the Gini coefficient of normalized values, and the normalized Gini coefficient. Tuple(Float64, Float64, Float64).
+Example
+¶
+SELECT arrayNormalizedGini([0.9, 0.3, 0.8, 0.7], [6, 1, 0, 2]) AS gini_coefficients
+Result:
+┌─gini_coefficients───────────────────────────────────────────┐
+│ (0.18055555555555558,0.2638888888888889,0.6842105263157896) │
+└─────────────────────────────────────────────────────────────┘
+Distance functions
+¶
+All supported functions are described in
+distance functions documentation
+.
+Updated
+3 weeks ago
+On this page
+Array functions
+empty
+notEmpty
+length
+emptyArrayUInt8
+emptyArrayUInt16
+emptyArrayUInt32
+emptyArrayUInt64
+emptyArrayInt8
+emptyArrayInt16
+emptyArrayInt32
+emptyArrayInt64
+emptyArrayFloat32
+emptyArrayFloat64
+emptyArrayDate
+emptyArrayDateTime
+emptyArrayString
+emptyArrayToSingle
+range
+array
+arrayWithConstant
+arrayConcat
+arrayElement
+has
+arrayElementOrNull
+hasAll
+hasAny
+hasSubstr
+indexOf
+indexOfAssumeSorted
+arrayCount
+arrayDotProduct
+countEqual
+arrayEnumerate
+arrayEnumerateUniq
+arrayEnumerateUniqRanked
+arrayPopBack
+arrayPopFront
+arrayPushBack
+arrayPushFront
+arrayResize
+arraySlice
+arrayShingles
+arraySort
+arrayPartialSort
+arrayReverseSort
+arrayPartialReverseSort
+arrayShuffle
+arrayPartialShuffle
+arrayUniq
+arrayJoin
+arrayDifference
+arrayDistinct
+arrayEnumerateDense
+arrayEnumerateDenseRanked
+arrayUnion
+arrayIntersect
+arraySymmetricDifference
+arrayJaccardIndex
+arrayReduce
+arrayReduceInRanges
+arrayFold
+arrayReverse
+reverse
+arrayFlatten
+arrayCompact
+arrayZip
+arrayZipUnaligned
+arrayROCAUC
+arrayAUCPR
+arrayMap
+arrayFilter
+arrayFill
+arrayReverseFill
+arraySplit
+arrayReverseSplit
+arrayExists
+arrayAll
+arrayFirst
+arrayFirstOrNull
+arrayLast
+arrayLastOrNull
+arrayFirstIndex
+arrayLastIndex
+arrayMin
+arrayMax
+arraySum
+arrayAvg
+arrayCumSum
+arrayCumSumNonNegative
+arrayProduct
+arrayRotateLeft
+arrayRotateRight
+arrayShiftLeft
+arrayShiftRight
+arrayRandomSample
+arrayNormalizedGini
+Distance functions
+forward
+classic
+Ask AI

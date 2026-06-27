@@ -1,0 +1,169 @@
+Source: https://mariadb.com/docs/server/server-management/server-monitoring-logs/writing-logs-into-tables
+
+Writing Logs Into Tables | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Overview of MariaDB Logs
+Securing MariaDB Logs
+Binary Log
+Error Log
+General Query Log
+MyISAM Log
+Rotating Logs on Unix and Linux
+Slow Query Log
+SQL Error Log Plugin
+Transaction Coordinator Log
+Writing Logs Into Tables
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Writing Logs Into Tables
+Instructions on directing the General Query Log and Slow Query Log to tables (`mysql.general_log`, `mysql.slow_log`) instead of files using the `log_output=TABLE` system variable.
+By default, all logs are disabled or written into files. The
+general query log
+and the
+slow query log
+can also be written to special tables in the
+mysql
+database. During the startup, entries will always be written into files.
+Note that
+EXPLAIN output
+will only be recorded if the slow query log is written to a file and not to a table.
+To write logs into tables, the
+log_output
+server system variable is used. Allowed values are
+FILE
+,
+TABLE
+and
+NONE
+. It is possible to specify multiple values, separated with commas, to write the logs into both tables and files.
+NONE
+disables logging and has precedence over the other values.
+So, to write logs into tables, one of the following settings can be used:
+Copy
+SET
+GLOBAL
+log_output
+=
+'
+TABLE
+'
+;
+SET
+GLOBAL
+log_output
+=
+'
+FILE,TABLE
+'
+;
+The general log will be written into the
+general_log
+table, and the slow query log will be written into the
+slow_log
+table. Only a limited set of operations are supported for those special tables. For example, direct DML statements (like
+INSERT
+) on those tables will fail with an error similar to the following:
+Copy
+ERROR
+1556
+(HY000): You can
+'
+t use locks with log tables.
+To flush data to the tables, use
+FLUSH TABLES
+instead of
+FLUSH LOGS
+.
+To empty the contents of the log tables,
+TRUNCATE TABLE
+can be used.
+The log tables use the
+CSV
+storage engine by default. This allows an external program to read the files if needed: normal CSV files are stored in the
+mysql
+subdirectory, in the data dir. However that engine is slow because it does not support indexes, so you can convert the tables to
+MyISAM
+(but not other storage engines). To do so, first temporarily disable logging:
+Copy
+SET
+GLOBAL
+general_log
+=
+'
+OFF
+'
+;
+ALTER
+TABLE
+mysql
+.
+general_log
+ENGINE
+=
+MyISAM;
+ALTER
+TABLE
+mysql
+.
+slow_log
+ENGINE
+=
+MyISAM;
+SET
+GLOBAL
+general_log
+=
+@old_log_state;
+CHECK TABLE
+and
+CHECKSUM TABLE
+are supported.
+CREATE TABLE
+is supported.
+ALTER TABLE
+,
+RENAME TABLE
+and
+DROP TABLE
+are supported when logging is disabled, but log tables cannot be partitioned.
+Contents of log tables are not logged in the
+binary log
+, thus cannot be replicated.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Heuristic Recovery with the Transaction Coordinator Log
+Next
+Variables and Modes
+Last updated
+5 months ago
+Was this helpful?
+Was this helpful?

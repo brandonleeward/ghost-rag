@@ -1,0 +1,34 @@
+Source: https://www.tinybird.com/docs/live/mongodb-cdc-confluent-tinybird-sep-2024
+
+Real-time MongoDB CDC with Confluent and Tinybird · Tinybird
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+← Back to Live
+Real-time MongoDB CDC with Confluent and Tinybird
+Learn how to build a real-time analytics pipeline based on MongoDB change data streams with Confluent and Tinybird.
+MongoDB has become the go-to NoSQL database for developers, offering exceptional real-time performance with schemaless design. Its ability to handle real-time transactions at scale makes it extremely popular among developers.
+MongoDB can handle some level of query complexity, but to perform real-time analytics with MongoDB at scale, you may need to land MongoDB tables into a data system optimized for analytics with streaming data.
+Join this session to learn how to use Confluent and Tinybird to build a real-time analytics pipeline over MongoDB CDC data.
+In this session, you'll learn:
+How to produce MongoDB CDC streams onto a Kafka topic with the Confluent MongoDB Atlas Source Connector
+How to consume MongoDB change events from Confluent using Tinybird's native Confluent Connector
+How to deduplicate records from MongoDB to maintain a consistent replica in Tinybird
+How to design a performant table schema in Tinybird to build real-time analytics over MongoDB data
+SQL best practices for querying MongoDB change streams in real time.
+Have questions?
+Join us on Slack
+Start building
+Live coding session
+When:
+September 17, 2024 at 15:00 UTC
+Duration:
+60 minutes
+Who:
+Jim Moffitt
+Developer Advocate
+Start building
+Ask AI
+Search...

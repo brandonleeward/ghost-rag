@@ -1,0 +1,243 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/time-window-functions
+
+Time Window Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Time Window functions
+¶
+Copy as MD
+Time window functions define and return the inclusive lower and exclusive upper bounds of specific time-based windows.
+tumble
+¶
+A tumbling window divides a time series into fixed-size, non-overlapping, and contiguous time segments. Each record belongs to exactly one window.
+Syntax
+¶
+tumble(time_attr, interval [, timezone])
+Arguments
+¶
+time_attr
+: The timestamp or datetime value to categorize into a window.
+DateTime
+.
+interval
+: The fixed duration of each tumbling window.
+Interval
+.
+timezone
+: Optional timezone name to apply to the calculation.
+String
+.
+Returns
+¶
+A tuple containing the start (inclusive) and end (exclusive) timestamps of the tumbling window.
+Tuple
+(
+DateTime
+,
+DateTime
+).
+Example
+¶
+SELECT tumble(now(), toIntervalDay('1'))
+Result:
+┌─tumble(now(), toIntervalDay('1'))─────────────┐
+│ ('2024-07-04 00:00:00','2024-07-05 00:00:00') │
+└───────────────────────────────────────────────┘
+tumbleStart
+¶
+Retrieves the starting timestamp (inclusive lower bound) of the tumbling window for a given time attribute and interval.
+Syntax
+¶
+tumbleStart(time_attr, interval [, timezone])
+Arguments
+¶
+time_attr
+: The timestamp or datetime value to categorize into a window.
+DateTime
+.
+interval
+: The fixed duration of each tumbling window.
+Interval
+.
+timezone
+: Optional timezone name to apply to the calculation.
+String
+.
+Returns
+¶
+The inclusive start timestamp of the tumbling window.
+DateTime
+.
+Example
+¶
+SELECT tumbleStart(now(), toIntervalDay('1'))
+Result:
+┌─tumbleStart(now(), toIntervalDay('1'))─┐
+│                    2024-07-04 00:00:00 │
+└────────────────────────────────────────┘
+tumbleEnd
+¶
+Retrieves the ending timestamp (exclusive upper bound) of the tumbling window for a given time attribute and interval.
+Syntax
+¶
+tumbleEnd(time_attr, interval [, timezone])
+Arguments
+¶
+time_attr
+: The timestamp or datetime value to categorize into a window.
+DateTime
+.
+interval
+: The fixed duration of each tumbling window.
+Interval
+.
+timezone
+: Optional timezone name to apply to the calculation.
+String
+.
+Returns
+¶
+The exclusive end timestamp of the tumbling window.
+DateTime
+.
+Example
+¶
+SELECT tumbleEnd(now(), toIntervalDay('1'))
+Result:
+┌─tumbleEnd(now(), toIntervalDay('1'))─┐
+│                  2024-07-05 00:00:00 │
+└──────────────────────────────────────┘
+hop
+¶
+A hopping window creates potentially overlapping time segments of a fixed duration, moving forward by a specified hop interval. Records can belong to multiple windows.
+Syntax
+¶
+hop(time_attr, hop_interval, window_interval [, timezone])
+Arguments
+¶
+time_attr
+: The timestamp or datetime value to categorize into a window.
+DateTime
+.
+hop_interval
+: The interval by which the window moves forward.
+Interval
+.
+window_interval
+: The total duration of each hopping window.
+Interval
+.
+timezone
+: Optional timezone name to apply to the calculation.
+String
+.
+Returns
+¶
+A tuple containing the start (inclusive) and end (exclusive) timestamps of the hopping window.
+Tuple
+(
+DateTime
+,
+DateTime
+).
+Since one record can be assigned to multiple hop windows, the function only returns the bound of the first window when hop function is used without
+WINDOW VIEW
+.
+Example
+¶
+SELECT hop(now(), INTERVAL '1' DAY, INTERVAL '2' DAY)
+Result:
+┌─hop(now(), toIntervalDay('1'), toIntervalDay('2'))─┐
+│ ('2024-07-03 00:00:00','2024-07-05 00:00:00')      │
+└────────────────────────────────────────────────────┘
+hopStart
+¶
+Returns the inclusive starting timestamp of the hopping window for a given time attribute, hop interval, and window duration.
+Syntax
+¶
+hopStart(time_attr, hop_interval, window_interval [, timezone])
+Arguments
+¶
+time_attr
+: The timestamp or datetime value to categorize into a window.
+DateTime
+.
+hop_interval
+: The interval by which the window moves forward.
+Interval
+.
+window_interval
+: The total duration of each hopping window.
+Interval
+.
+timezone
+: Optional timezone name to apply to the calculation.
+String
+.
+Returns
+¶
+The inclusive start timestamp of the hopping window.
+DateTime
+.
+Since one record can be assigned to multiple hop windows, the function only returns the bound of the first window when hop function is used without
+WINDOW VIEW
+.
+Example
+¶
+SELECT hopStart(now(), INTERVAL '1' DAY, INTERVAL '2' DAY)
+Result:
+┌─hopStart(now(), toIntervalDay('1'), toIntervalDay('2'))─┐
+│                                     2024-07-03 00:00:00 │
+└─────────────────────────────────────────────────────────┘
+hopEnd
+¶
+Returns the exclusive ending timestamp of the hopping window for a given time attribute, hop interval, and window duration.
+Syntax
+¶
+hopEnd(time_attr, hop_interval, window_interval [, timezone])
+Arguments
+¶
+time_attr
+: The timestamp or datetime value to categorize into a window.
+DateTime
+.
+hop_interval
+: The interval by which the window moves forward.
+Interval
+.
+window_interval
+: The total duration of each hopping window.
+Interval
+.
+timezone
+: Optional timezone name to apply to the calculation.
+String
+.
+Returns
+¶
+The exclusive end timestamp of the hopping window.
+DateTime
+.
+Since one record can be assigned to multiple hop windows, the function only returns the bound of the first window when hop function is used without
+WINDOW VIEW
+.
+Example
+¶
+SELECT hopEnd(now(), INTERVAL '1' DAY, INTERVAL '2' DAY)
+Result:
+┌─hopEnd(now(), toIntervalDay('1'), toIntervalDay('2'))─┐
+│                                   2024-07-05 00:00:00 │
+└───────────────────────────────────────────────────────┘
+Updated
+3 weeks ago
+On this page
+Time Window functions
+tumble
+tumbleStart
+tumbleEnd
+hop
+hopStart
+hopEnd
+forward
+classic
+Ask AI

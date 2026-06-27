@@ -1,0 +1,55 @@
+Source: https://www.tinybird.com/docs/work-with-data/optimization
+
+Classic: Optimizations guides · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Optimizations
+¶
+Copy as MD
+This compilation of guides assumes some familiarity with using Tinybird (ingesting data, building query Pipes, publishing API Endpoints), particularly with using
+Service Data Sources
+.
+The good news is that Tinybird is so fast that even for un-optimized projects, response times are excellent. Many projects, especially younger or smaller ones, won't necessarily or immediately
+need
+to optimize right now.
+However, it's never too soon, especially because data moves fast. It's better to have 30ms latency than 300ms, and better to process less data so your
+bills are smaller
+.
+About this section
+¶
+The guides in this Optimizations section curate the best applied knowledge across Tinybird's docs (
+Best practices for faster SQL
+), videos (
+Materialization process saves $40K
+,
+Tips & Tricks to Keep Your Queries under 100ms
+), blog posts (
+Thinking in Tinybird
+), and the deep expertise of our Data Engineering and Customer Support teams. It gives you both practical examples
+and
+a framework of questions you can ask in your own unique scenario. This combination should empower you with the tools, tips, tricks, and approach to build the best-optimized projects.
+So, if you want to feel like
+Marc
+, start digging in to the fascinating world of optimizing Tinybird projects.
+Optimizations mantra
+¶
+Tinybird gives you the platform to manage your real-time data. Measure what matters, detect inefficiencies, fix and eliminate common (or unusual!) mistakes, and move faster. Remember, speed wins!
+Next steps
+¶
+Dive in with
+Optimizations 101: Detecting inefficient resources
+.
+Improve the efficiency of project with
+Optimizations 201: Fixing common mistakes
+.
+Updated
+2 weeks ago
+On this page
+Optimizations
+About this section
+Optimizations mantra
+Next steps
+classic
+Ask AI

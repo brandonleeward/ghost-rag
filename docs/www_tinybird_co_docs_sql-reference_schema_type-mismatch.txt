@@ -1,0 +1,116 @@
+Source: https://www.tinybird.com/docs/sql-reference/schema/type-mismatch
+
+Type mismatch troubleshooting · Tinybird Docs
+Sign In
+Sign Up
+Type mismatch troubleshooting
+¶
+Copy as MD
+Common issues and solutions for type mismatches in ClickHouse and Tinybird.
+Common errors
+¶
+TYPE_MISMATCH
+¶
+Error
+:
+TYPE_MISMATCH: Cannot convert String to UInt32
+Cause
+: Trying to use incompatible data types in operations
+Solution
+: Cast to appropriate type
+-- Wrong
+SELECT numeric_column + string_column FROM events
+
+-- Correct
+SELECT numeric_column + toUInt32(string_column) FROM events
+NO_COMMON_TYPE
+¶
+Error
+:
+NO_COMMON_TYPE: There is no supertype for types String and UInt32
+Cause
+: No common type for operation
+Solution
+: Explicitly cast to common type
+-- Cast both to string for concatenation
+SELECT toString(numeric_column) || string_column FROM events
+Type conversion issues
+¶
+String to numeric conversion
+¶
+Issue
+: Converting strings to numbers with invalid data
+Solution
+: Use safe conversion functions
+-- Use safe conversion
+SELECT toUInt32OrNull(string_column) as safe_number
+FROM events
+Date type mismatches
+¶
+Issue
+: Mixing different date types
+Solution
+: Use consistent date types
+-- Convert to consistent date type
+SELECT toDate(date_column) as consistent_date
+FROM events
+Schema design issues
+¶
+Inconsistent column types
+¶
+Issue
+: Same logical data with different types across tables
+Solution
+: Standardize column types
+-- Use consistent types across tables
+-- Instead of: table1.id (String), table2.id (UInt32)
+-- Use: table1.id (UInt32), table2.id (UInt32)
+Type inference problems
+¶
+Issue
+: ClickHouse inferring wrong types from data
+Solution
+: Explicitly specify column types
+-- Explicitly specify types in schema
+CREATE TABLE events (
+  id UInt32,
+  value Float64,
+  timestamp DateTime
+) ENGINE = MergeTree()
+Best practices
+¶
+Use explicit types
+- Don't rely on type inference
+Use safe conversions
+- Use
+toTypeOrNull()
+functions
+Standardize types
+- Use consistent types across tables
+Validate data
+- Check data before type conversions
+Document types
+- Keep track of expected data types
+Related documentation
+¶
+Data types
+Type conversion functions
+Common error patterns
+Updated
+7 months ago
+On this page
+Type mismatch troubleshooting
+Common errors
+TYPE_MISMATCH
+NO_COMMON_TYPE
+Type conversion issues
+String to numeric conversion
+Date type mismatches
+Schema design issues
+Inconsistent column types
+Type inference problems
+Best practices
+Related documentation
+forward
+classic
+Ask AI

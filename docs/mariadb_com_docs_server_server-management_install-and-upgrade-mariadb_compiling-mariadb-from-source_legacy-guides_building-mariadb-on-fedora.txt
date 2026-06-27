@@ -1,0 +1,128 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/compiling-mariadb-from-source/legacy-guides/building-mariadb-on-fedora
+
+Building MariaDB on Fedora | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Compiling MariaDB From Source: The Master Guide
+Building MariaDB on Windows
+Cross-compiling MariaDB
+Compiling MariaDB with Extra Modules/Options
+Legacy Guides
+Build Environment Setup for macOS
+Building MariaDB on Gentoo
+Creating a Debian Repository
+Creating the MariaDB Source Tarball
+Build Environment Setup for Linux
+Building MariaDB from a Source RPM
+Building MariaDB From Source Using musl-based GNU/Linux
+Building MariaDB on CentOS
+Building MariaDB on Debian
+Building MariaDB on Fedora
+Building MariaDB on FreeBSD
+Building MariaDB on Solaris and OpenSolaris
+Building MariaDB on Ubuntu
+Building RPM Packages From Source
+Compile and Using MariaDB with Sanitizers (ASAN, UBSAN, TSAN, MSAN)
+Creating the MariaDB Binary Tarball
+Compiling with the InnoDB Plugin from Oracle
+Compiling MariaDB with Vanilla XtraDB
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Building MariaDB on Fedora
+Instructions for building MariaDB on Fedora, using `dnf builddep` to install dependencies and CMake to configure the build.
+In the event that you are using the Linux-based operating system Fedora or any of its derivatives and would like to compile MariaDB from source code, you can do so using the MariaDB build in the official repositories.
+Installing Build Dependencies
+MariaDB requires a number of packages to compile from source. Fortunately, you can use the package in the Fedora repository to retrieve most of the relevant build dependencies through DNF.
+Copy
+#
+dnf builddep mariadb-server
+Running DNF in this way pulls the build dependencies for the release of MariaDB compiled by your version of Fedora. These may not be all the dependencies you need to build the particular version of MariaDB you want to use, but it will retrieve most of them.
+You'll also need to install Git to retrieve the source repository:
+Copy
+#
+dnf install git
+Building MariaDB
+Once you have the base dependencies installed, you can retrieve the source code and start building MariaDB. The source code is available on GitHub. Use the
+--branch
+option to specify the particular version of MariaDB you want to build.
+Copy
+$
+git
+clone
+--branch
+10.3
+https://github.com/MariaDB/server.git
+mariadb-server
+With the source repository cloned onto your system, you can start building MariaDB. Change into the new
+mariadb-server/
+directory and run
+CMake
+to prepare the build.
+Copy
+$
+mkdir
+mariadb-build
+$
+cd
+mariadb-build
+$
+cmake
+-DRPM=fedora
+../mariadb-server
+Once
+CMake
+readies the relevant Makefile for your system, use Make to build MariaDB.
+Copy
+$
+make
+package
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Building MariaDB on Debian
+Next
+Building MariaDB on FreeBSD
+Last updated
+11 months ago
+Was this helpful?
+Installing Build Dependencies
+Building MariaDB
+Was this helpful?

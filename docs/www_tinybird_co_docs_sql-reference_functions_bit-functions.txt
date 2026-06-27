@@ -1,0 +1,500 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/bit-functions
+
+Bit Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Bit functions
+¶
+Copy as MD
+Bit functions perform operations directly on the binary representation of numbers. They work with
+UInt8
+,
+UInt16
+,
+UInt32
+,
+UInt64
+,
+Int8
+,
+Int16
+,
+Int32
+,
+Int64
+,
+Float32
+, or
+Float64
+types. Some functions also support
+String
+and
+FixedString
+types.
+The result type is an integer with a bit width equal to the maximum bit width of its arguments. If any argument is signed, the result will be signed. Floating-point arguments are cast to
+Int64
+before the operation.
+bitAnd
+¶
+Performs a bitwise AND operation on two numbers. Each bit in the result is 1 if and only if the corresponding bits in both input numbers are 1.
+Syntax
+¶
+bitAnd(a, b)
+Arguments
+¶
+a
+: The first number.
+Integer types
+,
+Float types
+.
+b
+: The second number.
+Integer types
+,
+Float types
+.
+Returns
+¶
+The result of the bitwise AND operation. Integer.
+Example
+¶
+SELECT bitAnd(5, 3)
+Result:
+┌─bitAnd(5, 3)─┐
+│            1 │
+└──────────────┘
+bitOr
+¶
+Performs a bitwise OR operation on two numbers. Each bit in the result is 1 if at least one of the corresponding bits in the input numbers is 1.
+Syntax
+¶
+bitOr(a, b)
+Arguments
+¶
+a
+: The first number.
+Integer types
+,
+Float types
+.
+b
+: The second number.
+Integer types
+,
+Float types
+.
+Returns
+¶
+The result of the bitwise OR operation. Integer.
+Example
+¶
+SELECT bitOr(5, 3)
+Result:
+┌─bitOr(5, 3)─┐
+│           7 │
+└─────────────┘
+bitXor
+¶
+Performs a bitwise XOR (exclusive OR) operation on two numbers. Each bit in the result is 1 if the corresponding bits in the input numbers are different.
+Syntax
+¶
+bitXor(a, b)
+Arguments
+¶
+a
+: The first number.
+Integer types
+,
+Float types
+.
+b
+: The second number.
+Integer types
+,
+Float types
+.
+Returns
+¶
+The result of the bitwise XOR operation. Integer.
+Example
+¶
+SELECT bitXor(5, 3)
+Result:
+┌─bitXor(5, 3)─┐
+│            6 │
+└──────────────┘
+bitNot
+¶
+Performs a bitwise NOT operation on a number, inverting all its bits. Each bit that is 0 becomes 1, and each bit that is 1 becomes 0.
+Syntax
+¶
+bitNot(a)
+Arguments
+¶
+a
+: The number to invert.
+Integer types
+,
+Float types
+.
+Returns
+¶
+The result of the bitwise NOT operation. Integer.
+Example
+¶
+SELECT bitNot(CAST(5 AS UInt8))
+Result:
+┌─bitNot(CAST(5, 'UInt8'))─┐
+│                      250 │
+└──────────────────────────┘
+bitShiftLeft
+¶
+Shifts the bits of a value to the left by a specified number of positions. Bits shifted out from the left are lost, and zeros are introduced on the right.
+A
+FixedString
+or a
+String
+is treated as a single multibyte value. Bits of a
+FixedString
+value are lost as they are shifted out. On the contrary, a
+String
+value is extended with additional bytes, so no bits are lost.
+Syntax
+¶
+bitShiftLeft(a, b)
+Arguments
+¶
+a
+: A value to shift.
+Integer types
+,
+String
+or
+FixedString
+.
+b
+: The number of shift positions.
+Unsigned integer types
+, 64 bit types or less are allowed.
+Returns
+¶
+The shifted value. The type of the returned value is the same as the type of the input value.
+Example
+¶
+SELECT 99 AS a, bin(a), bitShiftLeft(a, 2) AS a_shifted, bin(a_shifted)
+Result:
+┌──a─┬─bin(99)──┬─a_shifted─┬─bin(bitShiftLeft(99, 2))─┐
+│ 99 │ 01100011 │       140 │ 10001100                 │
+└────┴──────────┴───────────┴──────────────────────────┘
+bitShiftRight
+¶
+Shifts the bits of a value to the right by a specified number of positions. Bits shifted out from the right are lost, and zeros are introduced on the left.
+A
+FixedString
+or a
+String
+is treated as a single multibyte value. Note that the length of a
+String
+value is reduced as bits are shifted out.
+Syntax
+¶
+bitShiftRight(a, b)
+Arguments
+¶
+a
+: A value to shift.
+Integer types
+,
+String
+or
+FixedString
+.
+b
+: The number of shift positions.
+Unsigned integer types
+, 64 bit types or less are allowed.
+Returns
+¶
+The shifted value. The type of the returned value is the same as the type of the input value.
+Example
+¶
+SELECT 101 AS a, bin(a), bitShiftRight(a, 2) AS a_shifted, bin(a_shifted)
+Result:
+┌───a─┬─bin(101)─┬─a_shifted─┬─bin(bitShiftRight(101, 2))─┐
+│ 101 │ 01100101 │        25 │ 00011001                   │
+└─────┴──────────┴───────────┴────────────────────────────┘
+bitRotateLeft
+¶
+Rotates the bits of a value to the left by a specified number of positions. Bits shifted out from the left re-enter from the right.
+Syntax
+¶
+bitRotateLeft(a, b)
+Arguments
+¶
+a
+: The number to rotate.
+Integer types
+,
+Float types
+.
+b
+: The number of positions to rotate.
+Unsigned integer types
+.
+Returns
+¶
+The result of the bitwise left rotation. Integer.
+Example
+¶
+SELECT bitRotateLeft(CAST(5 AS UInt8), 1)
+Result:
+┌─bitRotateLeft(CAST(5, 'UInt8'), 1)─┐
+│                                 10 │
+└────────────────────────────────────┘
+bitRotateRight
+¶
+Rotates the bits of a value to the right by a specified number of positions. Bits shifted out from the right re-enter from the left.
+Syntax
+¶
+bitRotateRight(a, b)
+Arguments
+¶
+a
+: The number to rotate.
+Integer types
+,
+Float types
+.
+b
+: The number of positions to rotate.
+Unsigned integer types
+.
+Returns
+¶
+The result of the bitwise right rotation. Integer.
+Example
+¶
+SELECT bitRotateRight(CAST(5 AS UInt8), 1)
+Result:
+┌─bitRotateRight(CAST(5, 'UInt8'), 1)─┐
+│                                 130 │
+└─────────────────────────────────────┘
+bitSlice
+¶
+Extracts a sequence of bits from a string or fixed-string value, starting at a specified bit offset and with a given length. Bit indexing starts from 1.
+Syntax
+¶
+bitSlice(s, offset[, length])
+Arguments
+¶
+s
+: The string or fixed-string value.
+String
+or
+FixedString
+.
+offset
+: The 1-based starting bit index. A positive value indicates an offset from the left, and a negative value indicates an offset from the right.
+length
+: The number of bits to extract. If negative, it returns an open substring
+[offset, array_length - length]
+. If omitted, it returns the substring
+[offset, the_end_string]
+. If
+length
+exceeds the available bits, it will be truncated. If
+length
+is not a multiple of 8, the result will be padded with zeros on the right.
+Returns
+¶
+The extracted substring.
+String
+.
+Example
+¶
+SELECT bin('Hello'), bin(bitSlice('Hello', 1, 8))
+Result:
+┌─bin('Hello')─────────────────────────────┬─bin(bitSlice('Hello', 1, 8))─┐
+│ 0100100001100101011011000110110001101111 │ 01001000                     │
+└──────────────────────────────────────────┴──────────────────────────────┘
+bitTest
+¶
+Checks if a specific bit at a given position within an integer is set (1) or not (0). Bit positions are counted from right to left, starting at 0.
+Syntax
+¶
+SELECT bitTest(number, index)
+Arguments
+¶
+number
+: The integer to test.
+Integer types
+.
+index
+: The 0-based position of the bit to check.
+Integer types
+.
+Returns
+¶
+The value of the bit at the specified position (0 or 1).
+UInt8
+.
+Example
+¶
+For example, the number 43 in binary is
+101011
+.
+SELECT bitTest(43, 1)
+Result:
+┌─bitTest(43, 1)─┐
+│              1 │
+└────────────────┘
+bitTestAll
+¶
+Determines if all specified bits within an integer are set to 1. It returns 1 if all bits at the given indices are 1, otherwise 0. Bit positions are counted from right to left, starting at 0.
+Syntax
+¶
+SELECT bitTestAll(number, index1, index2, index3, index4, ...)
+Arguments
+¶
+number
+: The integer to test.
+Integer types
+.
+index1
+,
+index2
+, ...: The 0-based positions of the bits to check.
+Integer types
+.
+Returns
+¶
+The result of the logical conjunction (AND) of the specified bits (0 or 1).
+UInt8
+.
+Example
+¶
+For example, the number 43 in binary is
+101011
+.
+SELECT bitTestAll(43, 0, 1, 3, 5)
+Result:
+┌─bitTestAll(43, 0, 1, 3, 5)─┐
+│                          1 │
+└────────────────────────────┘
+bitTestAny
+¶
+Checks if at least one of the specified bits within an integer is set to 1. It returns 1 if any bit at the given indices is 1, otherwise 0. Bit positions are counted from right to left, starting at 0.
+Syntax
+¶
+SELECT bitTestAny(number, index1, index2, index3, index4, ...)
+Arguments
+¶
+number
+: The integer to test.
+Integer types
+.
+index1
+,
+index2
+, ...: The 0-based positions of the bits to check.
+Integer types
+.
+Returns
+¶
+The result of the logical disjunction (OR) of the specified bits (0 or 1).
+UInt8
+.
+Example
+¶
+For example, the number 43 in binary is
+101011
+.
+SELECT bitTestAny(43, 0, 2)
+Result:
+┌─bitTestAny(43, 0, 2)─┐
+│                    1 │
+└──────────────────────┘
+bitCount
+¶
+Counts the number of bits that are set to 1 in the binary representation of a number.
+Syntax
+¶
+bitCount(x)
+Arguments
+¶
+x
+: An
+Integer
+or
+floating-point
+number. The function operates on the in-memory representation of the value.
+Returns
+¶
+The number of bits set to one in the input number.
+UInt8
+.
+The function doesn't convert the input value to a larger type (sign extension). So, for example,
+bitCount(toUInt8(-1)) = 8
+.
+Example
+¶
+The number 333 in binary is
+0000000101001101
+.
+SELECT bitCount(333)
+Result:
+┌─bitCount(333)─┐
+│             5 │
+└───────────────┘
+bitHammingDistance
+¶
+Calculates the Hamming distance between the binary representations of two integer values, which is the number of positions at which the corresponding bits are different. This can be useful for comparing similarity, for example, with
+SimHash functions
+.
+Syntax
+¶
+bitHammingDistance(int1, int2)
+Arguments
+¶
+int1
+: The first integer value.
+Int64
+.
+int2
+: The second integer value.
+Int64
+.
+Returns
+¶
+The Hamming distance between the two integers.
+UInt8
+.
+Example
+¶
+SELECT bitHammingDistance(111, 121)
+Result:
+┌─bitHammingDistance(111, 121)─┐
+│                            3 │
+└──────────────────────────────┘
+Updated
+3 weeks ago
+On this page
+Bit functions
+bitAnd
+bitOr
+bitXor
+bitNot
+bitShiftLeft
+bitShiftRight
+bitRotateLeft
+bitRotateRight
+bitSlice
+bitTest
+bitTestAll
+bitTestAny
+bitCount
+bitHammingDistance
+forward
+classic
+Ask AI

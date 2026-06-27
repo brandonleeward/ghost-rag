@@ -1,0 +1,329 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading/platform-specific-upgrade-guides/upgrading-on-linux/upgrading-between-minor-versions-on-linux
+
+Upgrading Between Minor MariaDB Versions | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Platform Specific Upgrade Guides
+Upgrading on Linux
+Upgrading Between Major MariaDB Versions
+Upgrading Between Minor MariaDB Versions
+Upgrading MariaDB on Windows
+MariaDB Community Server Upgrade Paths
+MariaDB Enterprise Server Upgrade Paths
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Upgrading Between Minor MariaDB Versions
+Step-by-step minor version upgrade (e.g., 11.4.4 to 11.4.5) for MariaDB Community Server on Linux using YUM, APT, or ZYpp — backup, stop, upgrade packages, restart, and run mariadb-upgrade.
+These instructions detail a
+minor release upgrade
+of
+MariaDB Community Server
+on Linux. A minor release upgrade refers to upgrading within the same release series. For example, upgrading from MariaDB 11.4.4 to MariaDB 11.4.5 without changing the major version. Minor releases typically deliver bug fixes, security patches, and stability improvements.
+For Windows, see
+Upgrading MariaDB on Windows
+. For major version upgrades (for example, MariaDB 10.11 to MariaDB 11.4), see
+Upgrading Between Major MariaDB Versions
+and the per-version guides listed in
+See Also
+.
+The examples in this page use MariaDB Community Server 11.4.4 → 11.4.5 as the worked scenario. The same procedure applies to any supported minor-version upgrade within a release series.
+Data Backup
+Occasionally, issues can be encountered during an upgrade. These issues can even potentially corrupt the database's data files, making it difficult to revert to the previous installation. It is strongly recommended to create a backup before upgrading.
+If the upgrade fails, the backup can be used to restore the database to the previous version of MariaDB Server.
+If the upgrade finishes successfully, then the backup can be deleted.
+The instructions below show how to perform a backup using
+MariaDB Backup
+. For more information about backing up and restoring the database, see the
+Recovery Guide
+.
+Take a full backup:
+Copy
+sudo
+mariadb-backup
+--backup
+\
+--user=mariadb-backup_user
+\
+--password=mariadb-backup_passwd
+\
+--target-dir=/data/backup/preupgrade_backup
+Replace
+mariadb-backup_user
+and
+mariadb-backup_passwd
+with your actual backup user credentials. Confirm successful completion of the backup operation.
+Prepare the backup so it is ready for immediate restoration if required:
+Copy
+sudo
+mariadb-backup
+--prepare
+\
+--target-dir=/data/backup/preupgrade_backup
+Confirm successful completion of the prepare operation.
+Backups should be tested before they are trusted. Restore the backup to a non-production instance and verify it before proceeding with the upgrade.
+Stop the MariaDB Server Process
+Before the new packages are installed, stop the running server.
+Set the
+innodb_fast_shutdown
+system variable to
+1
+so InnoDB flushes all dirty pages and closes cleanly:
+Use
+XA RECOVER
+to confirm that there are no external XA transactions in a prepared state:
+Commit or roll back any open XA transactions before stopping the server.
+Stop the server process. On distributions that use
+systemd
+(most supported OSes), manage the server with
+systemctl
+:
+Install the New Version
+Unlike a major-version upgrade, a minor-version upgrade does
+not
+require uninstalling the old packages first. The distribution's package manager upgrades the packages in place, while keeping the data directory and configuration files unchanged.
+MariaDB Community Server provides a setup script,
+mariadb_repo_setup
+, that configures the package repository for your distribution. To pin to a specific minor release, pass the full version number to
+--mariadb-server-version
+, prefixed with
+mariadb-
+. For example, to install MariaDB 11.4.5 instead of the latest 11.4.x release:
+To track the latest release in a series rather than pinning to a specific minor, pass only the series:
+Upgrade via YUM
+Upgrade via APT
+Upgrade via ZYpp
+Upgrade via YUM (RHEL, AlmaLinux, CentOS, Rocky Linux)
+Configure the YUM package repository for the target release. The following example uses MariaDB 11.4.5; adjust the version number for your target release:
+See
+Pinning the Repository to a Specific Minor Release
+for more on minor-release pinning.
+Update MariaDB Community Server and package dependencies:
+Check that the wildcards do not unintentionally match any custom applications.
+Upgrade via APT (Debian, Ubuntu)
+Configure the APT package repository for the target release. The following example uses MariaDB 11.4.5; adjust the version number for your target release:
+Upgrade MariaDB Community Server and package dependencies. The
+--only-upgrade
+flag ensures
+apt
+does not install new packages, only updates existing ones:
+Check that the wildcards do not unintentionally match any custom applications.
+Upgrade via ZYpp (SLES, openSUSE)
+Configure the ZYpp package repository for the target release. The following example uses MariaDB 11.4.5; adjust the version number for your target release:
+Update MariaDB Community Server and package dependencies:
+Check that the wildcards do not unintentionally match any custom applications.
+Configuration
+For platforms that use YUM or ZYpp as a package manager, MariaDB Community Server's packages bundle several configuration files:
+/etc/my.cnf
+/etc/my.cnf.d/client.cnf
+/etc/my.cnf.d/mysql-clients.cnf
+/etc/my.cnf.d/server.cnf
+If your version of any of these configuration files contained custom edits, then the package manager may save your edited version with the
+.rpmsave
+extension during the upgrade. To continue using your customized version, restore it before starting the server. For example, to restore
+server.cnf
+:
+On APT-based systems (Debian, Ubuntu), preserved configuration files use the
+.dpkg-old
+extension instead. The principle is the same: rename and restore as needed.
+Now is also the time to make any desired changes to
+option files
+such as
+my.cnf
+, before starting the new server.
+Starting the Server
+MariaDB Community Server includes configuration to start, stop, restart, enable/disable on boot, and check the status of the server using the operating system's default process management system.
+For distributions that use
+systemd
+, manage the server process using
+systemctl
+:
+Operation
+Command
+Start
+sudo systemctl start mariadb
+Stop
+sudo systemctl stop mariadb
+Restart
+sudo systemctl restart mariadb
+Enable during startup
+sudo systemctl enable mariadb
+Disable during startup
+sudo systemctl disable mariadb
+Status
+sudo systemctl status mariadb
+Upgrading the Data Directory
+MariaDB ships with a utility that checks for and corrects any compatibility issues introduced by the upgrade. After the server is upgraded and running, run
+mariadb-upgrade
+to upgrade the data directory:
+Minor-version upgrades do not change the data dictionary. On mariadb-upgrade 2.0 and later,
+mariadb-upgrade
+detects this automatically and exits immediately with a message confirming no upgrade is needed and this is expected behaviour. Running
+mariadb-upgrade
+after a minor upgrade is still recommended as a safety check, and is harmless when no work is needed. Use
+--force
+to run the full check regardless.
+Testing
+When the upgraded server is up and running, verify it is working and there were no issues during startup.
+Connect to the server using the
+mariadb
+client as the
+root@localhost
+user:
+Verify the server version by checking the
+version
+system variable:
+Verify by calling the
+VERSION()
+function:
+See Also
+For major version upgrades (between release series), see:
+Upgrading Between Major MariaDB Versions
+Upgrading from MariaDB 11.4 to MariaDB 11.8
+Upgrading from MariaDB 10.11 to MariaDB 11.4
+Upgrading from MariaDB 10.6 to MariaDB 10.11
+For the equivalent Enterprise Server minor-upgrade guides, see:
+Upgrade MariaDB Enterprise Server from 11.4.X to 11.4.Y
+Upgrade MariaDB Enterprise Server from 10.6.X to 10.6.Y
+Related references:
+MariaDB Package Repository Setup and Usage
+— full reference for
+mariadb_repo_setup
+options, including
+--mariadb-server-version
+and minor-release pinning.
+Installing MariaDB Packages with YUM
+Installing MariaDB .deb Files (APT)
+Installing MariaDB with Zypper
+mariadb-upgrade
+— the post-upgrade data-directory utility.
+mariadb-backup
+— the recommended pre-upgrade backup tool.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Upgrading Between Major MariaDB Versions
+Next
+Upgrading MariaDB on Windows
+Last updated
+10 days ago
+Was this helpful?
+Data Backup
+Stop the MariaDB Server Process
+Install the New Version
+Configuration
+Starting the Server
+Upgrading the Data Directory
+Testing
+See Also
+Was this helpful?
+Copy
+SET GLOBAL innodb_fast_shutdown = 1;
+Copy
+XA RECOVER;
+Copy
+sudo systemctl stop mariadb
+Copy
+--mariadb-server-version="mariadb-11.4.5"
+Copy
+--mariadb-server-version="mariadb-11.4"
+Copy
+sudo yum install curl
+Copy
+curl -LsSO https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
+Copy
+chmod +x mariadb_repo_setup
+Copy
+sudo ./mariadb_repo_setup --mariadb-server-version="mariadb-11.4.5"
+Copy
+sudo yum update "MariaDB-*" "galera*"
+Copy
+sudo apt install curl
+Copy
+curl -LsSO https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
+Copy
+chmod +x mariadb_repo_setup
+Copy
+sudo ./mariadb_repo_setup --mariadb-server-version="mariadb-11.4.5"
+Copy
+sudo apt update
+Copy
+sudo apt install --only-upgrade "mariadb-*" "galera*"
+Copy
+sudo zypper install curl
+Copy
+curl -LsSO https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
+Copy
+chmod +x mariadb_repo_setup
+Copy
+sudo ./mariadb_repo_setup --mariadb-server-version="mariadb-11.4.5"
+Copy
+sudo zypper update "MariaDB-*" "galera*"
+Copy
+sudo mv /etc/my.cnf.d/server.cnf /etc/my.cnf.d/server.cnf.original
+Copy
+sudo mv /etc/my.cnf.d/server.cnf.rpmsave /etc/my.cnf.d/server.cnf
+Copy
+sudo mariadb-upgrade
+Copy
+sudo mariadb
+Copy
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 9
+Server version: 11.4.5-MariaDB MariaDB Server
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+MariaDB [(none)]>
+Copy
+SHOW GLOBAL VARIABLES LIKE 'version';
+Copy
++---------------+-----------------+
+| Variable_name | Value           |
++---------------+-----------------+
+| version       | 11.4.5-MariaDB  |
++---------------+-----------------+
+Copy
+SELECT VERSION();
+Copy
++-----------------+
+| VERSION()       |
++-----------------+
+| 11.4.5-MariaDB  |
++-----------------+

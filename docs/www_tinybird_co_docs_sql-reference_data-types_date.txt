@@ -1,0 +1,28 @@
+Source: https://www.tinybird.com/docs/sql-reference/data-types/date
+
+Date Data Type reference · Tinybird Docs
+Sign In
+Sign Up
+Date
+¶
+Copy as MD
+A date. Stored in two bytes as the number of days since 1970-01-01 (unsigned). Allows storing values from just after the beginning of the Unix Epoch to the upper threshold defined by a constant at the compilation stage (currently, this is until the year 2149, but the final fully-supported year is 2148).
+Supported range of values: [1970-01-01, 2149-06-06].
+The date value is stored without the time zone.
+Example
+¶
+SELECT
+    toDate('2023-10-26') AS date_from_string,
+    toDate(19649) AS date_from_days_since_epoch;
+Result:
+┌─date_from_string─┬─date_from_days_since_epoch─┐
+│       2023-10-26 │                 2023-10-26 │
+└──────────────────┴────────────────────────────┘
+Updated
+3 weeks ago
+On this page
+Date
+Example
+forward
+classic
+Ask AI

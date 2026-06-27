@@ -1,0 +1,29 @@
+Source: https://www.tinybird.com/docs/live/build-dashboards-for-saas-june-2024
+
+Building Customer-Facing Dashboards for SaaS Products · Tinybird
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+← Back to Live
+Building Customer-Facing Dashboards for SaaS Products
+A practical, hands-on course for teams looking to add real-time dashboards to their SaaS applications.
+This workshop is intended for developers of SaaS applications looking to take real-time user data and build customer-facing dashboards. Whether you're a cloud service like Vercel, a creator service like Canva, or a startup like Dub.co, your customers will love being able to see their usage stats for your product in real-time.
+See examples of customer-facing dashboards from real customers
+Build a customer-facing dashboard end-to-end
+Review common patterns and best practices for customer-facing dashboards
+Have questions?
+Join us on Slack
+Start building
+Live coding session
+When:
+June 20, 2024 at 15:00 UTC
+Duration:
+60 minutes
+Who:
+Jim Moffitt
+Developer Advocate
+Start building
+Ask AI
+Search...

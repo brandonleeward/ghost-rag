@@ -1,0 +1,44 @@
+Source: https://www.tinybird.com/docs/classic/work-with-data/publish-data/guides/share-endpoint-documentation
+
+Classic: Share API endpoints documentation · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Share Tinybird API endpoint documentation
+¶
+Copy as MD
+Learn how to share your Tinybird API endpoint documentation with development teams.
+The Tinybird API endpoint page
+¶
+When you publish an API endpoint, Tinybird generates a documentation page for you that is ready to share and compatible with OpenAPI 3.0. It contains your API endpoint description, information about the dynamic parameters you can use when querying this endpoint, and code snippets for quickly integrating your API in third-party applications.
+To share your published API endpoint, navigate to the "Create Chart" button (top right of the UI) > "Share this API endpoint" modal:
+Use Static Tokens to define API endpoint subsets
+¶
+Tinybird authentication is based on
+Tokens
+which contain different scopes for specific resources. For example, a token lets you read from one or many API endpoints, or get write permissions for a particular data source.
+If you take a closer look at the URLs generated for sharing a public API endpoint page, you'll see that after the Endpoint ID, it includes a Token parameter. This means that this page is only accessible if the token provided in the URL has read permissions for it:
+https://api.tinybird.co/endpoint/t_bdcad2252e794c6573e21e7e?token=<token_with_permissions>
+For security, Tinybird automatically generates a read-only Token when sharing a public API endpoint page for the first time. If you don't explicitly use it, your Admin Token won't ever get exposed.
+The API endpoints list page
+¶
+Tinybird also allows you to render the API endpoints information for a given Token.
+https://app.tinybird.co/<provider>/<region>/endpoints?token=<your_token>
+Enter the previous URL, with your Token and the provider and region where the API endpoint is published, into the browser to retrieve a list that shows all API endpoints that the token can read from.
+When integrating your API endpoint in your applications, manage dedicated tokens. The easiest way is creating a token for every application environment, so that you can also track the different requests to your API endpoints by application, and choose which API endpoints are accessible for them.
+Once you do that, you can share auto-generated documentation with ease, without compromising your data privacy and security.
+API endpoint docs pages include a read token by default. In the "Share this API endpoint" modal, you can also see public URLs for every token with read permissions for your pipe.
+Browse your API docs
+¶
+All endpoint documentation is compatible with OpenAPI 3.0 and accessible through the API. If you use a token with permissions for more than one API endpoint, the OpenAPI documentation contains information about all the API endpoints at once.
+Updated
+4 weeks ago
+On this page
+Share Tinybird API endpoint documentation
+The Tinybird API endpoint page
+Use Static Tokens to define API endpoint subsets
+The API endpoints list page
+Browse your API docs
+classic
+Ask AI

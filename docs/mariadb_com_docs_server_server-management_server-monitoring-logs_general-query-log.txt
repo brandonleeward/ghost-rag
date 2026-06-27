@@ -1,0 +1,315 @@
+Source: https://mariadb.com/docs/server/server-management/server-monitoring-logs/general-query-log
+
+General Query Log | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Overview of MariaDB Logs
+Securing MariaDB Logs
+Binary Log
+Error Log
+General Query Log
+MyISAM Log
+Rotating Logs on Unix and Linux
+Slow Query Log
+SQL Error Log Plugin
+Transaction Coordinator Log
+Writing Logs Into Tables
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+General Query Log
+Complete General Query Log guide for MariaDB. Complete reference documentation for implementation, configuration, and usage with comprehensive examples.
+The general query log is a log of every SQL query received from a client, as well as each client connect and disconnect. Since it's a record of every query received by the server, it can grow large quite quickly.
+However, if you only want a record of queries that change data, it might be better to use the
+binary log
+instead. One important difference is that the
+binary log
+only logs a query when the transaction is committed by the server, but the general query log logs a query immediately when it is received by the server.
+Enabling the General Query Log
+The general query log is disabled by default.
+To enable the general query log, set the
+general_log
+system variable to
+1
+. It can be changed dynamically with
+SET GLOBAL
+. For example:
+Copy
+SET GLOBAL general_log=1;
+It can also be set in a server
+option group
+in an
+option file
+prior to starting up the server. For example:
+Copy
+[mariadb]
+...
+general_log
+Configuring the General Query Log Filename
+By default, the general query log is written to
+${hostname}.log
+in the
+datadir
+directory. However, this can be changed.
+One way to configure the general query log filename is to set the
+general_log_file
+system variable. It can be changed dynamically with
+SET GLOBAL
+. For example:
+Copy
+SET GLOBAL general_log_file='mariadb.log';
+It can also be set in a server
+option group
+in an
+option file
+prior to starting up the server. For example:
+Copy
+[mariadb]
+...
+general_log
+general_log_file=mariadb.log
+If it is a relative path, then the
+general_log_file
+is relative to the
+datadir
+directory.
+However, the
+general_log_file
+system variable can also be an absolute path. For example:
+Another way to configure the general query log filename is to set the
+log-basename
+option, which configures MariaDB to use a common prefix for all log files (e.g. general query log,
+slow query log
+,
+error log
+,
+binary logs
+, etc.). The general query log filename will be built by adding a
+.log
+extension to this prefix. This option cannot be set dynamically. It can be set in a server
+option group
+in an
+option file
+prior to starting up the server. For example:
+The
+log-basename
+cannot be an absolute path. The log file name is relative to the
+datadir
+directory.
+Choosing the General Query Log Output Destination
+The general query log can either be written to a file on disk, or it can be written to the
+general_log
+table in the
+mysql
+database. To choose the general query log output destination, set the
+log_output
+system variable.
+Writing the General Query Log to a File
+The general query log is output to a file by default. However, it can be explicitly chosen by setting the
+log_output
+system variable to
+FILE
+. It can be changed dynamically with
+SET GLOBAL
+. For example:
+It can also be set in a server
+option group
+in an
+option file
+prior to starting up the server. For example:
+Writing the General Query Log to a Table
+The general query log can either be written to the
+general_log
+table in the
+mysql
+database by setting the
+log_output
+system variable to
+TABLE
+. It can be changed dynamically with
+SET GLOBAL
+. For example:
+It can also be set in a server
+option group
+in an
+option file
+prior to starting up the server. For example:
+Some rows in this table might look like this:
+See
+Writing logs into tables
+for more information.
+Formal Specification (File Format)
+When the General Query Log is written to a file, it follows a positional format. For tool developers (e.g., Fluentd, Logstash), it is important to treat this log as a continuous stream of events that can contain multi-line data.
+Template:
+Timestamp ThreadID Command Argument
+Field
+Component
+Data Type
+Description
+1
+Timestamp
+DateTime
+The time the query was received. Format varies by version (e.g.,
+yymmdd h:mm:ss
+or ISO 8601).
+2
+Thread ID
+Unsigned Integer
+The standardized connection identifier. This matches the
+Thread ID
+field in the Error Log and Slow Query Log.
+3
+Command
+String
+The command type (e.g.,
+Connect
+,
+Query
+,
+Quit
+,
+Prepare
+).
+4
+Argument
+String
+The raw SQL statement or command details.
+Parsing Considerations for Tool Developers
+Multi-line SQL:
+The
+Argument
+field contains the literal SQL query received by the server. Because SQL queries often contain newlines, a single log entry can span multiple lines. Parsers must be configured to handle multiline events, typically by identifying a new record when a line begins with a valid timestamp.
+Standardized Identification:
+While the log file header may label the second column as
+Id
+, it is functionally identical to the
+thread_id
+found in system tables (e.g.,
+mysql.general_log
+) and the
+Thread ID
+in other server logs.
+Immediate Logging:
+Unlike the Binary Log, which logs at commit time, the General Query Log records queries immediately upon receipt.
+Disabling the General Query Log for a Session
+A user with the
+SUPER
+privilege can disable logging to the general query log for a connection by setting the
+SQL_LOG_OFF
+system variable to
+1
+. For example:
+Disabling the General Query Log for Specific Statements
+In
+MariaDB 10.3.1
+and later, it is possible to disable logging to the general query log for specific types of statements by setting the
+log_disabled_statements
+system variable. This option cannot be set dynamically. It can be set in a server
+option group
+in an
+option file
+prior to starting up the server. For example:
+Rotating the General Query Log on Unix and Linux
+Unix and Linux distributions offer the
+logrotate
+utility, which makes it very easy to rotate log files. See
+Rotating Logs on Unix and Linux
+for more information on how to use this utility to rotate the general query log.
+See Also
+MariaDB audit plugin
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Error Log
+Next
+MyISAM Log
+Last updated
+4 months ago
+Was this helpful?
+Enabling the General Query Log
+Configuring the General Query Log Filename
+Choosing the General Query Log Output Destination
+Writing the General Query Log to a File
+Writing the General Query Log to a Table
+Disabling the General Query Log for a Session
+Disabling the General Query Log for Specific Statements
+Rotating the General Query Log on Unix and Linux
+See Also
+Was this helpful?
+Copy
+[mariadb]
+...
+general_log
+general_log_file=/var/log/mysql/mariadb.log
+Copy
+[mariadb]
+...
+log-basename=mariadb
+general_log
+Copy
+SET GLOBAL log_output='FILE';
+Copy
+[mariadb]
+...
+log_output=FILE
+general_log
+general_log_file=queries.log
+Copy
+SET GLOBAL log_output='TABLE';
+Copy
+[mariadb]
+...
+log_output=TABLE
+general_log
+Copy
+SELECT * FROM mysql.general_log\G
+*************************** 1. row ***************************
+event_time: 2014-11-11 08:40:04.117177
+user_host: root[root] @ localhost []
+thread_id: 74
+server_id: 1
+command_type: Query
+argument: SELECT * FROM test.s
+*************************** 2. row ***************************
+event_time: 2014-11-11 08:40:10.501131
+user_host: root[root] @ localhost []
+thread_id: 74
+server_id: 1
+command_type: Query
+argument: SELECT * FROM mysql.general_log
+...
+Copy
+SET SESSION SQL_LOG_OFF=1;
+Copy
+[mariadb]
+...
+log_output=FILE
+general_log
+general_log_file=queries.log
+log_disabled_statements='slave,sp'

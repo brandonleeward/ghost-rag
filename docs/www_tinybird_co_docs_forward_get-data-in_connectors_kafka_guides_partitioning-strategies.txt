@@ -1,0 +1,217 @@
+Source: https://www.tinybird.co/docs/forward/get-data-in/connectors/kafka/guides/partitioning-strategies
+
+Kafka partitioning strategies · Tinybird Docs
+Sign In
+Sign Up
+Kafka partitioning strategies
+¶
+Copy as MD
+This guide covers best practices for Kafka topic partitioning and how it affects Tinybird's Kafka connector performance.
+Understanding Kafka partitions
+¶
+Kafka topics are divided into partitions, which allow:
+Parallel processing
+- Multiple consumers can process different partitions simultaneously
+Scalability
+- Distribute load across partitions
+Ordering
+- Messages with the same key go to the same partition, maintaining order
+Tinybird's Kafka connector automatically assigns partitions to consumer instances and scales consumers based on lag and load.
+Partition assignment is automatic
+: Tinybird's Kafka connector automatically handles partition assignment. There is no configuration option to explicitly target specific partitions or turn off automatic assignment. The connector manages partition distribution across consumers automatically.
+Kafka partitions vs ClickHouse® table partitions
+¶
+Kafka partitions
+and
+ClickHouse® table partitions
+are different concepts:
+Kafka partitions
+: Logical divisions of a topic for parallel processing and ordering. Each Kafka partition can be consumed independently.
+ClickHouse® table partitions
+: Physical divisions of data in ClickHouse® tables, typically organized by time (for example, monthly partitions).
+How they relate:
+Each Kafka partition can write data to multiple ClickHouse® parts within a ClickHouse® partition
+Multiple Kafka partitions can write to the same ClickHouse® partition
+ClickHouse® typically partitions by time (for example,
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+)
+TOO_MANY_PARTS error:
+If you have too many Kafka partitions writing to the same ClickHouse® partition, you may encounter the
+TOO_MANY_PARTS
+error. This happens when ClickHouse® creates too many parts in a single partition, which can impact query performance.
+Best practice:
+For ClickHouse®, partitioning by time (for example, monthly or daily) is usually fine for time-series data. This is independent of your Kafka partition key strategy. Kafka partition keys should focus on distributing load evenly across Kafka partitions, while ClickHouse® partitioning organizes data by time for efficient querying.
+Partition design best practices
+¶
+Number of partitions
+¶
+Guidelines:
+Start with
+3-6 partitions
+for most use cases
+Scale up if you see uneven lag distribution
+More partitions = more parallelism, but also more overhead
+Too many partitions can cause frequent rebalancing and ClickHouse® TOO_MANY_PARTS errors
+Factors to consider:
+Expected message throughput
+Consumer capacity
+ClickHouse® partition strategy
+Kafka partition key strategy
+¶
+The partition key determines which Kafka partition a message goes to. This is about
+Kafka partitions
+, not ClickHouse partitions.
+Goal: Even distribution across Kafka partitions
+Use keys that distribute messages evenly across Kafka partitions
+Avoid keys that create "hot partitions" (one Kafka partition receiving most messages)
+Consider hash-based keys for even distribution
+Example of good partition key:
+# Even distribution using hash - distributes messages across Kafka partitions
+partition_key = hash(user_id) % num_partitions
+Example of problematic partition key:
+# Creates hot partition - all messages go to one Kafka partition
+partition_key = "all-users"
+Note:
+Partition keys are for distributing load across Kafka partitions. For ClickHouse® table partitioning, you typically partition by time (for example,
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+), which is usually fine for time-series data. ClickHouse® partitioning is independent of Kafka partition keys.
+Monitoring partition performance
+¶
+Monitor partition lag
+¶
+Partition lag indicates how far behind your consumer is:
+SELECT
+    datasource_id,
+    topic,
+    partition,
+    max(lag) as current_lag,
+    avg(lag) as avg_lag
+FROM tinybird.kafka_ops_log
+WHERE timestamp > now() - INTERVAL 1 hour
+  AND partition >= 0
+GROUP BY datasource_id, topic, partition
+ORDER BY current_lag DESC
+Detect hot partitions
+¶
+Check if messages are evenly distributed across partitions:
+SELECT
+    __partition,
+    count(*) as message_count,
+    count(*) * 100.0 / sum(count(*)) OVER () as percentage
+FROM your_datasource
+WHERE timestamp > now() - INTERVAL 1 hour
+GROUP BY __partition
+ORDER BY message_count DESC
+Uneven distribution (for example, one partition has >50% of messages) indicates a hot partition.
+Monitor partition assignment
+¶
+Track how partitions are assigned to consumers:
+SELECT
+    datasource_id,
+    topic,
+    partition,
+    count(*) as assignment_count
+FROM tinybird.kafka_ops_log
+WHERE timestamp > now() - INTERVAL 1 hour
+  AND partition >= 0
+GROUP BY datasource_id, topic, partition
+ORDER BY assignment_count DESC
+How it works in practice
+¶
+Producer sends messages
+to Kafka topics with optional partition keys
+Kafka assigns messages
+to partitions based on the key (or round-robin if no key)
+Tinybird connector
+consumes from all partitions in parallel
+Data is ingested
+into ClickHouse®, where it's organized into ClickHouse® partitions (typically by time)
+Multiple Kafka partitions
+can write to the same ClickHouse® partition
+Each Kafka partition
+may create multiple ClickHouse® parts within a partition
+Example flow:
+Kafka Topic: events (6 partitions)
+  ├─ Partition 0 → ClickHouse® partition 202401 (multiple parts)
+  ├─ Partition 1 → ClickHouse® partition 202401 (multiple parts)
+  ├─ Partition 2 → ClickHouse® partition 202402 (multiple parts)
+  └─ ...
+Rebalancing:
+When partitions are added, removed, or consumer instances change, Kafka rebalances partition assignments. This causes a brief pause in processing. Monitor for rebalancing by tracking partition assignment changes in
+kafka_ops_log
+.
+Troubleshooting
+¶
+Issue: Uneven partition lag
+¶
+Symptoms:
+Some partitions have high lag while others are idle
+Solutions:
+Review partition key strategy
+Check message distribution across partitions
+Consider increasing partitions if needed
+Adjust partition key to distribute more evenly
+Issue: Hot partitions
+¶
+Symptoms:
+One partition receives most messages, causing high lag
+Solutions:
+Change partition key strategy
+Use hash-based keys for even distribution
+Split high-volume keys across multiple partitions
+Issue: TOO_MANY_PARTS error
+¶
+Symptoms:
+ClickHouse® error indicating too many parts in a partition
+Solutions:
+Reduce number of Kafka partitions writing to the same ClickHouse® partition
+Adjust ClickHouse® merge settings if needed
+Consider increasing ClickHouse® partition granularity (for example, daily instead of monthly)
+Note: Kafka partition key strategy doesn't directly affect this - ClickHouse® partitioning by time is usually fine
+Best practices
+¶
+Start with 3-6 Kafka partitions
+and scale as needed
+Use Kafka partition keys
+that distribute messages evenly across Kafka partitions
+For ClickHouse®
+, partition by time (for example, monthly) - this is usually fine for time-series data
+Monitor partition lag
+regularly
+Avoid hot Kafka partitions
+by using hash-based keys
+Watch for TOO_MANY_PARTS
+errors and adjust ClickHouse® partition granularity if needed
+Remember
+: Kafka partition keys (for load distribution) and ClickHouse® partitioning (for data organization) serve different purposes
+Related documentation
+¶
+Performance optimization guide
+- Overall performance tuning
+Monitor Kafka connectors
+- Monitoring partition performance
+Troubleshooting guide
+- Resolve partition issues
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Kafka partitioning strategies
+Understanding Kafka partitions
+Kafka partitions vs ClickHouse® table partitions
+Partition design best practices
+Number of partitions
+Kafka partition key strategy
+Monitoring partition performance
+Monitor partition lag
+Detect hot partitions
+Monitor partition assignment
+How it works in practice
+Troubleshooting
+Issue: Uneven partition lag
+Issue: Hot partitions
+Issue: TOO_MANY_PARTS error
+Best practices
+Related documentation
+forward
+Ask AI

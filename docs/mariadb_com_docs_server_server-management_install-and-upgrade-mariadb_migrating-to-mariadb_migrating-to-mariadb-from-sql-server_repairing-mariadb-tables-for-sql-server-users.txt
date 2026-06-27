@@ -1,0 +1,218 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/migrating-to-mariadb/migrating-to-mariadb-from-sql-server/repairing-mariadb-tables-for-sql-server-users
+
+Repairing MariaDB Tables for SQL Server Users | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+Differences Between MariaDB and Other DBMSs
+DDL Export Guide
+Migrating to MariaDB from MySQL
+Migrating to MariaDB from PostgreSQL
+Migrating to MariaDB from Oracle
+Migrating to MariaDB from SQL Server
+MariaDB Backups Overview for SQL Server Users
+Understanding MariaDB Architecture
+MariaDB Features Not Available in SQL Server
+SQL Server Features Not Available in MariaDB
+SQL Server Features Implemented Differently in MariaDB
+SQL Server and MariaDB Types Comparison
+Syntax Differences between MariaDB and SQL Server
+MariaDB Authorization and Permissions for SQL Server Users
+MariaDB Replication Overview for SQL Server Users
+MariaDB Transactions and Isolation Levels for SQL Server Users
+Moving Data Between SQL Server and MariaDB
+Repairing MariaDB Tables for SQL Server Users
+Setting Up MariaDB for Testing for SQL Server Users
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Repairing MariaDB Tables for SQL Server Users
+Explains how to check and repair tables in MariaDB using `CHECK TABLE` and `REPAIR TABLE`, noting that InnoDB typically handles corruption by crashing to prevent data loss.
+Migrating from SQL Server?
+Contact our Migration Experts
+Repairing tables in MariaDB is not similar to repairing tables in SQL Server.
+The first thing to understand is that every MariaDB table is handled by a
+storage engine
+. Storage engines are plugins that know how to physically read and write a table, so each storage engine allows one to repair tables in different ways. The default storage engine is
+InnoDB
+.
+MariaDB provides specific SQL statements to deal with corrupted tables:
+CHECK TABLE
+checks if a table is corrupted;
+REPAIR TABLE
+repairs a table if it is corrupted.
+As a general rule, there is no reason why a table that is corrupted on a master should also be corrupted on the slaves. Therefore,
+REPAIR
+is generally used with the
+NO_WRITE_TO_BINLOG
+option, to avoid replicating it to the slaves.
+Partitioned Tables
+Partitioned tables
+are normally split into multiple physical files (one per partition). Even if one of the partitions is corrupted, in most cases other partitions are healthy.
+For this reason,
+CHECK TABLE
+and
+REPAIR TABLE
+don't work on partitioned tables. Instead, use
+ALTER TABLE
+to check or repair a single partition.
+For example:
+Copy
+ALTER TABLE orders CHECK PARTITION p_2019, p_2020;
+ALTER TABLE orders REPAIR PARTITION p_2019, p_2020;
+Indexes
+Indexes can get corrupted. However, as long as data is not corrupted, indexes can always be dropped and rebuilt with
+ALTER TABLE
+:
+Copy
+ALTER TABLE customer DROP INDEX idx_email;
+ALTER TABLE customer ADD INDEX idx_email (email);
+Checking and Repairing Tables
+Here we discuss how to repair tables, depending on the storage engine.
+InnoDB
+InnoDB follows the "fail fast" philosophy. If table corruption is detected, by default InnoDB deliberately causes MariaDB to crash to avoid corruption propagation, logging an error into the
+error log
+. This happens even if the corruption is found with a
+CHECK TABLE
+statement. This behavior can be changed with the
+innodb_corrupt_table_action
+server variable.
+To repair an InnoDB table after a crash:
+Restart MariaDB with the
+--innodb-force-recovery
+option set to a low but non-zero value.
+If MariaDB fails to start, retry with a higher value. Repeat until you succeed.
+At this point, you can follow two different procedures, depending if you can use a backup or not. Provided that you have a usable backup, it is often the best option to bring the database up quickly. But if you want to reduce the data loss as much as possible, you prefer to follow the second method.
+Restoring a backup:
+Drop the whole database with
+DROP DATABASE
+.
+Restore a backup of the database. The exact procedure depends on the
+type of backup
+.
+Recovering existing data:
+Dump data from the corrupter table, ordered by primary key. MariaDB could crash when it finds damaged data. Repeat the process skipping damaged data.
+Save somewhere the table structure with
+SHOW CREATE TABLE
+.
+Restart MariaDB.
+Drop the table with
+DROP TABLE
+.
+Recreate the table and restore the dump.
+For more details, see
+InnoDB Recovery Modes
+.
+Aria and MyISAM
+MyISAM
+is not crash-safe. In case of a MariaDB crash, the changes applied to MyISAM tables but not yet flushed to the disk are lost.
+Aria
+is crash-safe by default, which means that in case of a crash, after repairing any table that is damaged, no changes are lost. However, Aria tables are not crash-safe if created with
+TRANSACTIONAL=0
+or
+ROW_FORMAT
+set to
+FIXED
+or
+DYNAMIC
+.
+System tables use the Aria storage engine and they are crash-safe.
+To check if a MyISAM/Aria table is corrupted, we can use
+CHECK TABLE
+. To repair a MyISAM/Aria table, one can use
+REPAIR TABLE
+. Before running
+REPAIR TABLE
+against big tables, consider increasing
+myisam_repair_threads
+or
+aria_repair_threads
+.
+MyISAM and Aria tables can also be automatically repaired when corruption is detected. This is particularly useful for Aria, in case corrupted system tables prevent MariaDB from starting. See
+myisam_recover_options
+and
+aria_recover_options
+. By default Aria runs the quickest repair type. Occasionally, to repair a system table, we may have to start MariaDB in this way:
+It is also possible to stop MariaDB and repair MyISAM tables with
+myisamchk
+, and Aria tables with
+aria_chk
+. With default values, a repair can be unnecessarily very slow. Before running these tools, be sure to check the
+Memory and Disk Use With myisamchk
+page.
+Other Storage Engines
+Notes on the different storage engines:
+For
+MyRocks
+, see
+MyRocks and CHECK TABLE
+.
+With
+ARCHIVE
+,
+REPAIR TABLE
+also improves the compression rate.
+For
+CSV
+, see
+Checking and Rpairing CSV Tables
+.
+Some special storage engines, like
+MEMORY
+or
+BLACKHOLE
+, do not support any form of check and repair.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Moving Data Between SQL Server and MariaDB
+Next
+Setting Up MariaDB for Testing for SQL Server Users
+Last updated
+3 months ago
+Was this helpful?
+Partitioned Tables
+Indexes
+Checking and Repairing Tables
+InnoDB
+Aria and MyISAM
+Other Storage Engines
+Was this helpful?
+Copy
+mysqld --aria-recover-options=BACKUP,FORCE

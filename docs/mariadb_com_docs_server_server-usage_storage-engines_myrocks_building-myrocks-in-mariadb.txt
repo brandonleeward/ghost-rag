@@ -1,0 +1,182 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/myrocks/building-myrocks-in-mariadb
+
+Building MyRocks in MariaDB | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+About MyRocks for MariaDB
+Building MyRocks in MariaDB
+Differences Between MyRocks Variants
+Getting Started with MyRocks
+Loading Data Into MyRocks
+MyRocks Bloom Filters
+MyRocks CHECK TABLE
+MyRocks Data Compression
+MyRocks Group Commit with Binary log
+MyRocks Index-Only Scans
+MyRocks and Replication
+MyRocks START TRANSACTION WITH CONSISTENT SNAPSHOT
+MyRocks Column Families
+MyRocks Performance Troubleshooting
+Optimizer Statistics in MyRocks
+MyRocks Transactional Isolation
+MyRocks Status Variables
+MyRocks System Variables
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Building MyRocks in MariaDB
+Learn how to build the MyRocks storage engine from source within the MariaDB Server build process, including necessary dependencies and configuration options.
+This page describes how to get
+MyRocks in MariaDB
+when compiling MariaDB from source. (See
+Build-Steps
+for instructions how to build the upstream.)
+Build Process and Requirements
+MariaDB compile process will compile
+MyRocks
+into
+ha_rocksdb.so
+by default if the platform supports it (That is, no WITH_ROCKSDB switch is necessary).
+Platform requirements:
+A 64-bit platform (due to some 32 bit compilers having difficulties with RocksDB)
+git installed (or git submodules fetched somehow)
+A sufficiently recent compiler:
+gcc >= 4.8, or
+clang >= 3.3, or
+MS Visual Studio 2015 or newer
+Building on Ubuntu 16.04
+The steps were checked on a fresh install of Ubuntu 16.04.2 LTS Xenial.
+Copy
+sudo
+apt-get
+update
+sudo
+apt-get
+-y
+install
+g++
+cmake
+libbz2-dev
+libaio-dev
+bison
+zlib1g-dev
+libsnappy-dev
+sudo
+apt-get
+-y
+install
+libgflags-dev
+libreadline6-dev
+libncurses5-dev
+libssl-dev
+liblz4-dev
+gdb
+git
+;
+This should produce
+storage/rocksdb/ha_rocksdb.so
+which is MyRocks storage engine in the loadable form.
+Starting MyRocks
+MyRocks does not require any special way to initialize the data directory.
+Minimal my.cnf flle:
+Run the server like this
+Compression libraries.
+Supported compression libraries are listed in
+rocksdb_supported_compression_types
+. Compiling like the above, I get:
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+About MyRocks for MariaDB
+Next
+Differences Between MyRocks Variants
+Last updated
+6 months ago
+Was this helpful?
+Build Process and Requirements
+Building on Ubuntu 16.04
+Starting MyRocks
+Was this helpful?
+Copy
+git clone https://github.com/MariaDB/server.git mariadb-10.2
+cd mariadb-10.2
+git checkout 10.2
+git submodule init
+git submodule update
+cmake .
+make -j10
+Copy
+cat > ~/my1.cnf <<EOF
+[mysqld]
+datadir=../mysql-test/var/install.db
+plugin-dir=../storage/rocksdb
+language=./share/english
+socket=/tmp/mysql.sock
+port=3307
+plugin-load=ha_rocksdb
+default-storage-engine=rocksdb
+EOF
+Copy
+(cd mysql-test; ./mtr alias)
+cp -r mysql-test/var/install.db ~/data1
+cd ../sql
+./mysqld --defaults-file=~/my1.cnf
+Copy
+Snappy,Zlib,LZ4,LZ4HC

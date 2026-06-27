@@ -1,0 +1,173 @@
+Source: https://www.tinybird.com/docs/forward/ingest-data/connectors/kafka/guides/message-size-handling
+
+Kafka message size limits and handling · Tinybird Docs
+Sign In
+Sign Up
+Message size handling
+¶
+Copy as MD
+This guide covers handling large Kafka messages in Tinybird, including message size limits and strategies for large messages.
+Message size limits
+¶
+Tinybird has a default message size limit of
+10 MB
+per message. Messages exceeding this limit are automatically sent to the Quarantine Data Source.
+Checking message sizes
+¶
+Check quarantined messages for size-related issues:
+SELECT
+    timestamp,
+    length(__value) as message_size_bytes,
+    length(__value) / 1024 / 1024 as message_size_mb,
+    msg
+FROM your_datasource_quarantine
+WHERE timestamp > now() - INTERVAL 1 hour
+ORDER BY message_size_bytes DESC
+LIMIT 100
+Strategies for handling large messages
+¶
+Option 1: Compression
+¶
+Use Kafka compression to reduce message size:
+Producer configuration:
+producer = KafkaProducer(
+    bootstrap_servers=['localhost:9092'],
+    compression_type='gzip',  # or 'snappy', 'lz4'
+    value_serializer=lambda v: json.dumps(v).encode('utf-8')
+)
+Compression types:
+gzip
+- Best compression, higher CPU
+snappy
+- Good balance
+lz4
+- Fast, lower compression
+Option 2: Split large messages
+¶
+Break large messages into smaller chunks on the producer side, then reassemble in a Materialized View if needed.
+Option 3: External storage
+¶
+Store large payloads in object storage (S3, GCS) and send only references in Kafka:
+# Upload to S3, send reference in Kafka
+message = {
+    'message_id': message_id,
+    's3_key': s3_key,
+    'metadata': {...}
+}
+producer.send('topic', value=message)
+Option 4: Schema optimization
+¶
+Reduce message size by storing only necessary data and using references for large content:
+{
+  "user_id": "123",
+  "profile_summary": "key points only",
+  "full_profile_s3_key": "s3://bucket/profiles/123.json"
+}
+Troubleshooting quarantined messages
+¶
+Identify size-related quarantines
+¶
+SELECT
+    timestamp,
+    length(__value) as message_size,
+    length(__value) / 1024 / 1024 as size_mb,
+    msg
+FROM your_datasource_quarantine
+WHERE timestamp > now() - INTERVAL 24 hour
+  AND length(__value) > 10 * 1024 * 1024  -- Over 10 MB
+ORDER BY message_size DESC
+Extract useful data from quarantined messages
+¶
+Even if the full message is too large, you can extract metadata:
+SELECT
+    timestamp,
+    JSONExtractString(__value, 'message_id') as message_id,
+    JSONExtractString(__value, 'user_id') as user_id,
+    length(__value) as original_size
+FROM your_datasource_quarantine
+WHERE timestamp > now() - INTERVAL 24 hour
+Monitoring message sizes
+¶
+Track message size distribution
+¶
+SELECT
+    quantile(0.5)(message_size) as median_size,
+    quantile(0.95)(message_size) as p95_size,
+    quantile(0.99)(message_size) as p99_size,
+    max(message_size) as max_size
+FROM (
+    SELECT length(__value) as message_size
+    FROM your_datasource
+    WHERE timestamp > now() - INTERVAL 1 hour
+)
+Alert on large messages
+¶
+SELECT
+    timestamp,
+    length(__value) as message_size,
+    length(__value) / 1024 / 1024 as size_mb
+FROM your_datasource
+WHERE length(__value) > 8 * 1024 * 1024  -- Over 8MB
+  AND timestamp > now() - INTERVAL 1 hour
+ORDER BY message_size DESC
+Best practices
+¶
+Target size:
+Keep messages under 1 MB when possible
+Use Kafka compression
+for large messages
+Store only necessary data
+in Kafka messages
+Use references
+for large binary data (S3, GCS)
+Monitor message sizes
+regularly to catch issues early
+Common issues and solutions
+¶
+Issue: Messages consistently over 10 MB
+¶
+Solutions:
+Implement Kafka compression
+Split messages into chunks
+Move large data to external storage
+Optimize schema to reduce size
+Issue: Compression not helping
+¶
+Solutions:
+Check if data is already compressed
+Try different compression types
+Verify compression is turned on in producer
+Consider if data is compressible (text vs binary)
+Related documentation
+¶
+Troubleshooting guide
+- Message size error troubleshooting
+Quarantine Data Sources
+- Handling quarantined messages
+Kafka connector documentation
+- Main setup and configuration guide
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Message size handling
+Message size limits
+Checking message sizes
+Strategies for handling large messages
+Option 1: Compression
+Option 2: Split large messages
+Option 3: External storage
+Option 4: Schema optimization
+Troubleshooting quarantined messages
+Identify size-related quarantines
+Extract useful data from quarantined messages
+Monitoring message sizes
+Track message size distribution
+Alert on large messages
+Best practices
+Common issues and solutions
+Issue: Messages consistently over 10 MB
+Issue: Compression not helping
+Related documentation
+forward
+Ask AI

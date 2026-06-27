@@ -1,0 +1,103 @@
+Source: https://mariadb.com/docs/server/server-usage/stored-routines/stored-procedures/alter-procedure
+
+ALTER PROCEDURE | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Stored Procedures
+Stored Procedure Overview
+CREATE PROCEDURE
+ALTER PROCEDURE
+DROP PROCEDURE
+Stored Functions
+Binary Logging of Stored Routines
+Stored Routine Limitations
+DBMS_OUTPUT
+Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+ALTER PROCEDURE
+The ALTER PROCEDURE statement modifies the characteristics of an existing stored procedure, such as its security context or comment, without changing its logic.
+Syntax
+Copy
+ALTER PROCEDURE proc_name [characteristic ...]
+characteristic:
+{ CONTAINS SQL | NO SQL | READS SQL DATA | MODIFIES SQL DATA }
+| SQL SECURITY { DEFINER | INVOKER }
+| COMMENT 'string'
+Description
+This statement can be used to change the characteristics of a
+stored procedure
+. More than one change may be specified in an
+ALTER PROCEDURE
+statement. However, you cannot change the parameters or body of a stored procedure using this statement. To make such changes, you must drop and re-create the procedure using
+CREATE OR REPLACE PROCEDURE
+.
+You must have the
+ALTER ROUTINE
+privilege for the procedure. By default, that privilege is granted automatically to the procedure creator. See
+Stored Routine Privileges
+.
+Example
+Copy
+ALTER
+PROCEDURE
+simpleproc
+SQL
+SECURITY
+INVOKER;
+See Also
+Stored Procedure Overview
+CREATE PROCEDURE
+SHOW CREATE PROCEDURE
+DROP PROCEDURE
+SHOW CREATE PROCEDURE
+SHOW PROCEDURE STATUS
+Stored Routine Privileges
+Information Schema ROUTINES Table
+This page is licensed: GPLv2, originally from
+fill_help_tables.sql
+spinner
+Previous
+CREATE PROCEDURE
+Next
+DROP PROCEDURE
+Last updated
+22 days ago
+Was this helpful?
+Syntax
+Description
+Example
+See Also
+Was this helpful?

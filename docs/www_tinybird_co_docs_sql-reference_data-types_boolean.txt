@@ -1,0 +1,42 @@
+Source: https://www.tinybird.com/docs/sql-reference/data-types/boolean
+
+Bool Data Type reference · Tinybird Docs
+Sign In
+Sign Up
+Bool
+¶
+Copy as MD
+The
+Bool
+data type represents a truth value, storing either
+true
+or
+false
+. Internally, it is stored as an 8-bit unsigned integer (
+UInt8
+), where
+true
+corresponds to
+1
+and
+false
+to
+0
+.
+SELECT true AS col, toTypeName(col)
+Result:
+┌─col──┬─toTypeName(true)─┐
+│ true │ Bool             │
+└──────┴──────────────────┘
+SELECT true == 1 AS col, toTypeName(col)
+Result:
+┌─col─┬─toTypeName(equals(true, 1))─┐
+│   1 │ UInt8                       │
+└─────┴─────────────────────────────┘
+Updated
+3 weeks ago
+On this page
+Bool
+forward
+classic
+Ask AI

@@ -1,0 +1,83 @@
+Source: https://mariadb.com/docs/server/server-usage/partitioning-tables/partitioning-types/partitioning-types-overview
+
+Partitioning Types Overview | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Partitioning Overview
+Partition Pruning and Selection
+Partition Maintenance
+Partitioning Types
+Partitioning Types Overview
+HASH Partitioning Type
+KEY Partitioning Type
+LINEAR HASH Partitioning Type
+LINEAR KEY Partitioning Type
+LIST Partitioning Type
+RANGE COLUMNS and LIST COLUMNS Partitioning Types
+RANGE Partitioning Type
+Partitioning Limitations
+Partitions Files
+Partitions Metadata
+Stored Routines
+Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Partitioning Types Overview
+An introduction to the various partitioning strategies available in MariaDB, helping you choose the right method for your data distribution needs.
+A partitioning type determines how a partitioned table's rows are distributed across partitions. Some partition types require the user to specify a partitioning expression that determines in which partition a row are stored.
+The size of individual partitions depends on the partitioning type. Read and write performance are affected by the partitioning expression. Therefore, these choices should be made carefully.
+Partitioning Types
+MariaDB supports the following partitioning types:
+RANGE
+LIST
+RANGE COLUMNS and LIST COLUMNS
+HASH
+LINEAR HASH
+KEY
+LINEAR KEY
+SYSTEM_TIME
+See Also
+Partitioning Overview
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Partitioning Types
+Next
+HASH Partitioning Type
+Last updated
+4 months ago
+Was this helpful?
+Partitioning Types
+See Also
+Was this helpful?

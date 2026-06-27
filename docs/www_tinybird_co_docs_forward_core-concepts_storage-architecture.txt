@@ -1,0 +1,87 @@
+Source: https://www.tinybird.com/docs/forward/core-concepts/storage-architecture
+
+Storage Architecture · Tinybird Docs
+Sign In
+Sign Up
+Tinybird Cloud Storage Architecture
+¶
+Copy as MD
+Tinybird Cloud uses compute-storage separation. All data is stored in object storage (S3 on AWS, GCS on Google Cloud). Each ClickHouse® replica has a local SSD cache for fast reads. Replicas share data in object storage via zero-copy replication.
+Storage
+¶
+Tinybird writes all data to
+object storage
+(S3 or GCS, depending on your
+region
+), and object storage is the source of truth for durability and replication. Writes always go there first; the local SSD cache is only a read-path optimization.
+Local SSD cache
+¶
+Each replica has a local SSD that caches data parts fetched from object storage. When the database plans a new query, it checks the local cache first. If the part is cached, it reads at SSD speed. If not, it fetches from object storage and caches the part for future reads.
+The cache lives on fast local SSD, with capacity determined by cloud provider and machine type. ClickHouse® manages eviction: when cache pressure increases, older or less frequently accessed parts are removed first.
+To protect cache stability, Tinybird applies limits to how much data a single query can write into cache, so large scans don't flush useful working sets. There is also no TTL-based expiration: ClickHouse® data parts are immutable, so cached parts stay valid until they are superseded by merges and naturally evicted.
+Ingestion
+¶
+Data enters the ClickHouse® cluster through two paths.
+Streaming ingest
+(Events API, Kafka) goes through the
+Gatherer
+, which batches and buffers incoming events before writing to ClickHouse®. This reduces small-part fragmentation in object storage and improves merge behavior.
+Batch ingest
+(S3/GCS connectors, files via the datasources API) writes directly to the cluster.
+In both paths, persisted writes end up in object storage.
+Zero-copy replication
+¶
+Replicas share the same data in object storage rather than each storing its own copy. This means that adding a replica doesn't require copying data. The new replica syncs metadata and starts caching data locally when reading.
+Tinybird maintains zero-copy replication in its
+ClickHouse® fork
+.
+Query path
+¶
+When a query reaches Tinybird, ClickHouse® determines which data parts it needs, checks the
+local SSD cache
+first, and fetches any misses from
+object storage
+, caching those parts locally for subsequent reads.
+Infrastructure options
+¶
+Shared
+Dedicated
+Cluster
+Shared with other customers
+Exclusive cluster
+Replica management
+Managed by Tinybird
+Self-serve
+Cache sizing
+Automatic
+Configurable via replica size
+Plans
+Free, Developer, SaaS
+Enterprise
+See
+Shared infrastructure
+and
+Dedicated infrastructure
+for details.
+Related
+¶
+Core concepts
+Shared infrastructure
+Dedicated infrastructure
+Cluster management
+Why we maintain a ClickHouse® fork
+How Tinybird's storage architecture works: S3, local caching, and zero-copy replication
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Tinybird Cloud Storage Architecture
+Storage
+Local SSD cache
+Ingestion
+Zero-copy replication
+Query path
+Infrastructure options
+Related
+forward
+Ask AI

@@ -1,0 +1,149 @@
+Source: https://www.tinybird.com/docs/forward/get-data-in/local-file
+
+Ingest data from files · Tinybird Docs
+Sign In
+Sign Up
+Ingest data from files
+¶
+Copy as MD
+You can ingest data from files to Tinybird using the
+Data sources API
+, the
+tb datasource
+CLI command, the TypeScript SDK, or the Python SDK.
+Ingestion limits
+apply.
+Supported file types
+¶
+Tinybird supports these file types and compression formats at ingest time:
+File type
+Method
+Accepted extensions
+Compression formats supported
+CSV
+File upload, URL
+.csv
+,
+.csv.gz
+gzip
+NDJSON
+File upload, URL, Events API
+.ndjson
+,
+.ndjson.gz
+gzip
+Parquet
+File upload, URL
+.parquet
+,
+.parquet.gz
+gzip
+Avro
+Kafka
+gzip
+Analyze the schema of a file
+¶
+Before you upload data from a file or create a data source, you can analyze the schema of the file. Tinybird infers column names, types, and JSONPaths. This is helpful to identify the most appropriate data types for your columns. See
+Data types
+.
+The following examples show how to analyze a local NDJSON file.
+Tinybird CLI
+Analyze API
+tb datasource analyze local_file.ndjson
+Append data from a file
+¶
+You can append data from a local or remote file to a data source in Tinybird Local or Tinybird Cloud.
+Use
+tb datasource append
+in the CLI,
+mode=append
+with the Data Sources API,
+append
+in the TypeScript SDK, or
+append
+in the Python SDK.
+Append from a local file
+¶
+Tinybird CLI
+cURL
+TypeScript SDK
+Python SDK
+tb --cloud datasource append <data_source_name> local_file.csv
+Append from a remote file
+¶
+Tinybird CLI
+cURL
+TypeScript SDK
+Python SDK
+tb --cloud datasource append <data_source_name> http://example_url/file.csv
+When appending CSV files, you can improve performance by excluding the CSV Header line. However, in this case, make sure the CSV columns are ordered. If you can't guarantee the order of columns in your CSV, include the CSV header.
+Replace data from a file
+¶
+You can replace existing all data or a selection of data in a data source with the contents of a file. You can replace with data from local or remote files.
+When using
+mode=replace
+with an S3 URL via the API, you must use a pre-signed URL. Unlike
+mode=append
+,
+mode=replace
+is a multi-step process that passes the URL to a background worker with no access to your S3 Connector credentials. Generate a pre-signed URL programmatically using the AWS SDK or CLI before passing it to the API.
+Use
+tb datasource replace
+in the CLI,
+mode=replace
+with the Data Sources API,
+replace
+in the TypeScript SDK, or
+replace
+in the Python SDK.
+Replace from a local file
+¶
+Tinybird CLI
+cURL
+TypeScript SDK
+Python SDK
+tb --cloud datasource replace <data_source_name> local_file.csv
+Replace from a remote file
+¶
+Tinybird CLI
+cURL
+TypeScript SDK
+Python SDK
+tb --cloud datasource replace <data_source_name> http://example_url/file.csv
+Replace data based on conditions
+¶
+Instead of replacing all data, you can also replace specific partitions of data. To do this, you define an SQL condition that describes the filter that's applied. All matching rows are deleted before finally ingesting the new file. Only the rows matching the condition are ingested.
+Replacements are made by partition, so make sure that the condition filters on the partition key of the data source. If the source file contains rows that don't match the filter, the rows are ignored.
+Conditional replace is supported in the CLI and the Data Sources API. The TypeScript SDK and Python SDK
+replace
+methods don't currently support replace conditions.
+Replace from a local file with a condition
+¶
+Tinybird CLI
+cURL
+tb --cloud datasource replace <data_source_name> local_file.csv --sql-condition "my_partition_key > 123"
+Replace from a remote file with a condition
+¶
+Tinybird CLI
+cURL
+tb --cloud datasource replace <data_source_name> http://example_url/file.csv --sql-condition "my_partition_key > 123"
+All the dependencies of the data source are recalculated so that your data is consistent after the replacement. If you have n-level dependencies, they're also updated by this operation.
+Although replacements are atomic, Tinybird can't assure data consistency if you continue appending data to any related data source at the same time the replacement takes place. The new incoming data is discarded.
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Ingest data from files
+Supported file types
+Analyze the schema of a file
+Append data from a file
+Append from a local file
+Append from a remote file
+Replace data from a file
+Replace from a local file
+Replace from a remote file
+Replace data based on conditions
+Replace from a local file with a condition
+Replace from a remote file with a condition
+forward
+Ask AI

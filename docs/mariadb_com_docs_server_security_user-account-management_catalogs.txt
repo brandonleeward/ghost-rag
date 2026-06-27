@@ -1,0 +1,59 @@
+Source: https://mariadb.com/docs/server/security/user-account-management/catalogs
+
+Catalogs | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Security
+Securing MariaDB
+Encryption
+User Account Management
+Roles
+Account Locking
+Authentication
+Incrementing of the access_denied_errors Status Variable
+User Password Expiry
+Catalogs
+Catalogs Overview
+Starting with Catalogs
+Catalog-Specific Functions and Variables
+Catalog Status Variables
+Connecting to a Server Configured for Catalogs
+CREATE CATALOG
+SHOW CREATE CATALOG
+SHOW CATALOGS
+USE CATALOG
+DROP CATALOG
+Authentication with Enterprise Server
+Limiting Size of Created Disk Temporary Files and Tables
+Security Vulnerabilities (CVE) Fixed in MariaDB
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Catalogs
+Introduction to Catalogs, a multi-tenancy feature for isolating database objects and users, planned for future MariaDB releases.
+Catalogs are planned for an upcoming release, and don't yet appear in any current releases.
+Catalogs are a user account management feature. This section explains their role in organizing database objects and controlling access permissions.
+Last updated
+5 months ago
+Was this helpful?
+Was this helpful?

@@ -1,0 +1,213 @@
+Source: https://mariadb.com/docs/server/server-usage/stored-routines/stored-functions/stored-aggregate-functions
+
+Stored Aggregate Functions | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Stored Procedures
+Stored Functions
+Stored Function Overview
+Stored Aggregate Functions
+Stored Routine Privileges
+DROP FUNCTION
+Stored Function Limitations
+Binary Logging of Stored Routines
+Stored Routine Limitations
+DBMS_OUTPUT
+Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Stored Aggregate Functions
+Stored Aggregate Functions allow users to create custom aggregate functions that process a sequence of rows and return a single summary result.
+Aggregate functions
+are functions that are computed over a sequence of rows and return one result for the sequence of rows.
+Creating a custom aggregate function is done using the
+CREATE FUNCTION
+statement with two main differences:
+The addition of the AGGREGATE keyword, so
+CREATE AGGREGATE FUNCTION
+The
+FETCH GROUP NEXT ROW
+instruction inside the loop
+Oracle PL/SQL compatibility using SQL/PL is provided
+Standard Syntax
+Copy
+CREATE
+AGGREGATE
+FUNCTION
+function_name (parameters)
+RETURNS
+return_type
+BEGIN
+ALL types of declarations
+DECLARE
+CONTINUE
+HANDLER
+FOR
+NOT
+FOUND
+RETURN
+return_val;
+LOOP
+FETCH
+GROUP
+NEXT
+ROW
+;
+//
+fetches
+next
+row
+FROM
+TABLE
+other instructions
+END
+LOOP
+;
+END
+Stored aggregate functions were a
+2016 Google Summer of Code
+project by Varun Gupta.
+Using SQL/PL
+Examples
+First a simplified example:
+A non-trivial example that cannot easily be rewritten using existing functions:
+SQL/PL Example
+This uses the same marks table as created above.
+See Also
+Stored Function Overview
+CREATE FUNCTION
+SHOW CREATE FUNCTION
+DROP FUNCTION
+Stored Routine Privileges
+SHOW FUNCTION STATUS
+Information Schema ROUTINES Table
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Stored Function Overview
+Next
+Stored Routine Privileges
+Last updated
+12 months ago
+Was this helpful?
+Standard Syntax
+Using SQL/PL
+Examples
+SQL/PL Example
+See Also
+Was this helpful?
+Copy
+SET sql_mode=Oracle;
+DELIMITER //
+CREATE AGGREGATE FUNCTION function_name (parameters) RETURN return_type
+declarations
+BEGIN
+LOOP
+FETCH GROUP NEXT ROW; -- fetches next row from table
+-- other instructions
+END LOOP;
+EXCEPTION
+WHEN NO_DATA_FOUND THEN
+RETURN return_val;
+END //
+DELIMITER ;
+Copy
+CREATE TABLE marks(stud_id INT, grade_count INT);
+INSERT INTO marks VALUES (1,6), (2,4), (3,7), (4,5), (5,8);
+SELECT * FROM marks;
++---------+-------------+
+| stud_id | grade_count |
++---------+-------------+
+|       1 |           6 |
+|       2 |           4 |
+|       3 |           7 |
+|       4 |           5 |
+|       5 |           8 |
++---------+-------------+
+DELIMITER //
+CREATE AGGREGATE FUNCTION IF NOT EXISTS aggregate_count(x INT) RETURNS INT
+BEGIN
+DECLARE count_students INT DEFAULT 0;
+DECLARE CONTINUE HANDLER FOR NOT FOUND
+RETURN count_students;
+LOOP
+FETCH GROUP NEXT ROW;
+IF x  THEN
+SET count_students = count_students+1;
+END IF;
+END LOOP;
+END //
+DELIMITER ;
+Copy
+DELIMITER //
+CREATE AGGREGATE FUNCTION medi_int(x INT) RETURNS DOUBLE
+BEGIN
+DECLARE CONTINUE HANDLER FOR NOT FOUND
+BEGIN
+DECLARE res DOUBLE;
+DECLARE cnt INT DEFAULT (SELECT COUNT(*) FROM tt);
+DECLARE lim INT DEFAULT (cnt-1) DIV 2;
+IF cnt % 2 = 0 THEN
+SET res = (SELECT AVG(a) FROM (SELECT a FROM tt ORDER BY a LIMIT lim,2) ttt);
+ELSE
+SET res = (SELECT a FROM tt ORDER BY a LIMIT lim,1);
+END IF;
+DROP TEMPORARY TABLE tt;
+RETURN res;
+END;
+CREATE TEMPORARY TABLE tt (a INT);
+LOOP
+FETCH GROUP NEXT ROW;
+INSERT INTO tt VALUES (x);
+END LOOP;
+END //
+DELIMITER ;
+Copy
+SET sql_mode=Oracle;
+DELIMITER //
+CREATE AGGREGATE FUNCTION aggregate_count(x INT) RETURN INT AS count_students INT DEFAULT 0;
+BEGIN
+LOOP
+FETCH GROUP NEXT ROW;
+IF x  THEN
+SET count_students := count_students+1;
+END IF;
+END LOOP;
+EXCEPTION
+WHEN NO_DATA_FOUND THEN
+RETURN count_students;
+END aggregate_count //
+DELIMITER ;
+SELECT aggregate_count(stud_id) FROM marks;

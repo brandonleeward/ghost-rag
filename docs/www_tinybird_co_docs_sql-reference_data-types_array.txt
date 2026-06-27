@@ -1,0 +1,74 @@
+Source: https://www.tinybird.com/docs/sql-reference/data-types/array
+
+Array Data Type reference · Tinybird Docs
+Sign In
+Sign Up
+Array(T)
+¶
+Copy as MD
+The
+Array(T)
+data type stores an ordered collection of elements, where
+T
+can be any valid data type, including other arrays. Array elements are indexed starting from 1.
+Creating an array
+¶
+You can create an array using the
+array()
+function or by enclosing elements in square brackets
+[]
+.
+Syntax
+¶
+array(T)
+[]
+Example
+¶
+Creating an array using the
+array()
+function.
+SELECT array(1, 2, 3) AS my_array, toTypeName(my_array)
+Result:
+┌─my_array─┬─toTypeName(my_array)─┐
+│ [1,2,3]  │ Array(UInt8)         │
+└──────────┴──────────────────────┘
+Creating an array using square brackets.
+SELECT ['apple', 'banana', 'cherry'] AS my_fruits, toTypeName(my_fruits)
+Result:
+┌─my_fruits────────────────┬─toTypeName(my_fruits)─┐
+│ ['apple','banana','cherry'] │ Array(String)         │
+└──────────────────────────┴───────────────────────┘
+Working with data types
+¶
+When an array is created, Tinybird automatically infers the narrowest common data type that can accommodate all its elements. If any element is
+NULL
+, the array's element type becomes
+Nullable
+. If elements are incompatible, an error will occur.
+Example
+¶
+Automatic data type detection with
+NULL
+values.
+SELECT array(10, 20, NULL) AS mixed_array, toTypeName(mixed_array)
+Result:
+┌─mixed_array─┬─toTypeName(mixed_array)─┐
+│ [10,20,NULL] │ Array(Nullable(UInt8))  │
+└─────────────┴─────────────────────────┘
+Attempting to create an array with incompatible data types will result in an error.
+SELECT array(1, 'text')
+Result:
+Received exception from server (version 23.8.1.2984):
+Code: 386. DB::Exception: There is no supertype for types UInt8, String because some of them are String/FixedString and some of them are not.
+Updated
+3 weeks ago
+On this page
+Array(T)
+Creating an array
+Syntax
+Example
+Working with data types
+Example
+forward
+classic
+Ask AI

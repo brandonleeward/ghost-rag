@@ -1,0 +1,343 @@
+Source: https://www.tinybird.co/docs/concepts/materialized-views.html
+
+Classic: Materialized Views · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Materialized Views
+¶
+Copy as MD
+A Materialized View is the continuous, streaming result of a Pipe saved as a new Data Source. As new data is ingested into the origin Data Source, the transformed results from the Pipe are continually inserted in the new Materialized View, which you can query as any other Data Source. Tinybird represents Materialized Views using the
+icon.
+Preprocessing data at ingest time reduces latency and cost-per-query, and can significantly improve the performance of your API Endpoints. For example, you can transform the data through SQL queries, using calculations such as counts, sums, averages, or arrays, or transformations like string manipulations or joins. The resulting Materialized View acts as a Data Source you can query or publish.
+Typical use cases of Materialized Views include:
+Aggregating, sorting, or filtering data at ingest time.
+Improving the speed of a query that's taking too much time to run.
+Simplifying query development by automating common filters and aggregations.
+Reducing the amount of data processed by a single query.
+Changing an existing schema for a different use case.
+You can create a new Materialized View and populate it with all existing data without any cost. On-going incremental writes to Materialized Views count towards your Tinybird usage.
+Create Materialized Views
+¶
+To create a Materialized View using the Tinybird UI, follow these steps:
+Write your Pipe using as many nodes as needed.
+Select the downward arrow (▽) next to
+Create API Endpoint
+and select
+Create Materialized View
+.
+Select the node you want to use as output.
+Edit the name of the destination Data Source.
+Adjust the Engine Type, Sorting Keys, and so on.
+For a detailed example, see
+Example of Materialized View
+.
+Error messages
+¶
+With any Materialized View, Tinybird runs a speed simulation to ensure that the Materialized View won't produce any lag.
+If you're getting an error in Tinybird that your query isn't compatible with real-time ingestion, review your Materialized View query setup.
+Review
+the 5 rules for faster queries
+and keep the following principles in mind:
+Avoid doing huge joins without filtering.
+Use
+GROUP BY
+before filtering.
+Remember that array
+JOIN
+s are slow.
+Filter the right side of JOINs to speed up Materialized Views.
+If you're batching, especially when ingesting from Kinesis, consider decreasing the amount of data you batch.
+Create Materialized Views (CLI)
+¶
+Consider an
+origin
+data source, for example
+my_origin.datasource
+, like the following:
+Origin data source
+SCHEMA >
+    `id` Int16,
+    `local_date` Date,
+    `name` String,
+    `count` Int64
+You might want to create an optimized version of the Data Source that preaggregates
+count
+for each ID. To do this, create a new Data Source that uses a
+SimpleAggregateFunction
+as a Materialized View.
+First, define the
+destination
+data source, for example
+my_destination.datasource
+:
+Destination data source
+SCHEMA >
+    `id` Int16,
+    `local_date` Date,
+    `name` String,
+    `total_count` SimpleAggregateFunction(sum, UInt64)
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(local_date)"
+ENGINE_SORTING_KEY "local_date,id"
+Write a transformation Pipe, for example
+my_transformation.pipe
+:
+Transformation Pipe
+NODE transformation_node
+
+SQL >
+    SELECT
+        id,
+        local_date,
+        name,
+        sum(count) as total_count
+    FROM
+        my_origin
+    GROUP BY
+        id,
+        local_date,
+        name
+
+TYPE materialized
+DATASOURCE my_destination
+Once you have the origin and destination Data Sources defined and the transformation Pipe, you can push them:
+Push the Materialized Views
+tb push my_origin.datasource
+tb push my_destination.datasource
+tb push my_transformation.pipe --populate
+Any time you ingest data into
+my_origin
+, the data in
+my_destination
+is automatically updated.
+The order of columns in your transformation pipe's SELECT statement doesn't need to match the order defined in the destination data source schema. Tinybird maps columns by name, not by position. As long as the column names and data types are compatible, the materialization will work correctly.
+For a detailed example, see
+Example of Materialized View (CLI)
+.
+Guided process using tb materialize
+¶
+Alternatively, you can use the
+tb materialize
+command to generate the target .datasource file needed to push a new Materialized View.
+The goal of the command is to guide you through all the needed steps to create a Materialized View.
+Given a Pipe,
+tb materialize
+:
+Asks you which node of the Pipe you want to materialize. By default, it selects the last one in the Pipe. If there's only one, it's automatically selected, skipping asking you. From the selected query, the commands guesses the best parameters for the following steps.
+It warns you of the errors the query has, if any, that prevents it from materializing. If everything is correct, it continues.
+It creates the target Data Source file that receives the results of the materialization, setting default engine parameters. If you are materializing an aggregation you should make sure the
+ENGINE_SORTING_KEY
+columns in the .datasource file are in the right order you are going to filter the table.
+It modifies the query to set up the materialization settings and pushes the Pipe to create the materialization. You can skip the Pipe checks if needed as well.
+It asks you if you want to populate the Materialized View with existing data. If you select to populate, it asks you if you want to use a subset of the data or fully populate with all existing data.
+It creates a backup file of the Pipe adding the
+_bak
+suffix to the file extension. It completes the aggregate functions with
+-State
+combinators where needed and adds the target Data Source name. The backup file is preserved in case you want to recover the original query.
+The command generates and modifies the files involved in the materialization. If you run into an error or you need to modify something in the materialization, you can reuse the files as a better starting point.
+Force populate Materialized Views
+¶
+Sometimes you might want to force populate a Materialized View, most likely because you changed the transformation in the Pipe and you want the data from the origin Data Source to be reingested.
+You can do this using
+tb push
+and the
+--force
+and
+--populate
+flags:
+Populate a Materialized View
+tb push my_may_view_pipe.pipe --force --populate
+The response contains a
+Jobs API
+job_url
+that you can use to check progress and status of the job.
+Compute-Compute Separation for Populates
+¶
+For large-scale populates or when your workspace is under heavy load, Tinybird offers compute-compute separation through on-demand instances. This feature allows you to run populate operations on dedicated, isolated compute resources, separate from your main workspace infrastructure.
+Compute-compute separation for Populates in Google Cloud Platform requires manual enablement. Contact Tinybird support to activate this feature for your workspace.
+Benefits
+¶
+Eliminates resource contention
+: By running populates on dedicated instances, you avoid competing with your live queries and ingestion workloads for compute resources.
+Cost efficiency
+: Pay only for the compute time you use during the populate operation. There are no billing minimums, and usage is rounded to the minute.
+Enhanced reliability
+: Isolated compute ensures that populate operations don't impact the performance of your production workloads and vice versa.
+Usage
+¶
+You can enable on-demand compute for populates using the
+--on-demand-compute
+flag with either the
+tb push
+or
+tb pipe populate
+commands:
+Using on-demand compute with tb push
+tb push pipes/my_materialized_view.pipe --populate --on-demand-compute
+Using on-demand compute with tb pipe populate
+tb pipe populate pipes/my_materialized_view.pipe --on-demand-compute
+On-demand compute for populates uses 64-core instances. You can request smaller instances for less resource-intensive workloads. Contact Tinybird support for configuration options.
+Pricing
+¶
+On-demand compute is billed based on the actual compute time used, measured in credits per core per minute. Pricing varies by region:
+Region
+Price (Credits per core per minute)
+aws-us-east-1
+0.0029
+aws-us-west-2
+0.0029
+aws-eu-west-1
+0.0032
+aws-eu-central-1
+0.0035
+aws-ap-east-1
+0.004
+aws-ap-southeast-2
+0.0036
+gcp-us-east4
+0.0027
+gcp-europe-west3
+0.0031
+gcp-europe-west2
+0.0031
+gcp-northamerica-northeast2
+0.0027
+Example calculations
+:
+Simple example
+: A 2-hour populate operation in AWS US East 1:
+Duration: 2 hours = 120 minutes
+Instance: 64 cores
+Cost: 0.0029 credits × 120 minutes × 64 cores =
+22.3 credits
+Large-scale example
+: A 10-hour populate operation in AWS US East 1:
+Duration: 10 hours = 600 minutes
+Instance: 64 cores
+Cost: 0.0029 credits × 600 minutes × 64 cores =
+111.4 credits
+The credits are automatically deducted from your monthly invoice. You can choose smaller instances depending on your specific populate requirements.
+Failed populate jobs
+¶
+When a populate job fails for the first time, the Materialized View is automatically unlinked from its source pipe. This prevents failed jobs from affecting the Materialized View's data integrity.
+You can get failed population jobs and their errors to fix them with a query like this:
+SELECT * FROM tinybird.jobs_log
+WHERE job_type = 'populate' 
+AND status = 'failed' 
+ORDER BY created_at DESC
+Use the
+Jobs API
+to get more detailed information about failed populate jobs and troubleshoot the issues before re-linking the Materialized View.
+To handle this scenario, see
+Backfill strategies
+.
+Query Materialized Views
+¶
+If the type of engine in your Data Source is
+MergeTree
+and you're not doing aggregations, you can query a Materialized View as a standard Data Source.
+If the engine is
+AggregatingMergeTree
+,
+SummingMergeTree
+or other special engine, and you have functions in your Pipe with the
+-State
+modifier, use the
+-Merge
+modifier, or
+max()
+and group by the Sorting Key columns. See
+Best practices for Materialized Views
+.
+For Deduplication use cases with
+ReplacingMergeTree
+, see
+Deduplication strategies
+.
+Limitations
+¶
+Materialized Views work as insert triggers, which means a delete or truncate operation on your original Data Source doesn't affect the related Materialized Views.
+As transformation and ingestion in the Materialized View is done on each block of inserted data in the original Data Source, some operations such as
+GROUP BY
+,
+ORDER BY
+,
+DISTINCT
+and
+LIMIT
+might need a specific
+engine
+, such as
+AggregatingMergeTree
+or
+SummingMergeTree
+, which can handle data aggregations.
+The Data Source resulting from a Materialized View generated using
+JOIN
+is automatically updated only if and when a new operation is performed over the Data Source in the
+FROM
+.
+You can't create Materialized Views that depend on the
+UNION
+of several Data Sources.
+Considerations on populates
+¶
+As described in
+Best practices for Materialized Views
+, populates are the process to move the data that was already in the original Data Source through to the new Materialized View.
+If you have a continuous or streaming ingestion into the original Data Source, the populate might produce duplicated rows in the Materialized View. The populate runs as a separate job that goes partition by partition moving the existing data into the Materialized View. At the same time, the Materialized View is already automatically receiving new rows. There may be an overlap where the populate job moves a partition that includes rows that were already ingested into the Materialized View.
+Troubleshooting
+¶
+Materialized View stops updating after recreating a Data Source
+¶
+If you delete and recreate any Data Source in a Materialized View flow — whether the source Data Source or the destination Data Source — the Materialized View stops receiving data. This happens because Pipes reference Data Sources by internal ID, not by name. When you recreate a Data Source, it gets a new internal ID, but the Pipe still points to the old one.
+Symptoms:
+The Materialized View no longer updates when new data is ingested.
+No error messages appear, but the Materialized View data becomes stale.
+Solution:
+Re-push the Materialized View Pipe from the CLI using the
+--force
+flag to relink the connection:
+tb push my_materialized_view.pipe --force
+This forces Tinybird to update the Pipe's internal references to point to the current Data Sources.
+If the Materialized View also needs to be backfilled with existing data, add the
+--populate
+flag:
+tb push my_materialized_view.pipe --force --populate
+Avoid deleting and recreating Data Sources that are part of a Materialized View flow. If you must recreate a Data Source, re-push all dependent Materialized View Pipes with
+--force
+afterwards to restore the connections.
+Next steps
+¶
+Learn how to make the most of Materialized Views. See
+Best Practices
+.
+Review
+the 5 rules for faster queries
+.
+Updated
+3 weeks ago
+On this page
+Materialized Views
+Create Materialized Views
+Error messages
+Create Materialized Views (CLI)
+Guided process using tb materialize
+Force populate Materialized Views
+Compute-Compute Separation for Populates
+Benefits
+Usage
+Pricing
+Failed populate jobs
+Query Materialized Views
+Limitations
+Considerations on populates
+Troubleshooting
+Materialized View stops updating after recreating a Data Source
+Next steps
+classic
+Ask AI

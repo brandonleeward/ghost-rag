@@ -1,0 +1,74 @@
+Source: https://12factor.net/sk/dev-prod-parity
+
+The Twelve-Factor App  - slovenská verzia
+The Twelve-Factor App
+Blog
+Community
+GitHub
+X. Dev/prod parity
+Vývojové, testovacie a produkčné prostredie sú čo najpodobnejšie ako sa dá
+Historicky bývali podstatné rozdiely medzi vývojovým prostredím (developer upravoval živé lokálne
+nasadenie
+) a produkčným prostredím (bežiace nasadenie aplikácie, na ktoré pristupujú používatelia). Tieto rozdiely sa prejavujú v týchto troch oblastiach:
+Časový rozdiel:
+Developer môže pracovať na kóde, ktorý trvá dni, týždne alebo dokonca mesiace pred tým ako sa dostane na produkciu.
+Personálny rozdiel
+: Developeri píšu kód, systémový administrátory ho nasadzujú.
+Nástrojový rozdiel
+: Developeri môžu používať Nginx, SQLite, a OS X, pričom na produkcii beží Apache, MySQL, a Linux.
+Dvanásť faktorová aplikácia je navrhnutá pre
+continuous deployment
+tak, že udržiava rozdiely medzi vývojom a produkciou.
+Keď sa pozrieme na tri rozdiely popísané vyššie:
+Zmenšite časový rozdiel: developer napíše kód a nasadí ho v priebehu hodín alebo dokonca minút.
+Zmenšite personálny rozdiel: developeri, ktorí kód píšu by mali byť prítomní pri nasadzovaní a sledovaní správania na produkcii.
+Zmenšite nástrojvý rozdiel: udržujte vývojové a produkčné prostredie nakoľko sa dá rovnaké.
+Súhrn vyššie napísaného v tabuľke:
+Tradičná aplikácia
+Dvanásť faktorová aplikácia
+Čas medzi nasadeniami
+Týždne
+Hodiny
+Autori kódu vs nasadzovači kódu
+Rôzni ľudia
+Rovnakí ľudia
+Vývojárske vs produkčné prostredie
+Rozdielne
+Čo najpodobnejšie
+Podporné služby
+ako napríklad databáza, fronty alebo cache sú oblasťou, kde je zhodnosť vývojárskeho-produkčného prostredia dôležitá. Veľa jazykov poskytuje knižnice, ktoré uľahčujú prístup k podporným službám, vrátane
+adaptérov
+k rôznym typom služieb. Niektoré príklady sú v tabuľke nižšie.
+Typ
+Jazyk
+Knižnica
+Adapér
+Databáza
+Ruby/Rails
+ActiveRecord
+MySQL, PostgreSQL, SQLite
+Fronta
+Python/Django
+Celery
+RabbitMQ, Beanstalkd, Redis
+Cache
+Ruby/Rails
+ActiveSupport::Cache
+Pamäť, súborový systém, Memcached
+Developeri niekedy radi používajú odľahčené podporné služby na lokálny vývoj, pričom na produkcii sú robustnejšie podporné služby. Napríklad používajú SQLite lokálne a PostgreSQL na produkcii; alebo pamäť lokálneho procesu počas vývoja a Memcached na produkcii.
+Dvanásť faktorový vývojár odoláva nutkaniu používať rôzne podporné služby medzi vývojom a produkciou
+, aj v prípade, že adaptéry teoreticky abstrahujú rozdiely medzi službami. Rozdiely medzi službami znamenajú, že sa vyskytnú maličné nekompatibility a spôsobia, že kód prejde cez testy pri vývoji alebo testovaní a zlyhá na produkcii. Tieto typy chýb vytvárajú trenie, ktoré spomaľuje priebežné nasadzovanie. Cena tohoto trenia a následné spomalenie priebežného nasadzovania je extrémne vysoká, keď ju sčítame cez celú životnosť aplikácie.
+Odľahčené lokálne služby už nie sú také príťažlivé ako boli. Moderné podporné služby ako Memcached, PostgreSQL a RabbitMQ nie je ťažké nainštalovať a spustiť vďaka moderným balíčkovacím systémom ako
+Homebrew
+a
+apt-get
+. Alternatívne deklaratívne nástroje ako
+Chef
+a
+Puppet
+skombinované s odľahčenými virtuálnymi prostrediami ako
+Docker
+a
+Vagrant
+umôžňujú vývojárom vytvoriť lokálne prostredie, ktoré tesne aproximuje produkčné prostredie. Cena inštalácie a používania týchto systémov je nízka v porovnaní s výhodami rovnakého prostredia vývoj/produkcia.
+Adaptéry k rôznym podporným službám sú stále užitočné, pretože umožňujú plynulú migráciu na nové podporné služby. Ale všetky nasadenia aplikácia (vývojárske prostredie, testovacie, produkcia) by mali používať rovnaký typ a verziu každej podpornej služby.

@@ -1,0 +1,87 @@
+Source: https://www.tinybird.com/docs/forward/guides/ingest-from-orb
+
+Send Orb events to Tinybird · Tinybird Docs
+Sign In
+Sign Up
+Send Orb events to Tinybird
+¶
+Copy as MD
+Orb
+is a developer-focused platform to manage your subscription billing and revenue operations. By integrating Orb with Tinybird, you can analyze your subscription billing data in real time and enrich it with other data sources.
+Some common use cases for sending Orb events to Tinybird include:
+Tracking and monitoring subscriptions.
+Monitoring user churn.
+Creating custom dashboards for subscription analysis.
+Subscriptions logs.
+Read on to learn how to send events from Orb to Tinybird.
+Before you start
+¶
+Before you connect Orb to Tinybird, ensure:
+You have an Orb account.
+You have a Tinybird workspace.
+Connect Orb to Tinybird
+¶
+From the Orb dashboard, select
+Developers
+>
+Webhooks
+.
+Select
+Add Endpoint
+.
+In your Tinybird project, create a data source called
+orb
+. You can follow this
+schema
+:
+SCHEMA >
+  `event_time` DateTime `json:$.tinybirdIngestTime` DEFAULT now(),
+  `event_type` String `json:$.type` DEFAULT 'unknown',
+  `event` JSON `json:$` DEFAULT '{}'
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(event_time)"
+ENGINE_SORTING_KEY "event_time"
+Using the
+JSON Data Type
+you can store the semi-structured data you receive from Orb in a single column. You can later retrieve various events and their metadata as needed in your pipes.
+The
+JSON
+data type is in private beta. If you are interested in using this type, contact Tinybird at
+support@tinybird.co
+or in the
+Community Slack
+.
+From Tinybird Cloud, copy a token with privileges to append to the data source you created. You can use the admin token or create one with the required scope.
+Back in Orb, paste the Events API URL in your Webhook Endpoint URL. Use the query parameter
+name
+to match the name of the data source you created in Tinybird. For example:
+https://<your_host>/v0/events?name=orb&token=<your user token>
+The API host in the following examples must match your Workspace's region. See the full list of
+regions and hosts
+Select
+Send test request
+to test the connection and check the data gets to the
+orb
+data source in Tinybird.
+You're done. Any of the Orb events is automatically sent to Tinybird through the
+Events API
+.
+You can check the status of the integration by clicking on the Webhook endpoint in Orb or from the
+Log
+tab in the Tinybird
+orb
+data source.
+See also
+¶
+Orb webhooks
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Send Orb events to Tinybird
+Before you start
+Connect Orb to Tinybird
+See also
+forward
+Ask AI

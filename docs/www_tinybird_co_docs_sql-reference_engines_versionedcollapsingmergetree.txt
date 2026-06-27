@@ -1,0 +1,134 @@
+Source: https://www.tinybird.com/docs/sql-reference/engines/versionedcollapsingmergetree
+
+VersionedCollapsingMergeTree Engine reference · Tinybird Docs
+Sign In
+Sign Up
+VersionedCollapsingMergeTree engine
+¶
+Copy as MD
+This engine allows to quickly write object states that are continually changing and deletes old object states in the background. This significantly reduces the volume of storage.
+The engine inherits from MergeTree and adds the logic for collapsing rows to the algorithm for merging data parts.
+VersionedCollapsingMergeTree
+serves the same purpose as
+CollapsingMergeTree
+but uses a different collapsing algorithm that allows inserting the data in any order with multiple threads.
+Engine parameters
+¶
+You can use the following parameters to configure the engine.
+sign
+¶
+ENGINE_SIGN
+is the name of the column with the type of row:
+1
+is a “state” row,
+-1
+is a “cancel” row.
+The column data type should be
+Int8
+.
+version
+¶
+ENGINE_VERSION
+is the name of the column with the version of the object state.
+The column data type should be
+UInt*
+.
+Usage example
+¶
+vcmt.datasource
+SCHEMA >
+    UserID UInt64 `json:$.UserID`,
+    PageViews UInt8 `json:$.PageViews`,
+    Duration UInt8 `json:$.Duration`,
+    Sign Int8 `json:$.Sign`,
+    Version UInt16 `json:$.Version`
+
+ENGINE "CollapsingMergeTree"
+ENGINE_SORTING_KEY "UserID"
+ENGINE_SIGN "Sign"
+ENGINE_VERSION "Version"
+tb push datasources/vcmt.datasource
+
+TB_HOST=$(cat .tinyb | jq ".host" -r)
+TB_TOKEN=$(cat .tinyb | jq ".token" -r)
+
+curl \
+    -H "Authorization: Bearer $TB_TOKEN" \
+    -d '{"UserID": 4324182021466249494, "PageViews": 5, "Duration": 146, "Sign": 1, "Version": 1}' \
+    "$TB_HOST/v0/events?name=vcmt"
+
+tb sql "select * from vcmt"
+---------------------------------------------------------------
+|              UserID | PageViews | Duration | Sign | Version |
+---------------------------------------------------------------
+| 4324182021466249494 |         5 |      146 |    1 |       1 |
+---------------------------------------------------------------
+Let's add another row with the same
+UserID
+and negate the previous row (same row with -1 as
+Sign
+value).
+{"UserID": 4324182021466249494, "PageViews": 5, "Duration": 146, "Sign": -1, "Version": 2}
+curl \
+    -H "Authorization: Bearer $TB_TOKEN" \
+    -d $'{"UserID": 4324182021466249494, "PageViews": 6, "Duration": 185, "Sign": 1, "Version": 2}\n{"UserID": 4324182021466249494, "PageViews": 5, "Duration": 146, "Sign": -1, "Version": 1}\n' \
+    "$TB_HOST/v0/events?name=vcmt"
+
+tb sql "select * from vcmt"
+---------------------------------------------------------------
+|              UserID | PageViews | Duration | Sign | Version |
+---------------------------------------------------------------
+| 4324182021466249494 |         5 |      146 | 1    |       1 |
+| 4324182021466249494 |         6 |      185 | 1    |       2 |
+| 4324182021466249494 |         5 |      146 | -1   |       1 |
+---------------------------------------------------------------
+What happened here? Collapsing happens during merges, which are performed asynchronously and can't be controlled, so you should force it using
+FINAL
+or query using aggregation.
+tb sql "select * from vcmt final"
+---------------------------------------------------------------
+|              UserID | PageViews | Duration | Sign | Version |
+---------------------------------------------------------------
+| 4324182021466249494 |         6 |      185 |    1 |       2 |
+---------------------------------------------------------------
+
+tb sql "SELECT
+    UserID,
+    sum(PageViews * Sign) AS PageViews,
+    sum(Duration * Sign) AS Duration,
+    Version
+FROM vcmt
+GROUP BY UserID, Version
+HAVING sum(Sign) > 0
+ORDER BY Version DESC
+LIMIT 1 BY UserID"
+--------------------------------------------------------
+|              UserID | PageViews | Duration | Version |
+--------------------------------------------------------
+| 4324182021466249494 |         6 |      185 |       2 |
+--------------------------------------------------------
+Query clauses
+¶
+When creating a
+VersionedCollapsingMergeTree
+table, the same clauses as when creating a
+MergeTree
+table are required.
+Settings
+¶
+For a list of supported settings, see
+Engine settings
+.
+Updated
+3 weeks ago
+On this page
+VersionedCollapsingMergeTree engine
+Engine parameters
+sign
+version
+Usage example
+Query clauses
+Settings
+forward
+classic
+Ask AI

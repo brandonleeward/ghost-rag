@@ -1,0 +1,204 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/CANNOT_INSERT_NULL_IN_ORDINARY_COLUMN
+
+CANNOT_INSERT_NULL_IN_ORDINARY_COLUMN ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+CANNOT_INSERT_NULL_IN_ORDINARY_COLUMN ClickHouse error
+¶
+Copy as MD
+This error occurs when you try to insert NULL values into columns that don't allow NULL values. ClickHouse requires explicit handling of NULL values for non-nullable columns.
+The
+CANNOT_INSERT_NULL_IN_ORDINARY_COLUMN
+error in ClickHouse (and Tinybird) happens when you attempt to insert NULL values into columns that are defined as non-nullable (ordinary columns). ClickHouse is strict about NULL handling and requires explicit specification of which columns can accept NULL values.
+What causes this error
+¶
+You'll typically see it when:
+Inserting data with missing values into non-nullable columns
+Using INSERT statements without specifying all required columns
+Importing data from external sources with NULL values
+Using functions that return NULL for non-nullable columns
+Bulk insert operations with incomplete data
+In ClickHouse, columns are non-nullable by default. You must explicitly use
+Nullable()
+type to allow NULL values.
+Example errors
+¶
+Fails: inserting NULL into non-nullable column
+INSERT INTO users (id, name, email) VALUES
+(1, 'John Doe', NULL)
+Fails: missing column in INSERT
+INSERT INTO events (user_id, event_type) VALUES
+(123, 'click')
+-- timestamp column is missing and non-nullable
+Fails: function returning NULL
+INSERT INTO metrics (id, value, calculated_value) VALUES
+(1, 100, NULLIF(value, 0))
+Fails: bulk insert with incomplete data
+INSERT INTO users (id, name, email, created_at) VALUES
+(1, 'John', 'john@example.com', '2024-01-01'),
+(2, 'Jane', NULL, '2024-01-02')  -- email is non-nullable
+How to fix it
+¶
+Use Nullable data types
+¶
+Define columns that can accept NULL values:
+Fix: use Nullable types
+CREATE TABLE users (
+    id UInt64,
+    name String,
+    email Nullable(String),  -- Allows NULL values
+    created_at DateTime
+) ENGINE = MergeTree()
+ORDER BY id
+Provide default values
+¶
+Use default values for non-nullable columns:
+Fix: provide default values
+CREATE TABLE users (
+    id UInt64,
+    name String,
+    email String DEFAULT '',
+    created_at DateTime DEFAULT now()
+) ENGINE = MergeTree()
+ORDER BY id
+Handle NULL values explicitly
+¶
+Use COALESCE or IFNULL to provide fallback values:
+Fix: handle NULL values
+INSERT INTO users (id, name, email, created_at) VALUES
+(1, 'John Doe', COALESCE(NULL, ''), '2024-01-01')
+Specify all required columns
+¶
+Include all non-nullable columns in your INSERT statements:
+Fix: specify all columns
+INSERT INTO events (user_id, event_type, timestamp) VALUES
+(123, 'click', '2024-01-01 10:00:00')
+Common patterns and solutions
+¶
+Table creation with proper NULL handling
+¶
+Proper table design
+CREATE TABLE events (
+    id UInt64,
+    user_id UInt64,
+    event_type String,
+    timestamp DateTime,
+    metadata Nullable(String),  -- Optional field
+    value Float64 DEFAULT 0.0   -- Default value
+) ENGINE = MergeTree()
+ORDER BY (timestamp, user_id)
+PARTITION BY toYYYYMM(timestamp)
+Safe INSERT operations
+¶
+Safe INSERT with defaults
+INSERT INTO events (user_id, event_type, timestamp, value) VALUES
+(123, 'page_view', '2024-01-01 10:00:00', 1.0),
+(124, 'click', '2024-01-01 10:01:00', 1.0)
+Handling optional data
+¶
+INSERT with optional fields
+INSERT INTO users (id, name, email, phone) VALUES
+(1, 'John Doe', 'john@example.com', NULL),  -- phone is Nullable
+(2, 'Jane Smith', 'jane@example.com', '+1234567890')
+Bulk insert with validation
+¶
+Bulk insert with validation
+INSERT INTO events (user_id, event_type, timestamp, value)
+SELECT
+    user_id,
+    event_type,
+    timestamp,
+    COALESCE(value, 0.0) as safe_value
+FROM source_events
+WHERE user_id IS NOT NULL
+  AND event_type IS NOT NULL
+  AND timestamp IS NOT NULL
+Tinybird-specific notes
+¶
+In Tinybird, this error often occurs when:
+Creating Data Sources with non-nullable columns
+Importing data from external sources
+Using Pipes to transform and insert data
+Creating Materialized Views with strict schemas
+To debug in Tinybird:
+Check your Data Source schema for non-nullable columns
+Use the Data Source preview to identify NULL values
+Modify your Pipe transformations to handle NULL values
+Consider using default values or NULL handling functions
+Use Tinybird's schema validation to catch NULL value issues before they cause errors.
+Best practices
+¶
+Schema design
+¶
+Use
+Nullable()
+for optional fields
+Provide meaningful default values for required fields
+Consider business logic when deciding NULL policies
+Document which fields can be NULL
+Data validation
+¶
+Validate data before insertion
+Use CHECK constraints where possible
+Implement data quality checks in your pipelines
+Handle NULL values at the application level
+INSERT operations
+¶
+Always specify column names explicitly
+Use parameterized queries to avoid NULL issues
+Implement proper error handling for failed inserts
+Consider using UPSERT operations for data updates
+Alternative solutions
+¶
+Using COALESCE
+¶
+COALESCE to handle NULLs
+INSERT INTO users (id, name, email) VALUES
+(1, 'John', COALESCE(NULL, 'no-email@example.com'))
+Using IFNULL
+¶
+IFNULL to handle NULLs
+INSERT INTO users (id, name, email) VALUES
+(1, 'John', IFNULL(NULL, 'no-email@example.com'))
+Conditional INSERT
+¶
+Conditional INSERT
+INSERT INTO users (id, name, email) VALUES
+(1, 'John', CASE
+    WHEN NULL IS NULL THEN 'no-email@example.com'
+    ELSE NULL
+END)
+See also
+¶
+Data Types
+Working with Data Sources
+Data Validation
+Updated
+4 weeks ago
+On this page
+CANNOT_INSERT_NULL_IN_ORDINARY_COLUMN ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Use Nullable data types
+Provide default values
+Handle NULL values explicitly
+Specify all required columns
+Common patterns and solutions
+Table creation with proper NULL handling
+Safe INSERT operations
+Handling optional data
+Bulk insert with validation
+Tinybird-specific notes
+Best practices
+Schema design
+Data validation
+INSERT operations
+Alternative solutions
+Using COALESCE
+Using IFNULL
+Conditional INSERT
+See also
+forward
+classic
+Ask AI

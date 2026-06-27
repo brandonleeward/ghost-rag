@@ -1,0 +1,167 @@
+Source: https://www.tinybird.co/docs/guides/migrate-from-rockset
+
+Classic: Migrate from Rockset · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Migrate from Rockset
+¶
+Copy as MD
+In this guide, you'll learn how to migrate from Rockset to Tinybird, and the overview of how to quickly & safely recreate your setup.
+Rockset is no longer active. This guide explains the parallels between Rockset and Tinybird features, and how to migrate to using Tinybird.
+Wondering how to create an account? It's free!
+Start here
+.
+Prerequisites
+¶
+You don't need an active Tinybird Workspace to read through this guide, but it's good idea to understand the foundational concepts and how Tinybird integrates with your team.
+At a high level
+¶
+Tinybird is a great alternative to Rockset's analytical capabilities.
+Tinybird is a data platform for data and engineering teams to solve complex real-time, operational, and user-facing analytics use cases at any scale, with end-to-end latency in milliseconds for streaming ingest and high QPS workloads.
+It's a SQL-first analytics engine, purpose-built for the cloud, with real-time data ingest and full JOIN support. Native, managed ingest connectors make it easy to ingest data from a variety of sources. SQL queries can be published as production-grade, scalable REST APIs for public use or secured with JWTs.
+Tinybird is a managed platform that scales transparently, requiring no cluster operations, shard management or worrying about replicas.
+See how Tinybird is used by industry-leading companies today in the
+Customer Stories
+hub.
+Concepts
+¶
+A lot of concepts are the same between Rockset and Tinybird, and there are a handful of others that have a 1:1 mapping. In Tinybird:
+Data Source: Where data is ingested and stored.
+Pipe: How data is transformed.
+Workspace: How data projects are organized, containing Data Sources and Pipes.
+Shared Data Source: A Data Source shared between Workspaces.
+Roles: Each Workspace has Admin, Guest, and Viewer roles.
+Organizations: Contain all Workspaces and members.
+Key concept comparison
+¶
+Data Sources
+¶
+Super similar. Rockset and Tinybird both support ingesting data from many types of data sources. You ingest into Tinybird and create a Tinybird
+Data Source
+that you then have control over - you can iterate the schema, monitor your ingestion, and more. See the
+Data Sources docs
+.
+Workspaces
+¶
+Again, very similar. In Rockset, Workspaces contain resources like Collections, Aliases, Views, and Query Lambdas. In Tinybird,
+Workspaces
+serve the same purpose (holding resources), and you can also share Data Sources between
+multiple
+Workspaces. Enterprise users monitor and manage Workspaces using the
+Organizations feature
+. See the
+Workspace docs
+.
+Ingest Transformations
+¶
+These are analogous to Tinybird's
+Pipes
+. It's where you transform your data. The difference is that Rockset does this on initial load (on raw data), whereas Tinybird lets you create and manage a Data Source first, then transform it however you need. See the
+Pipes docs
+.
+Views
+¶
+Similar to Tinybird's
+nodes
+- the modular, chainable "bricks" of SQL queries that compose a Pipe. Like Views, nodes can reference resources like other nodes, Pipes, Data Sources, and more. See the
+Pipes > Nodes docs
+.
+Rollups
+¶
+The Tinybird equivalent of rollups is
+Materialized Views
+. Materialized Views give you a way to pre-aggregate and pre-filter large Data Sources incrementally, adding simple logic using SQL to produce a more relevant Data Source with significantly fewer rows. Put simply, Materialized Views shift computational load from query time to ingestion time, so your API Endpoints stay fast. See the
+Materialized Views docs
+.
+Query Lambdas
+¶
+The Tinybird equivalent of Query Lambdas is
+API Endpoints
+. You can publish the result of any SQL query in your Tinybird Workspace as an HTTP API Endpoint. See the
+API Endpoint docs
+.
+Schemaless ingestion
+¶
+You can do schemaless/variable schema event ingestion on Tinybird by storing the whole JSON in a column. Use the following schema in your Data Source definition and use
+JSONExtract functions
+to parse the result afterwards.
+schemaless.datasource
+SCHEMA >
+    `root` String `json:$`
+
+ENGINE "MergeTree"
+If your data has some common fields, be sure to extract them and add them to the sorting key.
+It's definitely possible to do schemaless, but having a defined schema is a great idea. Tinybird provides you with an easy way to manage your schema
+using .datasource schema files
+.
+Ingest data and build a POC
+¶
+Tinybird allows you to ingest your data from a variety of sources, then create Tinybird Data Sources in your Workspace that can be queried, published, materialized, and more.
+Just like Rockset, Tinybird supports ingestion from:
+Data streams (Kafka, Kinesis).
+OLTP databases (DynamoDB, MongoDB, MySQL, PostgreSQL).
+Data lakes (S3, GCS).
+A popular option is connecting DynamoDB to Tinybird. Follow
+the guide here
+or pick another source from the side nav under "Ingest".
+Materialized Views give you a way to pre-aggregate and pre-filter large Data Sources incrementally, adding simple logic using SQL to produce a more relevant Data Source with significantly fewer rows.
+Put simply, Materialized Views shift computational load from query time to ingestion time, so your API Endpoints stay fast.
+Useful resources
+¶
+Migrating to a new tool, especially at speed, can be challenging. Here are some helpful resources to get started on Tinybird:
+Set up a
+DynamoDB Data Source
+to start streaming data today.
+Read the blog post
+"Migrating from Rockset? See how Tinybird features compare"
+.
+Read the blog post
+"A practical guide to real-time CDC with MongoDB"
+.
+Billing and limits
+¶
+Read the
+billing docs
+to understand how Tinybird charges for different data operations. Remember,
+UI usage is free
+(Pipes, Playgrounds, Time Series - anywhere you can hit a "Run" button) as is anything on a
+Free plan
+so get started today for free and iterate
+fast
+.
+Check the
+limits page
+for limits on ingestion, queries, API Endpoints, and more.
+Next steps
+¶
+If you'd like assistance with your migration, contact Tinybird at
+support@tinybird.co
+or in the
+Community Slack
+.
+Set up a free Tinybird account and build a working prototype:
+Sign up here
+.
+Run through a quick example with your free account: Tinybird
+quick start
+.
+Read the
+billing docs
+to understand plans and pricing on Tinybird.
+Updated
+3 weeks ago
+On this page
+Migrate from Rockset
+Prerequisites
+At a high level
+Concepts
+Key concept comparison
+Schemaless ingestion
+Ingest data and build a POC
+Useful resources
+Billing and limits
+Next steps
+classic
+Ask AI

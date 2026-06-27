@@ -1,0 +1,265 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/UNKNOWN_TYPE
+
+UNKNOWN_TYPE ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+UNKNOWN_TYPE ClickHouse error
+¶
+Copy as MD
+This error usually means you're trying to use a data type that doesn't exist in ClickHouse. Check the type name spelling and verify it's available in your ClickHouse version.
+The
+UNKNOWN_TYPE
+error in ClickHouse (and Tinybird) happens when you try to use a data type that doesn't exist in ClickHouse or isn't available in your version. This commonly occurs when using types from other database systems or trying to use newer ClickHouse types in older versions.
+What causes this error
+¶
+You'll typically see it when:
+Using data types from other database systems (MySQL, PostgreSQL, etc.)
+Misspelling ClickHouse type names
+Using types available in newer ClickHouse versions
+Using custom types that haven't been defined
+Using deprecated or removed types
+Example errors
+¶
+Fails: MySQL type in ClickHouse
+CREATE TABLE events (id INT, name VARCHAR(255))
+Fails: misspelled type
+CREATE TABLE events (id UInt32, name Strng)
+Fails: non-existent type
+CREATE TABLE events (id UInt32, data JSONB)
+Fails: wrong case
+CREATE TABLE events (id uint32, name String)
+ClickHouse types are capitalized exactly:
+UInt32
+,
+String
+,
+Float64
+. There is no
+BOOLEAN
+type; use
+UInt8
+or
+Bool
+in newer versions.
+How to fix it
+¶
+Use ClickHouse data types
+¶
+Replace with equivalent ClickHouse types:
+Fix: use ClickHouse types
+CREATE TABLE events (id UInt32, name String)
+Check type spelling
+¶
+Verify the correct type name:
+Fix: correct spelling
+CREATE TABLE events (id UInt32, name String)
+Use proper case
+¶
+ClickHouse types are case-sensitive:
+Fix: correct case
+CREATE TABLE events (id UInt32, name String)
+Check type availability
+¶
+Verify the type exists in your ClickHouse version:
+Check ClickHouse version
+SELECT version()
+Common patterns and solutions
+¶
+Basic data types
+¶
+Common ClickHouse data types:
+Basic types
+CREATE TABLE events (
+    id UInt32,
+    name String,
+    value Float64,
+    active UInt8,
+    timestamp DateTime
+)
+Integer types
+¶
+ClickHouse integer types:
+Integer types
+CREATE TABLE events (
+    tiny_id UInt8,
+    small_id UInt16,
+    normal_id UInt32,
+    big_id UInt64,
+    signed_id Int32
+)
+String types
+¶
+ClickHouse string types:
+String types
+CREATE TABLE events (
+    name String,
+    fixed_name FixedString(10),
+    uuid UUID
+)
+Complex types
+¶
+ClickHouse complex types:
+Complex types
+CREATE TABLE events (
+    id UInt32,
+    tags Array(String),
+    metadata Map(String, String),
+    nullable_name Nullable(String),
+    decimal_value Decimal(10, 2)
+)
+Use
+Nullable(Type)
+wrapper for nullability and
+Array(Type)
+for arrays. Decimal types require scale and precision.
+Date and time types
+¶
+ClickHouse date/time types:
+Date/time types
+CREATE TABLE events (
+    date_col Date,
+    datetime_col DateTime,
+    timestamp_col DateTime64(3)
+)
+Type mapping from other databases
+¶
+MySQL to ClickHouse
+¶
+MySQL
+ClickHouse
+Description
+INT
+Int32
+32-bit integer
+VARCHAR(255)
+String
+Variable-length string
+TEXT
+String
+Long text
+DATETIME
+DateTime
+Date and time
+BOOLEAN
+UInt8
+Boolean (0/1)
+PostgreSQL to ClickHouse
+¶
+PostgreSQL
+ClickHouse
+Description
+INTEGER
+Int32
+32-bit integer
+VARCHAR
+String
+Variable-length string
+TEXT
+String
+Long text
+TIMESTAMP
+DateTime
+Date and time
+JSONB
+String
+JSON (as string)
+Advanced solutions
+¶
+Using complex types
+¶
+ClickHouse complex types:
+Complex types
+CREATE TABLE events (
+    id UInt32,
+    tags Array(String),
+    metadata Map(String, String),
+    coordinates Tuple(Float64, Float64)
+)
+Using Nullable types
+¶
+For columns that can be NULL:
+Nullable types
+CREATE TABLE events (
+    id UInt32,
+    name Nullable(String),
+    value Nullable(Float64)
+)
+Using LowCardinality for optimization
+¶
+For columns with repeated values:
+LowCardinality types
+CREATE TABLE events (
+    id UInt32,
+    event_type LowCardinality(String),
+    user_id UInt32
+)
+Tinybird-specific notes
+¶
+In Tinybird, this error often occurs when:
+Using Data Sources with unsupported types
+Creating Pipes with incompatible type definitions
+Using Materialized Views with wrong types
+Working with imported schemas from other databases
+To debug in Tinybird:
+Check Tinybird's supported ClickHouse types
+Use the Data Source schema editor to verify types
+Test type definitions in the Query Builder
+Use Schema Hints to enforce proper types
+Best practices
+¶
+Type selection
+¶
+Use appropriate types for your data
+Consider storage and performance implications
+Use Nullable types when needed
+Use LowCardinality for repeated string values
+Type validation
+¶
+Test type definitions with sample data
+Verify type compatibility across operations
+Use type conversion functions when needed
+Document type choices and reasons
+Performance considerations
+¶
+Use smallest appropriate integer types
+Consider using LowCardinality for string columns
+Use appropriate precision for decimal types
+Index columns with appropriate types
+See also
+¶
+ClickHouse Data Types
+Working with Data Sources
+Common function errors
+Updated
+4 weeks ago
+On this page
+UNKNOWN_TYPE ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Use ClickHouse data types
+Check type spelling
+Use proper case
+Check type availability
+Common patterns and solutions
+Basic data types
+Integer types
+String types
+Complex types
+Date and time types
+Type mapping from other databases
+MySQL to ClickHouse
+PostgreSQL to ClickHouse
+Advanced solutions
+Using complex types
+Using Nullable types
+Using LowCardinality for optimization
+Tinybird-specific notes
+Best practices
+Type selection
+Type validation
+Performance considerations
+See also
+forward
+classic
+Ask AI

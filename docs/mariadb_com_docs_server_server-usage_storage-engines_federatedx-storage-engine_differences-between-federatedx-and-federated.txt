@@ -1,0 +1,92 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/federatedx-storage-engine/differences-between-federatedx-and-federated
+
+Differences Between FederatedX and Federated | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+About FederatedX
+Differences Between FederatedX and Federated
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Differences Between FederatedX and Federated
+This page outlines the key enhancements in FederatedX over the original Federated engine, including support for transactions and a refactored codebase. This storage engine has been deprecated.
+This storage engine has been deprecated.
+The main differences are:
+New features in FederatedX
+Transactions (beta feature)
+Supports partitions (alpha feature)
+New class structure which allows developers to write connection classes for other RDBMSs without having to modify base classes for FederatedX
+Different behavior
+FederatedX is statically compiled into MariaDB by default.
+When you create a table with FederatedX, the connection are tested. The
+CREATE
+will fail if MariaDB can't connect to the remote host or if the remote table doesn't exist.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+About FederatedX
+Next
+InnoDB
+Last updated
+10 months ago
+Was this helpful?
+New features in FederatedX
+Different behavior
+Was this helpful?

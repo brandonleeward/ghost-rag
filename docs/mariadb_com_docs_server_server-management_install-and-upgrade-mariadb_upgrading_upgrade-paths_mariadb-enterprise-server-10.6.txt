@@ -1,0 +1,66 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading/upgrade-paths/mariadb-enterprise-server-10.6
+
+MariaDB Enterprise Server 10.6 | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Platform Specific Upgrade Guides
+MariaDB Community Server Upgrade Paths
+MariaDB Enterprise Server Upgrade Paths
+MariaDB Enterprise Server 11.8
+MariaDB Enterprise Server 11.4
+MariaDB Enterprise Server 10.6
+Upgrade to MariaDB Enterprise Server 10.6
+Upgrade MariaDB Enterprise Server from 10.6.X to 10.6.Y
+Upgrade from MariaDB Community Server to MariaDB Enterprise Server 10.6
+Archived Upgrade Guides (Unmaintained/EOL ES Versions)
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+MariaDB Enterprise Server 10.6
+Upgrade documentation for MariaDB Enterprise Server 10.6, featuring Atomic DDL support, JSON_TABLE function, improved Oracle compatibility modes, and the removal of older storage engines.
+Upgrade to MariaDB Enterprise Server 10.6
+Upgrade MariaDB Enterprise Server from 10.6.X to 10.6.Y
+Upgrade from MariaDB Community Server to MariaDB Enterprise Server 10.6
+Previous
+Upgrade from MariaDB Community Server to MariaDB Enterprise Server 11.4
+Next
+Upgrade to MariaDB Enterprise Server 10.6
+Was this helpful?
+Was this helpful?

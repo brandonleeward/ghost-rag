@@ -1,0 +1,117 @@
+Source: https://www.tinybird.co/docs/version-control/deployment-strategies
+
+Classic: Deployment strategies · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Deployment strategies
+¶
+Copy as MD
+This page explains deployment strategies when you are doing one of the following:
+Adding, updating or deleting resources
+Maintaining streaming ingestion
+Handling user API requests
+It covers the default method for implementing Continuous Deployment (CD), how to bypass the default deployment strategy to create custom deployments, and finally, strategies to take into account when migrating data.
+How deployment works
+¶
+With the Git integration, your project in Git is the real source of truth and you should expect your Workspace(s) to be a working version of the resources in Git.
+In the default
+CI/CD workflow templates
+the
+tb deploy
+command is used to deploy changes to the Workspace. This does the following:
+Checks the current commit in the Workspace and validates that is an ancestor of the commit in the Pull Request being deployed. If not, usually you have to
+git rebase
+your branch.
+Performs a
+git diff
+from the current branch to the main branch so it can get a list of the datafiles that changed.
+Deploys them both in CI and CD.
+Alter strategy
+¶
+Updates existing resources that have been changed. This is the default deployment strategy when using
+tb deploy
+. Use it to add a new column to a Data Source or change the TTL.
+Not all operations can be performed with this strategy. For instance, you can't change the Sorting Key of a Data Source with this strategy.
+An example use case can be found here:
+Add column to a Data Source
+.
+Versioning strategy
+¶
+When you want to make a breaking change to some resource, create a new version of that resource. You can perform this strategy in different steps each one corresponding to a Pull Request like this:
+Create a new Branch with the new resource(s) (Pipe or Data Source) with a different name and deploy it.
+Make sure any backfill operation is run over the new resources so data in the main Workspace is in sync.
+Create a new Branch to connect the corresponding dependencies to the new resource(s) and deploy it.
+Create a new Branch to
+git rm
+the old resources and deploy it.
+This strategy allows for a staged and controlled deployment of breaking changes. You keep old and new versions of the resource(s) in the main Workspace, until your end user application is rolled out.
+Custom deployments
+¶
+The
+tb deploy
+command allows you to deploy a project with a single command. Under the hood, this command performs a series of actions that
+are common to most deployments.
+However, your project might have specific requirements that mean you need to customize these actions, or run additional actions after the deployment process. Use a custom deployment when you need to perform some operation that's not directly supported by
+tb deploy
+or require several steps like automating a backfill operation.
+Custom deployment actions
+¶
+The
+deploy.sh
+file allows you to overwrite the default deployment process, so instead of running the default
+tb deploy
+command you can run a custom shell script to deploy your changes.
+Use custom deployment actions if the default deployment process isn't suitable for your project. For example, you might want to deploy resources in a specific order or handle errors differently.
+To create custom deployment actions:
+If you are using the Tinybird CI/CD templates, export an environment variable in your CI/CD templates with name
+VERSION
+. You can find it in the
+.tinyenv
+file in the data project.
+Create a
+deploy/$VERSION/deploy.sh
+file and ensure it has execution permissions. For example,
+chmod +x -R deploy/0.0.1/
+.
+In the
+deploy.sh
+file, write the Tinybird CLI commands you want to execute during the deployment process.
+The CI/CD pipelines will find the
+deploy.sh
+file and execute it when deploying the matching version of the project. It's important to note that custom deployments run in CI, so use it to validate that the custom deployment will work when merging the Pull Request.
+Once you merge a Pull Request with a custom deployment make sure you update the
+VERSION
+environment variable, so this custom deployment doesn't run on the next Pull Request.
+After a custom deployment, if you did not run
+tb deploy
+make sure your Workspace is synchronized with the Git main branch head commit by running
+tb init --override-commit HEAD_COMMIT_ID
+.
+Deploying common use cases
+¶
+Check out
+the Use Case repository
+for common use cases and scenarios.
+Next steps
+¶
+Practice iterating on one of Tinybird's examples in the
+Use Case repository
+.
+Learn about
+backfill strategies
+.
+Updated
+1 year ago
+On this page
+Deployment strategies
+How deployment works
+Alter strategy
+Versioning strategy
+Custom deployments
+Custom deployment actions
+Deploying common use cases
+Next steps
+classic
+Ask AI

@@ -1,0 +1,95 @@
+Source: https://www.tinybird.com/docs/classic/get-data-in
+
+Classic: Get data in · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Get your data into Tinybird
+¶
+Copy as MD
+You can bring your data into Tinybird from a variety of sources, then create Tinybird Data Sources that you can query, publish, materialize, and more.
+To get started, you only need to select your Data Source and get connected.
+Create your schema
+¶
+You define schemas using a specific file type: .datasource files. See
+.datasource
+.
+You can either define the schema first or send data directly and let Tinybird infer the schema.
+Define the schema yourself
+¶
+If you want to define your schema first, use one of the following methods:
+Option 1: Create an empty Data Source in the UI
+¶
+Follow these steps to create an empty Data Source:
+Select the
++
+icon then "Data Source".
+Select the
+Write schema
+option.
+Review the .datasource file that appears. Update the generated parameters to match your desired schema.
+Select
+Next
+.
+Review your column names and types and rename the Data Source.
+Select
+Create Data Source
+.
+Make sure you understand the definition and syntax for the schema, JSONPaths, engine, partition key, sorting keys, and TTL. They are all essential for efficient data operations later down the line.
+Option 2: Upload a .datasource file with the desired schema
+¶
+You can define your schema locally in a .datasource file. Drag the .datasource file to the UI and import the resource.
+You can also select the
++
+icon followed by
+Write schema
+and drag the file onto the dialog.
+Other options
+¶
+Among other options, you can create a data source in the following ways:
+Use the
+Data Sources API
+.
+Use the
+Tinybird CLI
+.
+Send data and use inferred schema
+¶
+If you want to send data directly and let Tinybird infer the schema, use one of the Connectors, upload a CSV, NDJSON, or Parquet file, or send data to the
+Events API
+.
+To use the Events API to infer the schema, send a single event over the API and let Tinybird create the schema automatically. If the schema is incorrect, go to the
+Data Source schema
+screen and download the schema as a .datasource file. Edit the file to adjust the schema if required, then drag the file back.
+You can't override an existing Data Source. Delete the existing one or rename the new Data Source.
+Supported data types, file types, and compression formats
+¶
+See
+Concepts > Data Sources
+for more information on supported types and formats.
+Update your schema
+¶
+If your data doesn't match the schema, it ends up in the quarantine Data Source. See
+Quarantine Data Source
+.
+You might also want to change your schema for optimization purposes. See
+Iterate a Data Source
+.
+Limits
+¶
+Check the
+limits page
+for limits on ingestion, queries, API Endpoints, and more.
+Updated
+1 year ago
+On this page
+Get your data into Tinybird
+Create your schema
+Define the schema yourself
+Send data and use inferred schema
+Supported data types, file types, and compression formats
+Update your schema
+Limits
+classic
+Ask AI

@@ -1,0 +1,83 @@
+Source: https://www.tinybird.com/docs/forward/guides/ingest-from-clerk
+
+Send Clerk webhooks to Tinybird · Tinybird Docs
+Sign In
+Sign Up
+Send Clerk webhooks to Tinybird
+¶
+Copy as MD
+Clerk
+is a developer-focused user management platform to handle user authentication with many prebuilt UI components. By integrating Clerk with Tinybird, you can analyze your user authentication data in real time and enrich it with other data sources.
+Some common use cases for sending Clerk webhooks to Tinybird include:
+Tracking net user and organization growth.
+Monitoring user churn.
+Identifying common auth errors.
+Creating custom dashboards for auth analysis.
+Enriching other data sources with real-time auth metrics.
+Read on to learn how to send data from Clerk to Tinybird.
+Before you start
+¶
+Before you connect Clerk to Tinybird, ensure:
+You have a Clerk account.
+You have a Tinybird workspace.
+Connect Clerk to Tinybird
+¶
+From the Clerk UI, select
+Configure
+>
+Webhooks
+.
+Select
+Add Endpoint
+.
+In your Tinybird project, create a data source called
+clerk
+. You can follow this
+schema
+:
+SCHEMA >
+    `event_time` DateTime64(3) `json:$.tinybirdIngestTime` DEFAULT now(),
+    `event_type` String `json:$.type` DEFAULT 'unknown',
+    `event` JSON `json:$` DEFAULT '{}'
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(event_time)"
+ENGINE_SORTING_KEY "event_time"
+Using the
+JSON Data Type
+you can store the semi-structured data you receive from Clerk in a single column. You can later retrieve various events and their metadata as needed in your pipes.
+The
+JSON
+data type is in private beta. If you are interested in using this type, contact Tinybird at
+support@tinybird.co
+or in the
+Community Slack
+.
+Back in Clerk, paste the Events API URL in your Webhook Endpoint URL. Use the query parameter
+name
+to match the name of the data source you created in Tinybird, for example:
+https://<your_host>/v0/events?name=clerk
+The API host in the following examples must match your Workspace's region. See the full list of
+regions and hosts
+From Tinybird Cloud, copy a token with privileges to write to the data source you created. You can use the admin token or create one with the required scope.
+Return to the Clerk Webhooks page, and update the URL to add a new search parameter
+token
+with the token you copied. The final URL looks like the following:
+https://<your_host>/v0/events?name=clerk&token=p.eyXXXXX
+Select the checkboxes for the Clerk events you want to send to Tinybird, and select
+Create
+.
+You're done. Any of the Clerk events you selected is automatically sent to Tinybird through the
+Events API
+. You can test the integration from the
+Testing
+tab in the Clerk Webhooks UI.
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Send Clerk webhooks to Tinybird
+Before you start
+Connect Clerk to Tinybird
+forward
+Ask AI

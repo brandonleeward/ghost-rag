@@ -1,0 +1,128 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading/mariadb-community-server-upgrade-paths/upgrading-to-unmaintained-mariadb-releases/upgrading-from-mariadb-53-to-mariadb-55.md
+
+> For the complete documentation index, see [llms.txt](https://mariadb.com/docs/llms.txt). Markdown versions of documentation pages are available by appending `.md` to page URLs; this page is available as [Markdown](https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading/mariadb-community-server-upgrade-paths/upgrading-to-unmaintained-mariadb-releases/upgrading-from-mariadb-53-to-mariadb-55.md).
+
+# Upgrading from MariaDB 5.3 to MariaDB 5.5
+
+## What you need to know
+
+There are no changes in table or index formats between [MariaDB 5.3](/docs/release-notes/community-server/old-releases/5.3/changes-improvements-in-mariadb-5-3.md) and [MariaDB\
+5.5](/docs/release-notes/community-server/old-releases/5.3/changes-improvements-in-mariadb-5-3.md), so on most servers the upgrade should be painless.
+
+### How to upgrade
+
+The suggested upgrade procedure is:
+
+1. For Windows, see [Upgrading MariaDB on Windows](/docs/server/server-management/install-and-upgrade-mariadb/upgrading/platform-specific-upgrade-guides/upgrading-mariadb-on-windows.md) instead.
+2. Shutdown [MariaDB 5.3](/docs/release-notes/community-server/old-releases/5.3/changes-improvements-in-mariadb-5-3.md)
+3. Take a backup (this is the perfect time to take a backup of your databases)
+4. Uninstall [MariaDB 5.3](/docs/release-notes/community-server/old-releases/5.3/changes-improvements-in-mariadb-5-3.md)
+5. Install [MariaDB 5.5](/docs/release-notes/community-server/old-releases/5.5/changes-improvements-in-mariadb-5-5.md) \[[1](#_note-0)]
+6. Run [mysql\_upgrade](/docs/server/clients-and-utilities/legacy-clients-and-utilities/mysql_upgrade.md)
+
+* Ubuntu and Debian packages do this automatically when they are installed; Red Hat, CentOS, and Fedora packages do not
+* `mysql_upgrade` does two things:
+  1. Upgrades the permission tables in the `mysql` database with some new fields
+  2. Does a very quick check of all tables and marks them as compatible with [MariaDB 5.5](/docs/release-notes/community-server/old-releases/5.5/changes-improvements-in-mariadb-5-5.md)
+* In most cases this should be a fast operation (depending of course on the number of tables)
+
+1. Add new options to [my.cnf](/docs/server/server-management/install-and-upgrade-mariadb/configuring-mariadb/configuring-mariadb-with-option-files.md) to enable features
+
+* If you change `my.cnf` then you need to restart `mysqld`
+
+### Incompatible changes between 5.3 and 5.5
+
+As mentioned previously, on most servers upgrading from 5.5 should be painless.\
+However, there are some things that have changed which could affect an upgrade:
+
+#### XtraDB options that have changed default values
+
+| Option                                                                                                                                    | Old value | New value |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | --------- | --------- |
+| [innodb\_change\_buffering](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_change_buffering)          | inserts   | all       |
+| [innodb\_flush\_neighbor\_pages](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_flush_neighbor_pages) | 1         | area      |
+
+#### Options that have been removed or renamed
+
+Percona, the provider of [XtraDB](/docs/server/server-usage/storage-engines/innodb/mariadb-enterprise-server-innodb-operations/innodb-unmaintained/about-xtradb.md), does not provide all earlier XtraDB features in the 5.5 code base. Because of that, [MariaDB 5.5](/docs/release-notes/community-server/old-releases/5.5/changes-improvements-in-mariadb-5-5.md) can't provide them either. The following options are not supported by XtraDB 5.5. If you are using them in any of your my.cnf files, you should remove them before upgrading to 5.5.
+
+* [innodb\_adaptive\_checkpoint](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_adaptive_checkpoint); Use [innodb\_adaptive\_flushing\_method](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_adaptive_flushing_method) instead.
+* [innodb\_auto\_lru\_dump](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_auto_lru_dump); Use [innodb\_buffer\_pool\_restore\_at\_startup](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_buffer_pool_restore_at_startup) instead (and [innodb\_buffer\_pool\_load\_at\_startup](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_buffer_pool_load_at_startup) in [MariaDB 10.0](/docs/release-notes/community-server/old-releases/10.0/changes-improvements-in-mariadb-10-0.md)).
+* innodb\_blocking\_lru\_restore; Use [innodb\_blocking\_buffer\_pool\_restore](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_blocking_buffer_pool_restore) instead.
+* [innodb\_enable\_unsafe\_group\_commit](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_enable_unsafe_group_commit)
+* innodb\_expand\_import; Use [innodb\_import\_table\_from\_xtrabackup](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_import_table_from_xtrabackup) instead.
+* [innodb\_extra\_rsegments](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_extra_rsegments); Use [innodb\_rollback\_segments](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_rollback_segments) instead.
+* [innodb\_extra\_undoslots](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_extra_undoslots)
+* innodb\_fast\_recovery
+* innodb\_flush\_log\_at\_trx\_commit\_session
+* [innodb\_overwrite\_relay\_log\_info](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_recovery_update_relay_log); Use [innodb\_recovery\_update\_relay\_log](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_recovery_update_relay_log) instead.
+* [innodb\_pass\_corrupt\_table](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_pass_corrupt_table); Use [innodb\_corrupt\_table\_action](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_corrupt_table_action) instead.
+* [innodb\_use\_purge\_thread](/docs/server/server-usage/storage-engines/innodb/innodb-system-variables.md#innodb_use_purge_thread)
+
+## Notes
+
+1. [↑](#_ref-0) If using a MariaDB `apt` or `yum` [repository](https://downloads.mariadb.org/mariadb/repositories/), it is often enough to replace instances of '5.3' with '5.5' and then run an update/upgrade. For example, in Ubuntu/Debian update the MariaDB `sources.list` entry from something that looks similar to this:
+
+```
+deb http://ftp.osuosl.org/pub/mariadb/repo/5.3/ubuntu trusty main
+```
+
+To something like this:
+
+```
+deb http://ftp.osuosl.org/pub/mariadb/repo/5.5/ubuntu trusty main
+```
+
+And then run
+
+```
+apt-get update && apt-get upgrade
+```
+
+And in Red Hat, CentOS, and Fedora, change the `baseurl` line from something that looks like this:
+
+```
+baseurl = http://yum.mariadb.org/5.3/centos6-amd64
+```
+
+To something that looks like this:
+
+```
+baseurl = http://yum.mariadb.org/5.5/centos6-amd64
+```
+
+And then run
+
+```
+yum update
+```
+
+## See also
+
+* [The features in MariaDB 5.5](/docs/release-notes/community-server/old-releases/5.5/changes-improvements-in-mariadb-5-5.md)
+* [Perconas guide of how to upgrade to 5.5](https://www.percona.com/doc/percona-server/5.5/upgrading_guide_51_55.html)
+*This page is licensed: CC BY-SA / Gnu FDL*
+{% @marketo/form formId="4316" %}
+
+
+---
+
+# Agent Instructions
+This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
+
+## Querying This Documentation
+If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
+
+Perform an HTTP GET request on the current page URL with the `ask` query parameter, and the optional `goal` query parameter:
+
+```
+GET https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading/mariadb-community-server-upgrade-paths/upgrading-to-unmaintained-mariadb-releases/upgrading-from-mariadb-53-to-mariadb-55.md?ask=
+&goal=
+```
+
+`ask` is the immediate question: it should be specific, self-contained, and written in natural language.
+`goal` is optional and describes the broader end goal you are ultimately trying to accomplish on behalf of the user. GitBook uses it to tailor the answer towards what is most useful for that goal.
+
+The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
+
+Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

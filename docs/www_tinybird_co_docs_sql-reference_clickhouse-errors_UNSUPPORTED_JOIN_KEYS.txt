@@ -1,0 +1,206 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/UNSUPPORTED_JOIN_KEYS
+
+UNSUPPORTED_JOIN_KEYS ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+UNSUPPORTED_JOIN_KEYS ClickHouse error
+¶
+Copy as MD
+This error usually means you're trying to use JOIN keys that aren't supported by ClickHouse. ClickHouse has specific requirements for JOIN key types and expressions.
+The
+UNSUPPORTED_JOIN_KEYS
+error in ClickHouse (and Tinybird) happens when you try to use JOIN keys that aren't supported by ClickHouse. This can occur due to incompatible data types, complex expressions, or using keys that don't meet ClickHouse's JOIN requirements.
+What causes this error
+¶
+You'll typically see it when:
+Using incompatible data types in JOIN keys
+Using complex expressions as JOIN keys
+Using unsupported column types for JOIN keys
+Using functions or operations in JOIN conditions
+Using keys that don't meet ClickHouse's JOIN requirements
+Example errors
+¶
+Fails: incompatible data types
+SELECT * FROM users JOIN events ON users.id = events.user_id_string
+Fails: complex expression in JOIN
+SELECT * FROM users JOIN events ON users.id + 1 = events.user_id
+Fails: subquery in JOIN key
+SELECT * FROM users JOIN events ON users.id = (SELECT user_id FROM events LIMIT 1)
+Fails: unsupported column type
+SELECT * FROM users JOIN events ON users.json_column = events.user_id
+How to fix it
+¶
+Use compatible data types
+¶
+Ensure JOIN keys have compatible types:
+Fix: compatible data types
+SELECT * FROM users JOIN events ON users.id = toInt32(events.user_id_string)
+Use simple column references
+¶
+Avoid complex expressions in JOIN keys:
+Fix: simple column references
+SELECT * FROM users JOIN events ON users.id = events.user_id
+Convert data types
+¶
+Convert keys to compatible types:
+Fix: convert data types
+SELECT * FROM users JOIN events ON toString(users.id) = toString(events.user_id)
+You can cast inside JOIN keys (e.g.,
+toString(users.id) = events.user_id
+), though it's slower than casting beforehand.
+Use appropriate column types
+¶
+Use supported column types for JOIN keys:
+Fix: supported column types
+SELECT * FROM users JOIN events ON users.id = events.user_id
+Common patterns and solutions
+¶
+Simple equality JOIN
+¶
+The most reliable JOIN pattern:
+Simple equality JOIN
+SELECT u.id, u.name, e.event_type
+FROM users u
+JOIN events e ON u.id = e.user_id
+Multiple JOIN conditions
+¶
+Use AND to combine multiple conditions:
+Multiple JOIN conditions
+SELECT u.id, u.name, e.event_type
+FROM users u
+JOIN events e ON u.id = e.user_id AND e.timestamp >= '2023-01-01'
+Different JOIN types
+¶
+Use appropriate JOIN types:
+Different JOIN types
+SELECT u.id, u.name, e.event_type
+FROM users u
+LEFT JOIN events e ON u.id = e.user_id
+Self-joins
+¶
+When joining a table to itself:
+Self-join example
+SELECT t1.id, t1.name, t2.name as parent_name
+FROM categories t1
+LEFT JOIN categories t2 ON t1.parent_id = t2.id
+Advanced solutions
+¶
+Using type conversion in JOIN
+¶
+Convert types to make them compatible:
+Type conversion in JOIN
+SELECT * FROM users u
+JOIN events e ON toString(u.id) = e.user_id_string
+Using subqueries for complex logic
+¶
+Break down complex JOIN logic:
+Subquery approach
+SELECT u.id, u.name, e.event_type
+FROM users u
+JOIN (
+    SELECT user_id, event_type
+    FROM events
+    WHERE timestamp >= '2023-01-01'
+) e ON u.id = e.user_id
+Using CTEs for complex joins
+¶
+Use CTEs for complex JOIN operations:
+CTE approach
+WITH user_events AS (
+    SELECT user_id, event_type
+    FROM events
+    WHERE timestamp >= now() - INTERVAL 1 DAY
+)
+SELECT u.id, u.name, e.event_type
+FROM users u
+JOIN user_events e ON u.id = e.user_id
+JOIN key requirements
+¶
+Supported data types
+¶
+ClickHouse supports these types for JOIN keys:
+Integer types (UInt8, UInt16, UInt32, UInt64, Int8, Int16, Int32, Int64)
+String types (String, FixedString)
+Date and DateTime types
+UUID type
+Unsupported data types
+¶
+Avoid these types for JOIN keys:
+Array types
+Map types
+Tuple types
+JSON types
+Float and Decimal types can be used for JOIN keys, but approximate equality is rarely meaningful. If you need to join on JSON arrays, extract a scalar first.
+Tinybird-specific notes
+¶
+In Tinybird, this error often occurs when:
+Building Pipes with incompatible JOIN keys
+Using Materialized Views with unsupported JOIN conditions
+Working with Data Sources that have incompatible schemas
+Creating API endpoints with complex JOIN logic
+To debug in Tinybird:
+Check your Data Source schemas for JOIN key compatibility
+Verify Pipe node JOIN operations use supported key types
+Test JOIN operations with simple queries first
+Use type conversion when needed for JOIN keys
+Best practices
+¶
+JOIN key selection
+¶
+Use simple column references for JOIN keys
+Ensure JOIN keys have compatible data types
+Use appropriate indexes on JOIN columns
+Avoid complex expressions in JOIN conditions
+Use
+joinGet()
+for dictionary joins
+JOIN keys must be deterministic and not array/map types. If you need to join on JSON arrays, extract a scalar first.
+Performance optimization
+¶
+Use integer types for JOIN keys when possible
+Consider using LowCardinality for string JOIN keys
+Use appropriate table engines for JOIN operations
+Monitor JOIN query performance
+Error prevention
+¶
+Test JOIN operations with sample data
+Validate JOIN key types before complex operations
+Use type conversion functions when needed
+Document JOIN key requirements
+See also
+¶
+ClickHouse JOIN Operations
+Working with Data Sources
+Common function errors
+Updated
+4 weeks ago
+On this page
+UNSUPPORTED_JOIN_KEYS ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Use compatible data types
+Use simple column references
+Convert data types
+Use appropriate column types
+Common patterns and solutions
+Simple equality JOIN
+Multiple JOIN conditions
+Different JOIN types
+Self-joins
+Advanced solutions
+Using type conversion in JOIN
+Using subqueries for complex logic
+Using CTEs for complex joins
+JOIN key requirements
+Supported data types
+Unsupported data types
+Tinybird-specific notes
+Best practices
+JOIN key selection
+Performance optimization
+Error prevention
+See also
+forward
+classic
+Ask AI

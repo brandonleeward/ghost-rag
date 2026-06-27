@@ -1,0 +1,259 @@
+Source: https://www.tinybird.com/docs/classic/cli/datafiles/pipe-files
+
+Classic: Pipe files · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Pipe files (.pipe)
+¶
+Copy as MD
+Pipe files describe your Pipes. You can use .pipe files to define the type, starting node, Data Source, and other settings of your Pipes. See
+Data Sources
+.
+Available instructions
+¶
+The following instructions are available for .pipe files.
+Instruction
+Required
+Description
+%
+No
+Use as the first character of a node to indicate the node uses the
+templating system
+.
+DESCRIPTION <markdown_string>
+No
+Sets the description for a node or the complete file.
+TAGS <tag_names>
+No
+Comma-separated list of tags. Tags are used to
+organize your data project
+.
+NODE <node_name>
+Yes
+Starts the definition of a new node. All the instructions until a new
+NODE
+instruction or the end of the file are related to this node.
+SQL <sql>
+Yes
+Defines a block for the SQL of a node. The block must be indented.
+INCLUDE <include_path.incl> <variables>
+No
+Includes are pieces of a Pipe that you can reuse in multiple .pipe files.
+TYPE <pipe_type>
+No
+Sets the type of the node. Valid values are
+ENDPOINT
+,
+MATERIALIZED
+,
+COPY
+, or
+SINK
+.
+DATASOURCE <data_source_name>
+Yes
+Required when
+TYPE
+is
+MATERIALIZED
+. Sets the destination Data Source for materialized nodes.
+TARGET_DATASOURCE <data_source_name>
+Yes
+Required when
+TYPE
+is
+COPY
+. Sets the destination Data Source for copy nodes.
+TOKEN <token_name> READ
+No
+Grants read access to a Pipe or Endpoint to the token named <token_name>. If the token isn't specified or <token_name> doesn't exist, it will be automatically created.
+COPY_SCHEDULE
+No
+Cron expression with the frequency to run copy jobs. Must be higher than 5 minutes. For example,
+*/5 * * * *
+. If undefined, it defaults to
+@on-demand
+.
+COPY_MODE
+No
+Strategy to ingest data for copy jobs. One of
+append
+or
+replace
+. If empty, the default strategy is
+append
+.
+Materialized Pipe
+¶
+In a .pipe file you can define how to materialize each row ingested in the earliest Data Source in the Pipe query to a materialized Data Source. Materialization happens at ingest.
+The following example shows how to describe a Materialized Pipe. See
+Materialized Views
+.
+tinybird/pipes/sales_by_hour_mv.pipe
+DESCRIPTION Materialized Pipe to aggregate sales per hour in the sales_by_hour Data Source
+
+NODE daily_sales
+SQL >
+    SELECT toStartOfDay(starting_date) day, country, sum(sales) as total_sales
+    FROM teams
+    GROUP BY day, country
+
+TYPE MATERIALIZED
+DATASOURCE sales_by_hour
+Copy Pipe
+¶
+In a .pipe file you can define how to export the result of a Pipe to a Data Source, optionally with a schedule.
+The following example shows how to describe a Copy Pipe. See
+Copy Pipes
+.
+tinybird/pipes/sales_by_hour_cp.pipe
+DESCRIPTION Copy Pipe to export sales hour every hour to the sales_hour_copy Data Source
+
+NODE daily_sales
+SQL >
+    %
+    SELECT toStartOfDay(starting_date) day, country, sum(sales) as total_sales
+    FROM teams
+    WHERE
+    day BETWEEN toStartOfDay(now()) - interval 1 day AND toStartOfDay(now())
+    and country = {{ String(country, 'US')}}
+    GROUP BY day, country
+
+TYPE COPY
+TARGET_DATASOURCE sales_hour_copy
+COPY_SCHEDULE 0 * * * *
+API Endpoint Pipe
+¶
+In a .pipe file you can define how to export the result of a Pipe as an HTTP endpoint.
+The following example shows how to describe an API Endpoint Pipe. See
+API Endpoints
+.
+tinybird/pipes/sales_by_hour_endpoint.pipe
+TOKEN dashboard READ
+DESCRIPTION endpoint to get sales by hour filtering by date and country
+
+TAGS sales
+
+NODE daily_sales
+SQL >
+    %
+    SELECT day, country, sum(total_sales) as total_sales
+    FROM sales_by_hour
+    WHERE
+    day BETWEEN toStartOfDay(now()) - interval 1 day AND toStartOfDay(now())
+    and country = {{ String(country, 'US')}}
+    GROUP BY day, country
+
+NODE result
+SQL >
+    %
+    SELECT * FROM daily_sales
+    LIMIT {{Int32(page_size, 100)}}
+    OFFSET {{Int32(page, 0) * Int32(page_size, 100)}}
+
+TYPE ENDPOINT
+Sink Pipe
+¶
+The following parameters are available when defining Sink Pipes:
+Instruction
+Required
+Description
+EXPORT_SERVICE
+Yes
+One of
+gcs_hmac
+,
+s3
+,
+s3_iamrole
+, or
+kafka
+.
+EXPORT_CONNECTION_NAME
+Yes
+The name of the export connection.
+EXPORT_SCHEDULE
+No
+Cron expression, in UTC time. Must be higher than 5 minutes. For example,
+*/5 * * * *
+.
+Blob storage Sink
+¶
+When setting
+EXPORT_SERVICE
+as one of
+gcs_hmac
+,
+s3
+, or
+s3_iamrole
+, you can use the following instructions:
+Instruction
+Required
+Description
+EXPORT_BUCKET_URI
+Yes
+The desired bucket path for the exported file. Path must not include the filename and extension.
+EXPORT_FILE_TEMPLATE
+Yes
+Template string that specifies the naming convention for exported files. The template can include dynamic attributes between curly braces based on columns' data that will be replaced with real values when exporting. For example:
+export_{category}{date,'%Y'}{2}
+.
+EXPORT_FORMAT
+Yes
+Format in which the data is exported. The default value is
+csv
+.
+EXPORT_COMPRESSION
+No
+Compression file type. Accepted values are
+none
+,
+gz
+for gzip,
+br
+for brotli,
+xz
+for LZMA,
+zst
+for zstd. Default values is
+none
+.
+EXPORT_STRATEGY
+Yes
+One of the available strategies. The default is
+@new
+.
+Kafka Sink
+¶
+Kafka Sinks are currently in private beta. If you have any feedback or suggestions, contact Tinybird at
+support@tinybird.co
+or in the
+Community Slack
+.
+When setting
+EXPORT_SERVICE
+as
+kafka
+, you can use the following instructions:
+Instruction
+Required
+Description
+EXPORT_KAFKA_TOPIC
+Yes
+The desired topic for the export data.
+Updated
+3 weeks ago
+On this page
+Pipe files (.pipe)
+Available instructions
+Materialized Pipe
+Copy Pipe
+API Endpoint Pipe
+Sink Pipe
+Blob storage Sink
+Kafka Sink
+classic
+Ask AI

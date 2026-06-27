@@ -1,0 +1,198 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/migrating-to-mariadb/migrating-to-mariadb-from-sql-server/sql-server-features-implemented-differently-in-mariadb
+
+SQL Server Features Implemented Differently in MariaDB | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+Differences Between MariaDB and Other DBMSs
+DDL Export Guide
+Migrating to MariaDB from MySQL
+Migrating to MariaDB from PostgreSQL
+Migrating to MariaDB from Oracle
+Migrating to MariaDB from SQL Server
+MariaDB Backups Overview for SQL Server Users
+Understanding MariaDB Architecture
+MariaDB Features Not Available in SQL Server
+SQL Server Features Not Available in MariaDB
+SQL Server Features Implemented Differently in MariaDB
+SQL Server and MariaDB Types Comparison
+Syntax Differences between MariaDB and SQL Server
+MariaDB Authorization and Permissions for SQL Server Users
+MariaDB Replication Overview for SQL Server Users
+MariaDB Transactions and Isolation Levels for SQL Server Users
+Moving Data Between SQL Server and MariaDB
+Repairing MariaDB Tables for SQL Server Users
+Setting Up MariaDB for Testing for SQL Server Users
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+SQL Server Features Implemented Differently in MariaDB
+Differences between features in Microsoft SQL Server and MariaDB.
+Migrating from SQL Server?
+Contact our Migration Experts
+Modern DBMSs implement several advanced features. While an SQL standard exists, the complete feature list is different for every database system. Sometimes different features allow achieving the same purpose, but with a different logic and different limitations. This is something to take into account when planning a migration.
+Some features are implemented by different DBMSs, with a similar logic and similar syntax. But there could be important differences that users should be aware of.
+This page has a list of SQL Server features that MariaDB implements in a different way, and SQL Server features for which MariaDB has an alternative feature. Minor differences are not taken into account here. The list is not exhaustive.
+SQL
+The list of supported
+data types
+is different.
+There are relevant
+differences in transaction isolation levels
+.
+SNAPSHOT
+isolation level is not supported. Instead, you can use
+START TRANSACTION WITH CONSISTENT SNAPSHOT
+to acquire a snapshot at the beginning of the transaction. This is compatible with all isolation levels. See
+How Isolation Levels are Implemented in MariaDB
+.
+JSON support is
+different
+.
+Indexes and Performance
+Clustered indexes. In MariaDB, the physical order of rows is delegated to the storage engine. InnoDB uses the primary key as a clustered index.
+Hash indexes. Only some storage engines support
+HASH
+indexes.
+The
+InnoDB
+storage engine has a feature called adaptive hash index, enabled by default. It means that in InnoDB all indexes are created as
+BTREE
+, and depending on how they are used, InnoDB could convert them from BTree to hash indexes, or the other way around. This happens in the background.
+The
+MEMORY
+storage engine uses hash indexes by default, if we don't specify the
+BTREE
+keyword.
+See
+Storage Engine Index Types
+for more information.
+Query store. MariaDB allows query performance analysis using the
+slow log
+and
+performance_schema
+. Some open source or commercial 3rd party tools read that information to produce statistics and make it easy to identify slow queries.
+Tables
+Computed columns are called
+generated columns
+in MariaDB and are created with a different syntax. See also
+Implementation Differences Compared to Microsoft SQL Server
+.
+Temporal tables
+use a different (more standard) syntax on MariaDB. In MariaDB, the history is stored in the same table as current data (but optionally in different partitions). MariaDB supports both
+SYSTEM_TIME
+and
+APPLICATION_TIME
+.
+Hidden columns are
+Invisible columns
+in MariaDB.
+Temporary tables
+are implemented and used differently.
+High Availability
+NOT FOR REPLICATION
+MariaDB supports
+replication filters
+to exclude some tables or databases from replication
+It is possible to keep a table empty in a slave (or in the master) by using the
+BLACKHOLE storage engine
+.
+The master can have columns that are not present in a slave (the other way around is also supported). Before using this feature, carefully read the
+Replication When the Master and Slave Have Different Table Definitions
+page.
+With MariaDB it's possible to
+prevent a trigger from running on slaves
+.
+It's possible to run
+events
+without replicating them. The same applies to some administrative statements.
+MariaDB superusers can run statements without replicating them, by using the
+sql_log_bin
+system variable.
+Constraints and triggers cannot be disabled for replication, but it is possible to drop them on the slaves.
+The
+IF EXISTS
+syntax allows one to easily create a table on the master that already exists (possibly in a different version) on a slave.
+pollinginterval option. See
+Delayed Replication
+.
+Security
+The list of
+permissions
+is different.
+Security policies. MariaDB allows one to achieve the same results by assigning permissions on views and stored procedures. However, this is not a common practice and it's more complicated than defining security policies. See
+Other Uses of Views
+.
+MariaDB does not support an
+OUTPUT
+clause. Instead, we can use
+DELETE RETURNING
+and, since
+MariaDB 10.5
+,
+INSERT RETURNING
+and
+REPLACE RETURNING
+.
+Other Features
+Linked servers. MariaDB supports storage engines to read from, and write to, remote tables. When using the
+CONNECT
+engine, those tables could be in different DBMSs, including SQL Server.
+Job scheduler: MariaDB uses an
+event scheduler
+to schedule events instead.
+See Also
+SQL Server features not available in MariaDB
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+SQL Server Features Not Available in MariaDB
+Next
+SQL Server and MariaDB Types Comparison
+Last updated
+1 year ago
+Was this helpful?
+SQL
+Indexes and Performance
+Tables
+High Availability
+Security
+Other Features
+See Also
+Was this helpful?

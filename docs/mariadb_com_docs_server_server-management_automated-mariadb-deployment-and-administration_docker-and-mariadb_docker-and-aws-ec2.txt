@@ -1,0 +1,166 @@
+Source: https://mariadb.com/docs/server/server-management/automated-mariadb-deployment-and-administration/docker-and-mariadb/docker-and-aws-ec2
+
+Docker and AWS EC2 | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+Starting & Stopping
+Automated Deployment & Administration
+Why to Automate MariaDB Deployments and Management
+Comparison Between Automation Systems
+Automating MariaDB Tasks with Events
+Automating Upgrades with MariaDB.Org Downloads REST API
+HashiCorp Vault and MariaDB
+Orchestrator Overview
+Ansible and MariaDB
+Puppet and MariaDB
+MariaDB Containers
+Adding Plugins to the MariaDB Docker Official Image
+Benefits of Managing MariaDB Containers with Orchestration Software
+Container Backup and Restoration
+Container Security
+Creating a Custom Container Image
+Deploy MariaDB Enterprise Server with Docker
+MariaDB Enterprise Docker Registry for MariaDB Enterprise Server
+Docker and AWS EC2
+Docker and Google Cloud
+Docker and Microsoft Azure
+Docker Official Image Frequently Asked Questions
+Installing and Using MariaDB via Docker
+MariaDB Container Cheat Sheet
+MariaDB Enterprise Server Docker Official Image Environment Variables
+Setting Up a LAMP Stack with Docker Compose
+Using Healthcheck
+MariaDB Enterprise Container Image Configuration Reference
+Kubernetes and MariaDB
+Vagrant and MariaDB
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Docker and AWS EC2
+Specific considerations and steps for running MariaDB Docker containers on Amazon EC2 instances.
+This process shows how to deploy MariaDB in a Docker container running on an EC2 instance. First we'll create the EC2 VM, then we'll deploy Docker to it. After that, we'll pull the MariaDB Docker image which we'll use to create a running container with a MariaDB instance. Finally, we'll load a sample database into the MariaDB instance.
+Create a VM in AWS EC2
+Install
+MariaDB client
+on your local machine, either bundled with Maria DB server or standalone.
+Login to AWS, navigate to
+EC2 service home
+Choose Region for EC2 in the upper right corner of the console
+Launch (1) Instance, giving instance a name (e.g. mrdb-ubuntu-docker-use1) and create or reuse a key pair
+Choose Ubuntu 22.04 or similar free tier instance
+Choose hardware, t2.micro or similar free tier instance
+Create Key Pair with name (e.g. mrdb-docker-aws-pk.pem if using openSSH at the command line, or mrdb- docker-aws-pk..ppk for use with programs like PuTTY.)
+Create or select a security group where SSH is allowed from anywhere 0.0.0.0/0. If you’d like to make this more secure, it can be restricted to a specific IP address or CIDR block.
+Copy
+{{aws-firewall}}
+Accept remaining instance creation defaults and click “launch instance”.
+Save the *.pem or *.ppk keyfile on your local hard drive when prompted. You will need it later. If you’re on Linux, don’t forget to change permissions on the downloaded *.pem / *.ppk key file:
+Copy
+$
+chmod
+400
+mrdb-docker-pk.pem
+Click into the instance summary (EC2 > Instances > Instance ID) and click on the “security” tab towards the bottom.
+Copy
+{{security-group}}
+In the relevant security group for your instance, Create an inbound rule so that TCP port 3306 is open, allowing external connections to Maria DB (like your local command line client for MariaDB). Double check that port 22 is open while you're there for SSH.
+Install Docker on the EC2 VM
+For more detailed instructions, refer to
+Installing and Using MariaDB via Docker
+Back in the instance summary (EC2 > Instances > Instance ID), copy the public IP (e.g. ww.xx.yyy.zzz)
+Open terminal window, navigate to the directory with private key (*.pem or *.ppk) file and start a SSH remote shell session by typing:
+(switch ww.xx.yyy.zzz for your IP address from step 14).
+Are you sure you want to continue connecting (yes/no/[fingerprint])?
+Say yes
+Escalate to root
+Install Docker
+Pull the Mariadb Docker Image and Create the Container
+Pull MariaDB Docker image
+Start MDRB docker process at your terminal / command line
+To ensure persistent storage, use the
+-v
+flag to mount your chosen directory as
+/var/lib/mysql
+. For Windows, represent file paths like
+C:\Users\YourUID\Documents\YourDirName
+accordingly. On Linux, use absolute file paths. Always replace the root password with a secure one, especially outside of development environments.
+Shell into container
+Login to MRDB inside container using the root password specified in step 20.
+Setup admin account with permission for remote connection, configure access control
+Obviously replace these passwords with something that is a bit more secure than you see in this example for anything other than development purposes.
+Setup service account for your app with permission for remote connection, configure access control
+Obviously replace these passwords with something that is a bit more secure than you see in this example for anything other than development purposes.
+Load up your database from your preexisting SQL script that contains
+CREATE DATABASE
+;
+USE DATABASE
+; and
+CREATE TABLE
+statements.
+Open a new terminal window (not your SSH session) and navigate to the directory containing your database creation script, for example,
+init.sql
+. Then, enter the command:
+(switch ww.xx.yyy.zzz for your IP address from step 14).
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+MariaDB Enterprise Docker Registry for MariaDB Enterprise Server
+Next
+Docker and Google Cloud
+Last updated
+28 days ago
+Was this helpful?
+Create a VM in AWS EC2
+Install Docker on the EC2 VM
+Pull the Mariadb Docker Image and Create the Container
+Was this helpful?
+Copy
+{{aws-instance-ip}}
+Copy
+$ ssh -i mrdb-docker-pk.pem ubuntu@ww.xx.yyy.zzz
+Copy
+$ sudo su
+Copy
+$ curl -fsSL https://get.docker.com | sudo sh
+Copy
+$ docker pull mariadb:lts
+Copy
+$ docker run --detach --name mariadb-docker -v \Users\YouUID\Documents\YourDirName:/var/lib/mysql:Z -p 3306:3306 -e MARIADB_ROOT_PASSWORD=yoursecurepassword mariadb:lts
+Copy
+$ docker exec -it mariadb-docker bash
+Copy
+$ mariadb -pyoursecurepassword
+Copy
+MariaDB [(none)]> CREATE USER 'admin'@'%' IDENTIFIED BY 'admin';
+MariaDB [(none)]> GRANT ALL ON *.* to 'admin'@'%' WITH GRANT OPTION;
+MariaDB [(none)]> SHOW GRANTS FOR admin;
+Copy
+MariaDB [(none)]> CREATE USER 'yourappname'@'%' IDENTIFIED BY 'yoursecurepassword';
+MariaDB [(none)]> GRANT INSERT, UPDATE, DELETE ON *.* to 'yourappname'@'%';
+MariaDB [(none)]> SHOW GRANTS FOR yourappname;
+Copy
+$ mariadb --host=ww.xx.yyy.zzz --port=3306 --user=admin --password=admin -e “SOURCE init.sql”

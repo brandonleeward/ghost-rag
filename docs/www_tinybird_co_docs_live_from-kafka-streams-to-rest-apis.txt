@@ -1,0 +1,34 @@
+Source: https://www.tinybird.com/docs/live/from-kafka-streams-to-rest-apis
+
+From Kafka Streams to REST APIs in minutes · Tinybird
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+← Back to Live
+From Kafka Streams to REST APIs in minutes
+Apache Kafka is the most popular platform for streaming data. In this live coding session, you'll learn how to use Kafka and Tinybird to quickly build flexible and scalable analytics pipelines that can be easily published as REST APIs in minutes. Come learn how to add streaming analytics to your data pipeline and productize your Kafka streams with Tinybird.
+In this live coding session, you'll learn how to:
+Connect a Kafka topic to a Tinybird Data Source to persist events data into OLAP storage
+Filter, aggregate, and join with SQL to enrich your streams
+Publish your SQL queries as low-latency, high-concurrency REST APIs
+Add query parameters to your API endpoints
+Monitor your API endpoints’ performance & errors
+Know when to use Tinybird and ksqldb, separately or in parallel
+Have questions?
+Join us on Slack
+Start building
+Live coding session
+When:
+December 27, 2022 at 16:00 UTC
+Duration:
+1 hour
+Who:
+Jorge Sancha
+Co-founder & CEO
+Alasdair Brown
+Developer Advocate
+Start building
+Ask AI
+Search...

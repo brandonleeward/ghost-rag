@@ -1,0 +1,168 @@
+Source: https://www.tinybird.com/docs/sql-reference/schema/how-to-debug-types
+
+How to debug types · Tinybird Docs
+Sign In
+Sign Up
+How to debug types
+¶
+Copy as MD
+Tools and techniques for debugging data types in ClickHouse and Tinybird.
+Using toTypeName()
+¶
+Check column types
+¶
+Use case
+: See what type ClickHouse assigned to a column
+Example
+:
+-- Check type of specific column
+SELECT toTypeName(user_id) as user_id_type FROM events LIMIT 1
+
+-- Check types of all columns
+SELECT
+  toTypeName(id) as id_type,
+  toTypeName(user_id) as user_id_type,
+  toTypeName(value) as value_type,
+  toTypeName(timestamp) as timestamp_type
+FROM events
+LIMIT 1
+Check expression types
+¶
+Use case
+: See what type an expression evaluates to
+Example
+:
+-- Check type of computed expression
+SELECT toTypeName(user_id + 1) as computed_type FROM events LIMIT 1
+Using toTypeName() with sample data
+¶
+Examine data and types together
+¶
+Use case
+: See both the data and its inferred type
+Example
+:
+-- See data and its type
+SELECT
+  user_id,
+  toTypeName(user_id) as type,
+  length(toString(user_id)) as length
+FROM events
+LIMIT 10
+Debug type conversion issues
+¶
+Use case
+: Understand why type conversions fail
+Example
+:
+-- Check what types are being converted
+SELECT
+  original_column,
+  toTypeName(original_column) as original_type,
+  toUInt32OrNull(original_column) as converted_value,
+  toTypeName(toUInt32OrNull(original_column)) as converted_type
+FROM events
+LIMIT 10
+Schema debugging
+¶
+Check table schema
+¶
+Use case
+: See the actual schema of a table
+Example
+:
+-- Get table schema
+DESCRIBE TABLE events
+
+-- Or use system.columns
+SELECT
+  name,
+  type,
+  default_expression
+FROM system.columns
+WHERE table = 'events'
+Compare expected vs actual types
+¶
+Use case
+: Verify if schema matches expectations
+Example
+:
+-- Check if types match expectations
+SELECT
+  name,
+  type,
+  CASE
+    WHEN type = 'UInt32' THEN 'Expected'
+    WHEN type = 'String' THEN 'Unexpected - should be UInt32'
+    ELSE 'Check this type'
+  END as status
+FROM system.columns
+WHERE table = 'events'
+Data validation
+¶
+Check for type inconsistencies
+¶
+Use case
+: Find data that doesn't match expected type
+Example
+:
+-- Find non-numeric values in numeric column
+SELECT
+  user_id,
+  toTypeName(user_id) as type
+FROM events
+WHERE toUInt32OrNull(user_id) IS NULL
+LIMIT 10
+Validate date formats
+¶
+Use case
+: Check if date strings can be parsed
+Example
+:
+-- Check date parsing
+SELECT
+  date_string,
+  toDateOrNull(date_string) as parsed_date,
+  CASE
+    WHEN toDateOrNull(date_string) IS NULL THEN 'Invalid date'
+    ELSE 'Valid date'
+  END as status
+FROM events
+LIMIT 10
+Best practices
+¶
+Use toTypeName() frequently
+- Check types during development
+Sample data
+- Always check sample data with types
+Validate assumptions
+- Don't assume types, verify them
+Document types
+- Keep track of expected vs actual types
+Test conversions
+- Test type conversions with sample data
+Related documentation
+¶
+Data types
+Type conversion functions
+Updated
+6 months ago
+On this page
+How to debug types
+Using toTypeName()
+Check column types
+Check expression types
+Using toTypeName() with sample data
+Examine data and types together
+Debug type conversion issues
+Schema debugging
+Check table schema
+Compare expected vs actual types
+Data validation
+Check for type inconsistencies
+Validate date formats
+Best practices
+Related documentation
+forward
+classic
+Ask AI

@@ -1,0 +1,256 @@
+Source: https://mariadb.com/docs/server/security/encryption/data-at-rest-encryption/innodb-encryption/disabling-innodb-encryption
+
+InnoDB: Disabling Encryption | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Security
+Securing MariaDB
+Encryption
+TLS and Cryptography Libraries
+Data-in-Transit Encryption
+Data-at-Rest Encryption
+Data-at-Rest Encryption (TDE) Fundamentals
+Managing Binary Log Encryption
+Aria Encryption
+InnoDB Encryption
+InnoDB: Encryption Overview
+InnoDB: Enabling Encryption
+InnoDB: Encryption Keys
+InnoDB: Disabling Encryption
+InnoDB: Background Encryption Threads
+InnoDB: Encryption Troubleshooting
+Key Management and Encryption Plugins
+User Account Management
+Authentication with Enterprise Server
+Limiting Size of Created Disk Temporary Files and Tables
+Security Vulnerabilities (CVE) Fixed in MariaDB
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+InnoDB: Disabling Encryption
+Instructions for safely disabling encryption on InnoDB tables, emphasizing the critical need to decrypt all tablespaces and redo logs using background threads or ALTER TABLE.
+Overview
+Decryption for InnoDB is more complex than Aria because it involves background threads and the Redo Log.
+This guide covers the process for safely decrypting InnoDB tablespaces, the system tablespace, and the Redo Log.
+Important Safety Precautions
+Do Not Remove Plugins Early: Keep your Key Management plugin configured and loaded until the very end. If you remove the keys before decryption is complete, the encrypted data will become permanently inaccessible.
+Order Matters: You must decrypt all tablespaces and the Redo Log before disabling the encryption plugin.
+1
+Disable automatic encryption.
+To stop the server from encrypting new tables and to begin the background decryption process for "automatically" encrypted tables (those where
+ENCRYPTED=DEFAULT
+), update the global system variables.
+Copy
+--
+Disable encryption for new tables and the system tablespace
+SET
+GLOBAL
+innodb_encrypt_tables
+=
+OFF
+;
+--
+Enable encryption threads to perform the decryption work
+SET
+GLOBAL
+innodb_encryption_threads
+=
+4
+;
+--
+Force rotation to unencrypted state by setting age to 1
+SET
+GLOBAL
+innodb_encryption_rotate_key_age
+=
+1
+;
+To make these changes persistent, update your
+MariaDB configuration file
+:
+Copy
+[mariadb]
+innodb_encrypt_tables
+=
+OFF
+innodb_encryption_threads
+=
+4
+innodb_encryption_rotate_key_age
+=
+1
+2
+Decrypt manually encrypted tables.
+Tables created with the explicit option
+ENCRYPTED=YES
+are not always automatically decrypted by background threads. You must manually issue an
+ALTER TABLE
+statement for these.
+Identify Manually Encrypted Tables
+Run this query to find tables that require manual decryption:
+Copy
+SELECT
+TABLE_SCHEMA, TABLE_NAME
+FROM
+information_schema
+.
+TABLES
+WHERE
+ENGINE
+=
+'
+InnoDB
+'
+AND
+(CREATE_OPTIONS
+LIKE
+'
+%ENCRYPTED=YES%
+'
+OR
+CREATE_OPTIONS
+LIKE
+'
+%ENCRYPTION="Y"%
+'
+);
+Perform Decryption
+For each table identified, run:
+Copy
+ALTER
+TABLE
+db_name
+.
+table_name
+ENCRYPTED
+=
+NO
+;
+3
+Decrypt the redo log.
+The Redo Log must be decrypted separately. This requires a server restart.
+The Redo Log is decrypted by ensuring the server can read the existing logs at startup and then configuring it to write new logs in plaintext.
+Ensure keys are active: Before attempting to disable Redo Log encryption, verify that your
+key management plugin
+is fully functional. MariaDB must be able to decrypt the current
+ib_logfile
+members during the startup/recovery phase.
+Update Configuration: Change the
+innodb_encrypt_log
+system variable to
+OFF
+in your server option file (for instance,
+my.cnf
+):
+Copy
+[mariadb]
+#
+Ensure the plugin remains loaded for this restart!
+innodb_encrypt_log
+=
+OFF
+Restart the server – perform a clean restart:
+Copy
+sudo
+systemctl
+restart
+mariadb
+During this restart, MariaDB uses the existing keys to read the encrypted Redo Logs, completes any necessary crash recovery, and then begins writing new Redo Log events in plaintext.
+Verification: Confirm the status by running:
+Copy
+SHOW
+GLOBAL
+VARIABLES
+LIKE
+'
+innodb_encrypt_log
+'
+;
+The value should now be
+OFF
+.
+4
+Monitor and verify decryption status.
+Before removing your encryption keys, you must verify that no tablespaces remain encrypted.
+Check Background Progress
+Monitor the
+INNODB_TABLESPACES_ENCRYPTION
+table. Decryption is complete when the count reaches
+0
+.
+Copy
+SELECT
+COUNT
+(
+*
+)
+AS
+"
+Encrypted_Tablespaces
+"
+FROM
+information_schema
+.
+INNODB_TABLESPACES_ENCRYPTION
+WHERE
+ENCRYPTION_SCHEME
+!=
+0
+OR
+ROTATING_OR_FLUSHING
+!=
+0
+;
+Verify Individual Tables
+Ensure that no tables show encryption in their creation options:
+Copy
+SELECT
+TABLE_NAME, CREATE_OPTIONS
+FROM
+information_schema
+.
+TABLES
+WHERE
+TABLE_SCHEMA
+=
+'
+your_database_name
+'
+;
+5
+Clean up.
+Once the count of encrypted tablespaces is
+0
+and the Redo Log has been rotated (after restart), you can safely:
+Remove the Encryption Key Management plugin settings from your configuration file.
+Restart the MariaDB Server one final time.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+InnoDB: Encryption Keys
+Next
+InnoDB: Background Encryption Threads
+Last updated
+2 months ago
+Was this helpful?
+Was this helpful?

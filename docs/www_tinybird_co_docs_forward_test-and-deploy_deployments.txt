@@ -1,0 +1,144 @@
+Source: https://www.tinybird.co/docs/forward/test-and-deploy/deployments
+
+Deployments · Tinybird Docs
+Sign In
+Sign Up
+Deployments in Tinybird
+¶
+Copy as MD
+Changing state in data infrastructure can be complex. Each state transition must ensure data integrity and consistency.
+Tinybird deployments simplify this process by providing robust mechanisms for managing state changes, allowing you to validate and push updates seamlessly while minimizing the risk of data conflicts or loss.
+What is a deployment?
+¶
+Deployments are versions of your project resources and data running on local or cloud infrastructure.
+Types of deployments
+¶
+There are two types of deployments:
+Staging deployments: Deployments you can use to validate your changes. You access them using the
+--staging
+flag.
+Live deployments: Deployments that make your changes available to your users.
+Deployment status
+¶
+Deployments have the following statuses:
+In progress
+: The deployment is in progress. Use
+--wait
+to wait for it to finish.
+Live
+: The deployment is active and has been promoted from staging.
+Staging
+: The deployment is active in staging. Use
+--staging
+to access it.
+Failed
+: The deployment failed. Try
+tb deploy --check
+to debug the issue.
+Deleted
+: The deployment was deleted as a result of creating new deployments.
+Deployment methods
+¶
+The following deployment methods are available:
+Manual deployment
+.
+CI/CD
+.
+If your project was initialized with
+tb init --dev-mode local
+or
+tb init --dev-mode branch
+,
+tb deploy
+without explicit environment flags deploys to your cloud main workspace.
+Staging deployments
+¶
+You can write data to, and read data from, a staging deployment before promoting it to live. This is useful when you've made schema changes
+that might be incompatible with the current live deployment, like adding new columns.
+Automatic data source changes that Tinybird applies with
+ALTER
+, such as adding a column or changing a data source TTL, are applied only when the deployment is promoted to live. Those changes aren't available in staging deployments.
+Use staging deployments to validate a deployment before it goes live. For longer-lived development environments that shouldn't block the deployment process, use
+Cloud Branches
+instead.
+Writing to staging deployments
+¶
+You can use the
+Events API
+to write directly to staging deployments through the
+__tb__min_deployment
+parameter,
+which indicates the target deployment ID. For example:
+curl \
+    -H "Authorization: Bearer <import_token>" \
+    -d '{"date": "2020-04-05 00:05:38", "city": "Chicago", "new_column": "value"}' \
+    'https://<your_host>/v0/events?name=events_test&__tb__min_deployment=5'
+In the example, if the ID of your current live deployment is 4 and you're creating deployment with an ID of 5, the data will be ingested into the staging deployment 5 only.
+This allows you to:
+Make schema changes in a staging deployment.
+Ingest data compatible with the new schema.
+Validate the changes work as expected.
+Promote the deployment to live when ready.
+Without the parameter, data would be rejected if it doesn't match the schema of the current live deployment.
+If you discard the staging deployment instead of promoting it, data written only to that staging deployment won't be available in the live deployment.
+To get the deployment ID, run
+tb deployment ls
+.
+Reading from staging deployments
+¶
+You can query data from a staging deployment using
+pipe endpoints
+. To access a staging endpoint, add the
+__tb__deployment
+parameter to your API request:
+curl \
+    -H "Authorization: Bearer <query_token>" \
+    'https://<your_host>/v0/pipes/my_endpoint?__tb__deployment=5'
+This allows you to:
+Test your endpoints with the new schema changes.
+Validate query results before promoting to live.
+Ensure your application works correctly with the updated data structure.
+To get the deployment ID, run
+tb deployment ls
+.
+Continuous operation
+¶
+Once the deployment is promoted to live, you can continue using the same API calls. In the previous example, calls using the
+__tb__min_deployment=5
+or
+__tb__deployment=5
+parameters will keep working without interruption. The parameters ensure compatibility both before and after promotion.
+For more details on the Events API parameters, see the
+Events API Reference
+.
+On-demand compute for deployment populates
+¶
+When a deployment needs to populate Data Sources, such as when creating Materialized Views or evolving schemas, Tinybird can run the populate on dedicated on-demand compute instead of your main workspace infrastructure. This keeps the populate isolated from production query and ingestion workloads.
+Tinybird automatically uses on-demand compute for large deployment populates. For pricing, regional rates, and example calculations, see
+On-demand CPUs
+.
+Next steps
+¶
+See how to
+deploy your project manually
+.
+See how to
+deploy your project using CI/CD
+.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Deployments in Tinybird
+What is a deployment?
+Types of deployments
+Deployment status
+Deployment methods
+Staging deployments
+Writing to staging deployments
+Reading from staging deployments
+Continuous operation
+On-demand compute for deployment populates
+Next steps
+forward
+Ask AI

@@ -1,0 +1,119 @@
+Source: https://www.tinybird.com/docs/classic/work-with-data/publish-data/guides/connect-datagrip
+
+Classic: Connect DataGrip to Tinybird · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Connect DataGrip to Tinybird
+¶
+Copy as MD
+DataGrip can connect to Tinybird using the ClickHouse® database driver, taking advantage of Tinybird's ClickHouse® HTTP protocol compatibility. This enables you to use DataGrip's advanced SQL development features, including intelligent code completion, on-the-fly error detection, and powerful refactoring capabilities with your Tinybird data.
+The ClickHouse® connection to Tinybird is read-only. You can use it to query and analyze data from your Tinybird data sources, but you cannot modify data through this connection.
+Prerequisites
+¶
+DataGrip IDE (part of JetBrains IDEs)
+A Tinybird workspace with data sources
+A Tinybird Auth Token with scopes
+WORKSPACE:READ_ALL
+and optionally
+ORG_DATASOURCES:READ
+. See
+how to create it
+.
+Create a new data source
+¶
+Open DataGrip and click the
++
+icon in the Database Explorer
+Select
+Data Source
+>
+ClickHouse
+If prompted, install or update the ClickHouse driver
+General settings
+¶
+Configure the main connection parameters in the
+General
+tab:
+Host: clickhouse.tinybird.co
+Port: 443  # For HTTPS connections
+User: <WORKSPACE_NAME>  # Not used for authentication, for identification only
+Password: <TOKEN>  # Your Tinybird Auth Token
+See the list of
+ClickHouse hosts
+to find the correct one for your region.
+DataGrip configuration
+SSH/SSL settings
+¶
+Click the
+SSH/SSL
+tab
+Check
+Use SSL
+Leave all other SSL settings at their defaults (no custom certificates required)
+DataGrip configuration
+Test and save
+¶
+Test Connection
+: Click
+Test Connection
+to verify the setup
+Apply
+: Click
+Apply
+and then
+OK
+to save the connection
+Explore your data
+¶
+Once connected, you can:
+Browse databases
+: Expand your data source to see available databases:
+Your workspace database (
+<WORKSPACE_NAME>
+)
+Service data sources (
+tinybird
+,
+organization
+)
+System tables (
+system
+)
+View tables and schemas
+: Navigate through your Data Sources and examine their structure
+Execute queries
+: Right-click on your data source and select
+New
+>
+Query Console
+to start writing SQL
+Test the connection
+¶
+Create a simple query to verify your connection:
+Open a new Query Console for your Tinybird data source
+Write a simple query to test the connection:
+SELECT *
+FROM system.tables
+WHERE database = '<WORKSPACE_NAME>'
+LIMIT 10
+Replace
+<WORKSPACE_NAME>
+with your actual workspace name. If the connection is working, you should see a list of your Data Sources.
+Learn more
+¶
+ClickHouse Interface overview
+Tinybird Auth Token management
+DataGrip documentation
+Updated
+4 weeks ago
+On this page
+Connect DataGrip to Tinybird
+Prerequisites
+Create a new data source
+Explore your data
+Test the connection
+Learn more
+classic
+Ask AI

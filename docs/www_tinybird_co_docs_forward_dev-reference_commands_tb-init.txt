@@ -1,0 +1,54 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-init
+
+tb init · Tinybird Docs
+Sign In
+Sign Up
+tb init
+¶
+Copy as MD
+Initializes a new Tinybird project.
+Use this command to scaffold your project structure, set development mode, and optionally generate CI/CD templates.
+tb init
+Options
+¶
+Option
+Description
+--type [typescript|python|cli]
+Project type.
+--dev-mode [branch|local|manual]
+Development mode for build/deploy routing.
+--folder TEXT
+Project folder. Default is
+tinybird
+.
+--cicd [github|gitlab|skip]
+Generates CI/CD templates for GitHub or GitLab.
+--skip-login
+Skips login prompt at the end of initialization.
+Example
+¶
+tb init --type cli --dev-mode manual --folder . --cicd github
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✓ Yes (implicit)
+Initializes local project files.
+--cloud
+✗ No
+Not supported.
+--branch=BRANCH_NAME
+✗ No
+Not supported.
+Updated
+3 months ago
+Looking for Classic docs?
+On this page
+tb init
+Options
+Example
+Environment support
+forward
+Ask AI

@@ -1,0 +1,58 @@
+Source: https://mariadb.com/docs/server/server-usage/triggers-events/event-scheduler
+
+Event Scheduler | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Triggers & Events
+Event Scheduler
+Events Overview
+ALTER EVENT
+Event Limitations
+Triggers
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Event Scheduler
+Utilize the Event Scheduler in MariaDB Server to automate tasks. Learn how to create, manage, and schedule events to execute SQL statements at specified intervals or times.
+Events Overview
+ALTER EVENT
+Event Limitations
+Previous
+Triggers & Events
+Next
+Events Overview
+Last updated
+1 year ago
+Was this helpful?
+Was this helpful?

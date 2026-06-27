@@ -1,0 +1,88 @@
+Source: https://www.tinybird.com/docs/classic/cli/quick-start
+
+Classic: Quick start · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Quick start for Tinybird command-line interface
+¶
+Copy as MD
+With Tinybird, you can ingest data from anywhere, query and transform it using SQL, and publish your data as high-concurrency, low-latency REST API endpoints.
+After you've
+familiarized yourself with Tinybird
+, you're ready to start automating and scripting the management of your Workspace using the Tinybird command-line interface (CLI). The Tinybird CLI is essential for all
+CI/CD workflows
+.
+Read on to learn how to download and configure the Tinybird CLI, create a Workspace, ingest data, create a query, publish an API, and confirm your setup works properly.
+Step 1: Create your Tinybird account
+¶
+Create a Tinybird account
+. It's free and no credit card is required. See
+Tinybird pricing plans
+for more information.
+Sign up for Tinybird
+Step 2: Download and install the Tinybird CLI
+¶
+Follow the instructions
+to download and install the Tinybird command-line interface (CLI).
+Complete the setup and authenticate with your Tinybird account in the cloud and region you prefer.
+Step 3: Create your Workspace
+¶
+A
+Workspace
+is an area that contains a set of Tinybird resources, including Data Sources, Pipes, nodes, API Endpoints, and Tokens.
+Create a Workspace named
+customer_rewards
+. Use a unique name.
+tb workspace create customer_rewards
+Step 4: Download and ingest sample data
+¶
+Download the following NDJSON sample data from a fictitious online coffee shop:
+Download data file
+The following Tinybird CLI commands infer the schema from the datafile, generate and push a .datasource file and ingest the data.
+tb datasource generate orders.ndjson        # Infer the schema
+tb push orders.datasource                   # Upload the datasource file
+tb datasource append orders orders.ndjson   # Ingest the data
+Step 5: Query data using a Pipe and Publish it as an API
+¶
+In Tinybird, you can create
+Pipes
+to query your data using SQL.
+The following commands create a Pipe with an SQL instruction that returns the number of records Tinybird has ingested from the data file:
+tb pipe generate rewards 'select count() from orders'
+tb push rewards.pipe
+When you push a Pipe, Tinybird publishes it automatically as a high-concurrency, low-latency API Endpoint.
+Step 6: Call the API Endpoint
+¶
+You can test your API Endpoint using a curl command.
+First, create and obtain the read Token for the API Endpoint.
+tb token create static rewards_read_token --scope PIPES:READ --resource rewards
+tb token copy rewards_read_token
+Copy the read Token and insert it into a curl command.
+curl --compressed -H 'Authorization: Bearer your_read_token_here'  https://api.us-east.aws.tinybird.co/v0/pipes/rewards.json
+You have now created your first API Endpoint in Tinybird using the CLI.
+Next steps
+¶
+Learn about datafiles and their format. See
+Datafiles
+.
+Learn how advanced templates can help you. See
+Advanced templates
+.
+Browse the full CLI reference. See
+Command reference
+.
+Updated
+1 month ago
+On this page
+Quick start for Tinybird command-line interface
+Step 1: Create your Tinybird account
+Step 2: Download and install the Tinybird CLI
+Step 3: Create your Workspace
+Step 4: Download and ingest sample data
+Step 5: Query data using a Pipe and Publish it as an API
+Step 6: Call the API Endpoint
+Next steps
+classic
+Ask AI

@@ -1,0 +1,279 @@
+Source: https://www.tinybird.com/docs/classic/get-data-in/guides/ingest-from-bigquery-using-google-cloud-storage
+
+Classic: Ingest from BigQuery using Google Cloud Storage · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Ingest data from BigQuery using Google Cloud Storage
+¶
+Copy as MD
+Read on to learn how to send data from BigQuery to Tinybird, for example when you need to periodically run full replaces of a table or do a one-off ingest.
+This process relies on
+BigQuery's exporting capabilities
+, or bulk exporting data as CSV, NDJSON, or Parquet files and then ingesting them using the
+GCS Connector
+.
+Prerequisites
+¶
+You need a Tinybird account and access to BigQuery and Google Cloud Storage.
+1
+Export the BigQuery table
+¶
+The first step consists in exporting the BigQuery table, or query result set, to a GCS bucket.
+1. Grant the required permissions in Google Cloud Console
+¶
+Make sure the GCS bucket allows BigQuery to write files. The service account used by BigQuery needs the
+roles/storage.objectCreator
+role on the bucket. You can grant this permission in the Google Cloud Console:
+Navigate to your GCS bucket in the Cloud Console
+Go to the
+Permissions
+tab
+Click
+Grant Access
+Add the BigQuery service account (format:
+service-<project-number>@gcp-sa-bigquery.iam.gserviceaccount.com
+) with the
+Storage Object Creator
+role
+2. Export the data
+¶
+Run the following SQL statement to export the data:
+EXPORT DATA OPTIONS(
+  uri = 'gs://your-bucket-name/path/orders/*.csv',
+  format = 'CSV',
+  compression = 'GZIP',
+  overwrite = true,
+  header = true,
+  field_delimiter = ','
+) AS (
+  SELECT
+    order_id,
+    customer_id,
+    order_status,
+    total_price,
+    order_date,
+    order_priority,
+    clerk
+  FROM `your-project.your_dataset.orders`
+  ORDER BY order_date
+);
+Replace
+your-bucket-name
+,
+path
+, and the table reference with your actual values.
+CSV format limitations
+: CSV does not support nested or repeated fields (arrays, structs). If your BigQuery table contains arrays or nested data types, you must use JSON or Parquet format instead. Attempting to export arrays or nested structures to CSV will result in an error.
+3. Export arrays and nested data
+¶
+For tables with arrays or nested structures, use JSON format:
+EXPORT DATA OPTIONS(
+  uri = 'gs://your-bucket-name/path/orders/*.json',
+  format = 'JSON',
+  compression = 'GZIP',
+  overwrite = true
+) AS (
+  SELECT
+    order_id,
+    customer_id,
+    items,  -- Array field
+    shipping_address,  -- Nested struct
+    order_date
+  FROM `your-project.your_dataset.orders`
+  ORDER BY order_date
+);
+JSON format considerations
+: When exporting to JSON format, BigQuery encodes
+INT64
+values as JSON strings to maintain precision. You may need to handle this in your Tinybird schema by parsing these strings as integers.
+4. Export using Parquet format
+¶
+Parquet format also supports nested and repeated data, and can be more efficient for large datasets:
+EXPORT DATA OPTIONS(
+  uri = 'gs://your-bucket-name/path/orders/*.parquet',
+  format = 'PARQUET',
+  compression = 'GZIP',
+  overwrite = true
+) AS (
+  SELECT
+    order_id,
+    customer_id,
+    items,
+    shipping_address,
+    order_date
+  FROM `your-project.your_dataset.orders`
+  ORDER BY order_date
+);
+5. Automate the export
+¶
+To automate the export, you can create a BigQuery Scheduled Query:
+In the BigQuery Console, click
+Scheduled queries
+Click
+Create scheduled query
+Enter your
+EXPORT DATA
+statement
+Set the schedule (e.g., daily, hourly)
+Configure the destination dataset and table if needed
+Follow the
+Google Cloud documentation for Scheduled Queries
+for more details.
+2
+Ingest data into Tinybird
+¶
+Before ingesting your BigQuery data from the GCS bucket, you need to create the GCS connection. For more details and advanced use cases, see the
+GCS Connector
+documentation.
+Supported file formats
+¶
+The GCS Connector supports the following formats exported from BigQuery:
+File Type
+Accepted Extensions
+Supported Compression
+Notes
+CSV
+.csv
+,
+.csv.gz
+gzip
+Does not support arrays or nested data. Use for simple, flat schemas.
+NDJSON
+.ndjson
+,
+.ndjson.gz
+,
+.jsonl
+,
+.jsonl.gz
+gzip
+Supports arrays and nested data. Each line must be a valid JSON object.
+Parquet
+.parquet
+,
+.parquet.gz
+snappy
+,
+gzip
+,
+lzo
+,
+brotli
+,
+lz4
+,
+zstd
+Supports arrays and nested data. More efficient for large datasets.
+NDJSON format
+: JSON files must follow the
+Newline Delimited JSON (NDJSON)
+format. Each line must be a valid JSON object and must end with a
+\n
+character. BigQuery's
+EXPORT DATA
+with
+format='JSON'
+produces NDJSON format.
+Create the data source
+¶
+You can use the following schema for the data source:
+SCHEMA >
+    `order_id` Int64,
+    `customer_id` Int64,
+    `order_status` String,
+    `total_price` Float32,
+    `order_date` DateTime,
+    `order_priority` String,
+    `clerk` String
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(order_date)"
+ENGINE_SORTING_KEY "order_date, order_priority"
+
+IMPORT_CONNECTION_NAME 'tb-gcs'
+IMPORT_BUCKET_URI 'gs://your-bucket-name/path/orders/*.csv.gz'
+IMPORT_SCHEDULE '@on-demand'
+For JSON exports with arrays, you'll need to handle the nested structure:
+SCHEMA >
+    `order_id` Int64 `json:$.order_id`,
+    `customer_id` Int64 `json:$.customer_id`,
+    `items` Array(String) `json:$.items[:]`,
+    `shipping_address` String `json:$.shipping_address`,
+    `order_date` DateTime `json:$.order_date`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(order_date)"
+ENGINE_SORTING_KEY "order_date"
+
+IMPORT_CONNECTION_NAME 'tb-gcs'
+IMPORT_BUCKET_URI 'gs://your-bucket-name/path/orders/*.json.gz'
+IMPORT_SCHEDULE '@on-demand'
+Handling BigQuery arrays and nested data
+: When exporting arrays or nested structures from BigQuery to JSON, they are stored as JSON strings in Tinybird. You can parse them in your Pipes using JSON functions like
+JSONExtractArrayRaw()
+or
+JSONExtractString()
+to work with the nested data.
+Deploy the data source. Since the GCS Connector uses
+@on-demand
+mode, you'll need to manually sync data when new files are available.
+Sync data
+¶
+After BigQuery exports new files to GCS, trigger a sync in Tinybird:
+Using the API
+¶
+curl -X POST "https://api.tinybird.co/v0/datasources/<datasource_name>/scheduling/runs" \
+  -H "Authorization: Bearer <your-tinybird-token>"
+Using the CLI
+¶
+tb datasource sync <datasource_name>
+Each file is appended to the Tinybird data source. As records might be duplicated if BigQuery re-exports the same data, consider using a materialized view to consolidate a stateful set of your BigQuery table.
+Data type considerations
+¶
+When exporting from BigQuery to Tinybird, be aware of these data type quirks:
+INT64 in JSON
+: BigQuery exports
+INT64
+values as JSON strings in JSON format to preserve precision. In your Tinybird schema, you may need to parse these strings. For example, if BigQuery exports
+"1234567890123456789"
+as a string, use
+toInt64(column_name)
+in your Pipes.
+Limits
+¶
+Because you're using the GCS Connector, its
+limits
+apply.
+The GCS Connector has its own limitations. To stay within your Tinybird plan's limits, you might need to
+limit the size of the exported files
+. BigQuery automatically splits large exports into multiple files of up to 1 GB when you use a wildcard in the URI (e.g.,
+gs://bucket/path/*.csv
+).
+Next steps
+¶
+See the following resources:
+GCS Connector
+Ingest from Snowflake using AWS S3
+Ingest from Snowflake using Azure Blob Storage
+Updated
+3 weeks ago
+On this page
+Ingest data from BigQuery using Google Cloud Storage
+Prerequisites
+Export the BigQuery table
+1. Grant the required permissions in Google Cloud Console
+2. Export the data
+3. Export arrays and nested data
+4. Export using Parquet format
+5. Automate the export
+Ingest data into Tinybird
+Supported file formats
+Create the data source
+Sync data
+Data type considerations
+Limits
+Next steps
+classic
+Ask AI

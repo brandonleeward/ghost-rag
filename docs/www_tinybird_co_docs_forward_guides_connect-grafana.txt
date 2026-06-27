@@ -1,0 +1,219 @@
+Source: https://www.tinybird.com/docs/forward/guides/connect-grafana
+
+Connect Grafana to Tinybird · Tinybird Docs
+Sign In
+Sign Up
+Connect Grafana to Tinybird
+¶
+Copy as MD
+Grafana can connect to Tinybird using ClickHouse® plugins, taking advantage of Tinybird's ClickHouse® HTTP protocol compatibility.
+This guide covers how to set up Grafana with Tinybird using two popular ClickHouse® plugins:
+ClickHouse® plugin
+Altinity plugin
+The ClickHouse® connection to Tinybird is read-only. You can use it to visualize data from your Tinybird data sources, but you cannot modify data through this connection.
+Remember you can expose metrics like API Endpoints in Prometheus format. See an
+example
+.
+And if you want to connect regular API Endpoints and not Data Sources you can use Infinity data source plugin for Grafana.
+Prerequisites
+¶
+A Tinybird workspace
+A Grafana instance (local or cloud)
+A Tinybird Auth Token with scopes
+WORKSPACE:READ_ALL
+and optionally
+ORG_DATASOURCES:READ
+. See
+how to create it
+.
+Install the ClickHouse® plugin
+¶
+Install one of the ClickHouse® plugins in your Grafana instance:
+ClickHouse® plugin
+- The official ClickHouse® plugin for Grafana
+Altinity plugin
+- developed by Vertamedia, maintaned by Altinity since 2020
+Select one based on your needs and install it through the Grafana plugin catalog or using grafana-cli.
+Configure the ClickHouse® plugin
+¶
+If you're using the official ClickHouse® plugin:
+Go to
+Configuration
+>
+Data Sources
+in Grafana
+Select
+Add data source
+and select
+ClickHouse®
+Configure the connection with these settings:
+Server address: clickhouse.tinybird.co # your host with 'clickhouse' subdomain instead of 'api', like clickhouse.eu-west-1.aws.tinybird.co
+Server port: 443
+Protocol: HTTP
+Secure Connection: yes
+See the list of
+ClickHouse hosts
+to find the correct one for your region.
+Add your authentication credentials:
+Username: <WORKSPACE_NAME> # not used for auth, helps you identify the connection
+Password: <TOKEN> # your Tinybird Auth Token
+Select
+Save & Test
+to verify the connection
+ClickHouse® plugin configuration
+Configure the ClickHouse® plugin for OpenTelemetry
+¶
+Use the
+OpenTelemetry template
+to build an end to end observability solution with OpenTelemetry and Tinybird.
+This section assumes you have the OpenTelemetry template deployed in a Tinybird Workspace.
+Once you've configured the ClickHouse plugin, edit the Grafana Data Source. You'll see the
+Logs
+and
+Traces
+configurations. Check the
+Use OTel
+checkboxes and set your Tinybird workspace name as
+Default database
+.
+ClickHouse® plugin configuration for OpenTelemetry
+From the
+Dashboards
+tab, you can import the
+Simple ClickHouse OTel dashboard
+as a starting point to analyze your OpenTelemetry logs and traces.
+ClickHouse® OTel dashboard
+You can add and edit visualization panels by writing new SQL queries to analyze your logs, metrics and traces.
+ClickHouse® Simple OTel dashboard
+Use the
+Explore
+feature in Grafana to filter and analyze your OpenTelemetry logs:
+OpenTelemetry logs explorer
+Provisioning the ClickHouse data source
+¶
+You can also provision the ClickHouse data source using a YAML file, which is useful for managing your Grafana configuration as code.
+This snippet uses the following environment variables, which you must set before applying it:
+TINYBIRD_WORKSPACE_NAME
+: Your workspace name
+TINYBIRD_TOKEN
+: A scoped or admin token
+TINYBIRD_CLICKHOUSE_HOST
+: Your ClickHouse HTTP interface host
+See the list of
+ClickHouse hosts
+to find the correct one for your region.
+apiVersion: 1
+
+datasources:
+  - name: Tinybird OTel Cloud
+    uid: tinybird-otel-cloud
+    type: grafana-clickhouse-datasource
+    access: proxy
+    editable: true
+    isDefault: false
+    jsonData:
+      defaultDatabase: ${TINYBIRD_WORKSPACE_NAME}
+      host: ${TINYBIRD_CLICKHOUSE_HOST}
+      logs:
+        contextColumns: []
+        defaultDatabase: ${TINYBIRD_WORKSPACE_NAME}
+        defaultTable: otel_logs
+        otelEnabled: true
+        otelVersion: latest
+        selectContextColumns: true
+      pdcInjected: false
+      port: 443
+      protocol: http
+      secure: true
+      tlsSkipVerify: false
+      traces:
+        defaultDatabase: ${TINYBIRD_WORKSPACE_NAME}
+        defaultTable: otel_traces
+        durationUnit: nanoseconds
+        otelEnabled: true
+        otelVersion: latest
+      useOtel: true
+      username: otel
+      version: 4.10.2
+    secureJsonData:
+      password: ${TINYBIRD_TOKEN}
+Configure the Altinity plugin
+¶
+If you're using the Altinity plugin:
+Go to
+Configuration
+>
+Data Sources
+in Grafana
+Select
+Add data source
+and select
+Altinity plugin for ClickHouse®
+Configure the connection with these settings:
+URL: https://clickhouse.tinybird.co
+Access: Server
+See the list of
+ClickHouse hosts
+to find the correct one for your region.
+Select Basic auth and add credentials:
+User: <WORKSPACE_NAME> # not used for auth, helps you identify the connection
+Password: <TOKEN> # your Tinybird Auth Token
+Select
+Save & Test
+to verify the connection
+Altinity plugin configuration
+Test the connection
+¶
+Once configured, test your connection by creating a simple query:
+Create a new dashboard and add a panel
+Select your newly created data source
+Write a simple query to test the connection
+If the connection is working, you should see the result.
+Databases and tables
+¶
+The SQL API exposes four databases: organization, system, tinybird, and workspace name:
+organization: for the Organization data sources, like
+organization.workspaces
+,
+organization.pipe_stats_rt
+system: for
+system.tables
+,
+system.columns
+tinybird: for the Workspace Service data sources like
+tinybird.datasources_ops_log
+,
+tinybird.pipe_stats_rt
+your workspace name: for your Workspace data sources.
+Next steps
+¶
+Explore Grafana's visualization options with your Tinybird data
+Set up alerts based on your real-time data
+Create dashboards that combine data from multiple sources
+Use Grafana variables to make your dashboards interactive
+Troubleshooting
+¶
+Connection failed
+: Verify that your Auth Token has read permissions and that the host URL is correct for your region.
+Query timeout
+: For large datasets, consider using Materialized Views or adding appropriate filters to your queries.
+Authentication errors
+: Double-check that your Auth Token is correct and that you've entered it into the Password field.
+Write operations fail
+: Remember that the ClickHouse® connection to Tinybird is read-only. You cannot use it to insert, update, or delete data.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Connect Grafana to Tinybird
+Prerequisites
+Install the ClickHouse® plugin
+Configure the ClickHouse® plugin
+Configure the ClickHouse® plugin for OpenTelemetry
+Configure the Altinity plugin
+Test the connection
+Databases and tables
+Next steps
+Troubleshooting
+forward
+Ask AI

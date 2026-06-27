@@ -1,0 +1,94 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/oqgraph-storage-engine/building-oqgraph-under-windows
+
+Building OQGRAPH Under Windows | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+OQGRAPH Overview
+Installing OQGRAPH
+Compiling OQGRAPH
+Building OQGRAPH Under Windows
+OQGRAPH Examples
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Building OQGRAPH Under Windows
+Specific instructions and prerequisites for building the OQGRAPH storage engine on Windows systems using Visual Studio.
+OQGRAPH v3 can be built on Windows. This has been tested using Windows 7, Microsoft Visual Studio Express 2010 (32-bit), Microsoft Windows 64-bit Platform SDK 7.1 (64-bit), the Boost library >= 1.55 and Judy 1.0.5.
+Note
+Other recent versions of Boost, Judy or MSVC may work but these combinations have not been tested.
+Download the source package for Boost 1.55 from the Boost project website,
+www.boost.org
+Download the source package for Judy 1.05 via
+Follow the documented instructions for building under Windows from the command line:
+Building_MariaDB_on_Windows
+Ensure that the following variable is set to CMAKE:
+JUDY_ROOT=path\to\judy\unzipped
+See also comments in
+storage/oqgraph/cmake/FindJudy.cmake
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Compiling OQGRAPH
+Next
+OQGRAPH Examples
+Last updated
+1 year ago
+Was this helpful?
+Was this helpful?

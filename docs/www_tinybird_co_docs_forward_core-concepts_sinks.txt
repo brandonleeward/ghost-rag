@@ -1,0 +1,91 @@
+Source: https://www.tinybird.com/docs/forward/core-concepts/sinks
+
+Sinks · Tinybird Docs
+Sign In
+Sign Up
+Sinks
+¶
+Copy as MD
+Tinybird Sinks allow you to export data from your Tinybird Workspace to external systems on a scheduled or on-demand basis. Sinks are built on top of
+Pipes
+and provide a fully managed way to push data to various destinations.
+Available Sinks
+¶
+Tinybird supports the following Sink destinations:
+Kafka Sink
+S3 Sink
+GCS Sink
+Sinks are available on the Developer and Enterprise plans. See
+Plans
+.
+Create a Sink
+¶
+Sinks are defined with a connection and a pipe that exports query results to that connection. Use
+TYPE SINK
+in
+.pipe
+files,
+defineSinkPipe
+in the TypeScript SDK, or
+define_sink_pipe
+in the Python SDK.
+The following example creates an S3 Sink that exports processed events to an S3 bucket on a schedule.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+connections/landing_s3.connection
+TYPE s3
+S3_REGION "us-east-1"
+S3_ARN {{ tb_secret("AWS_ROLE_ARN") }}
+datasources/events.datasource
+SCHEMA >
+    `timestamp` DateTime,
+    `session_id` String,
+    `status` String
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "timestamp"
+pipes/events_export_sink.pipe
+NODE export
+SQL >
+    SELECT timestamp, session_id
+    FROM events
+    WHERE status = 'processed'
+
+TYPE SINK
+EXPORT_CONNECTION_NAME "landing_s3"
+EXPORT_BUCKET_URI "s3://my-bucket/exports/"
+EXPORT_FILE_TEMPLATE "events_{date}"
+EXPORT_FORMAT "csv"
+EXPORT_SCHEDULE "0 * * * *"
+See all syntax options in the
+Sink pipes reference
+,
+TypeScript SDK reference
+, and
+Python SDK reference
+.
+Key features
+¶
+Fully Managed: Sinks require no additional tooling or infrastructure management.
+Scheduled or On-Demand: Run exports on a defined schedule using cron expressions or trigger them manually when needed.
+Query Parameters: Support for parameterized queries allows flexible data filtering and transformation.
+Observability: Monitor Sink operations and data transfer through Service Data Sources.
+Common use cases
+¶
+Sinks enable various data integration scenarios:
+Regular data exports to clients or partner systems.
+Feeding data lakes and data warehouses.
+Real-time data synchronization with external systems.
+Event-driven architectures and data pipelines.
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Sinks
+Available Sinks
+Create a Sink
+Key features
+Common use cases
+forward
+Ask AI

@@ -1,0 +1,88 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/installing-mariadb/troubleshooting-installation-issues/installing-on-an-old-linux-version
+
+Installing on an Old Linux Version | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+MariaDB ID Sign Up
+MariaDB Binary Packages
+Installing System Tables
+Troubleshooting Installation Issues
+Error: symbol mysql_get_server_name, version libmysqlclient_16 not defined
+Installation issues on Windows
+Installation Issues with PHP5
+Installing on an Old Linux Version
+Installation Issues on Debian and Ubuntu
+Installing MariaDB on IBM Cloud
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Installing on an Old Linux Version
+Guidance for dealing with glibc or shared library errors when attempting to install modern MariaDB binaries on older Linux distributions.
+This article lists some typical errors that may happen when you try to use an incompatible MariaDB binary on a linux system:
+The following example errors are from trying to install MariaDB built for SuSE 11.x on a SuSE 9.0 server:
+Copy
+> scripts/mysql_install_db
+./bin/my_print_defaults: /lib/i686/libc.so.6:
+version `GLIBC_2.4' not found (required by ./bin/my_print_defaults)
+and
+Copy
+> ./bin/mysqld --skip-grant &
+./bin/mysqld: error while loading shared libraries: libwrap.so.0:
+cannot open shared object file: No such file or directory
+If you see either of the above errors, the binary MariaDB package you installed is not compatible with your system.
+The options you have are:
+Find another MariaDB package or tar from the
+download page
+that matches your system.
+Alternatively,
+download the source
+and
+build it
+.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Installation Issues with PHP5
+Next
+Installation Issues on Debian and Ubuntu
+Last updated
+8 months ago
+Was this helpful?
+Was this helpful?

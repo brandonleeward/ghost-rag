@@ -1,0 +1,31 @@
+Source: https://www.tinybird.com/docs/classic/get-data-in/connectors
+
+Classic: Connectors · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Connectors
+¶
+Copy as MD
+Tinybird Connectors are native integrations that let you seamlessly connect to and ingest data from popular data platforms and services. They provide a managed solution to stream or batch import data into Tinybird with minimal configuration.
+The following Connectors are available:
+Amazon DynamoDB
+Amazon MSK
+Amazon S3
+Confluent
+Kafka
+Redpanda
+Each Connector is fully managed by Tinybird and requires minimal setup - typically just authentication credentials and basic configuration. They handle the complexities of:
+Authentication and secure connections
+Schema detection and mapping
+Incremental updates and change data capture
+Error handling and monitoring
+Scheduling and orchestration
+You can configure Connectors through either the Tinybird UI or CLI, making it easy to incorporate them into your data workflows and CI/CD pipelines.
+Updated
+1 year ago
+On this page
+Connectors
+classic
+Ask AI

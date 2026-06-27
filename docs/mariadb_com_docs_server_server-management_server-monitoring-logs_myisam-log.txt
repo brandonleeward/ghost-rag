@@ -1,0 +1,74 @@
+Source: https://mariadb.com/docs/server/server-management/server-monitoring-logs/myisam-log
+
+MyISAM Log | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Overview of MariaDB Logs
+Securing MariaDB Logs
+Binary Log
+Error Log
+General Query Log
+MyISAM Log
+Rotating Logs on Unix and Linux
+Slow Query Log
+SQL Error Log Plugin
+Transaction Coordinator Log
+Writing Logs Into Tables
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+MyISAM Log
+Explains the MyISAM log (`myisam.log`), a specialized log for recording changes to MyISAM tables for debugging purposes, enabled via the `--log-isam` option.
+The MyISAM log records all changes to
+MyISAM
+tables. It is not enabled by default. To enable it, start the server with the
+--log-isam
+option, for example:
+Copy
+--log-isam=myisam.log
+The
+isam
+instead of
+myisam
+above is not a typo - it's a legacy from when the predecessor to the MyISAM format, called ISAM. The option can be used without specifying a filename, in which case the default,
+myisam.log
+is used.
+To process the contents of the log file, use the
+myisamlog
+utility.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+General Query Log
+Next
+Rotating Logs on Unix and Linux
+Last updated
+5 months ago
+Was this helpful?
+Was this helpful?

@@ -1,0 +1,32 @@
+Source: https://www.tinybird.com/docs/live/deduplicating-olap-with-scheduled-data-snapshots
+
+Deduplicating OLAP with scheduled data snapshots · Tinybird
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+← Back to Live
+Deduplicating OLAP with scheduled data snapshots
+OLAP databases are great for analyzing huge amounts of data, but it's notoriously difficult to deduplicate records in them. Join this Live Coding Session to learn a new way to handle OLAP deduplication using scheduled copies of query results into snapshot tables.
+In this Live Coding Session, we’ll demonstrate an example deduplication use case using airline flight reservations.
+Follow along and learn how to
+Identify duplicated reservation entries in a columnar data table
+Generate a scheduled, deduplicated snapshot of reservation entries
+Publish low-latency APIs over the deduplicated data for your applications
+Have questions?
+Join us on Slack
+Start building
+Live coding session
+When:
+March 15, 2023 at 15:00 UTC
+Duration:
+1 hour
+Who:
+Iván Malagón
+Product Manager
+Gonzalo Gómez
+Sales Engineer
+Start building
+Ask AI
+Search...

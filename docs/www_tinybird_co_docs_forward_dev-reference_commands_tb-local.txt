@@ -1,0 +1,62 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-local
+
+tb local · Tinybird Docs
+Sign In
+Sign Up
+tb local
+¶
+Copy as MD
+Manages the local development environment.
+The following subcommands are available:
+Subcommand
+Description
+Arguments
+generate-tokens
+Generates random default user and workspace tokens for use in dev, CI/CD and testing.
+None
+start
+Starts the local development environment. Run with token args to set default values for
+TB_LOCAL_USER_TOKEN
+and
+TB_LOCAL_WORKSPACE_TOKEN
+.
+--user-token=<USER_TOKEN>
+--workspace-token=<WORKSPACE_TOKEN>
+restart
+Restarts the local development environment.
+None
+stop
+Stops the local development environment.
+None
+remove
+Removes the local development environment.
+tb local start
+¶
+Starts the local development environment.
+Option
+Description
+--watch
+Watches the logs of Tinybird Local while it is running.
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✗ No
+This command manages Tinybird Local itself.
+--cloud
+✗ No
+This command manages Tinybird Local itself.
+--branch=BRANCH_NAME
+✗ No
+This command manages Tinybird Local itself.
+Updated
+6 months ago
+Looking for Classic docs?
+On this page
+tb local
+tb local start
+Environment support
+forward
+Ask AI

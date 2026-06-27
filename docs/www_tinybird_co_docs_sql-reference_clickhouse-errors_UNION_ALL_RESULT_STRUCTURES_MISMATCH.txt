@@ -1,0 +1,221 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/UNION_ALL_RESULT_STRUCTURES_MISMATCH
+
+UNION_ALL_RESULT_STRUCTURES_MISMATCH ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+UNION_ALL_RESULT_STRUCTURES_MISMATCH ClickHouse error
+¶
+Copy as MD
+This error usually means the columns in your UNION ALL queries don't match in number, order, or data types. All queries in a UNION must have the same structure.
+The
+UNION_ALL_RESULT_STRUCTURES_MISMATCH
+error in ClickHouse (and Tinybird) happens when you try to combine multiple queries with UNION ALL, but the result structures don't match. This includes having different numbers of columns, different column orders, or incompatible data types.
+What causes this error
+¶
+You'll typically see it when:
+Using UNION ALL with different numbers of columns
+Having columns in different orders across queries
+Using incompatible data types in corresponding columns
+Missing columns in one part of the UNION
+Using different column names across UNION parts
+Column names in the final result come from the first SELECT. Subsequent SELECTs should align but do not rename columns.
+Example errors
+¶
+Fails: different number of columns
+SELECT user_id, event_type FROM users
+UNION ALL
+SELECT event_id FROM events
+Fails: different column order
+SELECT user_id, event_type FROM users
+UNION ALL
+SELECT event_type, user_id FROM events
+Fails: incompatible data types
+SELECT user_id, event_type FROM users
+UNION ALL
+SELECT event_type, user_id FROM events
+Fails: different column names
+SELECT user_id, event_type FROM users
+UNION ALL
+SELECT event_id, event_type FROM events
+How to fix it
+¶
+Match column count
+¶
+Ensure all queries have the same number of columns:
+Fix: same number of columns
+SELECT user_id, event_type FROM users
+UNION ALL
+SELECT user_id, event_type FROM events
+Match column order
+¶
+Ensure columns are in the same order across all queries:
+Fix: same column order
+SELECT user_id, event_type FROM users
+UNION ALL
+SELECT user_id, event_type FROM events
+Use compatible data types
+¶
+Ensure corresponding columns have compatible types:
+Fix: compatible data types
+SELECT toString(user_id) as user_id, event_type FROM users
+UNION ALL
+SELECT toString(user_id) as user_id, event_type FROM events
+Use column aliases
+¶
+Use aliases to ensure consistent column names:
+Fix: use column aliases
+SELECT user_id, event_type FROM users
+UNION ALL
+SELECT event_id as user_id, event_type FROM events
+Common patterns and solutions
+¶
+Simple UNION ALL
+¶
+When combining similar tables:
+Simple UNION ALL
+SELECT user_id, event_type, timestamp FROM users
+UNION ALL
+SELECT user_id, event_type, timestamp FROM events
+UNION ALL with different sources
+¶
+When combining different data sources:
+Different sources with same structure
+SELECT user_id, 'user' as source, name as description FROM users
+UNION ALL
+SELECT user_id, 'event' as source, event_type as description FROM events
+UNION ALL with aggregations
+¶
+When combining aggregated results:
+Aggregated results
+SELECT user_id, COUNT(*) as count FROM users GROUP BY user_id
+UNION ALL
+SELECT user_id, COUNT(*) as count FROM events GROUP BY user_id
+UNION ALL with constants
+¶
+When adding constant values:
+Adding constants
+SELECT user_id, event_type, 'user' as source FROM users
+UNION ALL
+SELECT user_id, event_type, 'event' as source FROM events
+Advanced solutions
+¶
+Using CTEs for complex unions
+¶
+Break down complex unions using CTEs:
+Complex union with CTEs
+WITH user_data AS (
+    SELECT user_id, name as description, 'user' as source
+    FROM users
+),
+event_data AS (
+    SELECT user_id, event_type as description, 'event' as source
+    FROM events
+)
+SELECT * FROM user_data
+UNION ALL
+SELECT * FROM event_data
+Handling different schemas
+¶
+When tables have different schemas:
+Different schemas
+SELECT
+    user_id,
+    name as description,
+    'user' as source,
+    created_at as timestamp
+FROM users
+UNION ALL
+SELECT
+    user_id,
+    event_type as description,
+    'event' as source,
+    timestamp
+FROM events
+Using type conversion
+¶
+Convert types to make them compatible:
+Type conversion in UNION
+SELECT
+    toString(user_id) as user_id,
+    name as description
+FROM users
+UNION ALL
+SELECT
+    toString(user_id) as user_id,
+    event_type as description
+FROM events
+Handling nullable types
+¶
+When dealing with nullable types, ensure compatibility:
+Nullable types in UNION
+SELECT id, count(*) as count FROM users GROUP BY id
+UNION ALL
+SELECT id, toInt64(NULL) as count FROM events GROUP BY id
+Best practices
+¶
+Column alignment
+¶
+Always check column count and order
+Use consistent column names across queries
+Ensure compatible data types
+Use aliases for clarity
+Query structure
+¶
+Test each part of the UNION separately
+Use CTEs for complex unions
+Document the expected structure
+Validate results after combining
+Performance considerations
+¶
+Use UNION ALL instead of UNION when duplicates are acceptable
+Consider using Materialized Views for complex unions
+Monitor query performance on large datasets
+Use appropriate indexes for UNION queries
+Tinybird-specific notes
+¶
+In Tinybird, this error often occurs when:
+Building Pipes that combine multiple Data Sources
+Using Materialized Views with UNION operations
+Working with nested Pipes that have different schemas
+Creating API endpoints that combine multiple queries
+To debug in Tinybird:
+Check your Data Source schemas for compatibility
+Verify Pipe node outputs have consistent structures
+Test UNION operations with simple queries first
+Use the Query Builder to validate UNION structures
+UNION in Pipes isn't supported. Use multiple Data Sources or perform UNION operations in SQL queries.
+See also
+¶
+SQL Reference
+- SQL reference documentation
+Working with Data Sources
+Updated
+4 weeks ago
+On this page
+UNION_ALL_RESULT_STRUCTURES_MISMATCH ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Match column count
+Match column order
+Use compatible data types
+Use column aliases
+Common patterns and solutions
+Simple UNION ALL
+UNION ALL with different sources
+UNION ALL with aggregations
+UNION ALL with constants
+Advanced solutions
+Using CTEs for complex unions
+Handling different schemas
+Using type conversion
+Handling nullable types
+Best practices
+Column alignment
+Query structure
+Performance considerations
+Tinybird-specific notes
+See also
+forward
+classic
+Ask AI

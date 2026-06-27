@@ -1,0 +1,33 @@
+Source: https://www.tinybird.com/docs/live/real-time-santa-tracker
+
+Building a Real-Time Santa Tracker · Tinybird
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+← Back to Live
+Building a Real-Time Santa Tracker
+Getting Santa from house to house is quite a logistics problem! Will the elves finish building the toys in time? Who's on the naughty and nice lists? What's Santa's most efficient route? Join us for a fun, festive live coding session where we'll build a live real-time Santa Tracker using streaming data from Santa's sleigh, CDC data from the workshop, and naughty and nice lists stored in an S3 bucket.
+In this live coding session, you'll learn how to...
+Solve complex inventory and logistics problems with real-time data
+Build a real-time data pipeline using simple HTTP requests and SQL
+Enrich event streams with data on files in object storage
+Capture change data from an application database for real-time analytics
+Create scalable, low-latency APIs to empower your team to build things with data
+Have questions?
+Join us on Slack
+Start building
+Live coding session
+When:
+December 15, 2023 at 14:00 UTC
+Duration:
+1 hour
+Who:
+Jim Moffitt
+Developer Advocate
+Cameron Archer
+Product Marketing Manager
+Start building
+Ask AI
+Search...

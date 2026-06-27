@@ -1,0 +1,196 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING
+
+QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING ClickHouse error
+¶
+Copy as MD
+This error usually means you're trying to run a query with the same ID as one that's already executing. This can happen with concurrent queries or when retrying failed queries too quickly.
+The
+QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING
+error in ClickHouse (and Tinybird) happens when you try to execute a query with an ID that's already being processed by the system. This is a concurrency control mechanism to prevent duplicate query execution.
+What causes this error
+¶
+You'll typically see it when:
+Running the same query multiple times simultaneously
+Retrying a failed query too quickly
+Using the same query ID across multiple concurrent requests
+Having long-running queries that block subsequent identical queries
+Using client libraries that reuse query IDs
+Example scenarios
+¶
+Scenario: Concurrent identical queries
+-- Query 1 (running)
+SELECT COUNT(*) FROM events WHERE timestamp >= now() - INTERVAL 1 HOUR
+
+-- Query 2 (fails - same ID)
+SELECT COUNT(*) FROM events WHERE timestamp >= now() - INTERVAL 1 HOUR
+Scenario: Quick retry after failure
+-- Query fails due to timeout
+SELECT * FROM large_table LIMIT 1000000
+
+-- Immediate retry (fails - same ID)
+SELECT * FROM large_table LIMIT 1000000
+How to fix it
+¶
+Wait for the query to complete
+¶
+The simplest solution is to wait for the original query to finish:
+Check running queries
+SELECT query_id, query, status
+FROM system.processes
+WHERE query LIKE '%your_query_pattern%'
+Use different query IDs
+¶
+If your client supports it, generate unique query IDs:
+Example with unique ID
+-- Client should generate unique query_id for each request
+SELECT query_id, query FROM system.processes
+Generate unique query IDs
+¶
+Use unique query IDs instead of random elements:
+Use unique query ID
+-- Set a unique query ID
+SET query_id = 'unique_id_123'
+SELECT COUNT(*) FROM events WHERE user_id > 0
+Use query hints
+¶
+Some clients allow you to specify query hints:
+Use query hint for unique ID
+SELECT /*+ QUERY_ID('unique_id_123') */
+       COUNT(*) FROM events
+Common patterns and solutions
+¶
+Long-running queries
+¶
+For queries that take a long time to complete:
+Check for long-running queries
+SELECT query_id, query, elapsed, status
+FROM system.processes
+ORDER BY elapsed DESC
+LIMIT 10
+Kill conflicting queries
+¶
+If you need to stop the conflicting query:
+Kill specific query
+KILL QUERY WHERE query_id = 'your_query_id'
+Use query timeouts
+¶
+Set appropriate timeouts to prevent long-running queries:
+Set query timeout
+SET max_execution_time = 300  -- 5 minutes
+SELECT * FROM large_table
+Implement retry logic
+¶
+Add delays between retries:
+Retry with delay
+-- Wait 5 seconds before retry
+SELECT sleep(5);
+SELECT COUNT(*) FROM events
+Advanced solutions
+¶
+Using connection pooling
+¶
+Configure your client to use connection pooling:
+Connection pool configuration
+-- Configure connection pool in your client
+-- This helps manage concurrent connections
+Query deduplication
+¶
+Implement query deduplication in your application:
+Application-level deduplication
+-- Check if query is already running before executing
+-- Use unique identifiers for each query instance
+Monitoring query execution
+¶
+Set up monitoring for query execution:
+Monitor query execution
+SELECT
+    query_id,
+    query,
+    status,
+    elapsed,
+    read_rows,
+    read_bytes
+FROM system.processes
+WHERE status = 'Running'
+Tinybird-specific notes
+¶
+In Tinybird, this error often occurs when:
+Running the same query multiple times in quick succession
+Using the same query ID across different API calls
+Having long-running queries in the Query Builder
+Using Materialized Views that take a long time to build
+To debug in Tinybird:
+Check the Query Builder for running queries
+Wait for long-running queries to complete
+Use different query parameters to make queries unique
+Implement proper retry logic in your applications
+Tinybird-specific notes
+¶
+By default, Tinybird sets a unique query ID for each request. This error mainly occurs when:
+Explicit query_id is provided
+PRIMARY KEY deduplication is used
+Using the same query_id across multiple API calls
+REST API
+: When using the REST API, pass the
+X-ClickHouse-Query-Id
+header if you need idempotency; otherwise let the client generate unique IDs.
+UI Console
+: In the Tinybird UI, you can see running queries in the console; there's no need to kill queries via raw SQL.
+Best practices
+¶
+Query management
+¶
+Use unique query IDs when possible
+Implement proper retry logic with exponential backoff
+Monitor query execution times
+Set appropriate timeouts for different query types
+Concurrency handling
+¶
+Limit concurrent queries when necessary
+Use connection pooling effectively
+Implement query queuing for high-load scenarios
+Monitor system resources during query execution
+Error handling
+¶
+Implement proper error handling for this specific error
+Add delays between retries
+Log query conflicts for debugging
+Use circuit breakers for repeated failures
+See also
+¶
+ClickHouse Query Management
+Working with Large Datasets
+Common function errors
+Updated
+4 weeks ago
+On this page
+QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING ClickHouse error
+What causes this error
+Example scenarios
+How to fix it
+Wait for the query to complete
+Use different query IDs
+Generate unique query IDs
+Use query hints
+Common patterns and solutions
+Long-running queries
+Kill conflicting queries
+Use query timeouts
+Implement retry logic
+Advanced solutions
+Using connection pooling
+Query deduplication
+Monitoring query execution
+Tinybird-specific notes
+Tinybird-specific notes
+Best practices
+Query management
+Concurrency handling
+Error handling
+See also
+forward
+classic
+Ask AI

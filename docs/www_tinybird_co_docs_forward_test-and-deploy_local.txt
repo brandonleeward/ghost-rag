@@ -1,0 +1,145 @@
+Source: https://www.tinybird.co/docs/forward/test-and-deploy/local
+
+Local development · Tinybird Docs
+Sign In
+Sign Up
+Local development
+¶
+Copy as MD
+Use Tinybird Local to build and test your project on your machine before deploying to Tinybird Cloud. The workflow is the same one used in the quickstarts: configure the project, build, test the Endpoint, then deploy.
+Use Tinybird Local when fixture data is enough and you want a fast loop on your machine. Use
+Cloud Branches
+when you need production-like data, connector validation, shared preview URLs, or pull request review.
+For installation, Docker settings, local services, API URLs, persistence, and local Tokens, see
+Tinybird Local
+.
+Check your project config
+¶
+Your project config defines which files Tinybird builds and which development environment commands use by default.
+Use
+include
+to point at your datafiles or SDK resource definitions. Set
+dev_mode
+or
+devMode
+to
+local
+when you want
+build
+to target Tinybird Local by default. You can still override the target with
+--local
+or
+--branch
+on the command line.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tinybird.config.json
+{
+  "dev_mode": "local",
+  "include": [
+    "tinybird"
+  ]
+}
+Typical local workflow
+¶
+Set the development environment to Local in
+tinybird.config.json
+.
+Start Tinybird Local.
+Check out a git branch.
+Build the project with fixture data.
+Edit Data Sources, Pipes, Endpoints, Tokens, or Connections.
+Rebuild and query local resources or call local Endpoints.
+Run a deployment check against Tinybird Cloud.
+Merge and deploy ideally via CI/CD.
+Start Tinybird Local
+¶
+Start Tinybird Local before you build or test local resources:
+tb local start
+The CLI logs the status of the container and services. Do not build the project until you see the
+Tinybird Local is ready!
+message.
+» Starting Tinybird Local...
+* Tinybird Local container status: healthy
+» Checking services...
+✓ Tinybird Local container
+✓ Clickhouse
+✓ Redis
+✓ Server
+✓ Events
+✓ Tinybird Local authentication
+✓ Tinybird Local is ready!
+Run Tinybird Local in the background with
+--daemon
+:
+tb local start --daemon
+If Tinybird Local becomes unhealthy, restart it:
+tb local restart
+Build the project
+¶
+Run a build before testing changes. It validates resource definitions, resolves dependencies, and loads matching fixture files.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb build
+If your config does not default to Local, pass the flag explicitly:
+tb --local build
+For SDK projects, use the matching SDK command, such as
+npx tinybird build --local
+.
+» Building project...
+✓ datasources/user_actions.datasource created
+✓ endpoints/user_actions_line_chart.pipe created
+✓ Build completed in 0.2s
+In the
+tb local start
+logs, you can see whether the request is successful.
+[API] POST /v1/build 200 67.1ms
+When you edit project files, run build again to apply the changes to Tinybird Local.
+If you want automatic rebuilds while editing local files, run
+tb dev
+. The examples use explicit
+tb build
+because it is the same command you run in CI and branch workflows.
+Test local resources
+¶
+Call local Endpoints with the local API host and a local Token:
+curl -H "Authorization: Bearer <local-token>" \
+  "http://localhost:7181/v0/pipes/user_actions_line_chart.json"
+You can also run SQL against Tinybird Local:
+tb --local sql "SELECT count() FROM user_actions"
+For test files and fixtures, see
+Test your project
+.
+Open Tinybird UI
+¶
+You can also use Tinybird UI to inspect your project. Run the following command to open the Tinybird UI pointing to your local environment.
+tb open
+The URL is
+https://cloud.tinybird.co/<cloud-provider>/<region>/<workspace-name>~local~<branch-name>
+Deploy after validation
+¶
+When the local checks pass, validate the deployment against Tinybird Cloud before merging or releasing:
+tb --cloud deploy --check
+Then deploy manually or let CI/CD deploy from the main branch:
+tb --cloud deploy
+See
+Manual deployment
+and
+CI/CD
+.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Local development
+Check your project config
+Typical local workflow
+Start Tinybird Local
+Build the project
+Test local resources
+Open Tinybird UI
+Deploy after validation
+forward
+Ask AI

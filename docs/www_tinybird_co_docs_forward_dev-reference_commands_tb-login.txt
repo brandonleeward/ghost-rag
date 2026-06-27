@@ -1,0 +1,63 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-login
+
+tb login · Tinybird Docs
+Sign In
+Sign Up
+tb login
+¶
+Copy as MD
+Authenticates with your Tinybird account.
+By default, the command opens a browser window for authentication. You can also use the
+--method code
+option to authenticate using a temporary code instead of a browser.
+The credentials are stored in the
+.tinyb
+file. See
+.tinyb file
+.
+Options
+¶
+Option
+Description
+--host TEXT
+Set a custom host if it's different than https://api.tinybird.co. Check
+Regions and endpoints
+for the available list of regions.
+--auth-host TEXT
+Set the host to authenticate to. If unset, the default host is used.
+--workspace TEXT
+Set the workspace to authenticate to. If unset, the default workspace is used.
+-i, --interactive
+Show available regions and prompts you to select one for authentication.
+--method [browser|code]
+Set the authentication method to use. Default: browser.
+--use-aws-creds
+Use AWS credentials to authenticate. Required to run S3 connections locally. See
+Using AWS credentials
+.
+To log out, run
+tb logout
+.
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✗ No
+Authentication is global and applies to all environments.
+--cloud
+✗ No
+Authentication is global and applies to all environments.
+--branch=BRANCH_NAME
+✗ No
+Authentication is global and applies to all environments.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+tb login
+Options
+Environment support
+forward
+Ask AI

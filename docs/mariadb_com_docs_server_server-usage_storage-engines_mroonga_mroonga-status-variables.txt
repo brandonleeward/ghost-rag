@@ -1,0 +1,97 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/mroonga/mroonga-status-variables
+
+Mroonga Status Variables | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+Mroonga Overview
+About Mroonga
+Mroonga Status Variables
+Mroonga System Variables
+Mroonga User-Defined Functions
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Mroonga Status Variables
+A list of status variables specific to Mroonga, used to monitor internal operations like fast line counts and order-by-limit optimizations.
+This page documents status variables related to the
+Mroonga storage engine
+. See
+Server Status Variables
+for a complete list of status variables that can be viewed with
+SHOW STATUS
+.
+Mroonga_count_skip
+Description: Incremented each time the 'fast line count feature' is used. Can be used to check if the feature is working after enabling it.
+Data Type:
+numeric
+Mroonga_fast_order_limit
+Description: Incremented each time the 'fast ORDER BY LIMIT feature' is used. Can be used to check if the feature is working after enabling it.
+Data Type:
+numeric
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+About Mroonga
+Next
+Mroonga System Variables
+Last updated
+1 year ago
+Was this helpful?
+Was this helpful?

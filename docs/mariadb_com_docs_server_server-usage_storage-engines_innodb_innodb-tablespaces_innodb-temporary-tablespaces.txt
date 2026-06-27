@@ -1,0 +1,196 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/innodb/innodb-tablespaces/innodb-temporary-tablespaces
+
+InnoDB Temporary Tablespaces | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+InnoDB Introduction
+InnoDB File Format
+InnoDB Limitations
+AUTO_INCREMENT Handling in InnoDB
+Binary Log Group Commit and InnoDB Flushing Performance
+InnoDB Asynchronous I/O
+InnoDB Buffer Pool
+InnoDB Change Buffering
+InnoDB Data Scrubbing
+InnoDB Doublewrite Buffer
+InnoDB Flush Method
+InnoDB Lock Modes
+InnoDB Log Archiving
+InnoDB Monitors
+InnoDB Page Compression
+InnoDB Page Flushing
+InnoDB Purge
+InnoDB Undo Log
+InnoDB Redo Log
+InnoDB Strict Mode
+InnoDB System Variables
+InnoDB Versions
+InnoDB Architecture for MariaDB Enterprise Server
+InnoDB Online DDL
+InnoDB Row Formats
+InnoDB Tablespaces
+InnoDB File-Per-Table Tablespaces
+InnoDB System Tablespaces
+InnoDB Temporary Tablespaces
+InnoDB Troubleshooting
+MariaDB Enterprise Server InnoDB Operations
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+InnoDB Temporary Tablespaces
+This page explains how InnoDB manages temporary tablespaces for non-compressed temporary tables, including configuration and sizing options.
+When the user creates a temporary table using the
+CREATE TEMPORARY TABLE
+statement and the engine is set as InnoDB, MariaDB creates a temporary tablespace file. When the table is not compressed, MariaDB writes to a shared temporary tablespace as defined by the
+innodb_temp_data_file_path
+system variable. MariaDB does not allow the creation of
+ROW_FORMAT=COMPRESSED
+temporary tables. All temporary tables are uncompressed. MariaDB deletes temporary tablespaces when the server shuts down gracefully and is recreated when it starts again. It cannot be placed on a raw device.
+Internal temporary tablespaces, (that is, temporary tables that cannot be kept in memory) use either Aria or MyISAM, depending on the
+aria_used_for_temp_tables
+system variable. You can set the default storage engine for user-created temporary tables using the
+default_tmp_storage_engine
+system variable.
+Prior to
+MariaDB 10.2
+, temporary tablespaces existed as part of the InnoDB
+system
+tablespace or were file-per-table depending on the configuration of the
+innodb_file_per_table
+system variable.
+Syntax for the value of the innodb_temp_data_file_path variable
+The options for
+innodb_temp_data_file_path
+is one path or a set of paths, separated by ';'.
+The syntax for each path is:
+Copy
+path:size[:autoextend][:max:size][:autoshrink]
+size
+can have extensions 'G' (Gigabytes), 'M' (Megabytes) or 'K' (Kilobytes). If no extension is given, then megabytes is assumed.
+The first
+size
+argument is the initial size of the temporary table space.
+autoextend
+means that the file size will automatically increase if needed.
+max
+can be used to limit the total size of the temporary file if
+autoextend
+is used.
+autoshrink
+means that the file will shrink to original size when possible.
+Only the last path can have the
+autoextend
+,
+max
+and
+autoshrink
+options.
+Sizing Temporary Tablespaces
+In order to size temporary tablespaces, use the
+innodb_temp_data_file_path
+system variable. This system variable can be specified as a command-line argument to
+mysqld
+or it can be specified in a relevant server
+option group
+in an
+option file
+:
+This system variable's syntax is the same as the
+innodb_data_file_path
+system variable. That is, a file name, size and option. By default, it writes a 12MB autoextending file to
+ibtmp1
+in the data directory.
+To increase the size of the temporary tablespace, you can add a path to an additional tablespace file to the value of the
+innodb_temp_data_file_path
+system variable. Providing additional paths allows you to spread the temporary tablespace between multiple tablespace files. The last file can have the
+autoextend
+attribute, which ensures that you won't run out of space:
+Unlike normal tablespaces, temporary tablespaces are deleted when you stop MariaDB. To shrink temporary tablespaces to their minimum sizes, restart the server.
+Shrinking the Tablespace
+From
+MariaDB 11.3.0
+, the temporary tablespace can be shrunk by setting
+innodb_truncate_temporary_tablespace_now
+to
+ON
+:
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+InnoDB System Tablespaces
+Next
+InnoDB Troubleshooting
+Last updated
+6 months ago
+Was this helpful?
+Syntax for the value of the innodb_temp_data_file_path variable
+Sizing Temporary Tablespaces
+Shrinking the Tablespace
+Was this helpful?
+Copy
+[mariadb]
+...
+innodb_temp_data_file_path=ibtmp1:32M:autoextend
+Copy
+[mariadb]
+...
+innodb_temp_data_file_path=ibtmp1:32M;ibtmp2:32M:autoextend
+Copy
+SET GLOBAL innodb_truncate_temporary_tablespace_now=1;

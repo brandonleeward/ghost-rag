@@ -1,0 +1,93 @@
+Source: https://www.tinybird.com/docs/sql-reference/data-types/geo
+
+Geographical Data Types reference · Tinybird Docs
+Sign In
+Sign Up
+Geographical data types
+¶
+Copy as MD
+This data type isn't supported at ingest. It is only supported at query time and to create Copy Data Sources or Materialized View Data Sources.
+Tinybird supports data types for representing geographical objects such as locations, boundaries, and regions.
+Point
+¶
+Point
+represents a single location as a pair of X (longitude) and Y (latitude) coordinates. Stored as
+Tuple(Float64, Float64)
+.
+SELECT CAST((12.3456, 65.4321) AS Point) AS point
+Result:
+┌─point────────────────┐
+│ (12.3456,65.4321)    │
+└──────────────────────┘
+Ring
+¶
+Ring
+represents a simple polygon without holes, stored as an array of points:
+Array(Point)
+. The ring should be closed, meaning the first and last points should be the same.
+SELECT CAST([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)] AS Ring) AS ring
+Result:
+┌─ring──────────────────────────────────┐
+│ [(0,0),(1,0),(1,1),(0,1),(0,0)]       │
+└───────────────────────────────────────┘
+LineString
+¶
+LineString
+represents a line as an ordered array of points:
+Array(Point)
+.
+SELECT CAST([(0, 0), (1, 1), (2, 0)] AS LineString) AS line
+Result:
+┌─line──────────────────────┐
+│ [(0,0),(1,1),(2,0)]       │
+└───────────────────────────┘
+MultiLineString
+¶
+MultiLineString
+represents multiple lines, stored as an array of
+LineString
+:
+Array(LineString)
+.
+SELECT CAST([[(0, 0), (1, 1)], [(2, 2), (3, 3)]] AS MultiLineString) AS lines
+Result:
+┌─lines────────────────────────────┐
+│ [[(0,0),(1,1)],[(2,2),(3,3)]]    │
+└──────────────────────────────────┘
+Polygon
+¶
+Polygon
+represents a polygon with optional holes, stored as an array of rings:
+Array(Ring)
+. The first element is the outer boundary and subsequent elements are holes.
+SELECT CAST([[(0, 0), (10, 0), (10, 10), (0, 10), (0, 0)]] AS Polygon) AS polygon
+Result:
+┌─polygon──────────────────────────────────────────┐
+│ [[(0,0),(10,0),(10,10),(0,10),(0,0)]]             │
+└──────────────────────────────────────────────────┘
+MultiPolygon
+¶
+MultiPolygon
+represents a collection of polygons, stored as an array of
+Polygon
+:
+Array(Polygon)
+.
+SELECT CAST([[[(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]], [[(2, 2), (3, 2), (3, 3), (2, 3), (2, 2)]]] AS MultiPolygon) AS mp
+Result:
+┌─mp───────────────────────────────────────────────────────────────────────┐
+│ [[[(0,0),(1,0),(1,1),(0,1),(0,0)]],[[(2,2),(3,2),(3,3),(2,3),(2,2)]]]    │
+└──────────────────────────────────────────────────────────────────────────┘
+Updated
+3 weeks ago
+On this page
+Geographical data types
+Point
+Ring
+LineString
+MultiLineString
+Polygon
+MultiPolygon
+forward
+classic
+Ask AI

@@ -1,0 +1,123 @@
+Source: https://www.tinybird.com/docs/sql-reference/performance/nullable-columns
+
+Nullable columns troubleshooting · Tinybird Docs
+Sign In
+Sign Up
+Nullable columns troubleshooting
+¶
+Copy as MD
+Common issues and solutions for nullable column performance in ClickHouse and Tinybird.
+Common issues
+¶
+Performance impact of nullable columns
+¶
+Issue
+: Nullable columns can significantly impact query performance
+Solution
+: Use nullable columns only when necessary
+-- Avoid nullable for frequently filtered columns
+-- Instead of: Nullable(String) user_id
+-- Use: String user_id with default value
+Inefficient nullable operations
+¶
+Issue
+: Operations on nullable columns without proper handling
+Solution
+: Handle nulls explicitly in queries
+-- Handle nulls explicitly
+SELECT
+  CASE
+    WHEN nullable_column IS NULL THEN 'unknown'
+    ELSE nullable_column
+  END as safe_column
+FROM events
+Performance optimization
+¶
+Using COALESCE
+¶
+Issue
+: Complex null handling in queries
+Solution
+: Use COALESCE for simple null handling
+-- Use COALESCE for null handling
+SELECT COALESCE(nullable_column, 'default_value') as safe_column
+FROM events
+Nullable columns cannot be sorting keys
+¶
+Issue
+: Nullable columns cannot be used in sorting keys (
+ENGINE_SORTING_KEY
+), limiting query optimization
+Solution
+: Use COALESCE to create non-nullable columns for sorting keys
+-- Data Source schema: use COALESCE for sorting key
+SCHEMA >
+  `id` Int64,
+  `nullable_status` Nullable(String),
+  `status` String DEFAULT COALESCE(nullable_status, 'unknown'),
+  `date` DateTime
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "status, date"
+This allows you to use the column in the sorting key while preserving the nullable information in the original column.
+Memory considerations
+¶
+Memory overhead of nullable columns
+¶
+Issue
+: Nullable columns use more memory than non-nullable
+Solution
+: Consider alternatives for large datasets
+-- Use default values instead of nullable for large datasets
+-- Instead of: Nullable(UInt32) value
+-- Use: UInt32 value DEFAULT 0
+Storage optimization
+¶
+Issue
+: Nullable columns with many null values
+Solution
+: Use sparse columns or separate null tracking
+-- Track nulls separately for optimization
+SELECT
+  value,
+  CASE WHEN value IS NULL THEN 1 ELSE 0 END as is_null
+FROM events
+Best practices
+¶
+Use nullable sparingly
+- Only for truly optional data
+Nullable columns can't be sorting keys
+- Use COALESCE to create non-nullable columns for sorting keys
+Handle nulls explicitly
+- Use COALESCE and CASE statements
+Consider alternatives
+- Use default values instead of nullable for large datasets
+Nullable columns are bigger and slower
+- They use more memory and storage than non-nullable columns
+Monitor nullable performance
+- Track impact on query performance
+Related documentation
+¶
+Fix common mistakes
+- Source of truth for data type optimization, including nullable columns
+Data types
+Query optimization
+Performance monitoring
+Updated
+4 weeks ago
+On this page
+Nullable columns troubleshooting
+Common issues
+Performance impact of nullable columns
+Inefficient nullable operations
+Performance optimization
+Using COALESCE
+Nullable columns cannot be sorting keys
+Memory considerations
+Memory overhead of nullable columns
+Storage optimization
+Best practices
+Related documentation
+forward
+classic
+Ask AI

@@ -1,0 +1,62 @@
+Source: https://mariadb.com/docs/server/server-usage/basics
+
+Basics | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+A MariaDB Primer
+Basic Queries
+Basic SQL Debugging
+Basic SQL Statements
+Commonly Used Queries
+String Functions
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Basics
+Grasp the basics of using MariaDB Server. This section introduces fundamental concepts, common SQL commands, and essential operations to get you started with your database.
+A MariaDB Primer
+Basic Queries
+Basic SQL Debugging
+Basic SQL Statements
+Commonly Used Queries
+String Functions
+Previous
+Server Usage
+Next
+A MariaDB Primer
+Last updated
+1 year ago
+Was this helpful?
+Was this helpful?

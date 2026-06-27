@@ -1,0 +1,112 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/aria/aria-two-step-deadlock-detection
+
+Aria Two-step Deadlock Detection | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+Aria Storage Engine
+Aria Group Commit
+Aria Status Variables
+Aria Storage Formats
+Aria System Variables
+Aria Two-step Deadlock Detection
+Aria FAQ
+The Aria Name
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Aria Two-step Deadlock Detection
+Explains Aria's deadlock detection mechanism, which uses a two-step process with configurable search depths and timeouts to resolve conflicts.
+Description
+The
+Aria
+storage engine can automatically detect and deal with deadlocks (see the
+Wikipedia deadlocks article
+).
+This feature is controlled by four configuration variables, two that control the search depth and two that control the timeout.
+deadlock_search_depth_long
+deadlock_search_depth_short
+deadlock_timeout_long
+deadlock_timeout_short
+How it Works
+If Aria is ever unable to obtain a lock, we might have a deadlock. There are two primary ways for detecting if a deadlock has actually occurred. First is to search a wait-for graph (see the
+wait-for graph on Wikipedia
+) and the second is to just wait and let the deadlock exhibit itself. Aria Two-step Deadlock Detection does a combination of both.
+First, if the lock request cannot be granted immediately, we do a short search of the wait-for graph with a small search depth as configured by the
+deadlock_search_depth_short
+variable. We have a depth limit because the graph can (theoretically) be arbitrarily big and we don't want to recursively search the graph arbitrarily deep. This initial, short search is very fast and most deadlocks are detected right away. If no deadlock cycles are found with the short search the system waits for the amount of time configured in
+deadlock_timeout_short
+to see if the lock conflicts are removed and the lock can be granted. Assuming this did not happen and the lock request still waits, the system then moves on to step two, which is a repeat of the process but this time searching deeper using the
+deadlock_search_depth_long
+. If no deadlock has been detected, it waits
+deadlock_timeout_long
+and times out.
+When a deadlock is detected the system uses a weighting algorithm to determine which thread in the deadlock should be killed and then kills it.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Aria System Variables
+Next
+Aria FAQ
+Last updated
+11 months ago
+Was this helpful?
+Description
+How it Works
+Was this helpful?

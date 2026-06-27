@@ -1,0 +1,206 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/NUMBER_OF_ARGUMENTS_DOESNT_MATCH
+
+NUMBER_OF_ARGUMENTS_DOESNT_MATCH ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+NUMBER_OF_ARGUMENTS_DOESNT_MATCH ClickHouse error
+¶
+Copy as MD
+This error usually means you're calling a function with the wrong number of arguments. Check the function documentation to see how many parameters it expects and what types they should be.
+The
+NUMBER_OF_ARGUMENTS_DOESNT_MATCH
+error in ClickHouse (and Tinybird) happens when you call a function with an incorrect number of arguments. Functions in ClickHouse have specific signatures that define how many parameters they expect and what types those parameters should be.
+What causes this error
+¶
+You'll typically see it when:
+Calling a function with too few arguments
+Calling a function with too many arguments
+Using the wrong syntax for function calls
+Missing required parameters
+Using optional parameters incorrectly
+Example errors
+¶
+Fails: too few arguments
+SELECT replace('hello world')
+Fails: too many arguments
+SELECT toDate('2023-01-01', 'UTC', 'extra')
+Fails: missing required parameter
+SELECT formatDateTime(now())
+Fails: wrong function syntax
+SELECT if(user_id > 10, 'high', 'low', 'unknown')
+How to fix it
+¶
+Check function documentation
+¶
+Always verify the function signature before using it:
+Correct: replace with all arguments
+SELECT replace('hello world', 'world', 'clickhouse')
+Correct: toDate with timezone
+SELECT toDate('2023-01-01', 'UTC')
+Use proper function syntax
+¶
+Make sure you're using the correct syntax for each function:
+Correct: formatDateTime with format
+SELECT formatDateTime(now(), '%Y-%m-%d %H:%M:%S')
+Correct: if with three arguments
+SELECT if(user_id > 10, 'high', 'low')
+Common patterns and solutions
+¶
+String functions
+¶
+Common string functions and their argument counts:
+substring function
+SELECT substring('hello world', 1, 5)  -- 3 arguments: string, start, length (indexing starts at 1)
+replace function
+SELECT replace('hello world', 'world', 'clickhouse')  -- 3 arguments: string, old, new
+concat function
+SELECT concat('hello', ' ', 'world')  -- variable number of arguments
+Date and time functions
+¶
+Date functions often require specific formats:
+parseDateTimeBestEffort function
+SELECT parseDateTimeBestEffort('2023/01/01', 'UTC')  -- 2 arguments: date string, timezone
+toDateTime function
+SELECT toDateTime('2023-01-01 12:00:00')  -- 1 argument: datetime string
+formatDateTime function
+SELECT formatDateTime(now(), '%Y-%m-%d')  -- 2 arguments: datetime, format
+Conditional functions
+¶
+Conditional functions have specific argument requirements:
+if function
+SELECT if(condition, true_value, false_value)  -- 3 arguments
+multiIf function
+SELECT multiIf(
+    condition1, value1,
+    condition2, value2,
+    default_value
+)  -- odd number of arguments
+greatest function
+SELECT greatest(1, 2, 3, 4, 5)  -- variable number of arguments
+least function
+SELECT least(10, 5, 8, 2)  -- variable number of arguments
+Aggregate functions
+¶
+Aggregate functions can have different argument patterns:
+count function
+SELECT count(*)  -- 1 argument: expression or *
+sum function
+SELECT sum(value)  -- 1 argument: numeric expression
+avg function
+SELECT avg(value)  -- 1 argument: numeric expression
+Advanced solutions
+¶
+Using optional parameters
+¶
+Some functions have optional parameters:
+toDate with optional timezone
+SELECT toDate('2023-01-01')  -- without timezone
+SELECT toDate('2023-01-01', 'UTC')  -- with timezone
+Variable argument functions
+¶
+Some functions accept variable numbers of arguments:
+concat function
+SELECT concat('a', 'b', 'c', 'd')  -- any number of arguments
+greatest function
+SELECT greatest(1, 2, 3, 4, 5)  -- any number of arguments
+Function parameter ordering
+¶
+ClickHouse doesn't support named parameters. Parameter order matters and must match the function signature exactly.
+Correct: parameters in order
+SELECT substring('hello world', 1, 5)  -- string, start, length
+Wrong: wrong parameter order
+SELECT substring(1, 'hello world', 5)  -- This will fail
+Window functions
+¶
+Window functions have specific syntax requirements:
+Correct window function
+SELECT user_id,
+       ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY timestamp) as row_num
+FROM events
+Function categories and common signatures
+¶
+String manipulation
+¶
+substring(string, start, length)
+- Extract substring
+replace(string, old, new)
+- Replace substring
+concat(string1, string2, ...)
+- Concatenate strings
+trim(string)
+- Remove whitespace
+Date and time
+¶
+toDate(string)
+- Convert to date
+toDateTime(string)
+- Convert to datetime
+formatDateTime(datetime, format)
+- Format datetime
+now()
+- Current timestamp
+Mathematical
+¶
+abs(number)
+- Absolute value
+round(number, decimals)
+- Round number
+power(base, exponent)
+- Raise to power
+sqrt(number)
+- Square root
+Conditional
+¶
+if(condition, true_value, false_value)
+- Simple conditional
+multiIf(condition1, value1, condition2, value2, ...)
+- Multiple conditions
+case when ... then ... else ... end
+- CASE statement
+Tinybird-specific notes
+¶
+In Tinybird, this error often occurs when:
+Using ClickHouse functions in Pipes with wrong argument counts
+Calling custom functions with incorrect parameters
+Using Materialized View functions incorrectly
+Working with JSON extraction functions
+To debug in Tinybird:
+Check the ClickHouse function documentation
+Use the Query Builder to test function calls
+Verify function signatures in Pipe nodes
+Test functions with simple examples first
+See also
+¶
+ClickHouse Functions
+String Functions
+Date and Time Functions
+Common function errors
+Updated
+7 months ago
+On this page
+NUMBER_OF_ARGUMENTS_DOESNT_MATCH ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Check function documentation
+Use proper function syntax
+Common patterns and solutions
+String functions
+Date and time functions
+Conditional functions
+Aggregate functions
+Advanced solutions
+Using optional parameters
+Variable argument functions
+Function parameter ordering
+Window functions
+Function categories and common signatures
+String manipulation
+Date and time
+Mathematical
+Conditional
+Tinybird-specific notes
+See also
+forward
+classic
+Ask AI

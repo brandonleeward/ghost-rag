@@ -1,0 +1,145 @@
+Source: https://www.tinybird.com/docs/forward/core-concepts/copy-pipes
+
+Copy pipes · Tinybird Docs
+Sign In
+Sign Up
+Copy pipes
+¶
+Copy as MD
+Copy pipes capture the result of a pipe at a moment in time and write the result into a target data source. They can be run on a schedule, or executed on demand.
+Copy pipes should not be confused with
+materialized views
+. While materialized views continuously update as new events are inserted, copy pipes generate a single snapshot at a specific point in time.
+Create a copy pipe
+¶
+Copy pipes are defined with SQL nodes and a target Data Source. Use
+TYPE COPY
+in
+.pipe
+files,
+defineCopyPipe
+in the TypeScript SDK, or
+define_copy_pipe
+in the Python SDK.
+Define the queries that filter and transform the data as needed. The final result is written into the target Data Source. Before pushing a copy pipe to your workspace, make sure that the target Data Source already exists and has a schema that matches the query output.
+The following example creates a copy pipe scheduled to run every hour and write the query result into the
+sales_hour_copy
+Data Source.
+Copy Pipes can use Tinybird's
+templating language
+in SQL nodes. Scheduled Copy Pipes must provide defaults for parameters because there is no request-time value.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+datasources/teams.datasource
+SCHEMA >
+    `starting_date` DateTime,
+    `country` String,
+    `sales` Float64
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "starting_date, country"
+datasources/sales_hour_copy.datasource
+SCHEMA >
+    `day` DateTime,
+    `country` String,
+    `total_sales` Float64
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "day, country"
+pipes/sales_hour_copy.pipe
+NODE daily_sales
+SQL >
+    %
+    SELECT toStartOfDay(starting_date) day, country, sum(sales) as total_sales
+    FROM teams
+    WHERE
+    day BETWEEN toStartOfDay({{DateTime(job_timestamp)}}) - interval 1 day AND toStartOfDay({{DateTime(job_timestamp)}})
+    and country = {{ String(country, 'US')}}
+    GROUP BY day, country
+
+TYPE COPY
+TARGET_DATASOURCE sales_hour_copy
+COPY_SCHEDULE 0 * * * *
+COPY_MODE append
+See all syntax options in the
+Copy pipes reference
+,
+TypeScript SDK reference
+, and
+Python SDK reference
+.
+Schedule a copy pipe
+¶
+You can schedule copy pipes to run at a specific time using a cron expression. To schedule a copy pipe, configure
+COPY_SCHEDULE
+with a cron expression. On-demand copy pipes are defined by configuring
+COPY_SCHEDULE
+with the value
+@on-demand
+.
+Copy Pipes scheduled with a cron expression have a maximum timeout defined by the minimum between the limit enforced by your plan and half of the time of your cron expression. For example, let's say your Copy Pipe is scheduled to run every 5 minutes (300 seconds). That means that even if your plan allows you to run a Copy Pipe for an hour, we will cap it to 2.5 minutes (150 seconds). This prevents your Copy Pipes from overlapping.
+All schedules are executed in the UTC time zone. If you are configuring a schedule that runs at a specific time, be careful to consider that you will need to convert the desired time from your local time zone to UTC.
+Run, pause, or resume a copy pipe
+¶
+Use the
+tb copy
+command to run, pause, or resume a copy pipe. See
+tb copy
+.
+You can query
+tinybird.jobs_log
+to see any running jobs, as well as any jobs that have finished during the last 48 hours.
+Run Copy Pipes locally
+¶
+When running Copy Pipes locally, you might encounter this error:
+Error: Failed creating copy job: Error while running job: There was a problem while copying data: [Error] Cannot schedule a task: no free thread (timeout=0) (threads=2, jobs=2). (CANNOT_SCHEDULE_TASK)
+This occurs when the local ClickHouse instance runs out of available threads. To fix this, limit the number of threads the copy job can use by adding the
+max_threads
+parameter at the top of your SQL query:
+NODE daily_sales
+SQL >
+    %
+    {{max_threads(1)}}
+    SELECT toStartOfDay(starting_date) day, country, sum(sales) as total_sales
+    FROM teams
+    WHERE
+    day BETWEEN toStartOfDay({{DateTime(job_timestamp)}}) - interval 1 day AND toStartOfDay({{DateTime(job_timestamp)}})
+    and country = {{ String(country, 'US')}}
+    GROUP BY day, country
+
+TYPE COPY
+TARGET_DATASOURCE sales_hour_copy
+COPY_SCHEDULE 0 * * * *
+The
+max_threads(1)
+parameter ensures the copy job uses only one thread, preventing the scheduling error in local environments with limited resources.
+On-demand compute for copy jobs
+¶
+When running a copy job, you can isolate execution on dedicated on-demand compute, separate from your main workspace infrastructure. This prevents copy jobs from impacting production query performance.
+Unlike deployment populates, on-demand compute for copy jobs is not automatically activated based on data size. You must pass the flag explicitly:
+tb copy run <copy_pipe_name> --on-demand-compute
+For pricing, regional rates, and example calculations, see
+On-demand CPUs
+.
+Next steps
+¶
+Learn about
+Materialized views
+.
+Publish your data with
+API Endpoints
+.
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Copy pipes
+Create a copy pipe
+Schedule a copy pipe
+Run, pause, or resume a copy pipe
+Run Copy Pipes locally
+On-demand compute for copy jobs
+Next steps
+forward
+Ask AI

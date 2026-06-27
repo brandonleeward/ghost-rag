@@ -1,0 +1,358 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/SUSPICIOUS_TYPE_FOR_LOW_CARDINALITY
+
+SUSPICIOUS_TYPE_FOR_LOW_CARDINALITY ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+SUSPICIOUS_TYPE_FOR_LOW_CARDINALITY ClickHouse error
+¶
+Copy as MD
+This error occurs when ClickHouse detects that a column with low cardinality (few unique values) is using a data type that's not optimal for storage and performance. It's a warning about potential inefficiency.
+The
+SUSPICIOUS_TYPE_FOR_LOW_CARDINALITY
+error in ClickHouse (and Tinybird) happens when the system detects that a column with low cardinality (few unique values) is using a data type that's not optimal for storage and performance. This is a warning that suggests using more appropriate data types like
+LowCardinality
+or
+Enum
+for better efficiency.
+What causes this error
+¶
+You'll typically see it when:
+Using String type for columns with few unique values
+Not using LowCardinality for repetitive string data
+Missing Enum types for categorical data
+Using wide data types for narrow value ranges
+String columns with high repetition
+Missing optimization for categorical columns
+Inefficient storage for status or type fields
+This error suggests optimization opportunities. Consider using LowCardinality or Enum types for columns with few unique values.
+Example errors
+¶
+Fails: String type for low cardinality
+CREATE TABLE events (
+    id UInt64,
+    event_type String,  -- Only has 5-10 unique values
+    status String,       -- Only has 3-4 unique values
+    timestamp DateTime
+) ENGINE = MergeTree()
+ORDER BY (timestamp, id)
+-- Warning: SUSPICIOUS_TYPE_FOR_LOW_CARDINALITY
+Fails: Wide type for narrow range
+CREATE TABLE users (
+    id UInt64,
+    country String,      -- Only 50-100 unique countries
+    language String,     -- Only 10-20 unique languages
+    created_at DateTime
+) ENGINE = MergeTree()
+ORDER BY (created_at, id)
+-- Warning: SUSPICIOUS_TYPE_FOR_LOW_CARDINALITY
+Fails: Missing optimization for categories
+CREATE TABLE orders (
+    id UInt64,
+    order_status String,  -- Only: 'pending', 'confirmed', 'shipped', 'delivered'
+    payment_method String, -- Only: 'credit_card', 'paypal', 'bank_transfer'
+    created_at DateTime
+) ENGINE = MergeTree()
+ORDER BY (created_at, id)
+-- Warning: SUSPICIOUS_TYPE_FOR_LOW_CARDINALITY
+How to fix it
+¶
+Use LowCardinality type
+¶
+Convert String columns to LowCardinality for better performance:
+Fix: use LowCardinality
+CREATE TABLE events (
+    id UInt64,
+    event_type LowCardinality(String),  -- Optimized for few unique values
+    status LowCardinality(String),       -- Optimized for few unique values
+    timestamp DateTime
+) ENGINE = MergeTree()
+ORDER BY (timestamp, id)
+Use Enum types
+¶
+Use Enum for columns with very few, fixed values:
+Fix: use Enum types
+CREATE TABLE orders (
+    id UInt64,
+    order_status Enum('pending' = 1, 'confirmed' = 2, 'shipped' = 3, 'delivered' = 4),
+    payment_method Enum('credit_card' = 1, 'paypal' = 2, 'bank_transfer' = 3),
+    created_at DateTime
+) ENGINE = MergeTree()
+ORDER BY (created_at, id)
+Analyze cardinality
+¶
+Check the actual cardinality of your columns:
+Analyze column cardinality
+SELECT
+    name,
+    type,
+    COUNT(DISTINCT value) as unique_values,
+    COUNT(*) as total_rows
+FROM (
+    SELECT 'event_type' as name, event_type as value FROM events
+    UNION ALL
+    SELECT 'status' as name, status as value FROM events
+)
+GROUP BY name, type
+ORDER BY unique_values
+Optimize existing tables
+¶
+Alter existing tables to use better types:
+Optimize existing table
+-- Convert String columns to LowCardinality
+ALTER TABLE events MODIFY COLUMN event_type LowCardinality(String);
+ALTER TABLE events MODIFY COLUMN status LowCardinality(String);
+
+-- Or convert to Enum if values are fixed
+ALTER TABLE orders MODIFY COLUMN order_status Enum('pending' = 1, 'confirmed' = 2, 'shipped' = 3, 'delivered' = 4);
+Common patterns and solutions
+¶
+Categorical data optimization
+¶
+Optimize columns with categorical values:
+Categorical optimization
+CREATE TABLE products (
+    id UInt64,
+    category LowCardinality(String),      -- Product categories
+    brand LowCardinality(String),         -- Brand names
+    condition Enum('new' = 1, 'used' = 2, 'refurbished' = 3),
+    price Decimal(10, 2),
+    created_at DateTime
+) ENGINE = MergeTree()
+ORDER BY (category, brand, created_at)
+Status and type fields
+¶
+Optimize status and type columns:
+Status field optimization
+CREATE TABLE transactions (
+    id UInt64,
+    transaction_type Enum('purchase' = 1, 'refund' = 2, 'exchange' = 3),
+    status Enum('pending' = 1, 'completed' = 2, 'failed' = 3, 'cancelled' = 4),
+    amount Decimal(10, 2),
+    created_at DateTime
+) ENGINE = MergeTree()
+ORDER BY (transaction_type, status, created_at)
+Geographic data
+¶
+Optimize geographic columns:
+Geographic optimization
+CREATE TABLE users (
+    id UInt64,
+    country LowCardinality(String),       -- Country names
+    region LowCardinality(String),        -- State/Province
+    city LowCardinality(String),          -- City names
+    timezone LowCardinality(String),      -- Timezone identifiers
+    created_at DateTime
+) ENGINE = MergeTree()
+ORDER BY (country, region, created_at)
+Configuration data
+¶
+Optimize configuration and settings columns:
+Configuration optimization
+CREATE TABLE user_settings (
+    user_id UInt64,
+    theme Enum('light' = 1, 'dark' = 2, 'auto' = 3),
+    language LowCardinality(String),      -- Language codes
+    currency LowCardinality(String),      -- Currency codes
+    notification_level Enum('none' = 1, 'low' = 2, 'medium' = 3, 'high' = 4),
+    updated_at DateTime
+) ENGINE = MergeTree()
+ORDER BY (user_id, updated_at)
+Tinybird-specific notes
+¶
+In Tinybird, SUSPICIOUS_TYPE_FOR_LOW_CARDINALITY warnings often occur when:
+Data Sources have inefficient column types
+Pipe transformations don't optimize data types
+Materialized Views use suboptimal schemas
+API endpoints return unoptimized data
+To debug in Tinybird:
+Review Data Source schema for optimization opportunities
+Check Pipe transformations for type optimization
+Verify Materialized View column types
+Consider using LowCardinality for categorical data
+In Tinybird, use the Data Source preview to analyze column cardinality and optimize types accordingly.
+Best practices
+¶
+Type selection
+¶
+Use LowCardinality(String) for columns with < 10,000 unique values
+Use Enum for columns with < 100 fixed values
+Use String only for truly high-cardinality data
+Consider storage and query performance trade-offs
+Schema design
+¶
+Analyze data patterns before choosing types
+Monitor column cardinality over time
+Use appropriate types for categorical data
+Document type selection rationale
+Performance optimization
+¶
+Benchmark different type choices
+Monitor storage usage and query performance
+Consider compression ratios
+Balance storage efficiency with query flexibility
+Configuration options
+¶
+LowCardinality settings
+¶
+LowCardinality configuration
+-- Check LowCardinality settings
+SELECT
+    name,
+    value,
+    description
+FROM system.settings
+WHERE name LIKE '%low_cardinality%'
+Enum optimization
+¶
+Enum configuration
+-- Configure Enum behavior
+SET allow_experimental_enum_data_type = 1;
+SET allow_experimental_low_cardinality_type = 1;
+Type inference
+¶
+Type inference settings
+-- Enable automatic type inference
+SET allow_experimental_infer_schema = 1;
+SET allow_experimental_auto_type_inference = 1;
+Alternative solutions
+¶
+Use FixedString
+¶
+Use FixedString for fixed-length categorical data:
+FixedString optimization
+CREATE TABLE products (
+    id UInt64,
+    sku FixedString(10),           -- Fixed-length SKU codes
+    category_code FixedString(3),   -- Fixed-length category codes
+    brand_code FixedString(2),      -- Fixed-length brand codes
+    price Decimal(10, 2),
+    created_at DateTime
+) ENGINE = MergeTree()
+ORDER BY (category_code, brand_code, created_at)
+Implement custom encoding
+¶
+Create custom encoding for categorical data:
+Custom encoding
+-- Create mapping table for categories
+CREATE TABLE category_mapping (
+    id UInt8,
+    name String
+) ENGINE = Memory;
+
+INSERT INTO category_mapping VALUES
+(1, 'electronics'),
+(2, 'clothing'),
+(3, 'books'),
+(4, 'home');
+
+-- Use UInt8 in main table
+CREATE TABLE products (
+    id UInt64,
+    category_id UInt8,  -- Reference to category_mapping
+    name String,
+    price Decimal(10, 2)
+) ENGINE = MergeTree()
+ORDER BY (category_id, created_at)
+Use Array types
+¶
+Use Array types for multiple categorical values:
+Array optimization
+CREATE TABLE users (
+    id UInt64,
+    interests Array(LowCardinality(String)),  -- User interests
+    skills Array(LowCardinality(String)),     -- User skills
+    created_at DateTime
+) ENGINE = MergeTree()
+ORDER BY (created_at, id)
+Monitoring and prevention
+¶
+Cardinality monitoring
+¶
+Cardinality tracking
+-- Monitor column cardinality over time
+SELECT
+    table,
+    column,
+    COUNT(DISTINCT value) as unique_values,
+    COUNT(*) as total_rows,
+    unique_values / total_rows as uniqueness_ratio
+FROM (
+    SELECT 'events' as table, 'event_type' as column, event_type as value FROM events
+    UNION ALL
+    SELECT 'events' as table, 'status' as column, status as value FROM events
+)
+GROUP BY table, column
+ORDER BY uniqueness_ratio
+Storage optimization
+¶
+Storage monitoring
+-- Monitor storage usage by column type
+SELECT
+    table,
+    column,
+    type,
+    COUNT(*) as row_count,
+    SUM(bytes_on_disk) as storage_bytes
+FROM system.columns
+WHERE database = currentDatabase()
+GROUP BY table, column, type
+ORDER BY storage_bytes DESC
+Performance monitoring
+¶
+Performance tracking
+-- Track query performance by column type
+-- Example pseudo-code:
+--
+-- def track_column_performance(table, column, query_type, execution_time):
+--     logger.info(f"Column {column} in table {table} - {query_type}: {execution_time}s")
+--
+--     # Track performance metrics
+--     increment_counter('column_query_performance', {
+--         'table': table,
+--         'column': column,
+--         'query_type': query_type,
+--         'execution_time': execution_time
+--     })
+See also
+¶
+Data Types
+LowCardinality Type
+Enum Type
+Schema Optimization
+Updated
+7 months ago
+On this page
+SUSPICIOUS_TYPE_FOR_LOW_CARDINALITY ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Use LowCardinality type
+Use Enum types
+Analyze cardinality
+Optimize existing tables
+Common patterns and solutions
+Categorical data optimization
+Status and type fields
+Geographic data
+Configuration data
+Tinybird-specific notes
+Best practices
+Type selection
+Schema design
+Performance optimization
+Configuration options
+LowCardinality settings
+Enum optimization
+Type inference
+Alternative solutions
+Use FixedString
+Implement custom encoding
+Use Array types
+Monitoring and prevention
+Cardinality monitoring
+Storage optimization
+Performance monitoring
+See also
+forward
+classic
+Ask AI

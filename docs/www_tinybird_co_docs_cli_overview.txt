@@ -1,0 +1,32 @@
+Source: https://www.tinybird.co/docs/cli/overview
+
+Classic: Tinybird CLI · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Tinybird command-line interface (CLI)
+¶
+Copy as MD
+Use the Tinybird CLI to access all the Tinybird features directly from the command line. You can test and run commands from the terminal or integrate the CLI in your pipelines.
+Read the Quick start guide. See
+Quick start
+.
+Install Tinybird CLI on your machine. See
+Install
+.
+Explore all available commands. See
+Command reference
+.
+Learn about Tinybird datafiles and their format. See
+Datafiles
+.
+Organize your CLI projects. See
+Data projects
+.
+Updated
+11 months ago
+On this page
+Tinybird command-line interface (CLI)
+classic
+Ask AI

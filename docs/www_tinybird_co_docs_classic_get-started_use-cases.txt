@@ -1,0 +1,18 @@
+Source: https://www.tinybird.com/docs/classic/get-started/use-cases
+
+Classic: Get started with Tinybird · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Use cases
+¶
+Copy as MD
+Leaderboard tutorial
+User-facing web analytics
+Updated
+1 year ago
+On this page
+Use cases
+classic
+Ask AI

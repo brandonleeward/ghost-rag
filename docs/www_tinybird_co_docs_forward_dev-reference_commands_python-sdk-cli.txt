@@ -1,0 +1,127 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/python-sdk-cli
+
+Python SDK CLI commands · Tinybird Docs
+Sign In
+Sign Up
+Python SDK CLI commands
+¶
+Copy as MD
+The Python SDK (
+tinybird-sdk
+) installs a
+tinybird
+command.
+tinybird generate
+and
+tinybird migrate
+are SDK-native commands.
+Other commands are passed through to the installed Tinybird CLI dependency.
+Supported Python versions are 3.11, 3.12, and 3.13. Python 3.14 is not supported yet.
+Install
+¶
+pip
+uv
+pip install tinybird-sdk
+Project and deployment commands
+¶
+tinybird init
+¶
+Initialize a project.
+tinybird init --dev-mode branch --cicd skip --folder tb_project
+tinybird init --dev-mode local --cicd github --folder tb_project
+tinybird init --dev-mode branch --cicd skip --folder tb_project --skip-login
+tinybird dev
+¶
+Build server-side and watch for changes.
+tinybird dev
+tinybird dev --with-connections
+tinybird dev --no-connections
+tinybird build
+¶
+Validate and build the current project.
+tinybird build
+tinybird build --watch
+tinybird build --with-connections
+tinybird deploy
+¶
+Deploy resources from your project.
+tinybird deploy
+tinybird deploy --check
+tinybird deploy --allow-destructive-operations
+tinybird deploy --wait --auto
+tinybird preview
+¶
+Create a preview environment and deploy project resources.
+tinybird preview
+tinybird preview --dry-run
+tinybird preview --check
+tinybird preview --name pr_482
+tinybird pull
+¶
+Pull latest resources from Tinybird.
+tinybird pull
+tinybird pull --force
+tinybird login
+¶
+Authenticate with Tinybird.
+tinybird login
+tinybird login --interactive
+tinybird login --host https://api.us-east-1.aws.tinybird.co
+tinybird branch
+¶
+Manage branches.
+tinybird branch ls
+tinybird branch create my_feature_branch
+tinybird branch clear my_feature_branch
+tinybird branch rm my_feature_branch
+tinybird info
+¶
+Show project information.
+tinybird info
+tinybird info --skip-local
+SDK-native commands
+¶
+tinybird generate
+¶
+Generates
+.datasource
+,
+.pipe
+, and
+.connection
+files from the Python resource definitions in your project.
+tinybird generate
+tinybird generate -o ./tinybird_datafiles
+tinybird generate -o ./tinybird_datafiles --json
+tinybird migrate
+¶
+Migrate
+.datasource
+,
+.pipe
+, and
+.connection
+files to Python SDK definitions.
+tinybird migrate "tinybird/**/*.datasource" "tinybird/**/*.pipe" "tinybird/**/*.connection"
+tinybird migrate tinybird/legacy --out ./tinybird.migration.py
+tinybird migrate tinybird --dry-run --json
+tinybird migrate tinybird --no-strict
+Next steps
+¶
+Review Python resource definitions:
+Python SDK resources
+Follow the Python SDK quickstart:
+Quick start: Python SDK
+Explore the SDK source repository:
+tinybird-sdk-python
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Python SDK CLI commands
+Install
+Project and deployment commands
+SDK-native commands
+Next steps
+forward
+Ask AI

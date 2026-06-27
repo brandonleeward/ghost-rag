@@ -1,0 +1,111 @@
+Source: https://www.tinybird.com/docs/sql-reference/data-types/fixedstring
+
+FixedString Data Type reference · Tinybird Docs
+Sign In
+Sign Up
+FixedString(N)
+¶
+Copy as MD
+The
+FixedString(N)
+data type stores strings of a precise, fixed length of
+N
+bytes. Unlike variable-length strings,
+FixedString
+values always occupy
+N
+bytes, regardless of the actual content.
+When a Data Source column is defined as
+FixedString(N)
+, it means the column is designed to hold string values that are exactly
+N
+bytes long.
+N
+must be a positive integer.
+This type is most efficient when the data naturally fits the exact
+N
+byte length. Using
+FixedString
+for data that frequently varies in length can lead to inefficiencies.
+Common use cases for
+FixedString(N)
+include:
+Binary representations of IP addresses (e.g.,
+FixedString(16)
+for IPv6).
+Standardized codes like language codes (
+en_US
+) or currency codes (
+USD
+).
+Binary representations of cryptographic hashes (e.g.,
+FixedString(16)
+for MD5,
+FixedString(32)
+for SHA256).
+For storing UUID values, it is recommended to use the dedicated
+UUID
+data type.
+When a string value is inserted into a
+FixedString(N)
+column:
+If the string contains fewer than
+N
+bytes, it is padded with null bytes (
+\0
+) at the end until it reaches
+N
+bytes.
+If the string contains more than
+N
+bytes, an error is thrown, as the value exceeds the defined fixed length.
+When querying data from a
+FixedString(N)
+column, the trailing null bytes are not automatically removed. This behavior is important when filtering data. If you use a
+WHERE
+clause to match a
+FixedString
+value that was padded, you must include the null bytes in your filter pattern.
+Example: Filtering FixedString values
+¶
+Consider a
+FixedString(2)
+column. If you insert the string
+'b'
+, it will be stored as
+'b\0'
+.
+SELECT CAST('b' AS FixedString(2)) AS my_fixed_string
+WHERE my_fixed_string = 'b'
+This query returns an empty result because
+'b'
+does not exactly match
+'b\0'
+. To match the stored value, you must include the padding:
+SELECT CAST('b' AS FixedString(2)) AS my_fixed_string
+WHERE my_fixed_string = 'b\0'
+Result:
+┌─my_fixed_string─┐
+│ b\0             │
+└─────────────────┘
+The
+length
+function will always return
+N
+for a
+FixedString(N)
+value, even if it's mostly filled with null bytes. However, the
+empty
+function will return
+1
+(true) if the
+FixedString
+value consists entirely of null bytes.
+Updated
+3 weeks ago
+On this page
+FixedString(N)
+Example: Filtering FixedString values
+forward
+classic
+Ask AI

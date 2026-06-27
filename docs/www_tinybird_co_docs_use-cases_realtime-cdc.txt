@@ -1,0 +1,29 @@
+Source: https://www.tinybird.com/docs/use-cases/realtime-cdc
+
+Real-time Change Data Capture · Tinybird Docs
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+Change data capture
+¶
+Copy as MD
+Change Data Capture (CDC) is a process used in databases to track and capture any changes made to data, such as inserts, updates, or deletes. It enables the identification and recording of modifications in real-time or near real-time, ensuring that downstream systems can be kept in sync with the primary database without having to constantly query the entire dataset. This is achieved by monitoring the transaction logs of the database, allowing CDC to capture only the changes rather than reprocessing all data.
+Tinybird helps you quickly build applications on top of your CDC data. When you send your change data to Tinybird, you are able to unify your CDC data with other data sources and transform it using SQL, and with one click or command line instruction, convert your SQL queries into high-concurrency, low-latency REST APIs.
+Tutorials
+¶
+Videos
+¶
+Watch screencasts and free training workshops for building CDC systems.
+Real-time MongoDB CDC with Confluent and Tinybird
+Capturing DynamoDB Change Streams for Real-Time Analytics
+Updated
+2 months ago
+On this page
+Change data capture
+Tutorials
+Videos
+forward
+classic
+Ask AI

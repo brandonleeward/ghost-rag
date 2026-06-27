@@ -1,0 +1,25 @@
+Source: https://www.tinybird.com/docs/forward/monitoring
+
+Monitoring · Tinybird Docs
+Sign In
+Sign Up
+Monitoring
+¶
+Copy as MD
+Tinybird is built around the idea of data that changes or grows continuously. Use the built-in Tinybird tools to monitor your data ingestion and API Endpoint processes.
+Endpoint latency
+Endpoint performance
+Health checks
+Kafka logs
+Logs
+Organization consumption
+Service Data Sources
+System tables
+Workspace jobs
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Monitoring
+forward
+Ask AI

@@ -1,0 +1,54 @@
+Source: https://mariadb.com/docs/server/security/securing-mariadb
+
+Securing MariaDB | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Security
+Securing MariaDB
+Running MariaDB as root
+MariaDB on SELinux
+Securing MariaDB Logs
+Encryption
+User Account Management
+Authentication with Enterprise Server
+Limiting Size of Created Disk Temporary Files and Tables
+Security Vulnerabilities (CVE) Fixed in MariaDB
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Securing MariaDB
+Overview of security best practices for MariaDB, covering privilege separation, mandatory access control (SELinux), and vulnerability tracking.
+Running MariaDB as root
+Understand the implications of running MariaDB Server as root. This section highlights security risks and provides guidance on configuring MariaDB Server to operate with less privileged user accounts.
+MariaDB on SELinux
+Secure MariaDB Server with SELinux. This section guides you through configuring SELinux policies to enhance the security posture of your MariaDB deployments on Linux systems.
+Securing MariaDB Logs
+Learn how to harden MariaDB log files by implementing at-rest encryption, TLS for transit, strict OS permissions, and automated rotation to ensure data integrity and regulatory compliance.
+Security Vulnerabilities (CVE) Fixed in MariaDB
+This is the master list of CVEs fixed across all versions of MariaDB.
+Security Vulnerabilities (CVE) Fixed in Oracle MySQL That Did Not Exist in MariaDB
+This page lists all CVEs that were fixed in MySQL and mentioned in Oracle CPU Advisories, but that — to the best of our knowledge — were never present in MariaDB.
+Last updated
+3 days ago
+Was this helpful?
+Was this helpful?

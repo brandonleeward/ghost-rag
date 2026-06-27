@@ -1,0 +1,63 @@
+Source: https://www.tinybird.com/docs/sql-reference/data-types/ipv4
+
+IPv4 Data Type reference · Tinybird Docs
+Sign In
+Sign Up
+IPv4
+¶
+Copy as MD
+This data type isn't supported at ingest. It is only supported at query time and to create Copy Data Sources or Materialized View Data Sources.
+The
+IPv4
+data type stores IPv4 addresses. Internally, these addresses are represented as 4-byte unsigned integers (
+UInt32
+).
+Example: Casting strings to IPv4
+¶
+WITH (SELECT [('https://wikipedia.org', '185.15.58.224'),('https://tinybird.co','66.33.60.67'),('https://vercel.com','64.239.109.193')]) AS ips
+SELECT arrayJoin(ips).1 as url, (arrayJoin(ips).2)::IPv4 as ipv4
+Result:
+------------------------------------------
+| url                   | ipv4           |
+------------------------------------------
+| https://wikipedia.org | 185.15.58.224  |
+| https://tinybird.co   | 66.33.60.67    |
+| https://vercel.com    | 64.239.109.193 |
+------------------------------------------
+Example: Inspecting internal storage
+¶
+Values are stored in a compact binary form. You can see the internal
+UInt32
+representation using
+hex()
+.
+WITH (SELECT [('https://wikipedia.org', '185.15.58.224'),('https://tinybird.co','66.33.60.67'),('https://vercel.com','64.239.109.193')]) AS ips
+SELECT (arrayJoin(ips).2)::IPv4 as ipv4, toTypeName(ipv4), hex(ipv4)
+Result:
+-------------------------------------------------
+| ipv4           | toTypeName(ipv4) | hex(ipv4) |
+-------------------------------------------------
+| 185.15.58.224  | IPv4             | B90F3AE0  |
+| 66.33.60.67    | IPv4             | 42213C43  |
+| 64.239.109.193 | IPv4             | 40EF6DC1  |
+-------------------------------------------------
+Example: Comparing IPv4 and IPv6 addresses
+¶
+IPv4
+addresses can be directly compared to
+IPv6
+addresses.
+SELECT toIPv4('127.0.0.1') = toIPv6('::ffff:127.0.0.1')
+Result:
+-----------------------------------------------------------
+| equals(toIPv4('127.0.0.1'), toIPv6('::ffff:127.0.0.1')) |
+-----------------------------------------------------------
+|                                                       1 |
+-----------------------------------------------------------
+Updated
+3 weeks ago
+On this page
+IPv4
+forward
+classic
+Ask AI

@@ -1,0 +1,281 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/innodb/mariadb-enterprise-server-innodb-operations/configure-the-innodb-io-threads
+
+Configure the InnoDB I/O Threads | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+InnoDB Introduction
+InnoDB File Format
+InnoDB Limitations
+AUTO_INCREMENT Handling in InnoDB
+Binary Log Group Commit and InnoDB Flushing Performance
+InnoDB Asynchronous I/O
+InnoDB Buffer Pool
+InnoDB Change Buffering
+InnoDB Data Scrubbing
+InnoDB Doublewrite Buffer
+InnoDB Flush Method
+InnoDB Lock Modes
+InnoDB Log Archiving
+InnoDB Monitors
+InnoDB Page Compression
+InnoDB Page Flushing
+InnoDB Purge
+InnoDB Undo Log
+InnoDB Redo Log
+InnoDB Strict Mode
+InnoDB System Variables
+InnoDB Versions
+InnoDB Architecture for MariaDB Enterprise Server
+InnoDB Online DDL
+InnoDB Row Formats
+InnoDB Tablespaces
+InnoDB Troubleshooting
+MariaDB Enterprise Server InnoDB Operations
+Configure the InnoDB Buffer Pool
+Configure the InnoDB I/O Threads
+Configure the InnoDB Purge Threads
+Configure the InnoDB Redo Log
+Configure the InnoDB Undo Log
+Schema Changes
+InnoDB - Unmaintained
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Configure the InnoDB I/O Threads
+Instructions on tuning the number of InnoDB read and write I/O threads to match your system's disk I/O capabilities.
+Overview
+The InnoDB Read I/O Threads handle completion of read I/O requests, and the InnoDB Write I/O Threads handle completion of write I/O requests.
+Starting with MariaDB Enterprise Server 10.5 and MariaDB Community Server 10.5, the InnoDB I/O Threads were replaced by the asynchronous I/O functionality in the
+InnoDB Background Thread Pool
+.
+For additional information, see "
+InnoDB I/O Threads
+".
+This page describes how to configure the InnoDB I/O Threads.
+Configure the Number of InnoDB I/O Threads
+Starting with ES 10.5 and CS 10.5, the InnoDB I/O Threads have been replaced by the asynchronous I/O functionality in the InnoDB Background Thread Pool. In these versions, the
+innodb_read_io_threads
+and
+innodb_write_io_threads
+system variables have been repurposed. The value of each system variable is multiplied by 256 to determine the maximum number of concurrent asynchronous I/O requests that can be completed by the Background Thread Pool.
+For example, if
+innodb_read_io_threads=2 and innodb_write_io_threads=4
+are set, InnoDB are restricted to a maximum of 512 concurrent asynchronous read I/O requests and 1024 concurrent asynchronous write I/O requests.
+Interaction with Asynchronous I/O
+When asynchronous I/O is enabled, the InnoDB I/O Threads do not receive the initial I/O request from query threads. Instead, the query threads submit asynchronous I/O requests directly to the operating system, and after the operating system performs the operation, the InnoDB I/O Threads handle completion of the request.
+Asynchronous I/O is enabled by the
+innodb_use_native_aio
+system variable, which is enabled by default.
+Affected I/O Operations
+The
+innodb_read_io_threads
+system variable affects completion of the following types of reads:
+Linear read-ahead (configured by
+innodb_read_ahead_threshold
+)
+Random read-ahead (configured by
+innodb_random_read_ahead
+)
+The
+innodb_write_io_threads
+system variable affects completion of the following types of writes:
+Page flushing due to adaptive flushing (configured by
+innodb_adaptive_flushing
+and
+innodb_adaptive_flushing_lwm
+)
+Page flushing due to buffer pool capacity (configured by [innodb_max_dirty_pages_pct] and [
+innodb-system-variables/#innodb_max_dirty_pages_pct_lwm|innodb_max_dirty_pages_pct_lwm
+)
+Page flushing due to LRU page evictions (configured by
+innodb_lru_flush_size
+and
+innodb_lru_scan_depth
+)
+Configuration Procedure
+The method to configure the number of I/O threads depends on the server version and whether a server restart are performed:
+Product Versions
+Server Restart?
+Method
+ES 10.5 and Later
+No
+Configure maximum number of asynchronous I/O requests with SET GLOBAL
+Any ES Any CS
+Yes.
+Configure number of I/O threads in configuration file
+Configure InnoDB's Maximum Number of Asynchronous I/O Requests with SET GLOBAL (ES 10.5) and Later
+Starting with
+MariaDB Enterprise Server 10.5
+, InnoDB's maximum number of asynchronous I/O requests can be changed dynamically by setting the
+innodb_read_io_threads
+innodb_write_io_threads
+system variables using the
+SET GLOBAL
+statement. The
+SET GLOBAL
+statement requires the SUPER privilege.
+The value of each system variable is multiplied by 256 to determine the maximum number of asynchronous I/O requests that can be performed by the Background Thread Pool. For example, if you want to allow a maximum of 1024 concurrent asynchronous write I/O requests, the
+innodb_write_io_threads
+system variable should be set to 4 (since 1024/256=4).
+To ensure that the change survives server restarts, the
+innodb_read_io_threads
+innodb_write_io_threads
+system variables should also be set in a configuration file.
+To configure InnoDB's maximum number of asynchronous I/O requests with the
+SET GLOBAL
+statement, use the following procedure:
+Connect to the server using MariaDB Client as the
+root@localhost
+user account or another user account with the SUPER privilege:
+Set the
+innodb_read_io_threads
+and
+innodb_write_io_threads
+system variables to the new values using the
+SET GLOBAL
+statement.
+For example:
+Choose a configuration file for custom changes to system variables and options.
+It is not recommended to make custom changes to Enterprise Server's default configuration files, because your custom changes can be overwritten by other default configuration files that are loaded after.
+Ensure that your custom changes are read last by creating a custom configuration file in one of the included directories. Configuration files in included directories are read in alphabetical order. Ensure that your custom configuration file is read last by using the z- prefix in the file name.
+Some example configuration file paths for different distributions are shown in the following table:
+Distributions
+Example configuration file path
+CentOS RHEL Rocky Linux SLES
+/etc/my.cnf.d/z-custom-mariadb.cnf
+Debian Ubuntu
+/etc/mysql/mariadb.conf.d/z-custom-mariadb.cnf
+Set the
+innodb_read_io_threads
+and
+innodb_write_io_threads
+system variables in the configuration file.
+It needs to be set in a group that are read by MariaDB Server, such as [mariadb] or [server].
+For example:
+Configure the Number of InnoDB I/O Threads in a Configuration File
+The number of I/O threads is configured by the
+innodb_read_io_threads
+and
+innodb_write_io_threads
+system variables.
+To configure the number of InnoDB I/O Threads in a configuration file, use the following procedure:
+Choose a configuration file for custom changes to system variables and options.
+It is not recommended to make custom changes to Enterprise Server's default configuration files, because your custom changes can be overwritten by other default configuration files that are loaded after.
+Ensure that your custom changes are read last by creating a custom configuration file in one of the included directories. Configuration files in included directories are read in alphabetical order. Ensure that your custom configuration file is read last by using the z- prefix in the file name.
+Some example configuration file paths for different distributions are shown in the following table:
+Distributions
+Example configuration file path
+CentOS RHEL Rocky Linux SLES
+/etc/my.cnf.d/z-custom-mariadb.cnf
+Debian Ubuntu
+/etc/mysql/mariadb.conf.d/z-custom-mariadb.cnf
+Set the
+innodb_read_io_threads
+and
+innodb_write_io_threads
+system variables in the configuration file.
+It needs to be set in a group that are read by
+MariaDB Server
+, such as
+[mariadb]
+or
+[server]
+.
+For example:
+Restart the server:
+Starting with
+MariaDB Enterprise Server 10.5
+, the server can use the configuration change without a restart if you use
+SET GLOBAL
+.
+This page is: Copyright © 2025 MariaDB. All rights reserved.
+spinner
+Previous
+Configure the InnoDB Buffer Pool
+Next
+Configure the InnoDB Purge Threads
+Last updated
+11 months ago
+Was this helpful?
+Overview
+Configure the Number of InnoDB I/O Threads
+Interaction with Asynchronous I/O
+Affected I/O Operations
+Configuration Procedure
+Configure InnoDB's Maximum Number of Asynchronous I/O Requests with SET GLOBAL (ES 10.5) and Later
+Configure the Number of InnoDB I/O Threads in a Configuration File
+Was this helpful?
+Copy
+$ mariadb --user=root
+Copy
+SET GLOBAL innodb_read_io_threads=8;
+SET GLOBAL innodb_write_io_threads=8;
+Copy
+[mariadb]
+...
+innodb_read_io_threads=8
+innodb_write_io_threads=8
+Copy
+[mariadb]
+...
+innodb_read_io_threads=8
+innodb_write_io_threads=8
+Copy
+$ sudo systemctl restart mariadb

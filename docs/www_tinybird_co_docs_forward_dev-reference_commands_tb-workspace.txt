@@ -1,0 +1,117 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-workspace
+
+tb workspace · Tinybird Docs
+Sign In
+Sign Up
+tb workspace
+¶
+Copy as MD
+Manage your workspaces. Global options apply to this command. See
+Global options
+.
+tb workspace
+is cloud-only. Workspace operations run against Tinybird Cloud account/workspace metadata.
+The following subcommands are available:
+Subcommand
+Description
+create [OPTIONS] WORKSPACE_NAME
+Creates a new workspace for your Tinybird user.
+current
+Shows the workspace you're currently authenticated to.
+delete [OPTIONS] WORKSPACE_NAME_OR_ID
+Deletes a workspace where you are an admin.
+ls
+Lists all the workspaces you have access to in the account you're currently authenticated to.
+members add [OPTIONS] MEMBERS_EMAILS
+Adds members to the current workspace.
+members ls
+Lists members in the current workspace.
+members rm MEMBERS_EMAILS
+Removes members from the current workspace.
+members set-role [viewer|admin] MEMBERS_EMAILS
+Sets the role for existing workspace members.
+use WORKSPACE_NAME_OR_ID
+Switches to another workspace. Use
+tb workspace ls
+to list the workspaces you have access to.
+tb workspace create
+¶
+Creates a new workspace for your Tinybird user.
+Option
+Description
+--organization-id TEXT
+When passed, the new workspace will be created in the specified organization.
+tb workspace delete
+¶
+Deletes a workspace where you are an admin.
+Option
+Description
+--yes
+Don't ask for confirmation.
+tb workspace members add
+¶
+Adds members to the current workspace. Takes a list of members emails as an argument.
+Option
+Description
+--role [viewer|admin]
+Sets the role for the members.
+--user_token TEXT
+Override local session with this authentication token.
+tb workspace members rm
+¶
+Removes members from the current workspace. Takes a list of members emails as an argument.
+Option
+Description
+--user_token TEXT
+Override local session with this authentication token.
+tb workspace members set-role
+¶
+Sets the role for existing workspace members.
+Option
+Description
+--user_token TEXT
+Override local session with this authentication token.
+tb workspace use
+¶
+Switches to another workspace. Use
+tb workspace ls
+to list the workspaces you have access to.
+Option
+Description
+--user_token TEXT
+When passed, Tinybird won't prompt asking for it.
+Deprecated alias
+¶
+tb workspace clear
+is deprecated. Use
+tb branch clear
+instead.
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✗ No
+Workspace commands are cloud-only.
+--cloud
+✓ Yes
+Manages workspaces in Tinybird Cloud.
+--branch=BRANCH_NAME
+✗ No
+Workspace commands are not branch-scoped.
+Updated
+1 month ago
+Looking for Classic docs?
+On this page
+tb workspace
+tb workspace create
+tb workspace delete
+tb workspace members add
+tb workspace members rm
+tb workspace members set-role
+tb workspace use
+Deprecated alias
+Environment support
+forward
+Ask AI

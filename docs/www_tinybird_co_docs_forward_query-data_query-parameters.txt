@@ -1,0 +1,481 @@
+Source: https://www.tinybird.com/docs/forward/query-data/query-parameters
+
+Query parameters · Tinybird Docs
+Sign In
+Sign Up
+Query parameters
+¶
+Copy as MD
+Query parameters define values that your application can control when it calls an API Endpoint or the Query API. For example, one Endpoint or Query API request can answer different questions by changing a filter, limit, sort order, or grouping value at request time.
+Query parameters are part of Tinybird's
+templating language
+. Use the concept page for the mental model, and this page for common patterns and examples.
+Use query parameters to do things like:
+Filtering as part of a
+WHERE
+clause.
+Changing the number of results as part of a
+LIMIT
+clause.
+Sorting order as part of an
+ORDER BY
+clause.
+Selecting specific columns for
+ORDER BY
+or
+GROUP BY
+clauses.
+Define query parameters
+¶
+To make a
+.pipe
+query dynamic, start the query with a
+%
+character. That signals the engine that it needs to parse potential parameters. In SDK projects, declare parameters in the
+params
+object and use the same SQL template syntax inside each node.
+After you make a query dynamic, define parameters by using the following pattern
+{{<data_type>(<name_of_parameter>[,<default_value>, description=<"This is a description">, required=<True|False>])}}
+. For example:
+Simple select clause using dynamic parameters
+%
+SELECT * FROM TR LIMIT {{Int32(lim, 10, description="Limit the number of rows in the response", required=False)}}
+The previous query returns 10 results by default, or however many are specified on the
+lim
+parameter when requesting data.
+Boolean parameters don't support the
+description
+or
+required
+arguments.
+Call a query with parameters
+¶
+When using an API Endpoint that uses parameters, pass in the desired parameters.
+Using the previous example where
+lim
+sets the maximum number of rows, the request looks like this:
+cURL
+TypeScript SDK
+Python SDK
+curl "https://api.tinybird.co/v0/pipes/tr_pipe.json?lim=20&token=<your_token>"
+You can specify parameters in more than one node in a Pipe. When invoking the API Endpoint, the passed parameters are included in the request.
+When using the Query API, pass parameters together with the
+q
+parameter. See
+Query API
+.
+You can't use query parameters in Materialized Views.
+Use parameters for observability
+¶
+In addition to using query parameters in your API Endpoints and Query API requests, you can use them downstream for monitoring.
+When you pass a parameter to your queries, you can build Pipes to reference the parameters and query the Service Data Sources with them, even if you don't use them in the API Endpoints themselves.
+Review
+Service Data Sources
+to use the available options. For example, the
+user_agent
+column on
+pipe_stats_rt
+shows which user agent made the request. Pass any additional values you need as parameters to improve visibility into incidents and Workspace performance.
+Example query to the pipe_stats_rt Service data source leveraging a passed 'referrer' parameter
+SELECT
+  toStartOfMinute(start_datetime) AS date,
+  count() AS requests,
+  parameters['referrer'] AS referrer
+FROM tinybird.pipe_stats_rt
+WHERE
+  status_code != 429
+  AND start_datetime > now() - INTERVAL 1 HOUR
+  AND (
+    pipe_id = '<pipe_id_here>'
+    OR pipe_name = '<pipe_name_here>'
+  )
+GROUP BY date, referrer
+ORDER BY requests DESC, date DESC
+Available parameter types
+¶
+Tinybird supports the following data types for query parameters:
+Boolean
+: Accepts
+True
+and
+False
+as values, as well as strings like
+'TRUE'
+,
+'FALSE'
+,
+'true'
+,
+'false'
+,
+'1'
+, or
+'0'
+, or the integers
+1
+and
+0
+.
+String
+: For any string values.
+DateTime64
+,
+DateTime
+and
+Date
+: Accepts values like
+YYYY-MM-DD HH:MM:SS.MMM
+,
+YYYY-MM-DD HH:MM:SS
+and
+YYYYMMDD
+respectively.
+Float32
+and
+Float64
+: Accepts floating point numbers of either 32 or 64 bit precision.
+Int
+or
+Integer
+: Accepts integer numbers of any precision.
+Int8
+,
+Int16
+,
+Int32
+,
+Int64
+,
+Int128
+,
+Int256
+and
+UInt8
+,
+UInt16
+,
+UInt32
+,
+UInt64
+,
+UInt128
+,
+UInt256
+: Accepts signed or unsigned integer numbers of the specified precision.
+Column parameters
+¶
+You can use
+column
+to pass along column names of a defined type as parameters, like:
+Using column dynamic parameters
+%
+SELECT * FROM TR
+ORDER BY {{column(order_by, 'timestamp')}}
+LIMIT {{Int32(lim, 10)}}
+Always define the
+column
+function's second argument, the one for the default value. The alternative for not defining the argument is to validate that the first argument is defined, but this only has an effect on query execution. A placeholder is used in the development of the Pipes.
+Validate the column parameter when not defining a default value
+%
+SELECT * FROM TR
+{% if defined(order_by) %}
+ORDER BY {{column(order_by)}}
+{% end %}
+Array parameters
+¶
+You can pass along a list of values with the
+Array
+function for parameters, like so:
+Passing arrays as dynamic parameters
+%
+SELECT * FROM TR WHERE
+access_type IN {{Array(access_numbers, 'Int32', default='101,102,110')}}
+JSON parameters
+¶
+Consider the following stringified JSON:
+"filters": [
+    {
+        "operand": "date",
+        "operator": "equals",
+        "value": "2018-01-02"
+    },
+    {
+        "operand": "high",
+        "operator": "greater_than",
+        "value": "100"
+    },
+    {
+        "operand": "symbol",
+        "operator": "in_list",
+        "value": "AAPL,AMZN"
+    }
+]
+You can use the
+JSON()
+function to use
+filters
+as a query parameter. The following example shows to use the
+filters
+field from the JSON snippet with the stock_prices_1m sample dataset.
+%
+SELECT symbol, date, high
+FROM stock_prices_1m
+WHERE
+    1
+    {% if defined(filters) %}
+        {% for item in JSON(filters, '[]') %}
+            {% if item.get('operator', '') == 'equals' %}
+                AND {{ column(item.get('operand', '')) }} == {{ item.get('value', '') }}
+            {% elif item.get('operator') == 'greater_than' %}
+                AND {{ column(item.get('operand', '')) }} > {{ item.get('value', '') }}
+            {% elif item.get('operator') == 'in_list' %}
+                AND {{ column(item.get('operand', '')) }} IN splitByChar(',',{{ item.get('value', '') }})
+            {% end %}
+        {% end %}
+    {% end %}
+When accessing the fields in a JSON object, use the following syntax:
+item.get('Field', 'Default value to avoid SQL errors').
+Pagination
+¶
+You paginate results by adding
+LIMIT
+and
+OFFSET
+clauses to your query. You can parameterize the values of these clauses, allowing you to pass pagination values as query parameters to your API Endpoint or Query API request.
+Use the
+LIMIT
+clause to select only the first
+n
+rows of a query result. Use the
+OFFSET
+clause to skip
+n
+rows from the beginning of a query result. Together, you can dynamically chunk the results of a query up into pages.
+For example, the following query introduces two dynamic parameters
+page_size
+and
+page
+, which lets you control the pagination of a query result using query parameters.
+Paging results using dynamic parameters
+%
+SELECT * FROM TR
+LIMIT {{Int32(page_size, 100)}}
+OFFSET {{Int32(page, 0) * Int32(page_size, 100)}}
+You can also use pages to perform calculations such as
+count()
+. The following example counts the total number of pages:
+Operation on a paginated endpoint
+%
+SELECT count() as total_rows, ceil(total_rows/{{Int32(page_size, 100)}}) pages FROM endpoint_to_paginate
+The addition of a
+LIMIT
+clause to a query also adds the
+rows_before_limit_at_least
+field to the response metadata.
+rows_before_limit_at_least
+is the lower bound on the number of rows returned by the query after transformations but before the limit was applied, and can be useful for response handling calculations.
+Example:
+SELECT * FROM users WHERE active = true LIMIT 10
+Response might include:
+rows
+: 10 (actual rows returned)
+rows_before_limit_at_least
+: 1,000 (at least this many active users exist)
+Why "at least"?
+ClickHouse can stop counting once it knows the answer exceeds the
+LIMIT
+value. This makes it a lower bound, not an exact count.
+Useful for:
+Pagination logic ("showing 10 of at least 1,247 results")
+Determining if more results exist without running a separate
+COUNT()
+query
+This metadata is returned automatically with any
+LIMIT
+query, saving you from running an additional
+COUNT(*)
+query to check if more results are available.
+To get consistent pagination results, add an
+ORDER BY
+clause to your paginated queries.
+Advanced templating
+¶
+To build more complex queries, use flow control operators like
+if
+,
+else
+and
+elif
+in combination with the
+defined()
+function, which helps you check whether a parameter has been received and act accordingly.
+Tinybird's templating system is based on the
+Tornado Python framework
+, and uses Python syntax. You must enclose control statements in curly brackets with percentages
+{%..%}
+as in the following example:
+Advanced templating using dynamic parameters
+%
+SELECT
+  toDate(start_datetime) as day,
+  countIf(status_code < 400) requests,
+  countIf(status_code >= 400) errors,
+  avg(duration) avg_duration
+FROM
+  log_events
+WHERE
+  endsWith(user_email, {{String(email, 'gmail.com')}}) AND
+  start_datetime >= {{DateTime(start_date, '2019-09-20 00:00:00')}} AND
+  start_datetime <= {{DateTime(end_date, '2019-10-10 00:00:00')}}
+  {% if method != 'All' %} AND method = {{String(method,'POST')}} {% end %}
+GROUP BY
+  day
+ORDER BY
+  day DESC
+Validate required parameters
+¶
+Validate if a param is in the query
+%
+SELECT * FROM table
+{% if defined(my_filter) %}
+WHERE attr > {{Int32(my_filter)}}
+{% end %}
+When you call the query with
+my_filter=20
+, it applies the filter.
+Set default values and understand placeholders
+¶
+Following best practices, you should set default parameter values as follows:
+Default parameter values
+%
+SELECT * FROM table
+WHERE attr > {{Int32(my_filter, 10)}}
+When you call the query without setting any value to
+my_filter
+, it automatically applies the default value of 10.
+If you don't set a default value for a parameter, you should validate that the parameter is defined before using it in the query as explained previously.
+If you don't validate the parameter and it's not defined, the query might fail. Tinybird populates the parameter with a placeholder value based on the data type. For instance, numerical data types are populated with 0, strings with
+__no_value__
+, and date and timestamps with
+2019-01-01
+and
+2019-01-01 00:00:00
+respectively. You could try yourself with a query like this:
+Get placeholder values
+%
+  SELECT
+      {{String(param)}} as placeholder_string,
+      {{Int32(param)}} as placeholder_num,
+      {{Boolean(param)}} as placeholder_bool,
+      {{Float32(param)}} as placeholder_float,
+      {{Date(param)}} as placeholder_date,
+      {{DateTime(param)}} as placeholder_ts,
+      {{Array(param)}} as placeholder_array
+This returns the following values:
+{
+  "placeholder_string": "__no_value__",
+  "placeholder_num": 0,
+  "placeholder_bool": 0,
+  "placeholder_float": 0,
+  "placeholder_date": "2019-01-01",
+  "placeholder_ts": "2019-01-01 00:00:00",
+  "placeholder_array": ["__no_value__0","__no_value__1"]
+}
+Test parameters in the UI
+¶
+Any dynamic parameters you create appear in the UI. Select
+Test new values
+to open a test dialog populated with the default value of your parameters. The test dialog helps you test different Pipe values than the default ones without impacting production environments.
+Use the View API page to see API Endpoint metrics resulting from that specific combination of parameters. Close the dialog to bring the Pipe back to its default production state.
+When testing parameters, you can modify both the SQL code and the parameters.
+Encode special characters in test parameters
+¶
+When using the Test UI for parameters, certain special characters need to be encoded:
+Character
+Status in Test UI
+URI Encoding
+#
+Truncates the value if not encoded
+%23
+&
+Used as a parameter separator
+%26
++
+Interpreted as a space character
+%2B
+%
+Reserved for escape sequences
+%25
+"
+Needs encoding
+%22
+The Forward UI supports special characters without encoding, except
+%
+and
+"
+. These character values are not supported.
+Cascade parameters across Pipes
+¶
+Parameters with the same name in different Pipes are cascaded down the dependency chain.
+For example, if you publish Pipe A with the parameter
+foo
+, and then Pipe B which uses Pipe A as a Data Source also with the parameter
+foo
+, then when you call the API Endpoint of Pipe B with
+foo=bar
+, the value of
+foo
+will be
+bar
+in both Pipes.
+Return custom errors
+¶
+The following example stops query processing and returns a 400 error:
+Validate if a param is defined and throw an error if it's not defined
+%
+{% if not defined(my_filter) %}
+{{ error('my_filter (int32) query param is required') }}
+{% end %}
+SELECT * FROM table
+WHERE attr > {{Int32(my_filter)}}
+The
+custom_error
+function is an advanced version of
+error
+where you can customize the response and other aspects. The function gets an object as the first argument, which is sent as JSON, and the status_code as a second argument, which defaults to 400.
+Validate if a param is defined and throw an error if it's not defined
+%
+{% if not defined(my_filter) %}
+{{ custom_error({'error_id': 10001, 'error': 'my_filter (int32) query param is required'}) }}
+{% end %}
+SELECT * FROM table
+WHERE attr > {{Int32(my_filter)}}
+Limits
+¶
+You can't use query parameters in nodes that are published as
+Materialized Views
+, only in API Endpoints, Query API requests, or on-demand copies or sinks.
+You can use query parameters in scheduled sinks and copies, but must have a default. That default is used in the scheduled execution. The preview step fails if the default doesn't exist.
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Query parameters
+Define query parameters
+Call a query with parameters
+Use parameters for observability
+Available parameter types
+Column parameters
+Array parameters
+JSON parameters
+Pagination
+Advanced templating
+Validate required parameters
+Set default values and understand placeholders
+Test parameters in the UI
+Encode special characters in test parameters
+Cascade parameters across Pipes
+Return custom errors
+Limits
+forward
+Ask AI

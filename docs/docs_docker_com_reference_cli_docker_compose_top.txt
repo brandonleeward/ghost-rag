@@ -1,0 +1,33 @@
+Source: https://docs.docker.com/reference/cli/docker/compose/top/
+
+docker compose top | Docker Docs
+Gordon
+Gordon, your AI assistant for Docker docs
+Search
+Start a new chat
+When enabled, Gordon considers the current page you're viewing
+to provide more relevant answers.
+Share feedback
+Answers are generated based on the documentation.
+Back
+Reference
+Get started
+Guides
+Manuals
+docker compose top
+Ask Gordon
+Copy Markdown
+View Markdown
+Description
+Display the running processes
+Usage
+docker compose top [SERVICES...]
+Description
+Displays the running processes
+Examples
+$
+docker compose top
+example_foo_1
+UID    PID      PPID     C    STIME   TTY   TIME       CMD
+root   142353   142331   2    15:33   ?     00:00:00   ping localhost -c 5
+Table of contents

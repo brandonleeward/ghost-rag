@@ -1,0 +1,644 @@
+Source: https://www.tinybird.co/docs/version-control/implementing-test-strategies
+
+Classic: Implementing test strategies · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Implementing test strategies
+¶
+Copy as MD
+Tinybird provides you with a suite of tools to test your project. This means you can make changes and be confident that they won't break the API Endpoints you've deployed.
+Overview
+¶
+This walkthrough is based on the
+Web Analytics template
+. You can follow along using your existing Tinybird project, or by cloning the Web Analytics template.
+If you need to, create a new Workspace by clicking on the following button:
+Generate mock data
+¶
+If you want to send fake data to your project, use Tinybird's
+mockingbird
+CLI tool. You'll need to run the following command to start receiving dummy events:
+Command to populate the Web Analytics template with fake events
+mockingbird-cli tinybird \
+   --template "Web Analytics template" \
+   --token <ADMIN_TOKEN> \
+   --datasource "analytics_events" \
+   # The region should be "eu_gcp", "us_gcp"
+   --endpoint "<REGION>" \
+   --eps 100 \
+   --limit 1000
+Testing strategies
+¶
+You can implement three different testing strategies in a Tinybird data project: Regression tests, data quality tests, and fixture tests. All three of them are included as part of the
+Continuous Integration workflow
+.
+Regression tests
+prevent you from breaking working APIs. They run automatically on each commit to a Pull Request, or when trying to overwrite a Pipe with an API Endpoint in a Workspace. They compare both the output and performance of your API Endpoints using the previous and current versions of the Pipe endpoints.
+Data quality tests
+warn you about anomalies in the data. As opposed to regression tests, you do have to write data quality tests to cover one or more criteria over your data: the presence of null values, duplicates, out-of-range values, etc. Data quality tests are usually scheduled by users to run over production data as well.
+Fixture tests
+are like "manual tests" for your API Endpoints. They check that a given call to a given Pipe endpoint with a set of parameters and a known set of data (fixtures) returns a deterministic response. They're useful for coverage testing and for when you are developing or debugging new business logic that requires very specific data scenarios. When creating fixture tests, you must provide both the test and any data fixtures.
+Regression tests
+¶
+When one of your API Endpoints is integrated into a production environment (such as a web/mobile application or a dashboard), you want to make sure that any change in the Pipe doesn't change the output of the API endpoint. In other words, you want the same version of an API Endpoint to return the same data for the same requests.
+Tinybird provides you with automatic regression tests that run any time you push a new change to an API Endpoint.
+Here's an example you can follow along by reading. Imagine you have a
+top_browsers
+Pipe:
+Definition of the top_browsers.pipe file
+DESCRIPTION >
+   Top Browsers ordered by most visits.
+   Accepts `date_from` and `date_to` date filter. Defaults to last 7 days.
+   Also `skip` and `limit` parameters for pagination.
+
+
+TOKEN "dashboard" READ
+
+NODE endpoint
+DESCRIPTION >
+   Group by browser and calculate hits and visits
+
+SQL >
+   %
+   SELECT
+      browser,
+      uniqMerge(visits) as visits,
+      countMerge(hits) as hits
+   FROM
+      analytics_sources_mv
+   WHERE
+      {% if defined(date_from) %}
+         date >= {{Date(date_from, description="Starting day for filtering a date range", required=False)}}
+      {% else %}
+         date >= timestampAdd(today(), interval -7 day)
+      {% end %}
+      {% if defined(date_to) %}
+         and date <= {{Date(date_to, description="Finishing day for filtering a date range", required=False)}}
+      {% else %}
+         and date <= today()
+      {% end %}
+   GROUP BY
+      browser
+   ORDER BY
+      visits desc
+   LIMIT {{Int32(skip, 0)}},{{Int32(limit, 50)}}
+These requests are sent to the API Endpoint:
+Let's run some requests to the API Endpoint to see the output
+curl https://<your_host>/v0/pipes/top_browsers.json?token={TOKEN}
+curl https://<your_host>/v0/pipes/top_browsers.json?token={TOKEN}&date_from=2020-04-23&date_to=2030-04-23
+Now, it's possible to filter by
+device
+and modify the API Endpoint:
+Definition of the top_browsers.pipe file
+DESCRIPTION >
+   Top Browsers ordered by most visits.
+   Accepts `date_from` and `date_to` date filter. Defaults to last 7 days.
+   Also `skip` and `limit` parameters for pagination.
+
+TOKEN "dashboard" READ
+
+NODE endpoint
+DESCRIPTION >
+   Group by browser and calculate hits and visits
+
+SQL >
+   %
+   SELECT
+      browser,
+      uniqMerge(visits) as visits,
+      countMerge(hits) as hits
+   FROM
+      analytics_sources_mv
+   WHERE
+      {% if defined(date_from) %}
+         date >= {{Date(date_from, description="Starting day for filtering a date range", required=False)}}
+      {% else %}
+         date >= timestampAdd(today(), interval -7 day)
+      {% end %}
+      {% if defined(date_to) %}
+         and date <= {{Date(date_to, description="Finishing day for filtering a date range", required=False)}}
+      {% else %}
+         and date <= today()
+      {% end %}
+      {% if defined(device) %}
+         and device = {{String(device, description="Device to filter", required=False)}}
+      {% end %}
+   GROUP BY
+      browser
+   ORDER BY
+      visits desc
+   LIMIT {{Int32(skip, 0)}},{{Int32(limit, 50)}}
+At this point, you'd create a new Pull Request like
+this example
+with the changes above, so the API Endpoint is tested for regressions.
+On the standard Tinybird Continuous Integration pipeline, changes are deployed to a branch, and there's a
+Run Pipe regression tests
+step that runs the following command on that branch:
+Run regression tests
+tb branch regression-tests coverage --wait
+The next step creates a Job that runs the coverage of the API Endpoints. The Job tests all combinations of parameters by running at least one request for each combination, and comparing the results of the new and old versions of the Pipe:
+Run coverage regression tests
+## In case the endpoints don't have any requests, we will show a warning so you can delete the endpoint if it's not needed or it's expected
+🚨 No requests found for the endpoint analytics_hits - coverage (Skipping validation).
+💡 See this guide for more info about the regression tests => https://www.tinybird.co/docs/work-with-data/strategies/implementing-test-strategies#testing-strategies
+🚨 No requests found for the endpoint trend - coverage (Skipping validation).
+💡 See this guide for more info about the regression tests => https://www.tinybird.co/docs/work-with-data/strategies/implementing-test-strategies#testing-strategies
+🚨 No requests found for the endpoint top_locations - coverage (Skipping validation).
+💡 See this guide for more info about the regression tests => https://www.tinybird.co/docs/work-with-data/strategies/implementing-test-strategies#testing-strategies
+🚨 No requests found for the endpoint kpis - coverage (Skipping validation).
+💡 See this guide for more info about the regression tests => https://www.tinybird.co/docs/work-with-data/strategies/implementing-test-strategies#testing-strategies
+🚨 No requests found for the endpoint top_sources - coverage (Skipping validation).
+💡 See this guide for more info about the regression tests => https://www.tinybird.co/docs/work-with-data/strategies/implementing-test-strategies#testing-strategies
+🚨 No requests found for the endpoint top_pages - coverage (Skipping validation).
+💡 See this guide for more info about the regression tests => https://www.tinybird.co/docs/work-with-data/strategies/implementing-test-strategies#testing-strategies
+
+## If the endpoint has been requested, we will run the regression tests and show the results
+## This validation is running for each combination of parameters and comparing the results from the branch against the resources that we have copied from the production
+OK - top_browsers(coverage) - https://api.tinybird.co/v0/pipes/top_browsers.json?&pipe_checker=true - 0.318s (9.0%) 8.59 KB (0.0%) 
+OK - top_browsers(coverage) - https://api.tinybird.co/v0/pipes/top_browsers.json?date_start=2020-04-23&date_end=2030-04-23&pipe_checker=true - 0.267s (-58.0%) 8.59 KB (0.0%) 
+OK - top_browsers(coverage) - https://api.tinybird.co/v0/pipes/top_browsers.json?date_from=2020-04-23&date_to=2030-04-23&pipe_checker=true - 0.297s (-26.0%) 0 bytes (0%) 
+🚨 No requests found for the endpoint top_devices - coverage (Skipping validation).
+💡 See this guide for more info about the regression tests => https://www.tinybird.co/docs/work-with-data/strategies/implementing-test-strategies#testing-strategies
+
+
+==== Performance metrics ====
+
+---------------------------------------------------------------------
+| top_browsers(coverage) | Origin        | Branch        | Delta    |
+---------------------------------------------------------------------
+| min response time      | 0.293 seconds | 0.267 seconds | -8.83 %  |
+| max response time      | 0.639 seconds | 0.318 seconds | -50.16 % |
+| mean response time     | 0.445 seconds | 0.294 seconds | -33.87 % |
+| median response time   | 0.402 seconds | 0.297 seconds | -26.23 % |
+| p90 response time      | 0.639 seconds | 0.318 seconds | -50.16 % |
+| min read bytes         | 0 bytes       | 0 bytes       | +0.0 %   |
+| max read bytes         | 8.59 KB       | 8.59 KB       | +0.0 %   |
+| mean read bytes        | 5.73 KB       | 5.73 KB       | +0.0 %   |
+| median read bytes      | 8.59 KB       | 8.59 KB       | +0.0 %   |
+| p90 read bytes         | 8.59 KB       | 8.59 KB       | +0.0 %   |
+---------------------------------------------------------------------
+
+==== Results Summary ====
+
+--------------------------------------------------------------------------------------------
+| Endpoint       | Test     | Run | Passed | Failed | Mean response time | Mean read bytes |
+--------------------------------------------------------------------------------------------
+| analytics_hits | coverage |   0 |      0 |      0 | +0.0 %             | +0.0 %          |
+| trend          | coverage |   0 |      0 |      0 | +0.0 %             | +0.0 %          |
+| top_locations  | coverage |   0 |      0 |      0 | +0.0 %             | +0.0 %          |
+| kpis           | coverage |   0 |      0 |      0 | +0.0 %             | +0.0 %          |
+| top_sources    | coverage |   0 |      0 |      0 | +0.0 %             | +0.0 %          |
+| top_pages      | coverage |   0 |      0 |      0 | +0.0 %             | +0.0 %          |
+| top_browsers   | coverage |   3 |      3 |      0 | -33.87 %           | +0.0 %          |
+| top_devices    | coverage |   0 |      0 |      0 | +0.0 %             | +0.0 %          |
+--------------------------------------------------------------------------------------------
+As you can see, regression tests are run for each combination of parameters and the results are compared against the Workspace. In this case, there are no regression issues since adding a new filter.
+Let's see what happens if you introduce a breaking change in the Pipe definition.
+First, you'd run some requests using the device filter:
+Let's run some requests using the device filter
+curl https://<your_host>/v0/pipes/top_browsers.json?token={TOKEN}&device=mobile-android
+curl https://<your_host>/v0/pipes/top_browsers.json?token={TOKEN}&date_from=2020-04-23&date_to=2030-04-23&device=desktop
+Then, introduce a breaking change in the Pipe definition by removing the
+device
+filter that was added in the previous step:
+Definition of the top_browsers.pipe file
+DESCRIPTION >
+   Top Browsers ordered by most visits.
+   Accepts `date_from` and `date_to` date filter. Defaults to last 7 days.
+   Also `skip` and `limit` parameters for pagination.
+
+
+TOKEN "dashboard" READ
+
+NODE endpoint
+DESCRIPTION >
+   Group by browser and calculate hits and visits
+
+SQL >
+   %
+   SELECT
+      browser,
+      uniqMerge(visits) as visits,
+      countMerge(hits) as hits
+   FROM
+      analytics_sources_mv
+   WHERE
+      {% if defined(date_from) %}
+         date >= {{Date(date_from, description="Starting day for filtering a date range", required=False)}}
+      {% else %}
+         date >= timestampAdd(today(), interval -7 day)
+      {% end %}
+      {% if defined(date_to) %}
+         and date <= {{Date(date_to, description="Finishing day for filtering a date range", required=False)}}
+      {% else %}
+         and date <= today()
+      {% end %}
+   GROUP BY
+      browser
+   ORDER BY
+      visits desc
+   LIMIT {{Int32(skip, 0)}},{{Int32(limit, 50)}}
+At this point, you'd create a Pull Request
+like this example
+with the change above so the API Endpoint is tested for regressions.
+This time, the output is slightly different than before:
+Run coverage regression tests
+🚨 No requests found for the endpoint analytics_hits - coverage (Skipping validation).
+💡 See this guide for more info about the regression tests => https://www.tinybird.co/docs/work-with-data/strategies/implementing-test-strategies#testing-strategies
+🚨 No requests found for the endpoint trend - coverage (Skipping validation).
+💡 See this guide for more info about the regression tests => https://www.tinybird.co/docs/work-with-data/strategies/implementing-test-strategies#testing-strategies
+🚨 No requests found for the endpoint top_locations - coverage (Skipping validation).
+💡 See this guide for more info about the regression tests => https://www.tinybird.co/docs/work-with-data/strategies/implementing-test-strategies#testing-strategies
+🚨 No requests found for the endpoint kpis - coverage (Skipping validation).
+💡 See this guide for more info about the regression tests => https://www.tinybird.co/docs/work-with-data/strategies/implementing-test-strategies#testing-strategies
+🚨 No requests found for the endpoint top_sources - coverage (Skipping validation).
+💡 See this guide for more info about the regression tests => https://www.tinybird.co/docs/work-with-data/strategies/implementing-test-strategies#testing-strategies
+🚨 No requests found for the endpoint top_pages - coverage (Skipping validation).
+💡 See this guide for more info about the regression tests => https://www.tinybird.co/docs/work-with-data/strategies/implementing-test-strategies#testing-strategies
+
+## The requests without using the device filter are still working, but the other will return a different number of rows, value
+OK - top_browsers(coverage) - https://api.tinybird.co/v0/pipes/top_browsers.json?&pipe_checker=true - 0.3s (-45.0%) 8.59 KB (0.0%) 
+FAIL - top_browsers(coverage) - https://api.tinybird.co/v0/pipes/top_browsers.json?device=mobile-android&pipe_checker=true - 0.274s (-43.0%) 8.59 KB (-2.0%) 
+OK - top_browsers(coverage) - https://api.tinybird.co/v0/pipes/top_browsers.json?date_start=2020-04-23&date_end=2020-04-23&pipe_checker=true - 0.341s (18.0%) 8.59 KB (0.0%) 
+OK - top_browsers(coverage) - https://api.tinybird.co/v0/pipes/top_browsers.json?date_from=2020-04-23&date_to=2020-04-23&pipe_checker=true - 0.314s (-49.0%) 0 bytes (0%) 
+FAIL - top_browsers(coverage) - https://api.tinybird.co/v0/pipes/top_browsers.json?date_from=2020-01-23&date_to=2030-04-23&device=desktop&pipe_checker=true - 0.218s (-58.0% skipped < 0.3) 8.59 KB (-2.0%) 
+
+
+🚨 No requests found for the endpoint top_devices - coverage (Skipping validation).
+💡 See this guide for more info about the regression tests => https://www.tinybird.co/docs/work-with-data/strategies/implementing-test-strategies#testing-strategies
+
+
+==== Failures Detail ====
+
+❌ top_browsers(coverage) - https://api.tinybird.co/v0/pipes/top_browsers.json?device=mobile-android&pipe_checker=true
+
+** 1 != 4 : Unexpected number of result rows count, this might indicate regression.
+💡 Hint: Use `--no-assert-result-rows-count` if it's expected and want to skip the assert.
+
+Origin Workspace: https://api.tinybird.co/v0/pipes/top_browsers.json?device=mobile-android&pipe_checker=true&__tb__semver=0.0.0
+Test Branch: https://api.tinybird.co/v0/pipes/top_browsers.json?device=mobile-android&pipe_checker=true
+
+
+❌ top_browsers(coverage) - https://api.tinybird.co/v0/pipes/top_browsers.json?date_from=2020-01-23&date_to=2030-04-23&device=desktop&pipe_checker=true
+
+** 3 != 4 : Unexpected number of result rows count, this might indicate regression.
+💡 Hint: Use `--no-assert-result-rows-count` if it's expected and want to skip the assert.
+
+Origin Workspace: https://api.tinybird.co/v0/pipes/top_browsers.json?date_from=2020-01-23&date_to=2030-04-23&device=desktop&pipe_checker=true&__tb__semver=0.0.0
+Test Branch: https://api.tinybird.co/v0/pipes/top_browsers.json?date_from=2020-01-23&date_to=2030-04-23&device=desktop&pipe_checker=true
+
+
+==== Performance metrics ====
+
+Error: 
+** Check Failures Detail above for more information. If the results are expected, skip asserts or increase thresholds, see 💡 Hints above (note skip asserts flags are applied to all regression tests, so use them when it makes sense).
+
+If you are using the CI template for GitHub or GitLab you can add skip asserts flags as labels to the MR and they are automatically applied. Find available flags to skip asserts and thresholds here => https://www.tinybird.co/docs/work-with-data/strategies/implementing-test-strategies#testing-strategies
+---------------------------------------------------------------------
+| top_browsers(coverage) | Origin        | Branch        | Delta    |
+---------------------------------------------------------------------
+| min response time      | 0.29 seconds  | 0.218 seconds | -24.61 % |
+| max response time      | 0.612 seconds | 0.341 seconds | -44.28 % |
+| mean response time     | 0.491 seconds | 0.289 seconds | -41.06 % |
+| median response time   | 0.523 seconds | 0.3 seconds   | -42.72 % |
+| p90 response time      | 0.612 seconds | 0.341 seconds | -44.28 % |
+| min read bytes         | 0 bytes       | 0 bytes       | +0.0 %   |
+| max read bytes         | 8.8 KB        | 8.59 KB       | -2.33 %  |
+| mean read bytes        | 6.95 KB       | 6.87 KB       | -1.18 %  |
+| median read bytes      | 8.59 KB       | 8.59 KB       | +0.0 %   |
+| p90 read bytes         | 8.8 KB        | 8.59 KB       | -2.33 %  |
+---------------------------------------------------------------------
+
+
+==== Results Summary ====
+
+--------------------------------------------------------------------------------------------
+| Endpoint       | Test     | Run | Passed | Failed | Mean response time | Mean read bytes |
+--------------------------------------------------------------------------------------------
+| analytics_hits | coverage |   0 |      0 |      0 | +0.0 %             | +0.0 %          |
+| trend          | coverage |   0 |      0 |      0 | +0.0 %             | +0.0 %          |
+| top_locations  | coverage |   0 |      0 |      0 | +0.0 %             | +0.0 %          |
+| kpis           | coverage |   0 |      0 |      0 | +0.0 %             | +0.0 %          |
+| top_sources    | coverage |   0 |      0 |      0 | +0.0 %             | +0.0 %          |
+| top_pages      | coverage |   0 |      0 |      0 | +0.0 %             | +0.0 %          |
+| top_browsers   | coverage |   5 |      3 |      2 | -41.06 %           | -1.18 %         |
+| top_devices    | coverage |   0 |      0 |      0 | +0.0 %             | +0.0 %          |
+--------------------------------------------------------------------------------------------
+
+❌ FAILED top_browsers(coverage) - https://api.tinybird.co/v0/pipes/top_browsers.json?device=mobile-android&pipe_checker=true
+
+❌ FAILED top_browsers(coverage) - https://api.tinybird.co/v0/pipes/top_browsers.json?date_from=2020-01-23&date_to=2030-04-23&device=desktop&pipe_checker=true
+Because the API Endpoint filter changed, the request response changed, and the regression testing warns you.
+If the change is expected, you can skip the assertion by adding the following labels to the Pull Request:
+--no-assert-result
+: If you expect the API Endpoint output to be different from the current version
+--no-assert-result-no-error
+: If you expect errors from the API Endpoint
+--no-assert-result-rows-count
+: If you expect the number of elements in the API Endpoint output to be different than the current version
+--assert-result-ignore-order
+: If you expect the API Endpoint output is returning the same elements but in a different order
+--assert-time-increase-percentage -1
+: If you expect the API Endpoint execution time to increase more than 25% from the current version
+--assert-bytes-read-increase-percentage -1
+: If you expect the API Endpoint bytes read to increase more than 25% from the current version
+--assert-max-time
+: If you expect the API Endpoint execution time to vary but you don't want to assert the increase in time up to a certain threshold. For instance, if you want to allow your API Endpoints to respond in up to 1s and you don't want to assert any increase in time percentage use
+--assert-max-time 1
+. By default is 0.3s.
+These flags will be applied to ALL the regression tests and are advised to be used for one-time breaking changes.
+Define a file in
+tests/regression.yaml
+to configure the behavior of the regression tests for each API Endpoint. Follow the docs in
+Configure regression tests
+.
+For this example, you would add the label
+--no-assert-result-rows-count
+to the PR as you'd expect the number of rows to be different and you'd want to remove the filter.
+At this point, the regression tests would pass and the PR could be merged.
+How regression tests work
+¶
+The regression test functionality is powered by
+tinybird.pipe_stats_rt
+, one of the
+service Data Sources
+that is available to all users by default.
+There are three options to run regression tests:
+coverage
+,
+last
+and
+manual
+.
+The
+coverage
+option will run at least 1 request for each combination of parameters.
+The
+last
+option will run the last N requests for each combination of parameters.
+The
+manual
+option will run the requests you define in the configuration file
+tests/regression.yaml
+.
+When you run
+tb branch regression-tests coverage --wait
+, Tinybird generates a job that queries
+tinybird.pipe_stats_rt
+to gather all the possible combinations of queries done in the last 7 days for each API Endpoint.
+Simplification of the query used to gather all the possible combinations
+SELECT
+   ## Using this function we extract all the parameters used in each request
+   extractURLParameterNames(assumeNotNull(url)) as params, 
+   ## According to the option `--sample-by-params`, we run one query for each combination of parameters or more
+   groupArraySample({sample_by_params if sample_by_params > 0 else 1})(url) as endpoint_url
+FROM tinybird.pipe_stats_rt
+WHERE
+   pipe_name = '{pipe_name}'
+   ## According to the option `--match`, we will filter only the requests that contain that parameter
+   ## This is especially useful when you want to validate a new parameter you want to introduce or you have optimized the endpoint in that specific case
+   { " AND " + " AND ".join([f"has(params, '{match}')" for match in matches])  if matches and len(matches) > 0 else ''}
+GROUP BY params
+FORMAT JSON
+When you run
+tb branch regression-tests last --wait
+, Tinybird generates a job that queries
+tinybird.pipe_stats_rt
+to gather the last N requests for each API Endpoint.
+Query to get the last N requests
+SELECT url
+FROM tinybird.pipe_stats_rt
+WHERE
+   pipe_name = '{pipe_name}'
+   ## According to the option `--match`, we will filter only the requests that contain that parameter
+   ## This is especially useful when you want to validate a new parameter you want to introduce or you have optimize the endpoint in that specific case
+   { " AND " + " AND ".join([f"has(params, '{match}')" for match in matches])  if matches and len(matches) > 0 else ''}
+
+## According to the option `--limit` by default 100
+LIMIT {limit}
+FORMAT JSON
+Configure regression tests
+¶
+By default, the CI Workflow uses the
+coverage
+option when running the regression-test:
+Default command to run regression tests in the CI Workflow
+tb branch regression-tests coverage --wait
+But if it finds a
+tests/regression.yaml
+file in your project, it uses the configuration defined in that file.
+Run regression tests for all endpoints in a test branch using a configuration file
+tb branch regression-tests -f tests/regression.yaml --wait
+If the file
+tests/regression.yaml
+is present, only
+--skip-regression-tests
+and
+--no-skip-regression-tests
+labels in the Pull Request will take effect
+The configuration file is a YAML file with the following structure:
+- pipe: '.*'  # regular expression that selects all API Endpoints in the Workspace
+  tests:  # list of tests to run for this Pipe
+    - [coverage|last|manual]:  # testing strategy to use (coverage, last, or manual)
+      config:  # configuration options for this strategy
+        assert_result: bool = True  # whether to perform an assertion on the results returned by the endpoint
+        assert_result_no_error: bool = True  # whether to verify that the endpoint doesn't return errors
+        assert_result_rows_count: bool = True  # whether to verify that the correct number of elements are returned in the results
+        assert_result_ignore_order: bool = False  # whether to ignore the order of the elements in the results
+        assert_time_increase_percentage: int = 25  # allowed percentage increase in endpoint response time. use -1 to disable assert
+        assert_bytes_read_increase_percentage: int = 25  # allowed percentage increase in the amount of bytes read by the endpoint. use -1 to disable assert
+        assert_max_time: float = 1  # Max time allowed for the endpoint response time. If the response time is lower than this value then the assert_time_increase_percentage isn't taken into account. Default is 0.3
+        failfast: bool = False  # whether the test should stop at the first error encountered
+Note that the order of preference for the configuration options is from bottom to top, so the configuration options specified for a particular Pipe take precedence over the options specified earlier (higher up) in the configuration file. Here's an example YAML file with two entries for two regular expressions of a Pipe, where one overrides the configuration of the other:
+- pipe: 'top_.*'
+  tests:
+    - coverage:
+        config:  # Default config but reducing thresholds from default 25 and expecting different order in the response payload
+          assert_time_increase_percentage: 15 
+          assert_bytes_read_increase_percentage: 15
+          assert_result_ignore_order: true
+    - last:
+        config: # default config but not asserting performance and failing at first occurrence
+          assert_time_increase_percentage: -1
+          assert_bytes_read_increase_percentage: -1
+          failfast: true
+        limit: 5 # Default value will be 10
+
+- pipe: 'top_pages'
+  tests:
+    - coverage:  
+    - manual:
+         params:
+            - {param1: value1, param2: value2}
+            - {param1: value3, param2: value4}
+         config:
+           failfast: true
+    # Override config for top_pages executing coverage with default config and two manual requests
+Data quality tests
+¶
+Data quality tests are meant to cover scenarios that don't have to happen in your production data. For example, you can check that the data isn't duplicated or you don't have values out of range.
+Data quality tests are run with the
+tb test
+command.
+You can use them in two different ways:
+Run them periodically over your production data.
+Use them as part of your test suite in Continuous Integration with a Branch or fixtures.
+Here's an example you can follow along by reading - no need to clone anything. In the Web Analytics example, you can use data quality tests to validate that there are no duplicate entries with the same session_id in the
+analytics_events
+.
+Run
+tb test init
+to generate a dummy test file in
+tests/default.yaml
+:
+Example of tests generated by running tb test init
+# This test should always pass as numbers(5) returns values from [1,5]
+- this_test_should_pass:
+   max_bytes_read: null
+   max_time: null
+   pipe: null
+   sql: SELECT * FROM numbers(5) WHERE 0
+
+# This test should always fail as numbers(5) returns values from [1,5]. Therefore the SQL will return a value
+- this_test_should_fail:
+   max_bytes_read: null
+   max_time: null
+   pipe: null
+   sql: SELECT * FROM numbers(5) WHERE 1
+
+# If max_time is specified, the test will show a warning if the query takes more than the threshold
+- this_test_should_pass_over_time:
+   max_bytes_read: null
+   max_time: 1.0e-07
+   pipe: null
+   sql: SELECT * FROM numbers(5) WHERE 0
+
+# if max_bytes_read is specified, the test will show a warning if the query reads more bytes than the threshold
+- this_test_should_pass_over_bytes:
+   max_bytes_read: 5
+   max_time: null
+   pipe: null
+   sql: SELECT sum(number) AS total FROM numbers(5) HAVING total>1000
+
+# The combination of both 
+- this_test_should_pass_over_time_and_bytes:
+   max_bytes_read: 5
+   max_time: 1.0e-07
+   pipe: null
+   sql: SELECT sum(number) AS total FROM numbers(5) HAVING total>1000
+These tests check that the SQL query returns an empty result. If the result isn't empty, the test fails.
+In this example, you'd write a similar test to check that there are no duplicate entries with the same session_id in the
+analytics_events
+:
+- no_duplicate_entries:
+   max_bytes_read: null
+   max_time: null
+   sql: |
+      SELECT
+         date,
+         sumMerge(total_sales) total_sales
+      FROM top_products_view
+      GROUP BY date
+      HAVING total_sales < 0
+If the test fails, the CI workflow will fail, and the output returns the value of the SQL query.
+You can also test the output of a Pipe. For instance, in the Web Analytics example, you could add a validation:
+First, query the API Endpoint
+top_products
+with the parameters
+date_start
+and
+date_end
+specified in the test.
+Then, run the SQL query from the result of the previous step.
+Data quality test for a Pipe
+- products_by_date:
+   max_bytes_read: null
+   max_time: null
+   sql: |
+      SELECT 1
+      FROM top_products
+      HAVING count() = 0
+   pipe:
+      name: top_products
+      params:
+         date_start: '2020-01-01'
+         date_end: '2020-12-31'
+Fixture tests
+¶
+Regression tests confirm the backward compatibility of your API Endpoints when overwriting them, and data quality tests cover scenarios that might not happen with test or production data. Sometimes, you need to cover a very specific scenario, or a use case that is being developed and you don't have production data for it. This is when to use fixture tests.
+To configure fixture testing you need:
+A script to run fixture tests, like
+this example
+. The script is automatically created when you
+connect your Workspace to Git
+.
+Data fixtures: These are datafiles placed in the
+datasources/fixtures
+folder of your project. Their name must match the name of a Data Source.
+Fixture tests in the
+tests
+folder.
+In the Continuous Integration job, a Branch is created. If fixture data exists in the
+datasources/fixtures
+folder, is appended to the Data Sources in the Branch, and the fixture tests are run.
+To effectively use data fixtures you should:
+Use data that don't collide with production data, to avoid unexpected results in regression testing.
+Use only data fixtures for landing Data Sources since Materialized Views are automatically populated.
+Use future dates in the data fixtures to avoid problems with the TTL of the Data Sources.
+Fixture tests are placed inside the
+tests
+folder of your project. If you have a lot of tests, create subfolders to organize the tests by module or API Endpoint.
+Each fixture test requires two files:
+One to indicate a request to an API Endpoint with the naming convention
+<test_name>.test
+One to indicate the exact response to the API Endpoint with the naming convention
+<test_name>.test.result
+For instance, to test the output of the
+top_browsers
+endpoint, create a
+simple_top_browsers.test
+fixture test with this content:
+top_browsers.test
+tb pipe data top_browsers --date_from 2100-01-01 --date_to 2100-02-01 --format CSV
+The test makes a request to the
+top_browsers
+API endpoint passing the
+date_from
+and
+date_to
+parameters and the response is
+CSV
+Now we need a
+simple_top_browsers.test.result
+with the expected result given our data fixtures:
+simple_top_browsers.test.result
+"browser","visits","hits"
+"chrome",1,1
+With this approach, your tests should run like this
+example Pull Request
+. Fixture tests are run as part of the Continuous Integration pipeline and the Job fails if the tests fail.
+Next steps
+¶
+Learn how to use
+staging and production Workspaces
+.
+Check out an
+example test Pull Request
+.
+Updated
+1 year ago
+On this page
+Implementing test strategies
+Overview
+Generate mock data
+Testing strategies
+Regression tests
+How regression tests work
+Configure regression tests
+Data quality tests
+Fixture tests
+Next steps
+classic
+Ask AI

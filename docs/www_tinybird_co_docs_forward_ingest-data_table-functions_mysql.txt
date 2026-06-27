@@ -1,0 +1,154 @@
+Source: https://www.tinybird.com/docs/forward/ingest-data/table-functions/mysql
+
+MySQL table function · Tinybird Docs
+Sign In
+Sign Up
+MySQL table function
+¶
+Copy as MD
+The Tinybird
+mysql()
+table function allows you to read data from your existing MySQL database into Tinybird, then schedule a regular copy pipe to orchestrate synchronization. You can load full tables, and every run performs a full replace on the data source.
+To use it, define a node using standard SQL and the
+mysql
+function keyword, then publish the node as a copy pipe that does a sync on every run. See
+Table functions
+for general information and tips.
+Setting secrets
+¶
+Table functions require authentication credentials that must be stored securely. In Tinybird Forward, manage those credentials with
+tb secret
+:
+tb secret set MYSQL_USERNAME <username>
+tb secret set MYSQL_PASSWORD <password>
+Set the secret in each environment where the copy pipe runs. For example, use
+tb --cloud secret set
+for Cloud and
+tb --branch=<branch_name> secret set
+for a branch. Then reference the secrets in SQL with
+tb_secret()
+.
+In Tinybird Classic, use the
+Environment Variables API
+to create the same secret values.
+For more details, see
+tb secret
+.
+Syntax
+¶
+Create a new pipe node. Call the
+mysql
+table function and pass the hostname and port, database, table, user, and password:
+Example query logic
+SELECT *
+FROM mysql(
+  'mysql.example.com:3306',
+  'mysql',
+  'orders',
+  {{ tb_secret("MYSQL_USERNAME") }},
+  {{ tb_secret("MYSQL_PASSWORD") }}
+)
+Publish this node as a copy pipe. You can choose to append only new data or replace all data.
+Example: sync orders from MySQL
+¶
+The following example copies an
+orders
+table from MySQL into a Tinybird Data Source every 5 minutes.
+First, define the target Data Source. Then define a copy pipe that reads from MySQL and appends rows updated in the last 10 minutes.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+datasources/mysql_orders.datasource
+SCHEMA >
+    `order_id` UInt64,
+    `customer_id` UInt64,
+    `status` String,
+    `amount` Float64,
+    `updated_at` DateTime
+
+ENGINE "ReplacingMergeTree(updated_at)"
+ENGINE_SORTING_KEY "order_id"
+pipes/mysql_orders_sync.pipe
+NODE updated_orders
+SQL >
+    %
+    SELECT
+        order_id,
+        customer_id,
+        status,
+        amount,
+        updated_at
+    FROM mysql(
+        'mysql.example.com:3306',
+        'shop',
+        'orders',
+        {{ tb_secret("MYSQL_USERNAME") }},
+        {{ tb_secret("MYSQL_PASSWORD") }}
+    )
+    WHERE updated_at >= now() - INTERVAL 10 MINUTE
+
+TYPE copy
+TARGET_DATASOURCE mysql_orders
+COPY_MODE append
+COPY_SCHEDULE */5 * * * *
+Use
+ReplacingMergeTree(updated_at)
+when the source can send multiple versions of the same row. Query with
+FINAL
+when you need the latest version at read time.
+Type support and inference
+¶
+Here's a detailed conversion table:
+MySQL data type
+Tinybird data type
+UNSIGNED TINYINT
+UInt8
+TINYINT
+Int8
+UNSIGNED SMALLINT
+UInt16
+SMALLINT
+Int16
+UNSIGNED INT, UNSIGNED MEDIUMINT
+UInt32
+INT, MEDIUMINT
+Int32
+UNSIGNED BIGINT
+UInt64
+BIGINT
+Int64
+FLOAT
+Float32
+DOUBLE
+Float64
+DATE
+Date
+DATETIME, TIMESTAMP
+DateTime
+BINARY
+FixedString
+Considerations
+¶
+The following considerations apply to the
+mysql()
+table function:
+Tinybird doesn't support all MySQL types directly, so some types are mapped to String, which is the most flexible type for arbitrary data.
+Time zone support in Tinybird's
+DateTime
+can be managed via additional functions or by ensuring consistent storage and retrieval time zones.
+See also
+¶
+Table functions
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+MySQL table function
+Setting secrets
+Syntax
+Example: sync orders from MySQL
+Type support and inference
+Considerations
+See also
+forward
+Ask AI

@@ -1,0 +1,145 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/sphinx-storage-engine/installing-sphinx
+
+Installing Sphinx | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+About SphinxSE
+Installing Sphinx
+Installing and Testing SphinxSE with MariaDB
+Configuring Sphinx
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Installing Sphinx
+Instructions for installing the standalone Sphinx search server on various operating systems, a prerequisite for using the SphinxSE storage engine.
+In order to use the
+Sphinx Storage Engine
+, it is necessary to install the Sphinx daemon.
+Many Linux distributions have Sphinx in their repositories. These can be used to install Sphinx instead of following the instructions below, but these are usually quite old versions and don't all include API's for easy integration. Ubuntu users can use the updated repository at
+sphinxsearch-rel21
+(see instructions below).
+Debian and Ubuntu
+Ubuntu users can make use of the repository, as follows:
+Copy
+sudo
+add-apt-repository
+ppa:builds/sphinxsearch-rel21
+sudo
+apt-get
+update
+sudo
+apt-get
+install
+sphinxsearch
+Alternatively, install as follows:
+The Sphinx package and daemon are named
+sphinxsearch
+.
+sudo apt-get install unixodbc libpq5 mariadb-client
+sudo dpkg -i sphinxsearch*.deb
+Configure Sphinx
+as required
+You may need to check
+/etc/default/sphinxsearch
+to see that
+START=yes
+Start with
+sudo service sphinxsearch start
+(and stop with
+sudo service sphinxsearch stop
+)
+Red Hat and CentOS
+The package name is
+sphinx
+and the daemon
+searchd
+.
+sudo yum install postgresql-libs unixODBC
+sudo rpm -Uhv sphinx*.rpm
+Configure Sphinx
+as required
+service searchd start
+Windows
+Unzip and extract the downloaded zip file
+Move the extracted directory to
+C:\Sphinx
+Configure Sphinx
+as required
+Install as a service:
+C:\Sphinx\bin> C:\Sphinx\bin\searchd --install --config C:\Sphinx\sphinx.conf.in --servicename SphinxSearch
+Once Sphinx has been installed, it will need to be
+configured
+.
+Full instructions, including details on compiling Sphinx yourself, are available at
+current.html
+.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+About SphinxSE
+Next
+Installing and Testing SphinxSE with MariaDB
+Last updated
+6 months ago
+Was this helpful?
+Debian and Ubuntu
+Red Hat and CentOS
+Windows
+Was this helpful?

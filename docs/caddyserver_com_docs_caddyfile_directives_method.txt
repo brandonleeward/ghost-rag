@@ -1,0 +1,29 @@
+Source: https://caddyserver.com/docs/caddyfile/directives/method
+
+method (Caddyfile directive) — Caddy Documentation
+A
+Project
+Store
+Forum
+GitHub
+Theme:
+System
+Download
+Sponsor
+method
+Changes the HTTP method on the request.
+Syntax
+method
+[<matcher>]
+<method>
+<method>
+is the HTTP method to change the request to.
+Examples
+Change the method for all requests under
+/api
+to
+POST
+:
+method
+/api*
+POST

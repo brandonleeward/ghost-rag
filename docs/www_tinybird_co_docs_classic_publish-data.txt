@@ -1,0 +1,22 @@
+Source: https://www.tinybird.com/docs/classic/publish-data
+
+Classic: Publish data · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Publish your data
+¶
+Copy as MD
+Whatever you need from your data, you can achieve it using Tinybird.
+Publish it as a queryable
+API Endpoint
+or a
+Sink Pipe
+.
+Updated
+1 year ago
+On this page
+Publish your data
+classic
+Ask AI

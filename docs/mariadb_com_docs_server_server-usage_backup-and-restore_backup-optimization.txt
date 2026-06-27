@@ -1,0 +1,171 @@
+Source: https://mariadb.com/docs/server/server-usage/backup-and-restore/backup-optimization
+
+Backup Optimization | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Backup and Restore Overview
+Forming a Backup Strategy
+Backup Optimization
+MariaDB Enterprise Backup
+mariadb-backup
+Point-In-Time Recovery (InnoDB Log Archiving)
+Replication as a Backup Solution
+Backup and Restore via dbForge Studio
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Backup Optimization
+Discover techniques to optimize your backup processes, including multithreading, incremental backups, and leveraging storage snapshots.
+Overview
+Backup and restore implementations can help overcome specific technical challenges that would otherwise pose a barrier to meeting business requirements.
+Each of these practices represents a trade-off. Understand risks before implementing any of these practices.
+Scheduling of Restore Preparation
+Technical challenge: restore time
+Trade-off: increased ongoing overhead for backup processing
+Backup data can be prepared for restore any time after it is produced and before it is used for restore. To expedite recovery, incremental backups can be pre-applied to the prior full backup to enable faster recovery. This may be done at the expense of recovery points, or at the expense of storage by maintaining copies of unmerged full and incremental backup directories.
+Moving Restored Data
+Technical challenge: disk space limitations
+Trade-off: modification of backup directory contents
+Suggested method for moving restored data is to use
+--copy-back
+as this method provides added safety. Where you might instead optimize for disk space savings, system resources, and time you may choose to instead use MariaDB Enterprise Backup's
+--move-back
+option. Speed benefits are only present when backup files are on the same disk partition as the destination data directory.
+The
+--move-back
+option will result in the removal of all data files from the backup directory, so it is best to use this option only when you have an additional copy of your backup data in another location.
+To restore from a backup by moving files, use the
+--move-back
+option:
+Copy
+mariadb-backup
+--move-back
+--target-dir=/data/backups/full
+Multithreading
+Technical challenge:: CPU bottlenecks
+Trade-off: Increased workload during backups
+MariaDB Enterprise Backup is a multi-threaded application that by default runs on a single thread. In cases where you have a host with multiple cores available, you can specify the number of threads you want it to use for parallel data file transfers using the
+--parallel
+option:
+Incrementing an Incremental Backup
+Technical challenge: Backup resource overhead, backup duration
+Trade-off: Increased restore complexity, restore process duration
+Under normal operation an incremental backup is taken against an existing full backup. This allows you to further shorten the amount of time MariaDB Enterprise Backup locks MariaDB Enterprise Server while copying tablespaces. You can then apply the changes in the increment to the full backup with a
+--prepare
+operation at leisure, without disrupting database operations.
+MariaDB Enterprise Backup also supports incrementing from an incremental backup. In this operation, the
+--incremental-basedir
+option points not to the full backup directory but rather to the previous incremental backup.
+In preparing a backup to restore the data directory, apply the chain of incremental backups to the full backup in order. That is, first
+inc1/, then inc2/
+, and so on:
+Continue to apply all the incremental changes until you have applied all available to the backup. Then restore as usual:
+Start MariaDB Enterprise Server on the restored data directory.
+Storage Snapshots
+Technical challenge: Backup resource overhead, backup duration.
+Trade-off: Limited to platforms with volume-level snapshots, may require crash recovery.
+While MariaDB Enterprise Backups produces file-level backups, users on storage solutions may prefer to instead perform volume-level snapshots to minimize resource impact. This storage capability exists with some SAN, NAS, and volume manager platforms.
+Snapshots occur point-in-time, so no preparation step is needed to ensure data is internally consistent. Snapshots occur while tablespaces are open, and a restored snapshot may need to undergo crash recovery.
+Just as traditional full, incremental, and partial backups should be tested, so too should recovery from snapshots be tested on an ongoing basis.
+Taking Snapshots
+Current
+< 10.11
+MariaDB Server includes
+advanced backup
+functionality to reduce the impact of backup operations:
+Connect with a client and issue a
+BACKUP STAGE START
+statement and then a
+BACKUP STAGE BLOCK_COMMIT
+statement.
+Take the snapshot.
+Issue a
+BACKUP STAGE END
+statement.
+Once the backup has been completed, remove all files which begin with the
+#sql prefix
+. These files are generated when
+ALTER TABLE
+occurs during a staged backup.
+Retrieve, copy, or store the snapshot as is typical for your storage platform and as per business requirements to make the backup durable. This may require mounting the snapshot in some manner.
+It is recommended to briefly prevent writes while snapshotting. Specific commands vary depending on storage platform, business requirements, and setup, but a general approach is to:
+Connect with a client and issue a
+FLUSH TABLES WITH READ LOCK
+statement, leaving the client connected.
+Take the snapshot.
+Issue an
+UNLOCK TABLES
+statement, to remove the read lock.
+Retrieve, copy, or store the snapshot as is typical for your storage platform and as per business requirements to make the backup durable. This may require mounting the snapshot in some manner.
+This page is: Copyright © 2025 MariaDB. All rights reserved.
+spinner
+Previous
+Forming a Backup Strategy
+Next
+MariaDB Enterprise Backup
+Last updated
+10 months ago
+Was this helpful?
+Overview
+Scheduling of Restore Preparation
+Moving Restored Data
+Multithreading
+Incrementing an Incremental Backup
+Storage Snapshots
+Taking Snapshots
+Was this helpful?
+Copy
+mariadb-backup --backup \
+--target-dir=/data/backups/full \
+--user=mariadb-backup \
+--password=mbu_passwd \
+--parallel=12
+Copy
+mariadb-backup --backup \
+--incremental-basedir=/data/backups/inc1 \
+--target-dir=/data/backups/inc2 \
+--user=mariadb-backup \
+--password=mbu_passwd
+Copy
+mariadb-backup --prepare \
+--target-dir=/data/backups/full \
+--incremental-dir=/data/backups/inc1
+Copy
+mariadb-backup --prepare \
+--target-dir=/data/backups/full \
+--incremental-dir=/data/backups/inc2
+Copy
+mariadb-backup --copy-back --target-dir=/data/backups/full
+chown -R mysql:mysql /var/lib/mysql

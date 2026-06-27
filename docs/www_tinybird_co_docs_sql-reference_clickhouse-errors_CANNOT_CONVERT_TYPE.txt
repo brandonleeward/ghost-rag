@@ -1,0 +1,313 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/CANNOT_CONVERT_TYPE
+
+CANNOT_CONVERT_TYPE ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+CANNOT_CONVERT_TYPE ClickHouse error
+¶
+Copy as MD
+This error occurs when ClickHouse cannot automatically convert between incompatible data types. It's common when comparing different types, using functions with wrong arguments, or inserting data with type mismatches.
+The
+CANNOT_CONVERT_TYPE
+error in ClickHouse (and Tinybird) happens when the system cannot automatically convert between incompatible data types. This typically occurs when comparing different types, using functions with arguments of the wrong type, or when inserting data that doesn't match the expected column types.
+What causes this error
+¶
+You'll typically see it when:
+Comparing different data types in WHERE clauses
+Using functions with incompatible argument types
+Inserting data with type mismatches
+Performing operations between incompatible types
+Using wrong data types in JOIN conditions
+Passing incorrect types to aggregate functions
+Type casting operations fail
+Array operations with mixed types
+ClickHouse is strict about type conversions. Use explicit CAST functions when you need to convert between types.
+Example errors
+¶
+Fails: comparing different types
+SELECT * FROM events
+WHERE user_id = '123'  -- user_id is UInt64, '123' is String
+-- Error: Cannot convert type String to UInt64
+Fails: function with wrong argument type
+SELECT toDate('2024-01-01') as date
+WHERE date > 123  -- date is Date, 123 is UInt64
+-- Error: Cannot convert type UInt64 to Date
+Fails: type mismatch in JOIN
+SELECT * FROM users u
+JOIN events e ON u.id = e.user_id
+WHERE u.id = 'user_123'  -- u.id is UInt64, 'user_123' is String
+-- Error: Cannot convert type String to UInt64
+Fails: array with mixed types
+SELECT [1, '2', 3.0] as mixed_array
+-- Error: Cannot convert type String to UInt64
+How to fix it
+¶
+Use explicit type casting
+¶
+Convert types explicitly using CAST functions:
+Fix: explicit type casting
+SELECT * FROM events
+WHERE user_id = CAST('123' AS UInt64)
+Fix data type mismatches
+¶
+Ensure data types match your schema:
+Fix: correct data types
+SELECT * FROM events
+WHERE user_id = 123  -- Use integer instead of string
+Use appropriate type conversion functions
+¶
+Use ClickHouse's built-in conversion functions:
+Fix: use conversion functions
+SELECT toDate('2024-01-01') as date
+WHERE date > toDate('2023-01-01')  -- Convert to Date type
+Fix array type consistency
+¶
+Ensure arrays contain consistent types:
+Fix: consistent array types
+SELECT [1, 2, 3] as int_array  -- All integers
+SELECT ['a', 'b', 'c'] as string_array  -- All strings
+Common patterns and solutions
+¶
+String to numeric conversion
+¶
+Convert strings to appropriate numeric types:
+String to numeric conversion
+-- Convert string to integer
+SELECT * FROM events
+WHERE user_id = toUInt64('123')
+
+-- Convert string to float
+SELECT * FROM metrics
+WHERE value = toFloat64('123.45')
+
+-- Convert string to decimal
+SELECT * FROM transactions
+WHERE amount = toDecimal64('123.45', 2)
+Date and time conversions
+¶
+Handle date and time type conversions:
+Date and time conversions
+-- Convert string to date
+SELECT * FROM events
+WHERE event_date = toDate('2024-01-01')
+
+-- Convert string to datetime
+SELECT * FROM events
+WHERE timestamp = toDateTime('2024-01-01 10:00:00')
+
+-- Convert timestamp to date
+SELECT * FROM events
+WHERE toDate(timestamp) = toDate('2024-01-01')
+Array type handling
+¶
+Ensure array type consistency:
+Array type handling
+-- Convert array elements to consistent types
+SELECT arrayMap(x -> toUInt64(x), ['1', '2', '3']) as int_array
+
+-- Filter arrays by type
+SELECT arrayFilter(x -> isUInt64(x), [1, '2', 3]) as filtered_array
+
+-- Convert mixed arrays to strings
+SELECT arrayMap(x -> toString(x), [1, '2', 3.0]) as string_array
+Function argument type conversion
+¶
+Convert function arguments to expected types:
+Function argument conversion
+-- Convert string to date for date functions
+SELECT toYYYYMM(toDate('2024-01-01')) as year_month
+
+-- Convert numeric to string for string functions
+SELECT length(toString(12345)) as string_length
+
+-- Convert string to array for array functions
+SELECT has(arrayMap(x -> toUInt64(x), ['1', '2', '3']), 2) as has_value
+Tinybird-specific notes
+¶
+In Tinybird, CANNOT_CONVERT_TYPE errors often occur when:
+Data Sources have type mismatches
+Pipe transformations use wrong data types
+API endpoints receive data with unexpected types
+Materialized Views have type conflicts
+To debug in Tinybird:
+Check Data Source schema for type definitions
+Verify Pipe transformation data types
+Ensure API input validation matches expected types
+Review Materialized View type consistency
+In Tinybird, use the Data Source preview to identify type mismatches before they cause errors.
+Best practices
+¶
+Type consistency
+¶
+Always use consistent data types in your schema
+Validate data types before insertion
+Use explicit type casting when needed
+Document expected data types
+Data validation
+¶
+Implement input validation in your application
+Check data types before processing
+Use appropriate default values for missing data
+Handle type conversion errors gracefully
+Schema design
+¶
+Choose appropriate data types for your use case
+Consider storage and performance implications
+Use nullable types when appropriate
+Plan for future data type changes
+Configuration options
+¶
+Type conversion settings
+¶
+Type conversion settings
+-- Check type conversion settings
+SELECT
+    name,
+    value,
+    description
+FROM system.settings
+WHERE name LIKE '%type%' OR name LIKE '%convert%'
+Strict type checking
+¶
+Strict type checking
+-- Enable strict type checking
+SET strict_type_checking = 1;
+
+-- Disable automatic type conversion
+SET allow_experimental_object_type = 0;
+Type inference
+¶
+Type inference settings
+-- Allow type inference for literals
+SET allow_experimental_infer_schema = 1;
+
+-- Enable automatic type detection
+SET allow_experimental_auto_type_inference = 1;
+Alternative solutions
+¶
+Use type-safe functions
+¶
+Use functions that handle type conversion automatically:
+Type-safe functions
+-- Use toTypeOrNull for safe conversion
+SELECT toTypeOrNull('123', 'UInt64') as safe_int
+
+-- Use toTypeOrZero for default values
+SELECT toTypeOrZero('invalid', 'UInt64') as default_int
+
+-- Use toTypeOrDefault with custom default
+SELECT toTypeOrDefault('invalid', 'UInt64', 0) as custom_default
+Implement type validation
+¶
+Add type validation in your application:
+Type validation
+-- In your application, validate types before querying
+-- Example pseudo-code:
+--
+-- def validate_user_id(user_id):
+--     try:
+--         if isinstance(user_id, str):
+--             return int(user_id)
+--         elif isinstance(user_id, int):
+--             return user_id
+--         else:
+--             raise ValueError(f"Invalid user_id type: {type(user_id)}")
+--     except ValueError:
+--         raise ValueError(f"Invalid user_id value: {user_id}")
+Use dynamic type handling
+¶
+Handle types dynamically in your queries:
+Dynamic type handling
+-- Use CASE statements for type-dependent logic
+SELECT
+    CASE
+        WHEN isString(user_id) THEN toUInt64(user_id)
+        WHEN isUInt64(user_id) THEN user_id
+        ELSE 0
+    END as safe_user_id
+FROM events
+Monitoring and prevention
+¶
+Type error tracking
+¶
+Type error monitoring
+-- Monitor type conversion errors
+-- Example pseudo-code:
+--
+-- def track_type_error(operation, expected_type, actual_type, value):
+--     logger.error(f"Type conversion failed: {operation}")
+--     logger.error(f"Expected: {expected_type}, Got: {actual_type}")
+--     logger.error(f"Value: {value}")
+--
+--     # Track error metrics
+--     increment_counter('type_conversion_errors', {
+--         'operation': operation,
+--         'expected_type': expected_type,
+--         'actual_type': actual_type
+--     })
+Schema validation
+¶
+Schema validation
+-- Validate table schema for type consistency
+SELECT
+    table,
+    name,
+    type,
+    default_expression
+FROM system.columns
+WHERE database = currentDatabase()
+  AND table = 'your_table_name'
+ORDER BY position
+Data quality checks
+¶
+Data quality monitoring
+-- Check for type inconsistencies in data
+SELECT
+    column_name,
+    COUNT(*) as total_rows,
+    COUNT(CASE WHEN value IS NULL THEN 1 END) as null_count,
+    COUNT(CASE WHEN value = '' THEN 1 END) as empty_string_count
+FROM your_table
+GROUP BY column_name
+See also
+¶
+Data Types
+Type Conversion Functions
+Data Validation
+Updated
+4 weeks ago
+On this page
+CANNOT_CONVERT_TYPE ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Use explicit type casting
+Fix data type mismatches
+Use appropriate type conversion functions
+Fix array type consistency
+Common patterns and solutions
+String to numeric conversion
+Date and time conversions
+Array type handling
+Function argument type conversion
+Tinybird-specific notes
+Best practices
+Type consistency
+Data validation
+Schema design
+Configuration options
+Type conversion settings
+Strict type checking
+Type inference
+Alternative solutions
+Use type-safe functions
+Implement type validation
+Use dynamic type handling
+Monitoring and prevention
+Type error tracking
+Schema validation
+Data quality checks
+See also
+forward
+classic
+Ask AI

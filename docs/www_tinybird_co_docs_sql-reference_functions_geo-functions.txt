@@ -1,0 +1,2104 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/geo-functions
+
+Geo Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Geo functions
+¶
+Copy as MD
+Geo functions are used to perform geographical calculations on spatial data. These functions are essential for applications that require distance measurements, location-based queries, and other geospatial operations.
+greatCircleDistance
+¶
+Calculates the shortest distance between two points on the surface of a sphere (Earth) using the great-circle formula. This function provides a good approximation for global distances.
+Syntax
+¶
+greatCircleDistance(lon1Deg, lat1Deg, lon2Deg, lat2Deg)
+Arguments
+¶
+lon1Deg
+: Float. Longitude of the first point in degrees. Range:
+[-180°, 180°]
+.
+lat1Deg
+: Float. Latitude of the first point in degrees. Range:
+[-90°, 90°]
+.
+lon2Deg
+: Float. Longitude of the second point in degrees. Range:
+[-180°, 180°]
+.
+lat2Deg
+: Float. Latitude of the second point in degrees. Range:
+[-90°, 90°]
+.
+Positive values correspond to North latitude and East longitude, and negative values correspond to South latitude and West longitude.
+Returns
+¶
+The distance between the two points on the Earth’s surface, in meters. Float64.
+Generates an exception when the input parameter values fall outside of the range.
+Example
+¶
+SELECT greatCircleDistance(55.755831, 37.617673, -55.755831, -37.617673) AS greatCircleDistance
+Result:
+┌─greatCircleDistance─┐
+│            14128352 │
+└─────────────────────┘
+geoDistance
+¶
+Computes the distance between two geographical points on the WGS-84 ellipsoid, offering a more precise measurement than the great-circle formula. This function is recommended for accurate Earth distance calculations.
+Syntax
+¶
+geoDistance(lon1Deg, lat1Deg, lon2Deg, lat2Deg)
+Arguments
+¶
+lon1Deg
+: Float. Longitude of the first point in degrees. Range:
+[-180°, 180°]
+.
+lat1Deg
+: Float. Latitude of the first point in degrees. Range:
+[-90°, 90°]
+.
+lon2Deg
+: Float. Longitude of the second point in degrees. Range:
+[-180°, 180°]
+.
+lat2Deg
+: Float. Latitude of the second point in degrees. Range:
+[-90°, 90°]
+.
+Positive values correspond to North latitude and East longitude, and negative values correspond to South latitude and West longitude.
+Returns
+¶
+The distance between the two points on the Earth’s surface, in meters. Float64.
+Generates an exception when the input parameter values fall outside of the range.
+Example
+¶
+SELECT geoDistance(38.8976, -77.0366, 39.9496, -75.1503) AS geoDistance
+Result:
+┌─geoDistance─┐
+│   212458.73 │
+└─────────────┘
+greatCircleAngle
+¶
+Determines the central angle between two points on a sphere, measured from the Earth's center. This calculation uses the great-circle formula.
+Syntax
+¶
+greatCircleAngle(lon1Deg, lat1Deg, lon2Deg, lat2Deg)
+Arguments
+¶
+lon1Deg
+: Float. Longitude of the first point in degrees.
+lat1Deg
+: Float. Latitude of the first point in degrees.
+lon2Deg
+: Float. Longitude of the second point in degrees.
+lat2Deg
+: Float. Latitude of the second point in degrees.
+Returns
+¶
+The central angle between two points in degrees. Float64.
+Example
+¶
+SELECT greatCircleAngle(0, 0, 45, 0) AS arc
+Result:
+┌─arc─┐
+│  45 │
+└─────┘
+pointInEllipses
+¶
+Checks if a given point lies within any of a specified set of ellipses in a Cartesian coordinate system.
+Syntax
+¶
+pointInEllipses(x, y, x₀, y₀, a₀, b₀,...,xₙ, yₙ, aₙ, bₙ)
+Arguments
+¶
+x
+: Float. X-coordinate of the point.
+y
+: Float. Y-coordinate of the point.
+xᵢ
+: Float. X-coordinate of the center of the
+i
+-th ellipsis.
+yᵢ
+: Float. Y-coordinate of the center of the
+i
+-th ellipsis.
+aᵢ
+: Float. Semi-major axis length of the
+i
+-th ellipsis.
+bᵢ
+: Float. Semi-minor axis length of the
+i
+-th ellipsis.
+The input parameters must be
+2+4⋅n
+, where
+n
+is the number of ellipses.
+Returns
+¶
+1
+if the point is inside at least one of the ellipses;
+0
+if it's not. UInt8.
+Example
+¶
+SELECT pointInEllipses(10., 10., 10., 9.1, 1., 0.9999)
+Result:
+┌─pointInEllipses(10., 10., 10., 9.1, 1., 0.9999)─┐
+│                                               1 │
+└─────────────────────────────────────────────────┘
+pointInPolygon
+¶
+Determines if a specified point is located inside a given polygon on a 2D plane. Polygons can include holes.
+Syntax
+¶
+pointInPolygon((x, y), [(a, b), (c, d) ...], ...)
+Arguments
+¶
+(x, y)
+: Tuple(Float, Float). Coordinates of a point on the plane.
+[(a, b), (c, d) ...]
+: Array(Tuple(Float, Float)). Polygon vertices. Each vertex is represented by a pair of coordinates
+(a, b)
+. Vertices should be specified in a clockwise or counterclockwise order. The minimum number of vertices is 3. The polygon must be constant.
+The function also supports polygons with holes (cut out sections). In this case, add polygons that define the cut out sections using additional arguments of the function. The function doesn't support non-simply-connected polygons.
+Returns
+¶
+1
+if the point is inside the polygon,
+0
+if it's not. UInt8.
+If the point is on the polygon boundary, the function may return either 0 or 1.
+Example
+¶
+SELECT pointInPolygon((3., 3.), [(6, 0), (8, 4), (5, 8), (0, 2)]) AS res
+Result:
+┌─res─┐
+│   1 │
+└─────┘
+geohashEncode
+¶
+Converts a given latitude and longitude into a geohash string, providing a compact representation of a geographical location.
+Syntax
+¶
+geohashEncode(longitude, latitude, [precision])
+Arguments
+¶
+longitude
+: Float. Longitude part of the coordinate you want to encode. Floating in range
+[-180°, 180°]
+.
+latitude
+: Float. Latitude part of the coordinate you want to encode. Floating in range
+[-90°, 90°]
+.
+precision
+: Int8. Optional. Length of the resulting encoded string. Defaults to
+12
+. Integer in the range
+[1, 12]
+.
+All coordinate parameters must be of the same type: either
+Float32
+or
+Float64
+.
+For the
+precision
+parameter, any value less than
+1
+or greater than
+12
+is silently converted to
+12
+.
+Returns
+¶
+Alphanumeric string of the encoded coordinate (modified version of the base32-encoding alphabet is used). String.
+Example
+¶
+SELECT geohashEncode(-5.60302734375, 42.593994140625, 0) AS res
+Result:
+┌─res──────────┐
+│ ezs42d000000 │
+└──────────────┘
+geohashDecode
+¶
+Decodes a geohash string back into its corresponding longitude and latitude coordinates.
+Syntax
+¶
+geohashDecode(hash_str)
+Arguments
+¶
+hash_str
+: String. Geohash-encoded string.
+Returns
+¶
+Tuple
+(longitude, latitude)
+of
+Float64
+values of longitude and latitude. Tuple(Float64, Float64).
+Example
+¶
+SELECT geohashDecode('ezs42') AS res
+Result:
+┌─res─────────────────────────────┐
+│ (-5.60302734375,42.60498046875) │
+└─────────────────────────────────┘
+geohashesInBox
+¶
+Generates an array of geohash strings that cover a specified rectangular geographical area at a given precision.
+Syntax
+¶
+geohashesInBox(longitude_min, latitude_min, longitude_max, latitude_max, precision)
+Arguments
+¶
+longitude_min
+: Float. Minimum longitude. Range:
+[-180°, 180°]
+.
+latitude_min
+: Float. Minimum latitude. Range:
+[-90°, 90°]
+.
+longitude_max
+: Float. Maximum longitude. Range:
+[-180°, 180°]
+.
+latitude_max
+: Float. Maximum latitude. Range:
+[-90°, 90°]
+.
+precision
+: UInt8. Geohash precision. Range:
+[1, 12]
+.
+All coordinate parameters must be of the same type: either
+Float32
+or
+Float64
+.
+Returns
+¶
+Array of precision-long strings of geohash-boxes covering provided area, you should not rely on order of items. Array(String).
+[]
+- Empty array if minimum latitude and longitude values aren’t less than corresponding maximum values.
+Function throws an exception if resulting array is over 10’000’000 items long.
+Example
+¶
+SELECT geohashesInBox(24.48, 40.56, 24.785, 40.81, 4) AS thasos
+Result:
+┌─thasos──────────────────────────────────────┐
+│ ['sx1q','sx1r','sx32','sx1w','sx1x','sx38'] │
+└─────────────────────────────────────────────┘
+h3IsValid
+¶
+Checks if a given 64-bit unsigned integer represents a valid H3 index.
+Syntax
+¶
+h3IsValid(h3index)
+Arguments
+¶
+h3index
+: UInt64. Hexagon index number.
+Returns
+¶
+1
+: The number is a valid H3 index. UInt8.
+0
+: The number isn't a valid H3 index. UInt8.
+Example
+¶
+SELECT h3IsValid(630814730351855103) AS h3IsValid
+Result:
+┌─h3IsValid─┐
+│         1 │
+└───────────┘
+h3GetResolution
+¶
+Retrieves the resolution level of a given H3 index.
+Syntax
+¶
+h3GetResolution(h3index)
+Arguments
+¶
+h3index
+: UInt64. Hexagon index number.
+Returns
+¶
+Index resolution. Range:
+[0, 15]
+. UInt8.
+If the index isn't valid, the function returns a random value. Use h3IsValid to verify the index.
+Example
+¶
+SELECT h3GetResolution(639821929606596015) AS resolution
+Result:
+┌─resolution─┐
+│         14 │
+└────────────┘
+h3EdgeAngle
+¶
+Calculates the average length of an H3 hexagon edge in degrees for a specified resolution.
+Syntax
+¶
+h3EdgeAngle(resolution)
+Arguments
+¶
+resolution
+: UInt8. Index resolution. Range:
+[0, 15]
+.
+Returns
+¶
+The average length of the H3 hexagon edge in grades. Float64.
+Example
+¶
+SELECT h3EdgeAngle(10) AS edgeAngle
+Result:
+┌───────h3EdgeAngle(10)─┐
+│ 0.0005927224846720883 │
+└───────────────────────┘
+h3EdgeLengthM
+¶
+Calculates the average length of an H3 hexagon edge in meters for a specified resolution.
+Syntax
+¶
+h3EdgeLengthM(resolution)
+Arguments
+¶
+resolution
+: UInt8. Index resolution. Range:
+[0, 15]
+.
+Returns
+¶
+The average length of the H3 hexagon edge in meters. Float64.
+Example
+¶
+SELECT h3EdgeLengthM(15) AS edgeLengthM
+Result:
+┌─edgeLengthM─┐
+│ 0.509713273 │
+└─────────────┘
+h3EdgeLengthKm
+¶
+Calculates the average length of an H3 hexagon edge in kilometers for a specified resolution.
+Syntax
+¶
+h3EdgeLengthKm(resolution)
+Arguments
+¶
+resolution
+: UInt8. Index resolution. Range:
+[0, 15]
+.
+Returns
+¶
+The average length of the H3 hexagon edge in kilometers. Float64.
+Example
+¶
+SELECT h3EdgeLengthKm(15) AS edgeLengthKm
+Result:
+┌─edgeLengthKm─┐
+│  0.000509713 │
+└──────────────┘
+geoToH3
+¶
+Converts geographical coordinates (longitude, latitude) into an H3 index at a specified resolution.
+Syntax
+¶
+geoToH3(lon, lat, resolution)
+Arguments
+¶
+lon
+: Float64. Longitude.
+lat
+: Float64. Latitude.
+resolution
+: UInt8. Index resolution. Range:
+[0, 15]
+.
+Returns
+¶
+Hexagon index number. UInt64.
+0
+in case of error.
+Example
+¶
+SELECT geoToH3(37.79506683, 55.71290588, 15) AS h3Index
+Result:
+┌────────────h3Index─┐
+│ 644325524701193974 │
+└────────────────────┘
+h3ToGeo
+¶
+Converts an H3 index back into its central geographical coordinates (longitude, latitude).
+Syntax
+¶
+h3ToGeo(h3Index)
+Arguments
+¶
+h3Index
+: UInt64. H3 Index.
+Returns
+¶
+A tuple consisting of two values:
+tuple(lon,lat)
+.
+lon
+: Longitude. Float64.
+lat
+: Latitude. Float64.
+Example
+¶
+SELECT h3ToGeo(644325524701193974) AS coordinates
+Result:
+┌─coordinates───────────────────────────┐
+│ (37.79506616830252,55.71290243145668) │
+└───────────────────────────────────────┘
+h3ToGeoBoundary
+¶
+Returns an array of coordinate pairs that define the boundary vertices of a given H3 index.
+Syntax
+¶
+h3ToGeoBoundary(h3Index)
+Arguments
+¶
+h3Index
+: UInt64. H3 Index.
+Returns
+¶
+Array of pairs
+(lon, lat)
+. Array(Tuple(Float64, Float64)).
+Example
+¶
+SELECT h3ToGeoBoundary(599686042433355775) AS coordinates
+Result:
+┌─h3ToGeoBoundary(599686042433355775)────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [(37.2713558667319,-121.91508032705622),(37.353926450852256,-121.8622232890249),(37.42834118609435,-121.92354999630156),(37.42012867767779,-122.03773496427027),(37.33755608435299,-122.090428929044),(37.26319797461824,-122.02910130919001)] │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+h3kRing
+¶
+Retrieves an array of H3 indexes that are within a specified 'k' distance (number of hexagonal steps) from a central H3 index.
+Syntax
+¶
+h3kRing(h3index, k)
+Arguments
+¶
+h3index
+: UInt64. Hexagon index number.
+k
+: Int. Radius.
+Returns
+¶
+Array of H3 indexes. Array(UInt64).
+Example
+¶
+SELECT arrayJoin(h3kRing(644325529233966508, 1)) AS h3index
+Result:
+┌────────────h3index─┐
+│ 644325529233966508 │
+│ 644325529233966497 │
+│ 644325529233966510 │
+│ 644325529233966504 │
+│ 644325529233966509 │
+│ 644325529233966355 │
+│ 644325529233966354 │
+└────────────────────┘
+h3GetBaseCell
+¶
+Extracts the base cell number from a given H3 index, indicating which of the 12 base cells the index belongs to.
+Syntax
+¶
+h3GetBaseCell(index)
+Arguments
+¶
+index
+: UInt64. Hexagon index number.
+Returns
+¶
+Hexagon base cell number. UInt8.
+Example
+¶
+SELECT h3GetBaseCell(612916788725809151) AS basecell
+Result:
+┌─basecell─┐
+│       12 │
+└──────────┘
+h3HexAreaM2
+¶
+Provides the average area of an H3 hexagon in square meters for a specified resolution.
+Syntax
+¶
+h3HexAreaM2(resolution)
+Arguments
+¶
+resolution
+: UInt8. Index resolution. Range:
+[0, 15]
+.
+Returns
+¶
+Area in square meters. Float64.
+Example
+¶
+SELECT h3HexAreaM2(13) AS area
+Result:
+┌─area─┐
+│ 43.9 │
+└──────┘
+h3HexAreaKm2
+¶
+Provides the average area of an H3 hexagon in square kilometers for a specified resolution.
+Syntax
+¶
+h3HexAreaKm2(resolution)
+Arguments
+¶
+resolution
+: UInt8. Index resolution. Range:
+[0, 15]
+.
+Returns
+¶
+Area in square kilometers. Float64.
+Example
+¶
+SELECT h3HexAreaKm2(13) AS area
+Result:
+┌──────area─┐
+│ 0.0000439 │
+└───────────┘
+h3IndexesAreNeighbors
+¶
+Checks if two given H3 indexes are adjacent (neighbors) on the H3 grid.
+Syntax
+¶
+h3IndexesAreNeighbors(index1, index2)
+Arguments
+¶
+index1
+: UInt64. Hexagon index number.
+index2
+: UInt64. Hexagon index number.
+Returns
+¶
+1
+: Indexes are neighbours. UInt8.
+0
+: Indexes aren't neighbours. UInt8.
+Example
+¶
+SELECT h3IndexesAreNeighbors(617420388351344639, 617420388352655359) AS n
+Result:
+┌─n─┐
+│ 1 │
+└───┘
+h3ToChildren
+¶
+Generates an array of H3 indexes that are direct children (finer resolution cells) of a given H3 index at a specified child resolution.
+Syntax
+¶
+h3ToChildren(index, resolution)
+Arguments
+¶
+index
+: UInt64. Hexagon index number.
+resolution
+: UInt8. Index resolution. Range:
+[0, 15]
+.
+Returns
+¶
+Array of the child H3-indexes. Array(UInt64).
+Example
+¶
+SELECT h3ToChildren(599405990164561919, 6) AS children
+Result:
+┌─children───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [603909588852408319,603909588986626047,603909589120843775,603909589255061503,603909589389279231,603909589523496959,603909589657714687] │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+h3ToParent
+¶
+Determines the parent H3 index (coarser resolution cell) that contains a given H3 index at a specified parent resolution.
+Syntax
+¶
+h3ToParent(index, resolution)
+Arguments
+¶
+index
+: UInt64. Hexagon index number.
+resolution
+: UInt8. Index resolution. Range:
+[0, 15]
+.
+Returns
+¶
+Parent H3 index. UInt64.
+Example
+¶
+SELECT h3ToParent(599405990164561919, 3) AS parent
+Result:
+┌─────────────parent─┐
+│ 590398848891879423 │
+└────────────────────┘
+h3ToString
+¶
+Converts an H3 index from its 64-bit unsigned integer representation to its hexadecimal string representation.
+Syntax
+¶
+h3ToString(index)
+Arguments
+¶
+index
+: UInt64. Hexagon index number.
+Returns
+¶
+String representation of the H3 index. String.
+Example
+¶
+SELECT h3ToString(617420388352917503) AS h3_string
+Result:
+┌─h3_string───────┐
+│ 89184926cdbffff │
+└─────────────────┘
+stringToH3
+¶
+Converts an H3 index from its hexadecimal string representation back to its 64-bit unsigned integer representation.
+Syntax
+¶
+stringToH3(index_str)
+Arguments
+¶
+index_str
+: String. String representation of the H3 index.
+Returns
+¶
+Hexagon index number. Returns
+0
+on error. UInt64.
+Example
+¶
+SELECT stringToH3('89184926cc3ffff') AS index
+Result:
+┌──────────────index─┐
+│ 617420388351344639 │
+└────────────────────┘
+h3IsResClassIII
+¶
+Checks if an H3 index has a resolution that belongs to Class III, which affects the orientation of the hexagonal cells.
+Syntax
+¶
+h3IsResClassIII(index)
+Arguments
+¶
+index
+: UInt64. Hexagon index number.
+Returns
+¶
+1
+: Index has a resolution with Class III orientation. UInt8.
+0
+: Index doesn't have a resolution with Class III orientation. UInt8.
+Example
+¶
+SELECT h3IsResClassIII(617420388352917503) AS res
+Result:
+┌─res─┐
+│   1 │
+└─────┘
+h3IsPentagon
+¶
+Determines if a given H3 index represents a pentagonal cell, which are rare exceptions in the otherwise hexagonal H3 grid.
+Syntax
+¶
+h3IsPentagon(index)
+Arguments
+¶
+index
+: UInt64. Hexagon index number.
+Returns
+¶
+1
+: Index represents a pentagonal cell. UInt8.
+0
+: Index doesn't represent a pentagonal cell. UInt8.
+Example
+¶
+SELECT h3IsPentagon(644721767722457330) AS pentagon
+Result:
+┌─pentagon─┐
+│        0 │
+└──────────┘
+h3GetFaces
+¶
+Identifies the icosahedron faces that are intersected by a given H3 index.
+Syntax
+¶
+h3GetFaces(index)
+Arguments
+¶
+index
+: UInt64. Hexagon index number.
+Returns
+¶
+Array containing icosahedron faces intersected by a given H3 index. Array(UInt64).
+Example
+¶
+SELECT h3GetFaces(599686042433355775) AS faces
+Result:
+┌─faces─┐
+│ [7]   │
+└───────┘
+h3CellAreaM2
+¶
+Calculates the precise area of a specific H3 cell in square meters.
+Syntax
+¶
+h3CellAreaM2(index)
+Arguments
+¶
+index
+: UInt64. Hexagon index number.
+Returns
+¶
+Cell area in square meters. Float64.
+Example
+¶
+SELECT h3CellAreaM2(579205133326352383) AS area
+Result:
+┌───────────────area─┐
+│ 4106166334463.9233 │
+└────────────────────┘
+h3CellAreaRads2
+¶
+Calculates the precise area of a specific H3 cell in square radians.
+Syntax
+¶
+h3CellAreaRads2(index)
+Arguments
+¶
+index
+: UInt64. Hexagon index number.
+Returns
+¶
+Cell area in square radians. Float64.
+Example
+¶
+SELECT h3CellAreaRads2(579205133326352383) AS area
+Result:
+┌────────────────area─┐
+│ 0.10116268528089567 │
+└─────────────────────┘
+h3ToCenterChild
+¶
+Finds the H3 index of the central child cell at a finer resolution within a given H3 index.
+Syntax
+¶
+h3ToCenterChild(index, resolution)
+Arguments
+¶
+index
+: UInt64. Hexagon index number.
+resolution
+: UInt8. Index resolution. Range:
+[0, 15]
+.
+Returns
+¶
+H3 index of the center child contained by given H3 at the given resolution. UInt64.
+Example
+¶
+SELECT h3ToCenterChild(577023702256844799,1) AS centerToChild
+Result:
+┌──────centerToChild─┐
+│ 581496515558637567 │
+└────────────────────┘
+h3ExactEdgeLengthM
+¶
+Calculates the precise length of a unidirectional H3 edge in meters.
+Syntax
+¶
+h3ExactEdgeLengthM(index)
+Arguments
+¶
+index
+: UInt64. Hexagon index number.
+Returns
+¶
+Exact edge length in meters. Float64.
+Example
+¶
+SELECT h3ExactEdgeLengthM(1310277011704381439) AS exactEdgeLengthM
+Result:
+┌───exactEdgeLengthM─┐
+│ 195449.63163407316 │
+└────────────────────┘
+h3ExactEdgeLengthKm
+¶
+Calculates the precise length of a unidirectional H3 edge in kilometers.
+Syntax
+¶
+h3ExactEdgeLengthKm(index)
+Arguments
+¶
+index
+: UInt64. Hexagon index number.
+Returns
+¶
+Exact edge length in kilometers. Float64.
+Example
+¶
+SELECT h3ExactEdgeLengthKm(1310277011704381439) AS exactEdgeLengthKm
+Result:
+┌──exactEdgeLengthKm─┐
+│ 195.44963163407317 │
+└────────────────────┘
+h3ExactEdgeLengthRads
+¶
+Calculates the precise length of a unidirectional H3 edge in radians.
+Syntax
+¶
+h3ExactEdgeLengthRads(index)
+Arguments
+¶
+index
+: UInt64. Hexagon index number.
+Returns
+¶
+Exact edge length in radians. Float64.
+Example
+¶
+SELECT h3ExactEdgeLengthRads(1310277011704381439) AS exactEdgeLengthRads
+Result:
+┌──exactEdgeLengthRads─┐
+│ 0.030677980118976447 │
+└──────────────────────┘
+h3NumHexagons
+¶
+Returns the total count of unique H3 indexes that exist at a specified resolution level.
+Syntax
+¶
+h3NumHexagons(resolution)
+Arguments
+¶
+resolution
+: UInt8. Index resolution. Range:
+[0, 15]
+.
+Returns
+¶
+Number of H3 indices. Int64.
+Example
+¶
+SELECT h3NumHexagons(3) AS numHexagons
+Result:
+┌─numHexagons─┐
+│       41162 │
+└─────────────┘
+h3PointDistM
+¶
+Computes the great-circle (Haversine) distance in meters between two geographical points specified by their latitude and longitude.
+Syntax
+¶
+h3PointDistM(lat1, lon1, lat2, lon2)
+Arguments
+¶
+lat1
+: Float64. Latitude of point1 in degrees.
+lon1
+: Float64. Longitude of point1 in degrees.
+lat2
+: Float64. Latitude of point2 in degrees.
+lon2
+: Float64. Longitude of point2 in degrees.
+Returns
+¶
+Haversine or great circle distance in meters. Float64.
+Example
+¶
+select h3PointDistM(-10.0 ,0.0, 10.0, 0.0) as h3PointDistM
+Result:
+┌──────h3PointDistM─┐
+│ 2223901.039504589 │
+└───────────────────┘
+h3PointDistKm
+¶
+Computes the great-circle (Haversine) distance in kilometers between two geographical points specified by their latitude and longitude.
+Syntax
+¶
+h3PointDistKm(lat1, lon1, lat2, lon2)
+Arguments
+¶
+lat1
+: Float64. Latitude of point1 in degrees.
+lon1
+: Float64. Longitude of point1 in degrees.
+lat2
+: Float64. Latitude of point2 in degrees.
+lon2
+: Float64. Longitude of point2 in degrees.
+Returns
+¶
+Haversine or great circle distance in kilometers. Float64.
+Example
+¶
+select h3PointDistKm(-10.0 ,0.0, 10.0, 0.0) as h3PointDistKm
+Result:
+┌─────h3PointDistKm─┐
+│ 2223.901039504589 │
+└───────────────────┘
+h3PointDistRads
+¶
+Computes the great-circle (Haversine) distance in radians between two geographical points specified by their latitude and longitude.
+Syntax
+¶
+h3PointDistRads(lat1, lon1, lat2, lon2)
+Arguments
+¶
+lat1
+: Float64. Latitude of point1 in degrees.
+lon1
+: Float64. Longitude of point1 in degrees.
+lat2
+: Float64. Latitude of point2 in degrees.
+lon2
+: Float64. Longitude of point2 in degrees.
+Returns
+¶
+Haversine or great circle distance in radians. Float64.
+Example
+¶
+select h3PointDistRads(-10.0 ,0.0, 10.0, 0.0) as h3PointDistRads
+Result:
+┌────h3PointDistRads─┐
+│ 0.3490658503988659 │
+└────────────────────┘
+h3GetRes0Indexes
+¶
+Returns an array containing all 12 H3 indexes at resolution 0, which are the coarsest cells in the H3 grid system.
+Syntax
+¶
+h3GetRes0Indexes()
+Returns
+¶
+Array of all the resolution 0 H3 indexes. Array(UInt64).
+Example
+¶
+select h3GetRes0Indexes as indexes
+Result:
+┌─indexes─────────────────────────────────────┐
+│ [576495936675512319,576531121047601151,....]│
+└─────────────────────────────────────────────┘
+h3GetPentagonIndexes
+¶
+Retrieves an array of all H3 indexes that represent pentagonal cells at a specified resolution.
+Syntax
+¶
+h3GetPentagonIndexes(resolution)
+Arguments
+¶
+resolution
+: UInt8. Index resolution. Range:
+[0, 15]
+.
+Returns
+¶
+Array of all pentagon H3 indexes. Array(UInt64).
+Example
+¶
+SELECT h3GetPentagonIndexes(3) AS indexes
+Result:
+┌─indexes────────────────────────────────────────────────────────┐
+│ [590112357393367039,590464201114255359,590816044835143679,...] │
+└────────────────────────────────────────────────────────────────┘
+h3Line
+¶
+Generates an array of H3 indexes that form a geodesic path (shortest path on the sphere) between two specified H3 indexes.
+Syntax
+¶
+h3Line(start,end)
+Arguments
+¶
+start
+: UInt64. Hexagon index number that represents a starting point.
+end
+: UInt64. Hexagon index number that represents an ending point.
+Returns
+¶
+Array of h3 indexes representing the line of indices between the two provided indices. Array(UInt64).
+Example
+¶
+SELECT h3Line(590080540275638271,590103561300344831) as indexes
+Result:
+┌─indexes────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [590080540275638271,590080471556161535,590080883873021951,590106516237844479,590104385934065663,590103630019821567,590103561300344831] │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+h3Distance
+¶
+Calculates the grid distance (number of hexagonal steps) between two H3 indexes.
+Syntax
+¶
+h3Distance(start,end)
+Arguments
+¶
+start
+: UInt64. Hexagon index number that represents a starting point.
+end
+: UInt64. Hexagon index number that represents an ending point.
+Returns
+¶
+Number of grid cells. Int64.
+Returns a negative number if finding the distance fails.
+Example
+¶
+SELECT h3Distance(590080540275638271,590103561300344831) as distance
+Result:
+┌─distance─┐
+│        7 │
+└──────────┘
+h3HexRing
+¶
+Returns an array of H3 indexes that form a hexagonal ring around a central H3 index at a specified distance
+k
+.
+Syntax
+¶
+h3HexRing(index, k)
+Arguments
+¶
+index
+: UInt64. Hexagon index number that represents the origin.
+k
+: UInt64. Distance.
+Returns
+¶
+Array of H3 indexes. Array(UInt64).
+Example
+¶
+SELECT h3HexRing(590080540275638271, toUInt16(1)) AS hexRing
+Result:
+┌─hexRing─────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [590080815153545215,590080471556161535,590080677714591743,590077585338138623,590077447899185151,590079509483487231] │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+h3GetUnidirectionalEdge
+¶
+Creates a unidirectional H3 edge index from a specified origin H3 index to a destination H3 index.
+Syntax
+¶
+h3GetUnidirectionalEdge(originIndex, destinationIndex)
+Arguments
+¶
+originIndex
+: UInt64. Origin Hexagon index number.
+destinationIndex
+: UInt64. Destination Hexagon index number.
+Returns
+¶
+Unidirectional Edge Hexagon Index number. UInt64.
+Example
+¶
+SELECT h3GetUnidirectionalEdge(599686042433355775, 599686043507097599) as edge
+Result:
+┌────────────────edge─┐
+│ 1248204388774707199 │
+└─────────────────────┘
+h3UnidirectionalEdgeIsValid
+¶
+Checks if a given H3 index represents a valid unidirectional edge. Returns 1 if it's a unidirectional edge and 0 otherwise.
+Syntax
+¶
+h3UnidirectionalEdgeisValid(index)
+Arguments
+¶
+index
+: UInt64. Hexagon index number.
+Returns
+¶
+1
+: The H3 index is a valid unidirectional edge. UInt8.
+0
+: The H3 index isn't a valid unidirectional edge. UInt8.
+Example
+¶
+SELECT h3UnidirectionalEdgeIsValid(1248204388774707199) as validOrNot
+Result:
+┌─validOrNot─┐
+│          1 │
+└────────────┘
+h3GetOriginIndexFromUnidirectionalEdge
+¶
+Extracts the origin H3 index from a unidirectional H3 edge index.
+Syntax
+¶
+h3GetOriginIndexFromUnidirectionalEdge(edge)
+Arguments
+¶
+edge
+: UInt64. Hexagon index number that represents a unidirectional edge.
+Returns
+¶
+Origin Hexagon Index number. UInt64.
+Example
+¶
+SELECT h3GetOriginIndexFromUnidirectionalEdge(1248204388774707197) as origin
+Result:
+┌─────────────origin─┐
+│ 599686042433355773 │
+└────────────────────┘
+h3GetDestinationIndexFromUnidirectionalEdge
+¶
+Extracts the destination H3 index from a unidirectional H3 edge index.
+Syntax
+¶
+h3GetDestinationIndexFromUnidirectionalEdge(edge)
+Arguments
+¶
+edge
+: UInt64. Hexagon index number that represents a unidirectional edge.
+Returns
+¶
+Destination Hexagon Index number. UInt64.
+Example
+¶
+SELECT h3GetDestinationIndexFromUnidirectionalEdge(1248204388774707197) as destination
+Result:
+┌────────destination─┐
+│ 599686043507097597 │
+└────────────────────┘
+h3GetIndexesFromUnidirectionalEdge
+¶
+Retrieves both the origin and destination H3 indexes from a unidirectional H3 edge index.
+Syntax
+¶
+h3GetIndexesFromUnidirectionalEdge(edge)
+Arguments
+¶
+edge
+: UInt64. Hexagon index number that represents a unidirectional edge.
+Returns
+¶
+A tuple consisting of two values
+tuple(origin,destination)
+:
+origin
+: Origin Hexagon index number. UInt64.
+destination
+: Destination Hexagon index number. UInt64.
+Returns
+(0,0)
+if the provided input isn't valid.
+Example
+¶
+SELECT h3GetIndexesFromUnidirectionalEdge(1248204388774707199) as indexes
+Result:
+┌─indexes─────────────────────────────────┐
+│ (599686042433355775,599686043507097599) │
+└─────────────────────────────────────────┘
+h3GetUnidirectionalEdgesFromHexagon
+¶
+Returns an array of all unidirectional H3 edge indexes originating from a given H3 hexagon.
+Syntax
+¶
+h3GetUnidirectionalEdgesFromHexagon(index)
+Arguments
+¶
+index
+: UInt64. Hexagon index number.
+Returns
+¶
+Array of h3 indexes representing each unidirectional edge. Array(UInt64).
+Example
+¶
+SELECT h3GetUnidirectionalEdgesFromHexagon(599686042433355775) as edges
+Result:
+┌─edges─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [1248204388774707199,1320261982812635135,1392319576850563071,1464377170888491007,1536434764926418943,1608492358964346879] │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+h3GetUnidirectionalEdgeBoundary
+¶
+Provides the geographical coordinates that define the boundary of a unidirectional H3 edge.
+Syntax
+¶
+h3GetUnidirectionalEdgeBoundary(index)
+Arguments
+¶
+index
+: UInt64. Hexagon index number that represents a unidirectional edge.
+Returns
+¶
+Array of pairs
+(lon, lat)
+. Array(Tuple(Float64, Float64)).
+Example
+¶
+SELECT h3GetUnidirectionalEdgeBoundary(1248204388774707199) as boundary
+Result:
+┌─boundary────────────────────────────────────────────────────────────────────────┐
+│ [(37.42012867767779,-122.03773496427027),(37.33755608435299,-122.090428929044)] │
+└─────────────────────────────────────────────────────────────────────────────────┘
+WKT
+¶
+Converts various internal Tinybird Geo data types into their Well-Known Text (WKT) string representation.
+Syntax
+¶
+WKT(geo_data)
+Arguments
+¶
+geo_data
+: Geo. A Tinybird Geo data type (Point, Ring, Polygon, MultiPolygon, LineString, MultiLineString).
+Returns
+¶
+The WKT string representation of the geometry. String.
+WKT geometric object
+POINT
+is returned for a Point.
+WKT geometric object
+POLYGON
+is returned for a Polygon
+WKT geometric object
+MULTIPOLYGON
+is returned for a MultiPolygon.
+WKT geometric object
+LINESTRING
+is returned for a LineString.
+WKT geometric object
+MULTILINESTRING
+is returned for a MultiLineString.
+Example
+¶
+SELECT WKT((0., 0.))
+Result:
+POINT(0 0)
+readWKTMultiPolygon
+¶
+Parses a Well-Known Text (WKT) string representing a MultiPolygon and converts it into Tinybird's internal MultiPolygon data type.
+Syntax
+¶
+readWKTMultiPolygon(wkt_string)
+Arguments
+¶
+wkt_string
+: String. The input WKT string representing a MultiPolygon geometry.
+Returns
+¶
+MultiPolygon.
+Example
+¶
+SELECT
+    toTypeName(readWKTMultiPolygon('MULTIPOLYGON(((2 0,10 0,10 10,0 10,2 0),(4 4,5 4,5 5,4 5,4 4)),((-10 -10,-10 -9,-9 10,-10 -10)))')) AS type,
+    readWKTMultiPolygon('MULTIPOLYGON(((2 0,10 0,10 10,0 10,2 0),(4 4,5 4,5 5,4 5,4 4)),((-10 -10,-10 -9,-9 10,-10 -10)))') AS output FORMAT Markdown
+Result:
+type
+output
+MultiPolygon
+[[[(2,0),(10,0),(10,10),(0,10),(2,0)],[(4,4),(5,4),(5,5),(4,5),(4,4)]],[[(-10,-10),(-10,-9),(-9,10),(-10,-10)]]]
+readWKTPolygon
+¶
+Parses a Well-Known Text (WKT) string representing a Polygon and converts it into Tinybird's internal Polygon data type.
+Syntax
+¶
+readWKTPolygon(wkt_string)
+Arguments
+¶
+wkt_string
+: String. The input WKT string representing a Polygon geometry.
+Returns
+¶
+Polygon.
+Example
+¶
+SELECT
+    toTypeName(readWKTPolygon('POLYGON((2 0,10 0,10 10,0 10,2 0))')) AS type,
+    readWKTPolygon('POLYGON((2 0,10 0,10 10,0 10,2 0))') AS output
+FORMAT Markdown
+Result:
+type
+output
+Polygon
+[[(2,0),(10,0),(10,10),(0,10),(2,0)]]
+readWKTPoint
+¶
+Parses a Well-Known Text (WKT) string representing a Point and converts it into Tinybird's internal Point data type.
+Syntax
+¶
+readWKTPoint(wkt_string)
+Arguments
+¶
+wkt_string
+: String. The input WKT string representing a Point geometry.
+Returns
+¶
+The function returns an internal representation of the Point geometry. Point.
+Example
+¶
+SELECT readWKTPoint('POINT (1.2 3.4)')
+Result:
+(1.2,3.4)
+readWKTLineString
+¶
+Parses a Well-Known Text (WKT) string representing a LineString and converts it into Tinybird's internal LineString data type.
+Syntax
+¶
+readWKTLineString(wkt_string)
+Arguments
+¶
+wkt_string
+: String. The input WKT string representing a LineString geometry.
+Returns
+¶
+The function returns an internal representation of the linestring geometry. LineString.
+Example
+¶
+SELECT readWKTLineString('LINESTRING (1 1, 2 2, 3 3, 1 1)')
+Result:
+[(1,1),(2,2),(3,3),(1,1)]
+readWKTMultiLineString
+¶
+Parses a Well-Known Text (WKT) string representing a MultiLineString and converts it into Tinybird's internal MultiLineString data type.
+Syntax
+¶
+readWKTMultiLineString(wkt_string)
+Arguments
+¶
+wkt_string
+: String. The input WKT string representing a MultiLineString geometry.
+Returns
+¶
+The function returns an internal representation of the multilinestring geometry. MultiLineString.
+Example
+¶
+SELECT readWKTMultiLineString('MULTILINESTRING ((1 1, 2 2, 3 3), (4 4, 5 5, 6 6))')
+Result:
+[[(1,1),(2,2),(3,3)],[(4,4),(5,5),(6,6)]]
+readWKTRing
+¶
+Parses a Well-Known Text (WKT) string representing a Polygon and extracts its outer boundary as a closed LineString (ring) in Tinybird's internal format.
+Syntax
+¶
+readWKTRing(wkt_string)
+Arguments
+¶
+wkt_string
+: String. The input WKT string representing a Polygon geometry.
+Returns
+¶
+The function returns an internal representation of the ring (closed linestring) geometry. Ring.
+Example
+¶
+SELECT readWKTRing('POLYGON ((1 1, 2 2, 3 3, 1 1))')
+Result:
+[(1,1),(2,2),(3,3),(1,1)]
+polygonsWithinSpherical
+¶
+Checks if one polygon is entirely contained within another polygon, treating coordinates as if they are on a perfect sphere.
+Syntax
+¶
+polygonsWithinSpherical(polygon1, polygon2)
+Arguments
+¶
+polygon1
+: MultiPolygon. The polygon that might contain the other.
+polygon2
+: MultiPolygon. The polygon to check for containment.
+Returns
+¶
+0
+for false,
+1
+for true. UInt8.
+Example
+¶
+select polygonsWithinSpherical([[[(4.3613577, 50.8651821), (4.349556, 50.8535879), (4.3602419, 50.8435626), (4.3830299, 50.8428851), (4.3904543, 50.8564867), (4.3613148, 50.8651279)]]], [[[(4.346693, 50.858306), (4.367945, 50.852455), (4.366227, 50.840809), (4.344961, 50.833264), (4.338074, 50.848677), (4.346693, 50.858306)]]])
+Result:
+0
+polygonsDistanceSpherical
+¶
+Calculates the minimum distance between any point in the first polygon and any point in the second polygon, assuming spherical coordinates.
+Syntax
+¶
+polygonsDistanceSpherical(polygon1, polygon2)
+Arguments
+¶
+polygon1
+: MultiPolygon. The first polygon.
+polygon2
+: MultiPolygon. The second polygon.
+Returns
+¶
+Float64.
+Example
+¶
+SELECT polygonsDistanceSpherical([[[(0, 0), (0, 0.1), (0.1, 0.1), (0.1, 0)]]], [[[(10., 10.), (10., 40.), (40., 40.), (40., 10.), (10., 10.)]]])
+Result:
+0.24372872211133834
+polygonsDistanceCartesian
+¶
+Calculates the minimum distance between two polygons using Cartesian coordinates, which can offer higher precision for local areas.
+Syntax
+¶
+polygonsDistanceCartesian(polygon1, polygon2)
+Arguments
+¶
+polygon1
+: MultiPolygon. The first polygon.
+polygon2
+: MultiPolygon. The second polygon.
+Returns
+¶
+Float64.
+Example
+¶
+SELECT polygonsDistanceCartesian([[[(0, 0), (0, 0.1), (0.1, 0.1), (0.1, 0)]]], [[[(10., 10.), (10., 40.), (40., 40.), (40., 10.), (10., 10.)]]])
+Result:
+14.000714267493642
+polygonsEqualsCartesian
+¶
+Compares two polygons to determine if they are geometrically identical in a Cartesian coordinate system.
+Syntax
+¶
+polygonsEqualsCartesian(polygon1, polygon2)
+Arguments
+¶
+polygon1
+: MultiPolygon. The first polygon.
+polygon2
+: MultiPolygon. The second polygon.
+Returns
+¶
+0
+for false,
+1
+for true. UInt8.
+Example
+¶
+SELECT polygonsEqualsCartesian([[[(1., 1.), (1., 4.), (4., 4.), (4., 1.)]]], [[[(1., 1.), (1., 4.), (4., 4.), (4., 1.), (1., 1.)]]])
+Result:
+1
+polygonsSymDifferenceSpherical
+¶
+Computes the symmetric difference (XOR) between two polygons, returning the areas that belong to one polygon but not both, using spherical coordinates.
+Syntax
+¶
+polygonsSymDifferenceSpherical(polygon1, polygon2)
+Arguments
+¶
+polygon1
+: MultiPolygon. The first polygon.
+polygon2
+: MultiPolygon. The second polygon.
+Returns
+¶
+MultiPolygon.
+Example
+¶
+SELECT wkt(arraySort(polygonsSymDifferenceSpherical([[(50., 50.), (50., -50.), (-50., -50.), (-50., 50.), (50., 50.)], [(10., 10.), (10., 40.), (40., 40.), (40., 10.), (10., 10.)], [(-10., -10.), (-10., -40.), (-40., -40.), (-40., -10.), (-10., -10.)]], [[(-20., -20.), (-20., 20.), (20., 20.), (20., -20.), (-20., -20.)]])))
+Result:
+MULTIPOLYGON(((-20 -10.3067,-10 -10,-10 -20.8791,-20 -20,-20 -10.3067)),((10 20.8791,20 20,20 10.3067,10 10,10 20.8791)),((50 50,50 -50,-50 -50,-50 50,50 50),(20 10.3067,40 10,40 40,10 40,10 20.8791,-20 20,-20 -10.3067,-40 -10,-40 -40,-10 -40,-10 -20.8791,20 -20,20 10.3067)))
+polygonsSymDifferenceCartesian
+¶
+Computes the symmetric difference (XOR) between two polygons, returning the areas that belong to one polygon but not both, using Cartesian coordinates.
+Syntax
+¶
+polygonsSymDifferenceCartesian(polygon1, polygon2)
+Arguments
+¶
+polygon1
+: MultiPolygon. The first polygon.
+polygon2
+: MultiPolygon. The second polygon.
+Returns
+¶
+MultiPolygon.
+Example
+¶
+SELECT wkt(polygonsSymDifferenceCartesian([[[(0, 0), (0, 3), (1, 2.9), (2, 2.6), (2.6, 2), (2.9, 1), (3, 0), (0, 0)]]], [[[(1., 1.), (1., 4.), (4., 4.), (4., 1.), (1., 1.)]]]))
+Result:
+MULTIPOLYGON(((1 2.9,1 1,2.9 1,3 0,0 0,0 3,1 2.9)),((1 2.9,1 4,4 4,4 1,2.9 1,2.6 2,2 2.6,1 2.9)))
+polygonsIntersectionSpherical
+¶
+Calculates the geometric intersection (AND) of two polygons, returning the area where they overlap, using spherical coordinates.
+Syntax
+¶
+polygonsIntersectionSpherical(polygon1, polygon2)
+Arguments
+¶
+polygon1
+: MultiPolygon. The first polygon.
+polygon2
+: MultiPolygon. The second polygon.
+Returns
+¶
+MultiPolygon.
+Example
+¶
+SELECT wkt(arrayMap(a -> arrayMap(b -> arrayMap(c -> (round(c.1, 6), round(c.2, 6)), b), a), polygonsIntersectionSpherical([[[(4.3613577, 50.8651821), (4.349556, 50.8535879), (4.3602419, 50.8435626), (4.3830299, 50.8428851), (4.3904543, 50.8564867), (4.3613148, 50.8651279)]]], [[[(4.346693, 50.858306), (4.367945, 50.852455), (4.366227, 50.840809), (4.344961, 50.833264), (4.338074, 50.848677), (4.346693, 50.858306)]]])))
+Result:
+MULTIPOLYGON(((4.3666 50.8434,4.36024 50.8436,4.34956 50.8536,4.35268 50.8567,4.36794 50.8525,4.3666 50.8434)))
+polygonsWithinCartesian
+¶
+Checks if one polygon is entirely contained within another polygon, using Cartesian coordinates.
+Syntax
+¶
+polygonsWithinCartesian(polygon1, polygon2)
+Arguments
+¶
+polygon1
+: MultiPolygon. The first polygon.
+polygon2
+: MultiPolygon. The second polygon.
+Returns
+¶
+0
+for false,
+1
+for true. UInt8.
+Example
+¶
+SELECT polygonsWithinCartesian([[[(2., 2.), (2., 3.), (3., 3.), (3., 2.)]]], [[[(1., 1.), (1., 4.), (4., 4.), (4., 1.), (1., 1.)]]])
+Result:
+1
+polygonConvexHullCartesian
+¶
+Computes the convex hull of a polygon or MultiPolygon, which is the smallest convex shape that encloses all points of the input geometry, using Cartesian coordinates.
+Syntax
+¶
+polygonConvexHullCartesian(polygon)
+Arguments
+¶
+polygon
+: MultiPolygon. The input polygon.
+Returns
+¶
+Polygon.
+Example
+¶
+SELECT wkt(polygonConvexHullCartesian([[[(0., 0.), (0., 5.), (5., 5.), (5., 0.), (2., 3.)]]]))
+Result:
+POLYGON((0 0,0 5,5 5,5 0,0 0))
+polygonAreaSpherical
+¶
+Calculates the surface area of a polygon, treating its coordinates as if they are on a perfect sphere.
+Syntax
+¶
+polygonAreaSpherical(polygon)
+Arguments
+¶
+polygon
+: MultiPolygon. The input polygon.
+Returns
+¶
+Float64.
+Example
+¶
+SELECT round(polygonAreaSpherical([[[(4.346693, 50.858306), (4.367945, 50.852455), (4.366227, 50.840809), (4.344961, 50.833264), (4.338074, 50.848677), (4.346693, 50.858306)]]]), 14)
+Result:
+9.387704e-8
+polygonsUnionSpherical
+¶
+Computes the geometric union (OR) of two polygons, returning a new polygon that encompasses all areas covered by either input polygon, using spherical coordinates.
+Syntax
+¶
+polygonsUnionSpherical(polygon1, polygon2)
+Arguments
+¶
+polygon1
+: MultiPolygon. The first polygon.
+polygon2
+: MultiPolygon. The second polygon.
+Returns
+¶
+MultiPolygon.
+Example
+¶
+SELECT wkt(polygonsUnionSpherical([[[(4.3613577, 50.8651821), (4.349556, 50.8535879), (4.3602419, 50.8435626), (4.3830299, 50.8428851), (4.3904543, 50.8564867), (4.3613148, 50.8651279)]]], [[[(4.346693, 50.858306), (4.367945, 50.852455), (4.366227, 50.840809), (4.344961, 50.833264), (4.338074, 50.848677), (4.346693, 50.858306)]]]))
+Result:
+MULTIPOLYGON(((4.36661 50.8434,4.36623 50.8408,4.34496 50.8333,4.33807 50.8487,4.34669 50.8583,4.35268 50.8567,4.36136 50.8652,4.36131 50.8651,4.39045 50.8565,4.38303 50.8429,4.36661 50.8434)))
+polygonPerimeterSpherical
+¶
+Calculates the perimeter of a polygon, treating its coordinates as if they are on a perfect sphere.
+Syntax
+¶
+polygonPerimeterSpherical(polygon)
+Arguments
+¶
+polygon
+: MultiPolygon. The input polygon.
+Returns
+¶
+Float64.
+Example
+¶
+SELECT polygonPerimeterSpherical([[[(0., 0.), (0., 1.), (1., 1.), (1., 0.), (0., 0.)]]]) AS perimeter
+Result:
+┌─perimeter─┐
+│ 444794.76 │
+└───────────┘
+polygonsIntersectionCartesian
+¶
+Calculates the geometric intersection (AND) of two polygons, returning the area where they overlap, using Cartesian coordinates.
+Syntax
+¶
+polygonsIntersectionCartesian(polygon1, polygon2)
+Arguments
+¶
+polygon1
+: MultiPolygon. The first polygon.
+polygon2
+: MultiPolygon. The second polygon.
+Returns
+¶
+MultiPolygon.
+Example
+¶
+SELECT wkt(polygonsIntersectionCartesian([[[(0., 0.), (0., 3.), (1., 2.9), (2., 2.6), (2.6, 2.), (2.9, 1.), (3., 0.), (0., 0.)]]], [[[(1., 1.), (1., 4.), (4., 4.), (4., 1.), (1., 1.)]]]))
+Result:
+MULTIPOLYGON(((1 2.9,2 2.6,2.6 2,2.9 1,1 1,1 2.9)))
+polygonAreaCartesian
+¶
+Calculates the area of a polygon using Cartesian coordinates.
+Syntax
+¶
+polygonAreaCartesian(polygon)
+Arguments
+¶
+polygon
+: MultiPolygon. The input polygon.
+Returns
+¶
+Float64.
+Example
+¶
+SELECT polygonAreaCartesian([[[(0., 0.), (0., 5.), (5., 5.), (5., 0.)]]])
+Result:
+25
+polygonPerimeterCartesian
+¶
+Calculates the perimeter of a polygon using Cartesian coordinates.
+Syntax
+¶
+polygonPerimeterCartesian(polygon)
+Arguments
+¶
+polygon
+: MultiPolygon. The input polygon.
+Returns
+¶
+Float64.
+Example
+¶
+SELECT polygonPerimeterCartesian([[[(0., 0.), (0., 5.), (5., 5.), (5., 0.)]]])
+Result:
+15
+polygonsUnionCartesian
+¶
+Computes the geometric union (OR) of two polygons, returning a new polygon that encompasses all areas covered by either input polygon, using Cartesian coordinates.
+Syntax
+¶
+polygonsUnionCartesian(polygon1, polygon2)
+Arguments
+¶
+polygon1
+: MultiPolygon. The first polygon.
+polygon2
+: MultiPolygon. The second polygon.
+Returns
+¶
+MultiPolygon.
+Example
+¶
+SELECT wkt(polygonsUnionCartesian([[[(0., 0.), (0., 3.), (1., 2.9), (2., 2.6), (2.6, 2.), (2.9, 1), (3., 0.), (0., 0.)]]], [[[(1., 1.), (1., 4.), (4., 4.), (4., 1.), (1., 1.)]]]))
+Result:
+MULTIPOLYGON(((1 2.9,1 4,4 4,4 1,2.9 1,3 0,0 0,0 3,1 2.9)))
+geoToS2
+¶
+Converts geographical coordinates (longitude, latitude) into an S2 point index, which is a unique 64-bit integer representing a location on a sphere.
+Syntax
+¶
+geoToS2(lon, lat)
+Arguments
+¶
+lon
+: Float64. Longitude.
+lat
+: Float64. Latitude.
+Returns
+¶
+S2 point index. UInt64.
+Example
+¶
+SELECT geoToS2(37.79506683, 55.71290588) AS s2Index
+Result:
+┌─────────────s2Index─┐
+│ 4704772434919038107 │
+└─────────────────────┘
+s2ToGeo
+¶
+Converts an S2 point index back into its corresponding geographical coordinates (longitude, latitude).
+Syntax
+¶
+s2ToGeo(s2index)
+Arguments
+¶
+s2index
+: UInt64. S2 Index.
+Returns
+¶
+A tuple consisting of two values:
+lon
+. Float64.
+lat
+. Float64.
+Example
+¶
+SELECT s2ToGeo(4704772434919038107) AS s2Coodrinates
+Result:
+┌─s2Coodrinates────────────────────────┐
+│ (37.79506681471008,55.7129059052841) │
+└──────────────────────────────────────┘
+s2GetNeighbors
+¶
+Retrieves the S2 indexes of the four direct neighbors of a given S2 cell.
+Syntax
+¶
+s2GetNeighbors(s2index)
+Arguments
+¶
+s2index
+: UInt64. S2 Index.
+Returns
+¶
+An array consisting of 4 neighbor indexes:
+array[s2index1, s2index3, s2index2, s2index4]
+. Array(UInt64).
+Example
+¶
+SELECT s2GetNeighbors(5074766849661468672) AS s2Neighbors
+Result:
+┌─s2Neighbors───────────────────────────────────────────────────────────────────────┐
+│ [5074766987100422144,5074766712222515200,5074767536856236032,5074767261978329088] │
+└───────────────────────────────────────────────────────────────────────────────────┘
+s2CellsIntersect
+¶
+Determines if two S2 cells overlap or touch each other.
+Syntax
+¶
+s2CellsIntersect(s2index1, s2index2)
+Arguments
+¶
+s2index1
+: UInt64. S2 Index.
+s2index2
+: UInt64. S2 Index.
+Returns
+¶
+1
+: If the cells intersect. UInt8.
+0
+: If the cells don't intersect. UInt8.
+Example
+¶
+SELECT s2CellsIntersect(9926595209846587392, 9926594385212866560) AS intersect
+Result:
+┌─intersect─┐
+│         1 │
+└───────────┘
+s2CapContains
+¶
+Checks if a given S2 point is located within a specified spherical cap, defined by a center point and a radius in degrees.
+Syntax
+¶
+s2CapContains(center, degrees, point)
+Arguments
+¶
+center
+: UInt64. S2 point index corresponding to the cap.
+degrees
+: Float64. Radius of the cap in degrees.
+point
+: UInt64. S2 point index.
+Returns
+¶
+1
+: If the cap contains the S2 point index. UInt8.
+0
+: If the cap doesn't contain the S2 point index. UInt8.
+Example
+¶
+SELECT s2CapContains(1157339245694594829, 1.0, 1157347770437378819) AS capContains
+Result:
+┌─capContains─┐
+│           1 │
+└─────────────┘
+s2CapUnion
+¶
+Computes the smallest spherical cap that completely encloses two given spherical caps.
+Syntax
+¶
+s2CapUnion(center1, radius1, center2, radius2)
+Arguments
+¶
+center1
+: UInt64. S2 point index corresponding to the first cap.
+radius1
+: Float64. Radius of the first cap in degrees.
+center2
+: UInt64. S2 point index corresponding to the second cap.
+radius2
+: Float64. Radius of the second cap in degrees.
+Returns
+¶
+center
+: S2 point index corresponding the center of the smallest cap containing the two input caps. UInt64.
+radius
+: Radius of the smallest cap containing the two input caps. Float64.
+Example
+¶
+SELECT s2CapUnion(3814912406305146967, 1.0, 1157347770437378819, 1.0) AS capUnion
+Result:
+┌─capUnion───────────────────────────────┐
+│ (4534655147792050737,60.2088283994957) │
+└────────────────────────────────────────┘
+s2RectAdd
+¶
+Expands an S2 rectangular region to include a specified S2 point, returning the new bounding rectangle.
+Syntax
+¶
+s2RectAdd(s2pointLow, s2pointHigh, s2Point)
+Arguments
+¶
+s2pointLow
+: UInt64. Low S2 point index corresponding to the rectangle.
+s2pointHigh
+: UInt64. High S2 point index corresponding to the rectangle.
+s2Point
+: UInt64. Target S2 point index that the bound rectangle should be grown to include.
+Returns
+¶
+s2PointLow
+: Low S2 cell id corresponding to the grown rectangle. UInt64.
+s2PointHigh
+: Height S2 cell id corresponding to the grown rectangle. UInt64.
+Example
+¶
+SELECT s2RectAdd(5178914411069187297, 5177056748191934217, 5179056748191934217) AS rectAdd
+Result:
+┌─rectAdd───────────────────────────────────┐
+│ (5179062030687166815,5177056748191934217) │
+└───────────────────────────────────────────┘
+s2RectContains
+¶
+Checks if a given S2 rectangular region contains a specified S2 point.
+Syntax
+¶
+s2RectContains(s2PointLow, s2PointHi, s2Point)
+Arguments
+¶
+s2PointLow
+: UInt64. Low S2 point index corresponding to the rectangle.
+s2PointHi
+: UInt64. High S2 point index corresponding to the rectangle.
+s2Point
+: UInt64. Target S2 point index.
+Returns
+¶
+1
+: If the rectangle contains the given S2 point. UInt8.
+0
+: If the rectangle doesn't contain the given S2 point. UInt8.
+Example
+¶
+SELECT s2RectContains(5179062030687166815, 5177056748191934217, 5177914411069187297) AS rectContains
+Result:
+┌─rectContains─┐
+│            0 │
+└──────────────┘
+s2RectUnion
+¶
+Computes the smallest S2 rectangular region that encompasses the combined area of two given S2 rectangles.
+Syntax
+¶
+s2RectUnion(s2Rect1PointLow, s2Rect1PointHi, s2Rect2PointLow, s2Rect2PointHi)
+Arguments
+¶
+s2Rect1PointLow
+: UInt64. Low S2 point index corresponding to the first rectangle.
+s2Rect1PointHi
+: UInt64. High S2 point index corresponding to the first rectangle.
+s2Rect2PointLow
+: UInt64. Low S2 point index corresponding to the second rectangle.
+s2Rect2PointHi
+: UInt64. High S2 point index corresponding to the second rectangle.
+Returns
+¶
+s2UnionRect2PointLow
+: Low S2 cell id corresponding to the union rectangle. UInt64.
+s2UnionRect2PointHi
+: High S2 cell id corresponding to the union rectangle. UInt64.
+Example
+¶
+SELECT s2RectUnion(5178914411069187297, 5177056748191934217, 5179062030687166815, 5177056748191934217) AS rectUnion
+Result:
+┌─rectUnion─────────────────────────────────┐
+│ (5179062030687166815,5177056748191934217) │
+└───────────────────────────────────────────┘
+s2RectIntersection
+¶
+Computes the S2 rectangular region that represents the overlapping area of two given S2 rectangles.
+Syntax
+¶
+s2RectIntersection(s2Rect1PointLow, s2Rect1PointHi, s2Rect2PointLow, s2Rect2PointHi)
+Arguments
+¶
+s2Rect1PointLow
+: UInt64. Low S2 point index corresponding to the first rectangle.
+s2Rect1PointHi
+: UInt64. High S2 point index corresponding to the first rectangle.
+s2Rect2PointLow
+: UInt64. Low S2 point index corresponding to the second rectangle.
+s2Rect2PointHi
+: UInt64. High S2 point index corresponding to the second rectangle.
+Returns
+¶
+s2UnionRect2PointLow
+: Low S2 cell id corresponding to the rectangle containing the intersection of the given rectangles. UInt64.
+s2UnionRect2PointHi
+: High S2 cell id corresponding to the rectangle containing the intersection of the given rectangles. UInt64.
+Example
+¶
+SELECT s2RectIntersection(5178914411069187297, 5177056748191934217, 5179062030687166815, 5177056748191934217) AS rectIntersection
+Result:
+┌─rectIntersection──────────────────────────┐
+│ (5178914411069187297,5177056748191934217) │
+└───────────────────────────────────────────┘
+Svg
+¶
+Converts various internal Tinybird Geo data types into their SVG (Scalable Vector Graphics) string representation for visualization.
+Syntax
+¶
+Svg(geometry,[style])
+Aliases:
+SVG
+,
+svg
+Arguments
+¶
+geometry
+: Geo. Geo data.
+style
+: String. Optional style name.
+Returns
+¶
+The SVG representation of the geometry. String.
+SVG circle
+SVG polygon
+SVG path
+Example
+¶
+SELECT SVG((0., 0.))
+Result:
+<circle cx="0" cy="0" r="5" style=""/>
+SELECT SVG([(0., 0.), (10, 0), (10, 10), (0, 10)])
+Result:
+<polygon points="0,0 0,10 10,10 10,0 0,0" style=""/>
+SELECT SVG([[(0., 0.), (10, 0), (10, 10), (0, 10)], [(4., 4.), (5, 4), (5, 5), (4, 5)]])
+Result:
+<g fill-rule="evenodd"><path d="M 0,0 L 0,10 L 10,10 L 10,0 L 0,0M 4,4 L 5,4 L 5,5 L 4,5 L 4,4 z " style=""/></g>
+Updated
+3 weeks ago
+On this page
+Geo functions
+greatCircleDistance
+geoDistance
+greatCircleAngle
+pointInEllipses
+pointInPolygon
+geohashEncode
+geohashDecode
+geohashesInBox
+h3IsValid
+h3GetResolution
+h3EdgeAngle
+h3EdgeLengthM
+h3EdgeLengthKm
+geoToH3
+h3ToGeo
+h3ToGeoBoundary
+h3kRing
+h3GetBaseCell
+h3HexAreaM2
+h3HexAreaKm2
+h3IndexesAreNeighbors
+h3ToChildren
+h3ToParent
+h3ToString
+stringToH3
+h3IsResClassIII
+h3IsPentagon
+h3GetFaces
+h3CellAreaM2
+h3CellAreaRads2
+h3ToCenterChild
+h3ExactEdgeLengthM
+h3ExactEdgeLengthKm
+h3ExactEdgeLengthRads
+h3NumHexagons
+h3PointDistM
+h3PointDistKm
+h3PointDistRads
+h3GetRes0Indexes
+h3GetPentagonIndexes
+h3Line
+h3Distance
+h3HexRing
+h3GetUnidirectionalEdge
+h3UnidirectionalEdgeIsValid
+h3GetOriginIndexFromUnidirectionalEdge
+h3GetDestinationIndexFromUnidirectionalEdge
+h3GetIndexesFromUnidirectionalEdge
+h3GetUnidirectionalEdgesFromHexagon
+h3GetUnidirectionalEdgeBoundary
+WKT
+readWKTMultiPolygon
+readWKTPolygon
+readWKTPoint
+readWKTLineString
+readWKTMultiLineString
+readWKTRing
+polygonsWithinSpherical
+polygonsDistanceSpherical
+polygonsDistanceCartesian
+polygonsEqualsCartesian
+polygonsSymDifferenceSpherical
+polygonsSymDifferenceCartesian
+polygonsIntersectionSpherical
+polygonsWithinCartesian
+polygonConvexHullCartesian
+polygonAreaSpherical
+polygonsUnionSpherical
+polygonPerimeterSpherical
+polygonsIntersectionCartesian
+polygonAreaCartesian
+polygonPerimeterCartesian
+polygonsUnionCartesian
+geoToS2
+s2ToGeo
+s2GetNeighbors
+s2CellsIntersect
+s2CapContains
+s2CapUnion
+s2RectAdd
+s2RectContains
+s2RectUnion
+s2RectIntersection
+Svg
+forward
+classic
+Ask AI

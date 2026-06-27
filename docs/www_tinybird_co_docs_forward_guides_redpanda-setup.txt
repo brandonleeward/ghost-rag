@@ -1,0 +1,215 @@
+Source: https://www.tinybird.com/docs/forward/guides/redpanda-setup
+
+Redpanda setup guide · Tinybird Docs
+Sign In
+Sign Up
+Redpanda setup guide
+¶
+Copy as MD
+This guide walks you through setting up Tinybird's Kafka connector with Redpanda, a Kafka-compatible streaming data platform.
+Prerequisites
+¶
+A Redpanda cluster (self-hosted or Redpanda Cloud)
+Redpanda credentials (if authentication is turned on)
+Network access to your Redpanda cluster
+A Tinybird workspace
+Redpanda compatibility
+¶
+Redpanda is fully compatible with the Apache Kafka protocol, so you can use Tinybird's Kafka connector with Redpanda without any special configuration. The connector works with Redpanda the same way it works with Apache Kafka.
+Step 1: Get your Redpanda connection details
+¶
+Bootstrap servers
+¶
+For
+Redpanda Cloud
+: Get the bootstrap server from your Redpanda Cloud console
+For
+self-hosted Redpanda
+: Use your Redpanda broker addresses
+The bootstrap server format is:
+<host>:<port>
+Common ports:
+9092
+for PLAINTEXT
+9093
+for SASL_SSL
+9094
+for TLS
+Authentication
+¶
+Redpanda supports multiple authentication methods:
+SASL/PLAIN
+- Username and password
+SASL/SCRAM-SHA-256
+or
+SCRAM-SHA-512
+- SCRAM authentication
+TLS/mTLS
+- Certificate-based authentication
+PLAINTEXT
+- No authentication (local development only)
+Step 2: Create the Kafka connection
+¶
+You can create the Kafka connection using the CLI wizard or by manually creating a connection file.
+Option 1: Use the CLI wizard (recommended)
+¶
+Run the following command to create a connection interactively:
+tb connection create kafka
+The wizard prompts you for:
+Connection name
+Bootstrap server
+Kafka key (username for SASL/PLAIN or SCRAM)
+Kafka secret (password for SASL/PLAIN or SCRAM)
+After the wizard completes, you can edit the generated
+.connection
+file to add additional settings like
+KAFKA_SASL_MECHANISM
+if needed (defaults to PLAIN).
+Option 2: Manually create a connection file
+¶
+SASL/PLAIN authentication
+¶
+connections/redpanda.connection
+TYPE kafka
+KAFKA_BOOTSTRAP_SERVERS <REDPANDA_BOOTSTRAP_SERVER>
+KAFKA_SECURITY_PROTOCOL SASL_SSL
+KAFKA_SASL_MECHANISM PLAIN
+KAFKA_KEY {{ tb_secret("REDPANDA_USERNAME") }}
+KAFKA_SECRET {{ tb_secret("REDPANDA_PASSWORD") }}
+Set the secrets:
+tb [--cloud] secret set REDPANDA_USERNAME <YOUR_USERNAME>
+tb [--cloud] secret set REDPANDA_PASSWORD <YOUR_PASSWORD>
+SASL/SCRAM authentication
+¶
+connections/redpanda_scram.connection
+TYPE kafka
+KAFKA_BOOTSTRAP_SERVERS <REDPANDA_BOOTSTRAP_SERVER>
+KAFKA_SECURITY_PROTOCOL SASL_SSL
+KAFKA_SASL_MECHANISM SCRAM-SHA-256
+KAFKA_KEY {{ tb_secret("REDPANDA_USERNAME") }}
+KAFKA_SECRET {{ tb_secret("REDPANDA_PASSWORD") }}
+PLAINTEXT (local development only)
+¶
+connections/redpanda_local.connection
+TYPE kafka
+KAFKA_BOOTSTRAP_SERVERS localhost:9092
+KAFKA_SECURITY_PROTOCOL PLAINTEXT
+PLAINTEXT connections should only be used for local development. Production Redpanda clusters should use SASL_SSL.
+Step 3: SSL/TLS certificate (if required)
+¶
+If your Redpanda cluster uses self-signed certificates or a private CA, provide the CA certificate:
+tb [--cloud] secret set --multiline REDPANDA_SSL_CA_PEM
+Add to your connection file:
+KAFKA_SSL_CA_PEM >
+  {{ tb_secret("REDPANDA_SSL_CA_PEM") }}
+Step 4: Create the Kafka Data Source
+¶
+Now that your connection is configured, create a Kafka Data Source. See
+Create a Kafka data source
+in the main Kafka connector guide for detailed instructions on:
+Using
+tb datasource create --kafka
+for a guided setup
+Manually creating
+.datasource
+files
+Defining schemas with JSONPath expressions
+Configuring Kafka-specific settings
+Step 5: Test the connection
+¶
+Test your connection and preview data:
+tb connection data redpanda
+This command prompts you to select a topic and consumer group ID, then returns preview data. This verifies that Tinybird can connect to your Redpanda cluster, authenticate, and consume messages.
+Redpanda Cloud specific setup
+¶
+If you're using Redpanda Cloud:
+Get connection details
+from the Redpanda Cloud console
+Use SASL/PLAIN
+authentication with your Redpanda Cloud credentials
+Use the provided bootstrap server
+address
+No SSL certificate needed
+- Redpanda Cloud uses public CA certificates
+Common Redpanda issues
+¶
+Issue: Authentication failed
+¶
+Solutions:
+Verify username and password are correct
+Check SASL mechanism matches your Redpanda configuration
+Ensure the user has read permissions on the topic
+Verify security protocol matches (SASL_SSL vs PLAINTEXT)
+Issue: Connection timeout
+¶
+Solutions:
+Verify bootstrap server address is correct
+Check network connectivity to Redpanda cluster
+Verify firewall rules allow outbound connections
+For self-hosted Redpanda, ensure the cluster is accessible
+Issue: SSL certificate validation
+¶
+Solutions:
+Provide CA certificate if using self-signed certificates
+Verify certificate is in PEM format
+Check certificate hasn't expired
+Redpanda vs Kafka differences
+¶
+While Redpanda is Kafka-compatible, there are some differences to be aware of:
+Performance
+: Redpanda is optimized for lower latency and higher throughput
+Resource usage
+: Redpanda typically uses less CPU and memory
+Configuration
+: Some Kafka-specific configurations may not apply
+Schema Registry
+: Redpanda doesn't include Schema Registry by default (use Confluent Schema Registry separately if needed)
+Best practices
+¶
+Use SASL_SSL
+for production Redpanda clusters
+Monitor consumer lag
+using
+kafka_ops_log
+Use unique consumer group IDs
+for each Data Source
+Set up alerts
+for high lag or errors
+Test connections
+before deploying to production
+Related documentation
+¶
+Kafka connector documentation
+- Main setup and configuration guide
+Monitor Kafka connectors
+- Set up monitoring and alerts
+Troubleshooting guide
+- Common issues and solutions
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Redpanda setup guide
+Prerequisites
+Redpanda compatibility
+Step 1: Get your Redpanda connection details
+Bootstrap servers
+Authentication
+Step 2: Create the Kafka connection
+Option 1: Use the CLI wizard (recommended)
+Option 2: Manually create a connection file
+SASL/SCRAM authentication
+PLAINTEXT (local development only)
+Step 3: SSL/TLS certificate (if required)
+Step 4: Create the Kafka Data Source
+Step 5: Test the connection
+Redpanda Cloud specific setup
+Common Redpanda issues
+Issue: Authentication failed
+Issue: Connection timeout
+Issue: SSL certificate validation
+Redpanda vs Kafka differences
+Best practices
+Related documentation
+forward
+Ask AI

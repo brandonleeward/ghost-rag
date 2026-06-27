@@ -1,0 +1,185 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/archive
+
+ARCHIVE | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+ARCHIVE
+The Archive storage engine is optimized for high-speed insertion and compression of large amounts of data, suitable for logging and auditing.
+The
+ARCHIVE
+storage engine is a storage engine that uses gzip to compress rows. It is mainly used for storing large amounts of data, without indexes, with only a very small footprint.
+A table using the
+ARCHIVE
+storage engine is stored in two files on disk. There's a table definition file with an extension of .frm, and a data file with the extension .ARZ. At times during optimization, a .ARN file will appear.
+New rows are inserted into a compression buffer and are flushed to disk when needed. SELECTs cause a flush. Sometimes, rows created by multi-row inserts are not visible until the statement is complete.
+ARCHIVE
+allows a maximum of one key. The key must be on an
+AUTO_INCREMENT
+column, and can be a
+PRIMARY KEY
+or a non-unique key. However, it has a limitation: it is not possible to insert a value which is lower than the next
+AUTO_INCREMENT
+value.
+Installing the Plugin
+Although the plugin's shared library is distributed with MariaDB by default, the plugin is not actually installed by MariaDB by default. There are two methods that can be used to install the plugin with MariaDB.
+The first method can be used to install the plugin without restarting the server. You can install the plugin dynamically by executing
+INSTALL SONAME
+or
+INSTALL PLUGIN
+:
+Copy
+INSTALL SONAME
+'
+ha_archive
+'
+;
+The second method can be used to tell the server to load the plugin when it starts up. The plugin can be installed this way by providing the
+--plugin-load
+or the
+--plugin-load-add
+options. This can be specified as a command-line argument to
+mysqld
+or it can be specified in a relevant server
+option group
+in an
+option file
+:
+Copy
+[mariadb]
+...
+plugin_load_add = ha_archive
+Uninstalling the Plugin
+You can uninstall the plugin dynamically by executing
+UNINSTALL SONAME
+or
+UNINSTALL PLUGIN
+:
+Copy
+UNINSTALL SONAME
+'
+ha_archive
+'
+;
+If you installed the plugin by providing the
+--plugin-load
+or the
+--plugin-load-add
+options in a relevant server
+option group
+in an
+option file
+, then those options should be removed to prevent the plugin from being loaded the next time the server is restarted.
+Characteristics
+Supports
+INSERT
+and
+SELECT
+, but not
+DELETE
+,
+UPDATE
+or
+REPLACE
+.
+Data is compressed with zlib as it is inserted, making it very small.
+Data is slow the select, as it needs to be uncompressed, and, besides the
+query cache
+, there is no cache.
+Supports AUTO_INCREMENT (since MariaDB/MySQL 5.1.6), which can be a unique or a non-unique index.
+Since MariaDB/MySQL 5.1.6, selects scan past BLOB columns unless they are specifically requested, making these queries much more efficient.
+Does not support
+spatial
+data types.
+Does not support
+transactions
+.
+Does not support foreign keys.
+Does not support
+virtual columns
+.
+No storage limit.
+Supports row locking.
+Supports
+table discovery
+, and the server can access ARCHIVE tables even if the corresponding
+.frm
+file is missing.
+OPTIMIZE TABLE
+and
+REPAIR TABLE
+can be used to compress the table in its entirety, resulting in slightly better compression.
+With MariaDB, it is possible to upgrade from the MySQL 5.0 format without having to dump the tables.
+INSERT DELAYED
+is supported.
+Running many SELECTs during the insertions can deteriorate the compression, unless only multi-rows INSERTs and INSERT DELAYED are used.
+Previous
+Choosing the Right Storage Engine
+Next
+ARIA
+Last updated
+5 months ago
+Was this helpful?
+Installing the Plugin
+Uninstalling the Plugin
+Characteristics
+Was this helpful?

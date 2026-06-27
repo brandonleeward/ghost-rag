@@ -1,0 +1,112 @@
+Source: https://caddyserver.com/docs/caddyfile/directives/intercept
+
+intercept (Caddyfile directive) — Caddy Documentation
+A
+Project
+Store
+Forum
+GitHub
+Theme:
+System
+Download
+Sponsor
+intercept
+A generalized abstraction of the
+response interception
+feature from the
+reverse_proxy
+directive
+. This may be used with any handler that produces responses, including those from plugins like
+FrankenPHP
+'s
+php_server
+.
+This directive allows you to
+match responses
+, and the first matching
+handle_response
+route or
+replace_status
+will be invoked. When invoked, the original response body is held back, giving the opportunity to that route to write a different response body, with a new status code or with any necessary response header manipulations. If the route does
+not
+write a new response body, then original response body is written instead.
+Syntax
+intercept
+[<matcher>]
+{
+@name
+{
+status
+<code...>
+header
+<field>
+[
+<value>
+]
+}
+replace_status
+[
+<response_matcher>
+]
+<code>
+handle_response
+[
+<response_matcher>
+]
+{
+<directives...>
+}
+}
+@name
+is a named
+response matcher
+block. As long as each response matcher has a unique name, multiple matchers can be defined. A response can be matched on the status code and presence or value of a response header.
+replace_status
+simply changes the status code of response when matched by the given matcher.
+handle_response
+defines the route to execute when the original response is matched by the given response matcher. If a matcher is omitted, all responses are intercepted. When multiple
+handle_response
+blocks are defined, the first matching block will be applied. Inside the block, all other
+directives
+can be used.
+Within
+handle_response
+routes, the following placeholders are available to pull information from the original response:
+{resp.status_code}
+The status code of the original response.
+{resp.header.*}
+The headers from the original response.
+Examples
+When using
+FrankenPHP
+'s
+php_server
+, you can use
+intercept
+to implement
+X-Accel-Redirect
+support, serving static files as requested by the PHP app:
+localhost
+{
+root
+/srv
+intercept
+{
+@accel
+header
+X-Accel-Redirect
+*
+handle_response
+@accel
+{
+root
+/path/to/private/files
+rewrite
+{resp.header.X-Accel-Redirect}
+method
+GET
+file_server
+}
+}
+php_server
+}

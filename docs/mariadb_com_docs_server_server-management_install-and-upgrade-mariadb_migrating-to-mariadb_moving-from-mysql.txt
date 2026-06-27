@@ -1,0 +1,85 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/migrating-to-mariadb/moving-from-mysql
+
+Migrating to MariaDB from MySQL | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+Differences Between MariaDB and Other DBMSs
+DDL Export Guide
+Migrating to MariaDB from MySQL
+MySQL to MariaDB Migration: The Master Guide
+MySQL to MariaDB Compatibility Matrix
+Migrating Galera Cluster
+Migrating from MySQL to MariaDB Galera Cluster (Node-by-Node In-Place)
+MySQL to MariaDB Migrator
+Migrating to MariaDB from PostgreSQL
+Migrating to MariaDB from Oracle
+Migrating to MariaDB from SQL Server
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Migrating to MariaDB from MySQL
+Complete MySQL to MariaDB migration: mysqldump/mysql import steps, SQL syntax compatibility, user/privilege migration, and replication configuration.
+MariaDB Server is designed to be a high-performance, drop-in replacement for MySQL. Whether you are moving from legacy versions (5.5, 5.6, 5.7) or modern releases (8.0, 8.4 LTS), this section provides the tools and workflows needed for a successful transition.
+Evaluate Compatibility
+MySQL to MariaDB Compatibility Matrix
+Before moving data, understand the technical differences between your current MySQL version and your target MariaDB version. Our Compatibility Matrix covers changes in authentication, SQL syntax, and system variables. It's a detailed reference for DBAs and developers.
+Choose Your Migration Path
+MySQL to MariaDB Migration: The Master Guide
+The best method for migration depends on your downtime requirements and server architecture. We have consolidated these workflows into a single authoritative guide.
+MySQL to MariaDB Migration: The Master Guide
+— Step-by-step instructions for:
+In-Place Upgrades: Fast, same-server binary swaps.
+Logical Migrations: Safe, cross-server dump and restore.
+Cloud & RDS Migrations: Specialized paths for managed environments.
+Specialized Migration Scenarios
+Migrating Galera Cluster
+Migrating from MySQL to MariaDB Galera Cluster (Node-by-Node In-Place)
+Guides for migrating MySQL Galera Cluster to MariaDB Galera Cluster.
+Previous
+DDL Export Guide
+Next
+MySQL to MariaDB Migration: The Master Guide
+Last updated
+3 months ago
+Was this helpful?
+Evaluate Compatibility
+Choose Your Migration Path
+Specialized Migration Scenarios
+Was this helpful?

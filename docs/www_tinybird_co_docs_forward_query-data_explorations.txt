@@ -1,0 +1,86 @@
+Source: https://www.tinybird.com/docs/forward/query-data/explorations
+
+Explorations · Tinybird Docs
+Sign In
+Sign Up
+Explorations
+¶
+Copy as MD
+Explorations is a conversational UI feature in Tinybird that lets you explore and interact with your data using natural language.
+Getting started
+¶
+To start using Explorations:
+Go to
+Tinybird Cloud
+and log in to your account
+Select
+Explorations
+in the sidebar
+Start with a suggested prompt or ask your own question
+Begin exploring your data
+How it works
+¶
+Explorations provides conversational analysis through a chat interface. Ask questions in natural language and receive structured, step-by-step responses. The AI breaks down complex analyses into clear, actionable steps that build upon each other. The chat also suggests follow-up questions that reference previous results, creating a natural flow where each question deepens your understanding of the data.
+If you want to write your own SQL queries, use
+Playgrounds
+. For time-based data visualization, use Time Series.
+Get the most out of Explorations
+¶
+Custom workspace rules
+¶
+Fine-tune how the AI assistant responds to get faster and more relevant results. Inside an Exploration, click the
+workspace rules
+link below the chat prompt input to add your custom rules. This context will be used in all your prompts.
+Add context
+¶
+Click the
+@
+icon near the submit button to add specific resources to your query. The LLM will prioritize them for that specific prompt.
+Getting better results
+¶
+Start with specific questions rather than broad exploratory queries. Instead of asking "show me my data," try "what are the top 5 pages by traffic in the last 7 days?" The AI performs better with clear, focused requests that have measurable outcomes.
+Usage and Billing
+¶
+At the moment, Explorations usage is free for Developer and Enterprise organizations.
+Free organizations receive a limited number of credits per month per organization and are restricted once they consume all credits. Read more in
+Pricing
+.
+Usage can be tracked using the
+llm_usage
+service data source.
+Limitations and Privacy
+¶
+Explorations are available to all roles within a Workspace.
+The Explorations AI chat is only available in Tinybird Cloud.
+Tinybird anonymously processes a limited sample of your data to deliver faster, more accurate results.
+Currently, Explorations cannot be shared or exported. Each user can only access their own Explorations.
+Next steps
+¶
+Learn about
+Playgrounds
+to write your own SQL queries.
+Learn about
+Time Series
+to quickly visualize data.
+Learn about
+Pipes
+.
+Learn about
+Materialized views
+.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Explorations
+Getting started
+How it works
+Get the most out of Explorations
+Custom workspace rules
+Add context
+Getting better results
+Usage and Billing
+Limitations and Privacy
+Next steps
+forward
+Ask AI

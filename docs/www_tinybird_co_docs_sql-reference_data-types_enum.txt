@@ -1,0 +1,145 @@
+Source: https://www.tinybird.com/docs/sql-reference/data-types/enum
+
+Enum Data Type reference · Tinybird Docs
+Sign In
+Sign Up
+Enum
+¶
+Copy as MD
+This data type isn't supported at ingest. It is only supported at query time and to create Copy Data Sources or Materialized View Data Sources.
+The
+Enum
+data type represents a set of named constant values, where each name is associated with an integer. While Tinybird stores the underlying integer, operations and display typically use the associated string name.
+You define an
+Enum
+by specifying a list of
+'string' = integer
+pairs or just
+'string'
+names. If only names are provided, Tinybird automatically assigns consecutive integer values, starting from
+1
+by default.
+Tinybird supports two sizes for
+Enum
+types:
+Enum8
+: An 8-bit enumeration that can hold up to 256 distinct values, with associated integers in the range
+[-128, 127]
+.
+Enum16
+: A 16-bit enumeration that can hold up to 65536 distinct values, with associated integers in the range
+[-32768, 32767]
+.
+When defining an
+Enum
+without explicitly specifying
+Enum8
+or
+Enum16
+, Tinybird automatically selects the appropriate size based on the range of integer values provided.
+Usage Notes
+¶
+Enum
+values cannot be
+NULL
+directly, but an
+Enum
+type can be wrapped in a
+Nullable
+type (e.g.,
+Nullable(Enum8('value' = 1))
+).
+When querying an
+Enum
+column, the string names are returned by default. To retrieve the underlying integer value, you must explicitly
+CAST
+the
+Enum
+to an integer type (e.g.,
+Int8
+,
+Int16
+).
+Enum
+values behave like their underlying integer values in operations such as
+ORDER BY
+,
+GROUP BY
+,
+IN
+, and comparison operators.
+You can compare an
+Enum
+value with a constant string that is part of its definition. Comparing an
+Enum
+with a number is not directly supported.
+Most numeric and string operations are not defined for
+Enum
+values directly, but you can use
+toString()
+to get the string representation or
+CAST
+to a numeric type for arithmetic operations.
+Example: Defining and Casting an Enum
+¶
+This example demonstrates how to define an
+Enum
+type within a
+SELECT
+statement and cast a string to that
+Enum
+type.
+SELECT
+    CAST('red', 'Enum8(\'red\' = 1, \'green\' = 2, \'blue\' = 3)') AS color_enum,
+    toTypeName(color_enum) AS type_name
+Result:
+┌─color_enum─┬─type_name───────────────────────────┐
+│ red        │ Enum8('red' = 1, 'green' = 2, 'blue' = 3) │
+└────────────┴─────────────────────────────────────┘
+Example: Retrieving the Underlying Integer Value
+¶
+To see the integer value associated with an
+Enum
+member, cast it to an integer type.
+SELECT
+    CAST('green', 'Enum8(\'red\' = 1, \'green\' = 2, \'blue\' = 3)') AS color_enum,
+    CAST(color_enum, 'Int8') AS color_id
+Result:
+┌─color_enum─┬─color_id─┐
+│ green      │        2 │
+└────────────┴──────────┘
+Example: Enum with Automatic Integer Assignment
+¶
+If you omit the integer values in the
+Enum
+definition, Tinybird assigns them automatically, starting from
+1
+.
+SELECT
+    CAST('medium', 'Enum16(\'small\', \'medium\', \'large\')') AS size_enum,
+    CAST(size_enum, 'Int16') AS size_id
+Result:
+┌─size_enum─┬─size_id─┐
+│ medium    │       2 │
+└───────────┴─────────┘
+Example: Using an Enum in a Comparison
+¶
+You can compare an
+Enum
+value with a string literal that is part of its definition.
+SELECT
+    CAST('blue', 'Enum8(\'red\' = 1, \'green\' = 2, \'blue\' = 3)') AS my_color,
+    my_color = 'blue' AS is_blue,
+    my_color = 'yellow' AS is_yellow
+Result:
+┌─my_color─┬─is_blue─┬─is_yellow─┐
+│ blue     │       1 │         0 │
+└──────────┴─────────┴───────────┘
+Updated
+3 weeks ago
+On this page
+Enum
+Usage Notes
+forward
+classic
+Ask AI

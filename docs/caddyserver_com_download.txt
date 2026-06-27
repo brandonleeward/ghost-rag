@@ -1,0 +1,43 @@
+Source: https://caddyserver.com/download
+
+Download Caddy
+a
+project
+Platform:
+Dragonfly amd64
+FreeBSD amd64
+FreeBSD arm 6
+FreeBSD arm 7
+FreeBSD arm64
+Linux amd64
+Linux arm 5
+Linux arm 6
+Linux arm 7
+Linux arm64
+Linux mips
+Linux mips64
+Linux mips64le
+Linux mipsle
+Linux ppc64
+Linux ppc64le
+Linux s390x
+Linux loong64
+macOS amd64 (Intel)
+macOS arm64 (Apple)
+OpenBSD amd64
+OpenBSD arm 6
+OpenBSD arm 7
+OpenBSD arm64
+Windows amd64
+Windows arm 6
+Windows arm 7
+Windows arm64
+Standard features:
+☑️
+Extra features:
+0
+Download
+or
+⚠️ Only choose plugins you need and trust
+⚠️ Run the following against the downloaded binary:
+xattr -d com.apple.quarantine

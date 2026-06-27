@@ -1,0 +1,99 @@
+Source: https://www.tinybird.com/docs/classic/get-data-in/guides/ingest-from-gitlab
+
+Classic: Send GitLab Events to Tinybird · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Send GitLab events to Tinybird
+¶
+Copy as MD
+GitLab
+is a platform for building and deploying web applications. By integrating GitLab with Tinybird, you can analyze your GitLab events in real time and enrich it with other data sources.
+Some common use cases for sending GitLab events to Tinybird include:
+Analyze GitLab issues and merge requests.
+Analyze GitLab push events.
+Analyze and monitor GitLab pipeline.
+Analyze custom DORA metrics.
+All this allows you to build a more complete picture of your GitLab events and improve your DevOps processes.
+Read on to learn how to send events from GitLab to Tinybird.
+Before you start
+¶
+Before you connect GitLab to Tinybird, ensure:
+You have a GitLab account.
+You have a Tinybird workspace.
+Connect GitLab to Tinybird
+¶
+In GitLab, go to
+Settings
+>
+Webhooks
+.
+Select
+Add new webhook
+.
+Webhooks payloads vary depending on the event type. You can check here the list of
+GitLab events
+.
+Select
+Issues Events
+.
+In your Tinybird project, create a data source called
+gitlab
+. You can follow this
+schema
+:
+SCHEMA >
+  `event_time` DateTime `json:$.tinybirdIngestTime` DEFAULT now(),
+  `event_type` String `json:$.object_kind` DEFAULT 'unknown',
+  `event` JSON `json:$` DEFAULT '{}'
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(event_time)"
+ENGINE_SORTING_KEY "event_time"
+Using the
+JSON Data Type
+you can store the semi-structured data you receive from GitLab in a single column. You can later retrieve various events and their metadata as needed in your pipes.
+The
+JSON
+data type is in private beta. If you are interested in using this type, contact Tinybird at
+support@tinybird.co
+or in the
+Community Slack
+.
+From Tinybird Cloud, copy a token with privileges to append to the data source you created. You can use the admin token or create one with the required scope.
+Back in GitLab, paste the Events API URL in your Webhook URL. Use the query parameter
+name
+to match the name of the data source you created in Tinybird.
+https://<your_host>/v0/events?name=gitlab
+The API host in the following examples must match your Workspace's region. See the full list of
+regions and hosts
+Select
+Add custom header
+and add 'Authorization' as
+Header name
+and paste the token you created in Tinybird as
+Header value
+.
+Bearer <your user token>
+You're done. You can select
+Test
+to check if the webhook is working.
+Check the status of the integration from the
+Log
+tab in the Tinybird
+gitlab
+data source.
+See also
+¶
+GitLab Webhooks
+Tinybird data sources
+Updated
+3 weeks ago
+On this page
+Send GitLab events to Tinybird
+Before you start
+Connect GitLab to Tinybird
+See also
+classic
+Ask AI

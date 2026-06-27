@@ -1,0 +1,266 @@
+Source: https://www.tinybird.com/docs/forward/query-data/clickhouse-interface
+
+ClickHouse interface · Tinybird Docs
+Sign In
+Sign Up
+ClickHouse interface
+¶
+Copy as MD
+Tinybird is compatible with the ClickHouse® HTTP interface, so BI tools, SQL clients, and data visualization platforms can query Tinybird Data Sources directly.
+Use the ClickHouse interface when a tool already supports ClickHouse and needs read-only SQL access to Tinybird.
+The ClickHouse connection to Tinybird is read-only. You can use it to query, visualize, and analyze data from your Tinybird Data Sources, but you cannot modify data through this connection.
+Connection parameters
+¶
+To connect any ClickHouse®-compatible tool to Tinybird, use these standard connection parameters:
+Basic connection settings
+¶
+Protocol: HTTPS
+Host: clickhouse.<REGION>.tinybird.co
+Port: 443 (HTTPS)
+SSL/TLS: Required (enabled)
+Replace
+<REGION>
+with your workspace region (e.g.,
+eu-west-1.aws
+,
+us-east-1
+).
+ClickHouse interface hosts
+¶
+Here are the ClickHouse HTTP hosts for each Tinybird region:
+Region
+Provider
+Provider region
+ClickHouse interface URL
+Europe
+GCP
+europe-west2
+clickhouse.europe-west2.gcp.tinybird.co
+Europe
+GCP
+europe-west3
+clickhouse.tinybird.co
+US East
+GCP
+us-east4
+clickhouse.us-east.tinybird.co
+North America
+GCP
+northamerica-northeast2
+clickhouse.northamerica-northeast2.gcp.tinybird.co
+Europe
+AWS
+eu-central-1
+clickhouse.eu-central-1.aws.tinybird.co
+Europe
+AWS
+eu-west-1
+clickhouse.eu-west-1.aws.tinybird.co
+US East
+AWS
+us-east-1
+clickhouse.us-east.aws.tinybird.co
+US West
+AWS
+us-west-2
+clickhouse.us-west-2.aws.tinybird.co
+Authentication
+¶
+Username: <WORKSPACE_NAME>  # Optional, for identification purposes
+Password: <TOKEN>           # Your Tinybird Auth Token
+The username field is not used for authentication but helps identify the connection. The actual authentication is done via the Auth Token in the password field.
+Auth Token requirements
+¶
+Your Auth Token must have the following permissions:
+Read access
+to Workspace Data Sources
+Read access
+to Service Data Sources (if needed)
+Read access
+to Organization Data Sources (if needed)
+Create a token with these permissions:
+tb --cloud token create static <token_name> --scope "WORKSPACE:READ_ALL" --scope "ORG_DATASOURCES:READ"
+Tinybird Local
+¶
+To connect to your local development environment using Tinybird Local, use these connection parameters:
+Protocol: HTTP
+Host: localhost
+Port: 7182
+SSL/TLS: Disabled
+You can test the connection using curl:
+curl -H "X-ClickHouse-Key: your_token_here" \
+     "http://localhost:7182/?query=SELECT%20*%20FROM%20system.tables"
+Available databases
+¶
+The ClickHouse interface exposes four databases:
+<your_workspace_name>
+: Contains your Workspace's Data Sources.
+tinybird
+: Contains
+Workspace Service Data Sources
+, such as
+tinybird.datasources_ops_log
+and
+tinybird.pipe_stats_rt
+.
+organization
+: Contains
+Organization Service Data Sources
+, such as
+organization.workspaces
+and
+organization.pipe_stats_rt
+.
+system
+: Contains a subset of system tables, including
+system.tables
+,
+system.columns
+,
+system.parts
+,
+system.part_log
+,
+system.query_views_log
+, and
+system.query_log
+.
+Querying
+system.query_log
+,
+system.query_views_log
+or
+system.part_log
+without filters is too resource-intensive and will timeout. Always apply a time filter on the
+event_time
+column to query a reasonable time frame.
+Compatible tools
+¶
+Tinybird's ClickHouse® interface works with BI tools and SQL clients that support ClickHouse:
+Business intelligence platforms
+¶
+Grafana
+Hex
+Metabase
+Superset
+Power BI
+Redash
+Chartbrew
+Deepnote
+Draxlr
+Fabi.ai
+Holistics
+Luzmo
+Mitzu
+Tableau
+SQL clients and IDEs
+¶
+DataGrip
+DBeaver
+Application clients
+¶
+ClickHouse JS Client
+ClickHouse Go Client
+ClickHouse Python Client
+Other compatible tools
+¶
+Any tool that supports ClickHouse® HTTP interface can potentially work with Tinybird, including:
+Looker (via custom connection)
+Other JetBrains IDEs
+Retool and other low-code platforms
+Limitations
+¶
+The interface is
+read-only
+. You cannot perform
+INSERT
+,
+UPDATE
+,
+DELETE
+, or any DDL operations (
+CREATE
+,
+ALTER
+,
+DROP
+).
+Observability
+¶
+Queries made through the ClickHouse® interface are logged as
+Query API
+requests in the pipe statistics Data Sources. You can monitor these queries using:
+tinybird.pipe_stats_rt
+and
+tinybird.pipe_stats
+- Workspace-level statistics
+organization.pipe_stats_rt
+and
+organization.pipe_stats
+- Organization-level statistics
+ClickHouse® queries appear with
+pipe_id
+and
+pipe_name
+as
+'query_api'
+. The actual SQL query is available in the
+parameters
+column under the
+q
+field.
+For more details, see
+Service Data Sources
+.
+Troubleshooting
+¶
+Invalid host or region
+Error: Connection refused
+Verify your region and use the correct host format:
+clickhouse.<region>.tinybird.co
+Authentication failures
+Error: Authentication failed
+Check your Auth Token is valid and not expired
+Ensure the token has read permissions for the workspace
+Verify the token is entered in the password field
+SSL/TLS errors
+Error: SSL connection error
+Ensure SSL/TLS is enabled in your client
+Use port 443 with HTTPS protocol
+Check that your client supports TLS 1.2 or higher.
+Query timeouts
+Error: Query timeout
+Add appropriate WHERE clauses to filter data
+Use LIMIT to reduce result set size
+Consider querying Materialized Views instead of raw data
+Getting help
+¶
+If you encounter issues not covered here:
+Check the specific tool integration guide
+Review your
+Auth Token
+permissions
+Test the connection with a simple query
+Contact Tinybird at support@tinybird.co for additional assistance
+Next steps
+¶
+Connect your BI tool and follow the specific integration guide to set up dashboards and visualizations with your Tinybird data.
+ClickHouse JS
+ClickHouse Go
+ClickHouse Python
+Grafana
+Metabase
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+ClickHouse interface
+Connection parameters
+Available databases
+Compatible tools
+Limitations
+Observability
+Troubleshooting
+Next steps
+forward
+Ask AI

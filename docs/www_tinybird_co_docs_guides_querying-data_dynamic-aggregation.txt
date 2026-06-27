@@ -1,0 +1,164 @@
+Source: https://www.tinybird.co/docs/guides/querying-data/dynamic-aggregation
+
+Classic: Rollup aggregations with query parameters · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Rollup aggregations with query parameters
+¶
+Copy as MD
+In this guide, you'll learn how to dynamically aggregate time series data by different time intervals (rollups) to optimize frontend performance.
+These days, it's not uncommon to have datasets with a per-second resolution for a few years' worth of data. This creates some demands at the storage and the query layers, and it also presents some challenges for the data consumers. Aggregating this data dynamically and on-the-fly is key for resolving the specific demands at scale.
+In this guide, you'll create an API Endpoint that aggregates the data in different time-frames depending on the amount of data, so only the needed rows are sent to the frontend, thereby gaining performance and speed.
+When preparing the API Endpoint you'll focus on 3 things:
+Keep the API Endpoint interface extremely simple: "I want events data from this
+start date
+to this
+end date
+".
+Make the API Endpoint return enough data with adequate resolution for the selected date range.
+Don't add logic to the frontend to do the aggregation of the returned data. You simply request the desired date range knowing that you will receive an amount of data that won't swamp your rendering pipeline.
+Prerequisites
+¶
+You'll need to have at least read through the
+quick start guide
+to be familiar with the scenario. The following guide uses a Data Source called
+events
+with 100M rows, for a ~5-year timespan.
+1. Build the Pipe
+¶
+In this step, you'll learn how to use Tinybird's
+templating language
+to add more logic to your API Endpoints.
+In addition to the main docs on
+using the templating language to pass query parameters
+to Endpoints, you can also learn about variables and the functions that are available within templates in the
+CLI > Advanced Templates
+docs.
+The Endpoint created in the
+quick start guide
+returns
+sales per day
+of an ecommerce store, and takes a start and end date. The problem of having a fixed period of one day to aggregate data is that the amount of data transferred will vary a lot, depending on the selected dates, as well as the work that the client will have to do on the frontend to render that data. Also, if the start and end dates are close to each other, the grouping window will be too big and the backend won't return data with a high enough level of detail.
+Fortunately, you can add
+conditional logic
+when defining API Endpoints in Tinybird and, depending on the range of dates selected, the Endpoint will return data grouped by one of these periods:
+Weekly
+Daily
+Every 4 hours
+Every 1 hour
+Every 15 minutes
+To do this, you can create a new Pipe named
+ecommerce_events_dynamic
+. In the first Node, add the following code to 1) keep only the
+buy
+events, and 2) cast the
+price
+column to
+Float32
+changing its name to
+buy_events_with_price
+:
+Filtering raw events Data Source to keep only BUY events
+SELECT 
+    date,
+    product_id,
+    user_id,
+    toFloat32(JSONExtractFloat(extra_data, 'price')) price
+FROM events
+WHERE event='buy'
+And then, add another transformation node containing the following query. Name this node
+buy_events_dynamic_agg
+:
+Using dynamic parameters to aggregate data depending on the time range
+%
+SELECT
+    {% set days_interval = day_diff(Date(start_date, '2018-01-01'), Date(end_date, '2018-01-31')) %}
+    {% if days_interval > 180 %}
+        toStartOfWeek(date)
+    {% elif days_interval > 31 %}
+        toStartOfDay(date)
+    {% elif days_interval > 7 %}
+        toStartOfInterval(date, INTERVAL 4 HOUR)
+    {% elif days_interval > 2 %}
+        toStartOfHour(date)
+    {% else %}
+        toStartOfFifteenMinutes(date)
+    {% end %} AS t,
+    round(sum(price), 2) AS sales
+FROM buy_events_with_price
+WHERE date BETWEEN
+    toDateTime(toDate({{Date(start_date, '2018-10-01')}})) AND
+    toDateTime(toDate({{Date(end_date, '2020-11-01')}}) + 1)
+GROUP BY t
+ORDER BY t
+This query makes use of Tinybird's templating language:
+It defines a couple of Date parameters and adds some default values to be able to test the Pipe while you build it (
+{{Date(start_date, '2018-01-01')}}
+and
+{{Date(end_date, '2018-12-31')}}
+).
+It computes the number of days in the interval defined by
+start_date
+and
+end_date
+:
+days_interval = day_diff(...)
+.
+It uses the
+days_interval
+variable to decide the best granularity for the data.
+Using the templating language additions might look a little complicated at a first glance, but you'll quickly become familiar with it!
+2. Publish your API Endpoint
+¶
+Selecting the
+Publish
+button >
+buy_events_dynamic_agg
+node makes your API accessible immediately. Once it's published you can directly test it using the snippets available in the API Endpoint page or using Tinybird's REST API. Just change the
+start_date
+and the
+end_date
+parameters to see how the aggregation window changes dynamically.
+Testing the API Endpoint using cURL
+TOKEN=<your_token>
+
+curl -s "https://<your_host>/v0/pipes/ecommerce_events_dynamic.json?start_date=2018-10-01&end_date=2018-11-01&token=$TOKEN" \
+    | jq '.data[:2]'
+[
+  {
+    "t": "2018-10-01 00:00:00",
+    "sales": 66687.38
+  },
+  {
+    "t": "2018-10-01 04:00:00",
+    "sales": 50821.24
+  }
+]
+Use a Token with the right scope. Replace
+<your_token>
+with a Token whose
+scope
+is
+READ
+or higher.
+To sum up: With Tinybird, you can dynamically return different responses from your analytics API Endpoints depending on the request's parameters. This can give you more granular control over the data you send to the client, either for performance or privacy reasons.
+Next steps
+¶
+Learn more about the
+using the templating language to pass query parameters
+.
+Need to deduplicate your data? Read the
+deduplication strategies guide
+.
+Updated
+3 weeks ago
+On this page
+Rollup aggregations with query parameters
+Prerequisites
+1. Build the Pipe
+2. Publish your API Endpoint
+Next steps
+classic
+Ask AI

@@ -1,0 +1,108 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/myrocks/myrocks-and-check-table
+
+MyRocks CHECK TABLE | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+About MyRocks for MariaDB
+Building MyRocks in MariaDB
+Differences Between MyRocks Variants
+Getting Started with MyRocks
+Loading Data Into MyRocks
+MyRocks Bloom Filters
+MyRocks CHECK TABLE
+MyRocks Data Compression
+MyRocks Group Commit with Binary log
+MyRocks Index-Only Scans
+MyRocks and Replication
+MyRocks START TRANSACTION WITH CONSISTENT SNAPSHOT
+MyRocks Column Families
+MyRocks Performance Troubleshooting
+Optimizer Statistics in MyRocks
+MyRocks Transactional Isolation
+MyRocks Status Variables
+MyRocks System Variables
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+MyRocks CHECK TABLE
+Details on using the CHECK TABLE statement with MyRocks to verify the integrity of tables and indexes, and how it differs from other engines.
+MyRocks supports the
+CHECK TABLE
+command.
+The command will do a number of checks to verify that the table data is self-consistent.
+The details about the errors are printed into the
+error log
+.
+If
+log_warnings
+> 2, the error log will also have some informational messages which can help with troubleshooting.
+Besides this, RocksDB has its own (low-level) log in
+#rocksdb/LOG
+file.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+MyRocks Bloom Filters
+Next
+MyRocks Data Compression
+Last updated
+1 year ago
+Was this helpful?
+Was this helpful?

@@ -1,0 +1,76 @@
+Source: https://docs.ghost.org/update
+
+How To Update Ghost - Ghost Developer Docs
+Documentation Index
+Fetch the complete documentation index at:
+/llms.txt
+Use this file to discover all available pages before exploring further.
+Skip to main content
+Ghost Developer Docs
+home page
+Search...
+⌘
+K
+Search...
+Navigation
+Getting Started
+How To Update Ghost
+Home
+Documentation
+Migration Guides
+Getting Started
+How To Update Ghost
+Learn how to update your self-hosted Ghost install to the latest version
+Our team
+release
+updates to the open source software every week, and you can find out whether new updates are available any time by running
+ghost check-update
+.
+If you’re already running the latest major version (
+6.x
+) - update using Ghost CLI by running
+ghost
+update
+That’s it! If you want to be super safe, run
+ghost backup
+first.
+​
+Updating to the latest major version (6.x)
+If you’re running Ghost 5.x with MySQL 8, updating your Ghost-CLI site is still just as easy as usual, but there are
+breaking changes
+you should check out first.
+The web analytics feature is not compatible with Ghost-CLI. There is a docker-based hosting method currently in preview, which includes a migration tool for Ghost CLI sites:
+check it out
+.
+If you’re on an older version, or not using MySQL 8, getting up-to-date is slightly more involved. Below is a full breakdown of the the recommended update paths for older Ghost versions.
+Updates are recommended for sites that are:
+Running Ghost version
+3.0.0
+or higher and are using MySQL in production
+Development sites using any database
+A full reinstall of Ghost is recommended for sites that are:
+Running on a Ghost version less than
+3.0.0
+Using SQLite3 in production on any Ghost version
+Ghost Version
+Database
+Update method
+< 2.x
+Any
+Reinstall
+3.x, 4.x
+SQLite
+Reinstall
+3.x, 4.x
+MySQL
+Update
+5.x
+MySQL
+Update
+If you’re using MariaDB it is recommended to migrate to MySQL 8 - read more about supported databases.
+Suggest edits
+Raise issue
+Hosting Guide
+Overview
+⌘
+I

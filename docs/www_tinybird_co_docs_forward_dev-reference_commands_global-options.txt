@@ -1,0 +1,75 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/global-options
+
+Global options · Tinybird Docs
+Sign In
+Sign Up
+Global options
+¶
+Copy as MD
+The following options are available for all commands. Enter them before the command name. For example:
+tb --host https://api.tinybird.co workspace ls
+.
+Environment options (
+--cloud
+,
+--local
+,
+--build
+,
+--staging
+) don't apply to all commands. For example,
+tb dev
+and
+tb build
+don't support
+--cloud
+. Check the
+Environment support
+section on each command's page to see which options apply.
+Option
+Description
+--host TEXT
+Tinybird host. Defaults to the value of the
+TB_HOST
+environment variable, then to
+https://api.tinybird.co
+.
+--token TEXT
+Authentication token. Defaults to the value of the
+TB_TOKEN
+environment variable, then to the
+.tinyb
+file. See
+.tinyb file
+.
+--show-tokens
+Shows available tokens.
+--user-token
+Use the user token, defaults to the
+TB_USER_TOKEN
+environment variable, then to the .tinyb file. See
+.tinyb file
+.
+--cloud / --local
+Run against Tinybird Cloud or Tinybird Local. Local is the default except when in build mode.
+--build
+Run against the build mode. Default when running
+tb dev
+or
+tb build --watch
+.
+--staging
+Run against the staging deployment.
+--debug / --no-debug
+Prints internal representation. Combine it with any command to get more information.
+--version
+Shows the version and exits.
+-h, --help
+Shows help for the command.
+Updated
+1 month ago
+Looking for Classic docs?
+On this page
+Global options
+forward
+Ask AI

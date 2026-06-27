@@ -1,0 +1,61 @@
+Source: https://mariadb.com/docs/server/server-management/server-monitoring-logs/slow-query-log
+
+Slow Query Log | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Overview of MariaDB Logs
+Securing MariaDB Logs
+Binary Log
+Error Log
+General Query Log
+MyISAM Log
+Rotating Logs on Unix and Linux
+Slow Query Log
+Slow Query Log Overview
+EXPLAIN in the Slow Query Log
+log_slow_always_query_time System Variable
+SQL Error Log Plugin
+Transaction Coordinator Log
+Writing Logs Into Tables
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Slow Query Log
+Utilize the slow query log in MariaDB Server. This section helps you identify and optimize inefficient queries, improving overall database performance and responsiveness.
+Slow Query Log Overview
+EXPLAIN in the Slow Query Log
+log_slow_always_query_time System Variable
+Previous
+Rotating Logs on Unix and Linux
+Next
+Slow Query Log Overview
+Last updated
+1 year ago
+Was this helpful?
+Was this helpful?

@@ -1,0 +1,32 @@
+Source: https://www.tinybird.com/docs/live/kafka-real-time-dashboard
+
+Build a Real-Time Dashboard over Kafka · Tinybird
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+← Back to Live
+Build a Real-Time Dashboard over Kafka
+Data consumers, including both internal stakeholders and product users, demand real-time data visualizations. In this free training, you'll learn how to give your customers an amazing data analytics UX. Join us and learn how to build real-time, user-facing analytics dashboards over streaming data from Kafka.
+In this free technical training, you'll learn how to:
+Capture event streams from Kafka (Confluent Cloud) and write them into a real-time database
+Sync dimensional data from a data warehouse (BigQuery) into the same real-time database
+Write complex analytical queries to filter, aggregate, and join data from Kafka and BigQuery
+Develop low-latency, high-concurrency data APIs to power user-facing dashboards
+Integrate data APIs with various frontend systems, including Grafana and Next.js (React)
+Optimize SQL queries using Materialized Views to improve latency and minimize data processing costs
+Have questions?
+Join us on Slack
+Start building
+Live coding session
+When:
+March 13, 2024 at 15:00 UTC
+Duration:
+1 hr
+Who:
+Cameron Archer
+Product Marketing Manager
+Start building
+Ask AI
+Search...

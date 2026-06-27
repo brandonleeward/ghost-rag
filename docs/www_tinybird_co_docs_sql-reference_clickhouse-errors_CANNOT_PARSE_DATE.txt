@@ -1,0 +1,199 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/CANNOT_PARSE_DATE
+
+CANNOT_PARSE_DATE ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+CANNOT_PARSE_DATE error
+¶
+Copy as MD
+This error usually means ClickHouse can't parse a string as a Date value. Check the format of your date strings and make sure they match the expected format.
+The
+CANNOT_PARSE_DATE
+error in ClickHouse (and Tinybird) happens when you try to convert a string to a Date value, but the string format doesn't match what ClickHouse expects. This commonly occurs when importing date data or using date conversion functions.
+What causes this error
+¶
+You'll typically see it when:
+Using
+toDate()
+on strings with unexpected formats
+Working with date strings that don't match ClickHouse's default format
+Importing data with non-standard date formats
+Using date functions with incorrectly formatted strings
+Working with dates from different locales or formats
+Example errors
+¶
+Fails: invalid date string
+SELECT toDate('not a date')
+Fails: invalid date string
+SELECT toDate('not a date')
+Fails: incomplete date
+SELECT toDate('2023-01')
+Fails: missing components
+SELECT toDate('2023-01')
+How to fix it
+¶
+Use the correct date format
+¶
+ClickHouse expects ISO format by default (YYYY-MM-DD):
+Fix: use ISO format
+SELECT toDate('2023-01-01')
+Specify custom format
+¶
+Use the second parameter to specify the format:
+Fix: use ISO format
+SELECT toDate('2023-01-01')
+Use parseDate for flexible parsing
+¶
+Use
+parseDate()
+for more flexible parsing:
+Fix: use toDate with valid format
+SELECT toDate('2023/01/01')
+Handle invalid dates
+¶
+Use try functions to handle parsing errors gracefully:
+Fix: use toDateOrZero
+SELECT toDateOrZero(date_string) as parsed_date FROM events
+Common patterns and solutions
+¶
+Standard ISO format
+¶
+The most reliable format is ISO 8601:
+ISO format examples
+SELECT toDate('2023-01-01')  -- YYYY-MM-DD format
+SELECT toDate('2023-01-01T00:00:00')  -- ISO 8601 with time
+Custom format strings
+¶
+Use format strings for non-standard formats:
+Custom format examples
+SELECT toDate('01/01/2023', 'MM/DD/YYYY')
+SELECT toDate('2023.01.01', 'YYYY.MM.DD')
+SELECT toDate('01-01-2023', 'DD-MM-YYYY')
+Working with timestamps
+¶
+Convert timestamps to dates:
+Timestamp to date
+SELECT toDate(toDateTime('2023-01-01 12:00:00'))
+SELECT toDate(now())
+Date arithmetic
+¶
+Perform date calculations:
+Date arithmetic
+SELECT addDays(toDate('2023-01-01'), 7)  -- Add 7 days
+SELECT subtractDays(toDate('2023-01-01'), 7)  -- Subtract 7 days
+Advanced solutions
+¶
+Handling various date formats
+¶
+Create robust parsing for multiple formats:
+Multiple format handling
+SELECT CASE
+    WHEN date_string REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN toDate(date_string)
+    WHEN date_string REGEXP '^[0-9]{2}/[0-9]{2}/[0-9]{4}$' THEN toDate(date_string, 'MM/DD/YYYY')
+    WHEN date_string REGEXP '^[0-9]{2}-[0-9]{2}-[0-9]{4}$' THEN toDate(date_string, 'DD-MM-YYYY')
+    ELSE NULL
+END as parsed_date
+FROM events
+Working with JSON date strings
+¶
+Parse dates from JSON data:
+JSON date parsing
+SELECT
+    toDate(JSONExtractString(data, 'date')) as event_date,
+    toDate(JSONExtractString(data, 'created_at')) as created_date
+FROM events
+Error handling with try functions
+¶
+Comprehensive error handling:
+Comprehensive error handling
+SELECT
+    try(toDate(date_string)) as safe_date,
+    try(toDate(date_string, 'MM/DD/YYYY')) as safe_date_custom,
+    try(parseDate(date_string, '%Y/%m/%d')) as safe_date_parse
+FROM events
+Date format reference
+¶
+Common format specifiers for
+toDate()
+:
+YYYY
+- 4-digit year
+MM
+- 2-digit month (01-12)
+DD
+- 2-digit day (01-31)
+YY
+- 2-digit year
+M
+- 1-digit month (1-12)
+D
+- 1-digit day (1-31)
+Tinybird-specific notes
+¶
+In Tinybird, this error often occurs when:
+Ingesting data with non-standard date formats
+Using Schema Hints with mismatched date formats
+Processing JSON data with embedded date strings
+Working with Data Sources that have inconsistent date formats
+To debug in Tinybird:
+Check your Data Source schema for date column types
+Use Schema Hints to specify date formats
+Validate incoming date formats
+Use try functions in your Pipes for robust parsing
+Best practices
+¶
+Date standardization
+¶
+Use ISO 8601 format (YYYY-MM-DD) when possible
+Standardize date formats across your data sources
+Handle time zones consistently
+Use appropriate date precision for your use case
+Error handling
+¶
+Use
+try()
+functions for robust parsing
+Validate date strings before processing
+Provide fallback values for invalid dates
+Log parsing errors for debugging
+Performance considerations
+¶
+Use appropriate date data types
+Index date columns for better query performance
+Consider using date functions in WHERE clauses
+Use date ranges for efficient filtering
+See also
+¶
+ClickHouse Date and Time Functions
+Working with Date and Time
+Common function errors
+Updated
+7 months ago
+On this page
+CANNOT_PARSE_DATE error
+What causes this error
+Example errors
+How to fix it
+Use the correct date format
+Specify custom format
+Use parseDate for flexible parsing
+Handle invalid dates
+Common patterns and solutions
+Standard ISO format
+Custom format strings
+Working with timestamps
+Date arithmetic
+Advanced solutions
+Handling various date formats
+Working with JSON date strings
+Error handling with try functions
+Date format reference
+Tinybird-specific notes
+Best practices
+Date standardization
+Error handling
+Performance considerations
+See also
+forward
+classic
+Ask AI

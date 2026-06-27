@@ -1,0 +1,197 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/compiling-mariadb-from-source/legacy-guides/build-environment-setup-for-linux
+
+Build Environment Setup for Linux | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Compiling MariaDB From Source: The Master Guide
+Building MariaDB on Windows
+Cross-compiling MariaDB
+Compiling MariaDB with Extra Modules/Options
+Legacy Guides
+Build Environment Setup for macOS
+Building MariaDB on Gentoo
+Creating a Debian Repository
+Creating the MariaDB Source Tarball
+Build Environment Setup for Linux
+Building MariaDB from a Source RPM
+Building MariaDB From Source Using musl-based GNU/Linux
+Building MariaDB on CentOS
+Building MariaDB on Debian
+Building MariaDB on Fedora
+Building MariaDB on FreeBSD
+Building MariaDB on Solaris and OpenSolaris
+Building MariaDB on Ubuntu
+Building RPM Packages From Source
+Compile and Using MariaDB with Sanitizers (ASAN, UBSAN, TSAN, MSAN)
+Creating the MariaDB Binary Tarball
+Compiling with the InnoDB Plugin from Oracle
+Compiling MariaDB with Vanilla XtraDB
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Build Environment Setup for Linux
+Lists required tools and dependencies for building MariaDB on Linux, and how to install them using package managers.
+Required Tools
+The following is a list of tools that are required for building MariaDB on Linux and Mac OS X. Most, if not all, of these will exist as packages in your distribution's package repositories, so check there first. See
+Building MariaDB on Ubuntu
+,
+Building MariaDB on CentOS
+, and
+Building MariaDB on Gentoo
+pages for specific requirements for those platforms.
+git
+gzip
+tar
+gcc/g++ 4.8.5 or later, recommend above 9
+or
+clang/clang++
+GNU make 3.75 or later
+or
+Ninja
+bison (3.0)
+libncurses
+or libncurses6
+zlib-dev
+or zlib-devel
+libevent-dev
+or libevent-devel
+cmake above 2.8.7 though preferably above 3.3
+gnutls
+or
+openssl
+jemalloc
+(optional)
+snappy
+(compression library, optional)
+valgrind
+(only needed if running
+mysql-test-run --valgrind
+)
+libcurl
+(only needed if you want to use the
+S3 storage engine
+)
+libxml2-devel
+or
+libxml-dev
+boost
+libaio-devel
+or
+libaio-dev
+systemd-devel
+or
+systemd-dev
+pcre2-devel
+(optional, will be automatically downloaded and installed if not on the system)
+ccache
+; Will speed up builds if you are going to use the scripts in the BUILD directory.
+ctags
+or
+universal-ctags
+; If you plan to use BUILD scripts and local editors
+You can install these programs individually through your package manager.
+In addition, some package managers support the use a build dependency command. When using this command, the package manager retrieves a list of build dependencies and install them for you, making it much easier to get started on the compile. The actual option varies, depending on the distribution you use.
+On Ubuntu and Debian you can use the
+build-dep
+command.
+Fedora uses the
+builddep
+command with DNF.
+If building on Centos 7, use the
+building MariaDB on Centos instructions
+.
+With openSUSE and SUSE, you can use the source-install command.
+Each of these commands works off of the release of MariaDB provided in the official software repositories of the given distribution. In some instances and especially in older versions of Linux, MariaDB may not be available in the official repositories. In these cases you can use the MariaDB repositories as an alternative.
+Bear in mind, the release of MariaDB provided by your distribution may not be the same as the version you are trying to install. Additionally, the package managers don't always retrieve all of the packages you need to compile MariaDB. There may be some missed or unlisted in the process. When this is the case,
+CMake
+fails during checks with an error message telling you what's missing.
+Note: On Debian-based distributions, you may receive a
+"You must put some 'source' URIs in your sources.list"
+error. To avoid this, ensure that
+/etc/apt/sources.list
+contains the source repositories.
+For example, for Debian buster:
+Refer to the documentation for your Linux distribution for how to do this on your system.
+After editing the
+sources.list
+, do:
+...and then the above mentioned
+build-dep
+command.
+Note: On openSUSE the source package repository may be disabled. The following command will enable it:
+After enabling it, you will be able to run the
+zypper
+command to install the build dependencies.
+You should now have your build environment set up and can proceed to
+Getting the MariaDB Source Code
+and then using the
+Generic Build Instructions
+to build MariadB (or following the steps for your Linux distribution or
+Creating a MariaDB Binary Tarball
+).
+See Also
+Installing Galera from source
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Creating the MariaDB Source Tarball
+Next
+Building MariaDB from a Source RPM
+Last updated
+28 days ago
+Was this helpful?
+Required Tools
+See Also
+Was this helpful?
+Copy
+# apt build-dep mariadb-server
+Copy
+# dnf builddep mariadb-server
+Copy
+# zypper source-install -d mariadb
+Copy
+deb http://ftp.debian.org/debian buster main contrib
+deb http://security.debian.org buster/updates main contrib
+deb-src http://ftp.debian.org/debian buster main contrib
+deb-src  http://security.debian.org buster/updates main contrib
+Copy
+sudo apt update
+Copy
+sudo zypper mr -er repo-source

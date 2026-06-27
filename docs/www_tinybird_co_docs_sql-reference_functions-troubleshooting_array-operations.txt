@@ -1,0 +1,166 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions-troubleshooting/array-operations
+
+Array operations troubleshooting · Tinybird Docs
+Sign In
+Sign Up
+Array operations troubleshooting
+¶
+Copy as MD
+Common issues and solutions when working with array functions in ClickHouse and Tinybird.
+Common errors
+¶
+SIZES_OF_ARRAYS_DONT_MATCH
+¶
+Error
+:
+SIZES_OF_ARRAYS_DONT_MATCH: Arrays have different sizes
+Cause
+: Trying to operate on arrays of different lengths
+Solution
+: Ensure arrays have same length or handle different sizes
+-- Wrong
+SELECT array1 + array2 FROM events
+
+-- Correct: Check lengths first
+SELECT
+  CASE
+    WHEN length(array1) = length(array2) THEN array1 + array2
+    ELSE array1
+  END as safe_operation
+ZERO_ARRAY_OR_TUPLE_INDEX
+¶
+Error
+:
+ZERO_ARRAY_OR_TUPLE_INDEX: Array indices are 1-based
+Cause
+: Using 0-based indexing (arrays are 1-based in ClickHouse)
+Solution
+: Use 1-based indexing
+-- Wrong
+SELECT array_column[0] FROM events
+
+-- Correct
+SELECT array_column[1] FROM events
+Type edge cases
+¶
+Working with nested arrays
+¶
+Issue
+: Complex nested array operations
+Solution
+: Flatten or handle nested structures properly
+-- Handle nested arrays
+SELECT
+  arrayJoin(nested_array) as flattened_item
+FROM events
+Array type mismatches
+¶
+Issue
+: Arrays with different element types
+Solution
+: Convert to common type
+-- Convert array elements to same type
+SELECT
+  arrayMap(x -> toString(x), mixed_array) as string_array
+FROM events
+Usage patterns that break Pipes
+¶
+Large array operations
+¶
+Issue
+: Processing large arrays in aggregations
+Solution
+: Pre-process arrays in data sources
+-- Pre-calculate array operations
+SELECT
+  array_column,
+  length(array_column) as array_length,
+  arraySort(array_column) as sorted_array
+FROM events
+Complex array filtering
+¶
+Issue
+: Complex array filtering in queries
+Solution
+: Use array functions efficiently
+-- Use arrayFilter instead of complex WHERE
+SELECT
+  arrayFilter(x -> x > 0, numeric_array) as positive_values
+FROM events
+Sample fixes
+¶
+Fixing array concatenation
+¶
+-- Problem: Concatenating arrays of different types
+SELECT array1 || array2 FROM events
+
+-- Solution: Convert to common type
+SELECT
+  concat(
+    arrayMap(x -> toString(x), array1),
+    arrayMap(x -> toString(x), array2)
+  ) as combined_arrays
+FROM events
+Working with array indices
+¶
+-- Problem: Accessing array elements safely
+SELECT array_column[index] FROM events
+
+-- Solution: Check bounds
+SELECT
+  CASE
+    WHEN index <= length(array_column) THEN array_column[index]
+    ELSE NULL
+  END as safe_element
+FROM events
+Handling empty arrays
+¶
+-- Problem: Operations on empty arrays
+SELECT arraySum(empty_array) FROM events
+
+-- Solution: Check for empty arrays
+SELECT
+  CASE
+    WHEN length(array_column) = 0 THEN 0
+    ELSE arraySum(array_column)
+  END as safe_sum
+FROM events
+Best practices
+¶
+Use 1-based indexing
+- ClickHouse arrays start at index 1
+Check array lengths
+- Validate before operations
+Handle empty arrays
+- Check for empty arrays before operations
+Convert types consistently
+- Ensure array elements have same type
+Pre-process large arrays
+- Do heavy array operations in data sources
+Related documentation
+¶
+Array functions
+Data types
+Common error patterns
+Updated
+7 months ago
+On this page
+Array operations troubleshooting
+Common errors
+SIZES_OF_ARRAYS_DONT_MATCH
+ZERO_ARRAY_OR_TUPLE_INDEX
+Type edge cases
+Working with nested arrays
+Array type mismatches
+Usage patterns that break Pipes
+Large array operations
+Complex array filtering
+Sample fixes
+Fixing array concatenation
+Working with array indices
+Handling empty arrays
+Best practices
+Related documentation
+forward
+classic
+Ask AI

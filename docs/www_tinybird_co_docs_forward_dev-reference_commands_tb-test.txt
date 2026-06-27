@@ -1,0 +1,86 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-test
+
+tb test · Tinybird Docs
+Sign In
+Sign Up
+tb test
+¶
+Copy as MD
+Runs and updates tests for your Tinybird project.
+The following subcommands are available:
+Subcommand
+Description
+run [FILES]
+Runs all the tests in the project or specific tests passed as arguments.
+update [FILES]
+Updates the test's expectations.
+Create test files
+¶
+Create test YAML files manually in the
+tests/
+folder.
+For the test file format, see
+Test files
+.
+Example
+tests/user_actions.yaml
+:
+- name: user_actions_clicked
+  description: Returns clicked actions only
+  expected_http_status: 200
+  parameters: action=CLICKED
+  expected_result: |
+    {"action":"CLICKED"}
+Use
+tb test update
+to refresh expected results after changing a query.
+tb test run
+¶
+Runs all the tests in the project
+tb test run
+or specific tests passed as arguments. Tests are run with fixture data against your local.
+For example:
+tb test run tests/get_lego_sets_by_year.yaml
+will return:
+Running against Tinybird Local
+
+» Building test environment
+✓ Done!
+
+» Running tests
+* get_sets_by_theme_year.yaml
+✓ get_sets_by_theme_year_2000s_range passed
+✓ get_sets_by_theme_year_1990s_range passed
+Tinybird creates a fresh workspace for each test run. Secrets will not persist between test runs. To avoid test failures, add a default value to your secrets:
+{{ tb_secret("secret_name", "default_value") }}
+.
+tb test update
+¶
+Updates the test's expectations. For example:
+tb test update get_lego_sets_by_year
+.
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✓ Yes (default)
+Runs tests locally with fixture data.
+--cloud
+✗ No
+Tests run locally, not in cloud.
+--branch=BRANCH_NAME
+✗ No
+Tests run locally, not in branches.
+Updated
+1 month ago
+Looking for Classic docs?
+On this page
+tb test
+Create test files
+tb test run
+tb test update
+Environment support
+forward
+Ask AI

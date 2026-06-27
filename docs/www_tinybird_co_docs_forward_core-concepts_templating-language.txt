@@ -1,0 +1,305 @@
+Source: https://www.tinybird.com/docs/forward/core-concepts/templating-language
+
+Templating language · Tinybird Docs
+Sign In
+Sign Up
+Templating language
+¶
+Copy as MD
+Tinybird's templating language lets you make project definitions dynamic while keeping them safe and deployable as code. Use it in SQL nodes to define request parameters, in connector settings to reference secrets, and in datafiles to reuse values across environments.
+Templates are rendered before Tinybird runs the SQL or creates the resource. The rendered result must be valid SQL or a valid datafile setting.
+Where templates are used
+¶
+You use templates in different places depending on the resource:
+API Endpoints, SQL API queries, Copy Pipes, and Sink Pipes
+: Use typed parameters in SQL, such as
+{{DateTime(start_date)}}
+or
+{{String(country, 'US')}}
+.
+Connection files and connector Data Sources
+: Use secrets in settings, such as
+{{ tb_secret("KAFKA_KEY") }}
+.
+Conditional SQL
+: Use control flow with
+{% if %}
+,
+{% else %}
+,
+{% for %}
+, and
+defined()
+to include SQL only when a value exists.
+In
+.pipe
+files, start dynamic SQL with
+%
+so Tinybird parses template parameters:
+Parameterized SQL node
+%
+SELECT pathname, count() AS views
+FROM page_views
+WHERE timestamp >= {{DateTime(start_date)}}
+  AND timestamp < {{DateTime(end_date)}}
+  AND country = {{String(country, 'US')}}
+GROUP BY pathname
+ORDER BY views DESC
+LIMIT {{Int32(limit, 10)}}
+In SDK projects, declare parameters in the
+params
+object and use the same SQL template syntax inside SQL strings. The
+%
+prefix is not required:
+TypeScript SDK endpoint parameters
+import { defineEndpoint, node, p } from "@tinybirdco/sdk";
+
+export const topPages = defineEndpoint("top_pages", {
+  params: {
+    start_date: p.dateTime(),
+    end_date: p.dateTime(),
+    country: p.string().optional("US"),
+    limit: p.int32().optional(10),
+  },
+  nodes: [
+    node({
+      name: "top_pages",
+      sql: `
+        SELECT pathname, count() AS views
+        FROM page_views
+        WHERE timestamp >= {{DateTime(start_date)}}
+          AND timestamp < {{DateTime(end_date)}}
+          AND country = {{String(country, 'US')}}
+        GROUP BY pathname
+        ORDER BY views DESC
+        LIMIT {{Int32(limit, 10)}}
+      `,
+    }),
+  ],
+});
+Parameters
+¶
+Parameters are values supplied when an API Endpoint, SQL API query, on-demand Copy Pipe, or on-demand Sink Pipe runs. Define parameters with type functions so Tinybird validates and casts incoming values before injecting them into SQL.
+The basic pattern is:
+{{<type>(<name>, <default>, description=<description>, required=<true|false>)}}
+For example:
+{{Int32(limit, 10, description="Maximum number of rows", required=False)}}
+Use defaults for scheduled resources and for optional filters. If a parameter has no default, use
+defined()
+before referencing it:
+Optional filter
+%
+SELECT *
+FROM events
+WHERE 1
+{% if defined(country) %}
+  AND country = {{String(country)}}
+{% end %}
+Common parameter functions include
+String
+,
+Boolean
+,
+Date
+,
+DateTime
+,
+DateTime64
+,
+Float32
+,
+Float64
+, integer types such as
+Int32
+and
+UInt64
+, and
+Array
+. Use
+column()
+when you need to parameterize a column name:
+ORDER BY {{column(order_by, 'timestamp')}}
+For the full list of functions and arguments, see
+Template functions
+.
+Do not concatenate untyped user input into SQL. Use typed template functions so Tinybird validates values and renders safe SQL literals.
+Settings
+¶
+Settings are datafile instructions that configure resources. They include values like
+ENGINE_SORTING_KEY
+,
+KAFKA_BOOTSTRAP_SERVERS
+,
+IMPORT_BUCKET_URI
+, and
+EXPORT_SCHEDULE
+.
+Settings can use template functions when the value must vary by environment or must stay out of source control:
+Connection settings with secrets
+TYPE kafka
+KAFKA_BOOTSTRAP_SERVERS {{ tb_secret("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092") }}
+KAFKA_SECURITY_PROTOCOL SASL_SSL
+KAFKA_KEY {{ tb_secret("KAFKA_KEY") }}
+KAFKA_SECRET {{ tb_secret("KAFKA_SECRET") }}
+The rendered setting must still be valid for the resource type. For available settings, see the relevant datafile reference:
+Datasource files
+Connection files
+Pipe files
+Secrets
+¶
+Secrets store credentials and environment-specific values outside your source files. In datafiles, read them with
+tb_secret()
+:
+S3_ARN {{ tb_secret("S3_ARN") }}
+In TypeScript and Python SDK projects, use
+secret()
+:
+import { secret } from "@tinybirdco/sdk";
+
+const arn = secret("S3_ARN");
+from tinybird_sdk import secret
+
+arn = secret("S3_ARN")
+Set secrets in each environment where the resource runs:
+tb secret set KAFKA_KEY <local-value>
+tb --cloud secret set KAFKA_KEY <cloud-value>
+tb --branch=my_branch secret set KAFKA_KEY <branch-value>
+You can provide a default value as the second argument to
+tb_secret()
+. Defaults are useful for local development, but Cloud resources should use real secret values:
+KAFKA_BOOTSTRAP_SERVERS {{ tb_secret("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092") }}
+Secrets are replaced when resources are deployed. If you change a secret, redeploy the project for the affected resources to use the new value.
+See
+tb secret
+to set, list, and remove secrets.
+Control flow
+¶
+Tinybird templates support Python-style control flow for conditional SQL. Use
+{% if %}
+,
+{% elif %}
+,
+{% else %}
+,
+{% for %}
+, and
+{% end %}
+with escaped Markdoc syntax in Markdown examples.
+Conditional SQL
+%
+SELECT *
+FROM events
+WHERE 1
+{% if defined(plan) %}
+  AND plan = {{String(plan)}}
+{% end %}
+{% if defined(min_amount) %}
+  AND amount >= {{Float64(min_amount)}}
+{% end %}
+Use
+WHERE 1
+before optional
+AND
+clauses to avoid invalid SQL when no optional filters are rendered.
+Helper functions
+¶
+In addition to typed parameters and control flow, Tinybird includes helper functions for common dynamic SQL patterns:
+defined(param)
+: Check if a parameter exists before rendering SQL that uses it.
+column(param, default)
+: Render a validated column name, often for dynamic
+ORDER BY
+or
+GROUP BY
+clauses.
+columns(param)
+: Render multiple column names from a parameter.
+sql_and(...)
+: Build optional
+AND
+filters from parameterized comparisons, such as
+in
+,
+not_in
+,
+gt
+,
+lt
+,
+gte
+, and
+lte
+.
+split_to_array(param, default, separator=',')
+: Split a parameter into an array.
+date_diff_in_seconds()
+,
+date_diff_in_minutes()
+,
+date_diff_in_hours()
+, and
+date_diff_in_days()
+: Compare dates in template control flow, for example to choose between raw and aggregated Data Sources based on the requested time range.
+JSON(param, default)
+: Parse a JSON parameter so you can iterate over structured filters.
+max_threads(n)
+: Set the maximum number of threads for a query. This is useful for Copy Pipes in local environments with limited resources.
+error()
+and
+custom_error()
+: Stop rendering and return a custom error when a parameter is invalid or missing.
+For example, use
+sql_and()
+when you need to add several optional filters without manually assembling every
+AND
+clause:
+Optional filters with sql_and
+%
+SELECT *
+FROM events
+WHERE 1
+{% if defined(plan) or defined(countries) %}
+  AND {{sql_and(
+    plan__in=Array(plan, 'String', defined=False),
+    country__in=Array(countries, 'String', defined=False)
+  )}}
+{% end %}
+See
+Template functions
+for the full helper reference and examples.
+Scope and limitations
+¶
+Query parameters are available in API Endpoints, SQL API queries, and in on-demand Copy Pipes and Sink Pipes.
+Scheduled Copy Pipes and Sink Pipes can use parameters only when those parameters have defaults, because there is no request-time value.
+Materialized Views don't support query parameters.
+Parameters with the same name cascade through dependent Pipes.
+Fixed parameters from JWTs override URL parameters with the same name.
+Next steps
+¶
+Add request-time filters with
+Query parameters
+.
+Publish parameterized
+API Endpoints
+.
+Store credentials with
+tb secret
+.
+Review every available
+Template function
+.
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Templating language
+Where templates are used
+Parameters
+Settings
+Secrets
+Control flow
+Helper functions
+Scope and limitations
+Next steps
+forward
+Ask AI

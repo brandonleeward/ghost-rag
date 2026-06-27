@@ -1,0 +1,194 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/connect/connect-table-types/connect-vec-table-type
+
+CONNECT VEC Table Type | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+Introduction to the CONNECT Engine
+Using CONNECT
+Installing CONNECT
+CONNECT Create Table Options
+CONNECT Data Types
+CONNECT Table Types
+CONNECT Table Types Overview
+CONNECT BIN Table Type
+CONNECT CSV and FMT Table Types
+CONNECT DBF Table Type
+CONNECT DOS and FIX Table Types
+CONNECT - External Table Types
+CONNECT - Files Retrieved Using Rest Queries
+CONNECT INI Table Type
+CONNECT JDBC Table Type: Accessing Tables from Another DBMS
+CONNECT JSON Table Type
+CONNECT MONGO Table Type: Accessing Collections from MongoDB
+CONNECT MYSQL Table Type: Accessing MySQL/MariaDB Tables
+CONNECT - NoSQL Table Types
+CONNECT OCCUR Table Type
+CONNECT ODBC Table Type: Accessing Tables From Another DBMS
+CONNECT PIVOT Table Type
+CONNECT PROXY Table Type
+CONNECT Table Types - Catalog Tables
+CONNECT Table Types - Data Files
+CONNECT Table Types - OEM: Implemented in an External LIB
+CONNECT Table Types - Special "Virtual" Tables
+CONNECT Table Types - VIR
+CONNECT TBL Table Type: Table List
+CONNECT - Using the TBL and MYSQL Table Types Together
+CONNECT VEC Table Type
+CONNECT XCOL Table Type
+CONNECT XML Table Type
+CONNECT Zipped File Tables
+Inward and Outward Tables
+CONNECT Security
+CONNECT System Variables
+Adding the REST Feature as a Library Called by an OEM Table
+Compiling JSON UDFs in a Separate Library
+Making the GetRest Library
+OEM Table Example
+Current Status of the CONNECT Handler
+JSON Sample Files
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+CONNECT VEC Table Type
+The CONNECT storage engine.
+Avoid using this table type in production applications. This file format is specific to CONNECT and may not be supported in future versions.
+Tables of type
+VEC
+are binary files that in some cases can provide good performance on read-intensive query workloads. CONNECT organizes their data on disk as columns of values from the same attribute, as opposed to storing it as rows of tabular records. This organization means that when a query needs to. access only a few columns of a particular table, only those columns need to be read from disk. Conversely, in a row-oriented table, all values in a table are typically read from disk, wasting I/O bandwidth.
+CONNECT provides two integral VEC formats, in which each column's data is adjacent.
+Integral Vector Formats
+In these true vertical formats, the VEC files are made of all the data of the first column, followed by all the data of the second column etc. All this can be in one physical file or each column data can be in a separate file. In the first case, the option max_rows=m, where m is the estimate of the maximum size (number of rows) of the table, must be specified to be able to insert some new records. This leaves an empty space after each column area in which new data can be inserted. In the second case, the “Split” option can be specified[
+2
+] at table creation and each column are stored in a file named sequentially from the table file name followed by the rank of the column. Inserting new lines can freely augment such a table.
+Differences Between Vector Formats
+These formats correspond to different needs. The integral vector format provides the best performance gain. It are chosen when the speed of decisional queries must be optimized.
+In the case of a unique file, inserting new data are limited but there will be only one open and close to do. However, the size of the table cannot be calculated from the file size because of the eventual unused space in the file. It must be kept in a header containing the maximum number of rows and the current number of valid rows in the table. To achieve this, specify the option Header=
+n
+when creating the table. If
+n=1
+the header are placed at the beginning of the file, if
+n=2
+it are a separate file with the type ‘.blk’, and if
+n=3
+the header are place at the end of the file. This last value is provided because batch inserting is sometimes slower when the header is at the beginning of the file. If not specified, the header option
+will default to 2 for this table type.
+On the other hand, the "Split" format with separate files have none of these issues, and is a much safer solution when the table must frequently inserted or shared among several users.
+For instance:
+Copy
+CREATE
+TABLE
+vtab
+(
+a
+INT
+NOT NULL
+,
+b
+CHAR
+(
+10
+)
+NOT NULL
+)
+ENGINE
+=
+CONNECT
+table_type
+=
+VEC file_name
+=
+'
+vt.vec
+'
+;
+This table, split by default, will have the column values in files vt1.vec and vt2.vec.
+For vector tables, the option
+block_size=n
+is used for block reading and writing; however, to have a file made of blocks of equal size, the internal value of the
+max_rows=m
+option is eventually increased to become a multiple of n.
+Like for BIN tables, numeric values are stored using platform internal layout, the correspondence between column types and internal format being the same than the default ones given above for BIN. However, field formats are not available for VEC tables.
+Header Option
+This applies to VEC tables that are not split. Because the file size depends on the MAX_ROWS value, CONNECT cannot know how many valid records exist in the file. Depending on the value of the HEADER option, this information is stored in a header that can be placed at the beginning of the file, at the end of the file or in a separate file called fn.blk. The valid values for the HEADER option are:
+0
+Defaults to 2 for standard tables and to 3 for inward tables.
+1
+The header is at the beginning of the file.
+2
+The header is in a separate file.
+3
+The header is at the end of the file.
+The value 2 can be used when dealing with files created by another application
+with no header. The value 3 makes sometimes inserting in the file faster than
+when the header is at the beginning of the file.
+Note: VEC being a file format specific to CONNECT, no big endian / little endian conversion is provided. These files are not portable between machines using a different byte order setting.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+CONNECT - Using the TBL and MYSQL Table Types Together
+Next
+CONNECT XCOL Table Type
+Last updated
+4 months ago
+Was this helpful?
+Integral Vector Formats
+Differences Between Vector Formats
+Header Option
+Was this helpful?

@@ -1,0 +1,79 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/migrating-to-mariadb
+
+Migrating to MariaDB | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+Differences Between MariaDB and Other DBMSs
+DDL Export Guide
+Migrating to MariaDB from MySQL
+Migrating to MariaDB from PostgreSQL
+Migrating to MariaDB from Oracle
+Migrating to MariaDB from SQL Server
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Migrating to MariaDB
+Learn how to migrate your existing databases to MariaDB Server. This section provides comprehensive guides and best practices for a smooth and successful data transfer.
+Differences Between MariaDB and Other DBMSs
+A high-level comparison of MariaDB's architecture, including its pluggable storage engines, transaction log handling, and buffer pool management versus other databases.
+DDL Export Guide
+Learn how to export SQL
+DDL
+to MariaDB from database management systems like Oracle Database, Microsoft SQL Server, MySQL, and IBM DB2.
+Migrating to MariaDB from MySQL
+Complete MySQL to MariaDB migration:
+mysqldump
+/
+mysql
+import steps, SQL syntax compatibility, user/privilege migration, and replication configuration.
+Migrating to MariaDB from PostgreSQL
+Strategies for moving data from PostgreSQL to MariaDB, using the CONNECT storage engine with ODBC/JDBC or foreign data wrappers.
+Migrating to MariaDB from Oracle
+Migrate from Oracle to MariaDB Server. This section provides detailed guidance, tools, and best practices for a smooth and efficient transition of your databases and applications.
+Migrating to MariaDB from SQL Server
+Migrate from SQL Server to MariaDB. This section provides detailed guidance, tools, and best practices for a smooth and efficient transition of your databases and applications to MariaDB.
+Previous
+Downgrading MariaDB
+Next
+Differences Between MariaDB and Other DBMSs
+Last updated
+4 months ago
+Was this helpful?
+Was this helpful?

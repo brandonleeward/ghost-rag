@@ -1,0 +1,677 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/ip-address-functions
+
+IP Address Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Functions for working with IP addresses
+¶
+Copy as MD
+IPv4NumToString
+¶
+Converts a 32-bit unsigned integer representing an IPv4 address into its standard dot-separated string format. The integer is interpreted in big-endian order.
+Alias:
+INET_NTOA
+.
+Syntax
+¶
+IPv4NumToString(num)
+Arguments
+¶
+num
+: UInt32. An unsigned 32-bit integer representing an IPv4 address.
+Returns
+¶
+The IPv4 address as a string (e.g., '192.168.1.1'). String.
+Example
+¶
+SELECT IPv4NumToString(3232235777)
+Result:
+┌─IPv4NumToString(3232235777)─┐
+│ 192.168.1.1                 │
+└─────────────────────────────┘
+IPv4StringToNum
+¶
+Converts an IPv4 address string into its corresponding 32-bit unsigned integer representation. This is the inverse of
+IPv4NumToString
+. An error is thrown if the input string is not a valid IPv4 address.
+Alias:
+INET_ATON
+.
+Syntax
+¶
+IPv4StringToNum(s)
+Arguments
+¶
+s
+: String. An IPv4 address in dot-separated string format.
+Returns
+¶
+The IPv4 address as a 32-bit unsigned integer. UInt32.
+Example
+¶
+SELECT IPv4StringToNum('192.168.1.1')
+Result:
+┌─IPv4StringToNum('192.168.1.1')─┐
+│                     3232235777 │
+└────────────────────────────────┘
+IPv4StringToNumOrDefault
+¶
+Converts an IPv4 address string to its 32-bit unsigned integer representation. If the input string is not a valid IPv4 address, it returns
+0
+instead of throwing an error.
+Syntax
+¶
+IPv4StringToNumOrDefault(s)
+Arguments
+¶
+s
+: String. An IPv4 address in dot-separated string format.
+Returns
+¶
+The IPv4 address as a 32-bit unsigned integer, or
+0
+if invalid. UInt32.
+Example
+¶
+SELECT IPv4StringToNumOrDefault('invalid-ip')
+Result:
+┌─IPv4StringToNumOrDefault('invalid-ip')─┐
+│                                      0 │
+└────────────────────────────────────────┘
+IPv4StringToNumOrNull
+¶
+Converts an IPv4 address string to its 32-bit unsigned integer representation. If the input string is not a valid IPv4 address, it returns
+NULL
+.
+Syntax
+¶
+IPv4StringToNumOrNull(s)
+Arguments
+¶
+s
+: String. An IPv4 address in dot-separated string format.
+Returns
+¶
+The IPv4 address as a 32-bit unsigned integer, or
+NULL
+if invalid. Nullable(UInt32).
+Example
+¶
+SELECT IPv4StringToNumOrNull('invalid-ip')
+Result:
+┌─IPv4StringToNumOrNull('invalid-ip')─┐
+│                                ᴺᵁᴸᴸ │
+└─────────────────────────────────────┘
+IPv4NumToStringClassC
+¶
+Converts a 32-bit unsigned integer representing an IPv4 address into a string, masking the last octet with "xxx". This is useful for grouping IP addresses by their Class C network.
+Syntax
+¶
+IPv4NumToStringClassC(num)
+Arguments
+¶
+num
+: UInt32. An unsigned 32-bit integer representing an IPv4 address.
+Returns
+¶
+The IPv4 address string with the last octet replaced by "xxx". String.
+Example
+¶
+SELECT IPv4NumToStringClassC(IPv4StringToNum('192.168.1.100'))
+Result:
+┌─IPv4NumToStringClassC(IPv4StringToNum('192.168.1.100'))─┐
+│ 192.168.1.xxx                                           │
+└─────────────────────────────────────────────────────────┘
+IPv6NumToString
+¶
+Converts a binary
+FixedString(16)
+value representing an IPv6 address into its standard text format. IPv6-mapped IPv4 addresses are formatted as
+::ffff:A.B.C.D
+.
+Alias:
+INET6_NTOA
+.
+Syntax
+¶
+IPv6NumToString(x)
+Arguments
+¶
+x
+: FixedString(16). A 16-byte binary representation of an IPv6 address.
+Returns
+¶
+The IPv6 address as a string. String.
+Example
+¶
+SELECT IPv6NumToString(toFixedString(unhex('2A0206B8000000000000000000000011'), 16)) AS addr
+Result:
+┌─addr─────────┐
+│ 2a02:6b8::11 │
+└──────────────┘
+IPv6StringToNum
+¶
+Converts an IPv6 address string into its 16-byte binary
+FixedString(16)
+representation. It can also convert a valid IPv4 address string into its IPv6 equivalent. An error is thrown if the input is invalid.
+Alias:
+INET6_ATON
+.
+Syntax
+¶
+IPv6StringToNum(string)
+Arguments
+¶
+string
+: String. An IPv6 or IPv4 address in string format.
+Returns
+¶
+The IPv6 address in binary
+FixedString(16)
+format. FixedString(16).
+Example
+¶
+SELECT IPv6StringToNum('2001:0db8::1')
+Result:
+┌─IPv6StringToNum('2001:0db8::1')─┐
+│ 20010db8000000000000000000000001 │
+└─────────────────────────────────┘
+IPv6StringToNumOrDefault
+¶
+Converts an IPv6 address string to its 16-byte binary representation. If the input string is not a valid IPv6 or IPv4 address, it returns a
+FixedString(16)
+of all zeros (
+0x00...00
+).
+Syntax
+¶
+IPv6StringToNumOrDefault(s)
+Arguments
+¶
+s
+: String. An IPv6 or IPv4 address in string format.
+Returns
+¶
+The IPv6 address in binary
+FixedString(16)
+format, or all zeros if invalid. FixedString(16).
+Example
+¶
+SELECT IPv6StringToNumOrDefault('invalid-ip')
+Result:
+┌─IPv6StringToNumOrDefault('invalid-ip')─┐
+│ 00000000000000000000000000000000         │
+└──────────────────────────────────────────┘
+IPv6StringToNumOrNull
+¶
+Converts an IPv6 address string to its 16-byte binary representation. If the input string is not a valid IPv6 or IPv4 address, it returns
+NULL
+.
+Syntax
+¶
+IPv6StringToNumOrNull(s)
+Arguments
+¶
+s
+: String. An IPv6 or IPv4 address in string format.
+Returns
+¶
+The IPv6 address in binary
+FixedString(16)
+format, or
+NULL
+if invalid. Nullable(FixedString(16)).
+Example
+¶
+SELECT IPv6StringToNumOrNull('invalid-ip')
+Result:
+┌─IPv6StringToNumOrNull('invalid-ip')─┐
+│                                ᴺᵁᴸᴸ │
+└─────────────────────────────────────┘
+IPv4ToIPv6
+¶
+Converts a 32-bit unsigned integer representing an IPv4 address into its IPv6-mapped IPv4 address binary
+FixedString(16)
+format. The IPv4 integer is interpreted in big-endian order.
+Syntax
+¶
+IPv4ToIPv6(x)
+Arguments
+¶
+x
+: UInt32. An unsigned 32-bit integer representing an IPv4 address.
+Returns
+¶
+The IPv6-mapped IPv4 address in binary
+FixedString(16)
+format. FixedString(16).
+Example
+¶
+SELECT IPv6NumToString(IPv4ToIPv6(IPv4StringToNum('192.168.0.1'))) AS addr
+Result:
+┌─addr───────────────┐
+│ ::ffff:192.168.0.1 │
+└────────────────────┘
+cutIPv6
+¶
+Truncates an IPv6 address (in binary
+FixedString(16)
+format) by a specified number of bytes, returning the result as a string. It can handle both native IPv6 and IPv6-mapped IPv4 addresses.
+Syntax
+¶
+cutIPv6(x, bytesToCutForIPv6, bytesToCutForIPv4)
+Arguments
+¶
+x
+: FixedString(16). The IPv6 address in binary format.
+bytesToCutForIPv6
+: UInt8. The number of bytes to cut from the end of a native IPv6 address.
+bytesToCutForIPv4
+: UInt8. The number of bytes to cut from the end of an IPv6-mapped IPv4 address.
+Returns
+¶
+The truncated IPv6 address as a string. String.
+Example
+¶
+WITH
+    IPv6StringToNum('2001:0DB8:AC10:FE01:FEED:BABE:CAFE:F00D') AS ipv6,
+    IPv4ToIPv6(IPv4StringToNum('192.168.0.1')) AS ipv4
+SELECT
+    cutIPv6(ipv6, 2, 0),
+    cutIPv6(ipv4, 0, 2)
+Result:
+┌─cutIPv6(ipv6, 2, 0)─────────────────┬─cutIPv6(ipv4, 0, 2)─┐
+│ 2001:db8:ac10:fe01:feed:babe:cafe:0 │ ::ffff:192.168.0.0  │
+└─────────────────────────────────────┴─────────────────────┘
+IPv4CIDRToRange
+¶
+Calculates the start and end IPv4 addresses for a given IPv4 address and CIDR prefix length. It returns these as a tuple of two IPv4 addresses.
+Syntax
+¶
+IPv4CIDRToRange(ipv4, Cidr)
+Arguments
+¶
+ipv4
+: IPv4. An IPv4 address.
+Cidr
+: UInt8. The CIDR prefix length (0-32).
+Returns
+¶
+A tuple containing the lower and upper bound IPv4 addresses of the subnet. Tuple(IPv4, IPv4).
+Example
+¶
+SELECT IPv4CIDRToRange(toIPv4('192.168.5.2'), 16)
+Result:
+┌─IPv4CIDRToRange(toIPv4('192.168.5.2'), 16)─┐
+│ ('192.168.0.0','192.168.255.255')          │
+└────────────────────────────────────────────┘
+IPv6CIDRToRange
+¶
+Calculates the start and end IPv6 addresses for a given IPv6 address and CIDR prefix length. It returns these as a tuple of two IPv6 addresses.
+Syntax
+¶
+IPv6CIDRToRange(ipv6, Cidr)
+Arguments
+¶
+ipv6
+: IPv6. An IPv6 address.
+Cidr
+: UInt8. The CIDR prefix length (0-128).
+Returns
+¶
+A tuple containing the lower and upper bound IPv6 addresses of the subnet. Tuple(IPv6, IPv6).
+Example
+¶
+SELECT IPv6CIDRToRange(toIPv6('2001:0db8:0000:85a3:0000:0000:ac1f:8001'), 32)
+Result:
+┌─IPv6CIDRToRange(toIPv6('2001:0db8:0000:85a3:0000:0000:ac1f:8001'), 32)─┐
+│ ('2001:db8::','2001:db8:ffff:ffff:ffff:ffff:ffff:ffff')                │
+└────────────────────────────────────────────────────────────────────────┘
+toIPv4
+¶
+Converts a string representation of an IPv4 address into the
+IPv4
+data type. If the input string is invalid, it throws an exception.
+Syntax
+¶
+toIPv4(string)
+Arguments
+¶
+string
+: String. An IPv4 address in string format.
+Returns
+¶
+The IPv4 address as an
+IPv4
+data type. IPv4.
+Example
+¶
+SELECT toIPv4('171.225.130.45')
+Result:
+┌─toIPv4('171.225.130.45')─┐
+│ 171.225.130.45           │
+└──────────────────────────┘
+toIPv4OrDefault
+¶
+Converts a string representation of an IPv4 address into the
+IPv4
+data type. If the input string is invalid, it returns
+0.0.0.0
+or a specified default IPv4 address.
+Syntax
+¶
+toIPv4OrDefault(string[, default])
+Arguments
+¶
+string
+: String. An IPv4 address in string format.
+default
+(optional): IPv4. The IPv4 address to return if
+string
+is invalid.
+Returns
+¶
+The IPv4 address as an
+IPv4
+data type, or the default value if invalid. IPv4.
+Example
+¶
+SELECT
+    toIPv4OrDefault('invalid-ip') AS default_zero,
+    toIPv4OrDefault('invalid-ip', toIPv4('1.1.1.1')) AS custom_default
+Result:
+┌─default_zero─┬─custom_default─┐
+│ 0.0.0.0      │ 1.1.1.1        │
+└──────────────┴────────────────┘
+toIPv4OrNull
+¶
+Converts a string representation of an IPv4 address into the
+IPv4
+data type. If the input string is invalid, it returns
+NULL
+.
+Syntax
+¶
+toIPv4OrNull(string)
+Arguments
+¶
+string
+: String. An IPv4 address in string format.
+Returns
+¶
+The IPv4 address as a
+Nullable
+(IPv4) data type, or
+NULL
+if invalid. Nullable(IPv4).
+Example
+¶
+SELECT toIPv4OrNull('invalid-ip')
+Result:
+┌─toIPv4OrNull('invalid-ip')─┐
+│                       ᴺᵁᴸᴸ │
+└────────────────────────────┘
+toIPv4OrZero
+¶
+Converts a string representation of an IPv4 address into the
+IPv4
+data type. If the input string is invalid, it returns
+0.0.0.0
+.
+Syntax
+¶
+toIPv4OrZero(string)
+Arguments
+¶
+string
+: String. An IPv4 address in string format.
+Returns
+¶
+The IPv4 address as an
+IPv4
+data type, or
+0.0.0.0
+if invalid. IPv4.
+Example
+¶
+SELECT toIPv4OrZero('invalid-ip')
+Result:
+┌─toIPv4OrZero('invalid-ip')─┐
+│ 0.0.0.0                    │
+└────────────────────────────┘
+toIPv6
+¶
+Converts a string representation of an IPv6 address into the
+IPv6
+data type. It can also convert a valid IPv4 address string into its IPv6 equivalent. If the input string is invalid, it returns an empty
+IPv6
+value (
+::
+).
+Syntax
+¶
+toIPv6(string)
+Arguments
+¶
+string
+: String. An IPv6 or IPv4 address in string format.
+Returns
+¶
+The IP address as an
+IPv6
+data type. IPv6.
+Example
+¶
+SELECT toIPv6('2001:db8::1')
+Result:
+┌─toIPv6('2001:db8::1')─┐
+│ 2001:db8::1           │
+└───────────────────────┘
+toIPv6OrDefault
+¶
+Converts a string representation of an IPv6 address into the
+IPv6
+data type. If the input string is invalid, it returns
+::
+(the zero IPv6 address) or a specified default IPv6 address.
+Syntax
+¶
+toIPv6OrDefault(string[, default])
+Arguments
+¶
+string
+: String. An IPv6 or IPv4 address in string format.
+default
+(optional): IPv6. The IPv6 address to return if
+string
+is invalid.
+Returns
+¶
+The IPv6 address as an
+IPv6
+data type, or the default value if invalid. IPv6.
+Example
+¶
+SELECT
+    toIPv6OrDefault('invalid-ip') AS default_zero,
+    toIPv6OrDefault('invalid-ip', toIPv6('1.1.1.1')) AS custom_default
+Result:
+┌─default_zero─┬─custom_default───┐
+│ ::           │ ::ffff:1.1.1.1   │
+└──────────────┴──────────────────┘
+toIPv6OrNull
+¶
+Converts a string representation of an IPv6 address into the
+IPv6
+data type. If the input string is invalid, it returns
+NULL
+.
+Syntax
+¶
+toIPv6OrNull(string)
+Arguments
+¶
+string
+: String. An IPv6 or IPv4 address in string format.
+Returns
+¶
+The IP address as a
+Nullable
+(IPv6) data type, or
+NULL
+if invalid. Nullable(IPv6).
+Example
+¶
+SELECT toIPv6OrNull('invalid-ip')
+Result:
+┌─toIPv6OrNull('invalid-ip')─┐
+│                       ᴺᵁᴸᴸ │
+└────────────────────────────┘
+toIPv6OrZero
+¶
+Converts a string representation of an IPv6 address into the
+IPv6
+data type. If the input string is invalid, it returns
+::
+(the zero IPv6 address).
+Syntax
+¶
+toIPv6OrZero(string)
+Arguments
+¶
+string
+: String. An IPv6 or IPv4 address in string format.
+Returns
+¶
+The IP address as an
+IPv6
+data type, or
+::
+if invalid. IPv6.
+Example
+¶
+SELECT toIPv6OrZero('invalid-ip')
+Result:
+┌─toIPv6OrZero('invalid-ip')─┐
+│ ::                         │
+└────────────────────────────┘
+isIPv4String
+¶
+Checks if a given string is a valid IPv4 address. It returns
+1
+if it is, and
+0
+otherwise. Note that IPv6 addresses (including IPv6-mapped IPv4) will return
+0
+.
+Syntax
+¶
+isIPv4String(string)
+Arguments
+¶
+string
+: String. The string to check.
+Returns
+¶
+1
+if the string is a valid IPv4 address,
+0
+otherwise.
+UInt8
+.
+Example
+¶
+SELECT isIPv4String('192.168.1.1'), isIPv4String('::1'), isIPv4String('invalid')
+Result:
+┌─isIPv4String('192.168.1.1')─┬─isIPv4String('::1')─┬─isIPv4String('invalid')─┐
+│                           1 │                   0 │                       0 │
+└─────────────────────────────┴─────────────────────┴─────────────────────────┘
+isIPv6String
+¶
+Checks if a given string is a valid IPv6 address. It returns
+1
+if it is, and
+0
+otherwise. Note that IPv4 addresses will return
+0
+.
+Syntax
+¶
+isIPv6String(string)
+Arguments
+¶
+string
+: String. The string to check.
+Returns
+¶
+1
+if the string is a valid IPv6 address,
+0
+otherwise.
+UInt8
+.
+Example
+¶
+SELECT isIPv6String('::1'), isIPv6String('::ffff:192.168.1.1'), isIPv6String('192.168.1.1'), isIPv6String('invalid')
+Result:
+┌─isIPv6String('::1')─┬─isIPv6String('::ffff:192.168.1.1')─┬─isIPv6String('192.168.1.1')─┬─isIPv6String('invalid')─┐
+│                   1 │                                  1 │                           0 │                       0 │
+└─────────────────────┴────────────────────────────────────┴─────────────────────────────┴─────────────────────────┘
+isIPAddressInRange
+¶
+Determines if an IP address falls within a specified network range defined by CIDR notation. It supports both IPv4 and IPv6 addresses and networks.
+Syntax
+¶
+isIPAddressInRange(address, prefix)
+Arguments
+¶
+address
+: String. An IPv4 or IPv6 address.
+prefix
+: String. An IPv4 or IPv6 network prefix in CIDR format (e.g., '192.168.0.0/24').
+Returns
+¶
+1
+if the address is within the range,
+0
+otherwise.
+UInt8
+.
+Example
+¶
+SELECT isIPAddressInRange('192.168.1.10', '192.168.1.0/24')
+Result:
+┌─isIPAddressInRange('192.168.1.10', '192.168.1.0/24')─┐
+│                                                    1 │
+└──────────────────────────────────────────────────────┘
+Updated
+3 weeks ago
+On this page
+Functions for working with IP addresses
+IPv4NumToString
+IPv4StringToNum
+IPv4StringToNumOrDefault
+IPv4StringToNumOrNull
+IPv4NumToStringClassC
+IPv6NumToString
+IPv6StringToNum
+IPv6StringToNumOrDefault
+IPv6StringToNumOrNull
+IPv4ToIPv6
+cutIPv6
+IPv4CIDRToRange
+IPv6CIDRToRange
+toIPv4
+toIPv4OrDefault
+toIPv4OrNull
+toIPv4OrZero
+toIPv6
+toIPv6OrDefault
+toIPv6OrNull
+toIPv6OrZero
+isIPv4String
+isIPv6String
+isIPAddressInRange
+forward
+classic
+Ask AI

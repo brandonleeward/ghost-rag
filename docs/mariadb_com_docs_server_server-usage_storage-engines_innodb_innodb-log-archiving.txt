@@ -1,0 +1,249 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/innodb/innodb-log-archiving
+
+InnoDB Log Archiving | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+InnoDB Introduction
+InnoDB File Format
+InnoDB Limitations
+AUTO_INCREMENT Handling in InnoDB
+Binary Log Group Commit and InnoDB Flushing Performance
+InnoDB Asynchronous I/O
+InnoDB Buffer Pool
+InnoDB Change Buffering
+InnoDB Data Scrubbing
+InnoDB Doublewrite Buffer
+InnoDB Flush Method
+InnoDB Lock Modes
+InnoDB Log Archiving
+InnoDB Monitors
+InnoDB Page Compression
+InnoDB Page Flushing
+InnoDB Purge
+InnoDB Undo Log
+InnoDB Redo Log
+InnoDB Strict Mode
+InnoDB System Variables
+InnoDB Versions
+InnoDB Architecture for MariaDB Enterprise Server
+InnoDB Online DDL
+InnoDB Row Formats
+InnoDB Tablespaces
+InnoDB Troubleshooting
+MariaDB Enterprise Server InnoDB Operations
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+InnoDB Log Archiving
+This functionality is available from MariaDB 13.0.
+Overview
+By default, the InnoDB write-ahead log is managed as a ring buffer in a single file (
+ib_logfile0
+). This is efficient for write performance, but log records are eventually overwritten as the ring wraps, which limits the options for
+point-in-time recovery (PITR)
+and
+incremental backups
+.
+InnoDB log archiving replaces the ring buffer with a sequence of pre-allocated, sequentially-named log files. When one file fills up, the server creates the next. Once a checkpoint completes in a new file, the previous file is marked read-only — at which point you can safely move it to long-term storage. The result is a continuous log history for the period archiving was active.
+No shipped backup tool yet generates or restores backups in the
+innodb_log_archive=ON
+format.
+mariadb-backup
+only supports the legacy
+ib_logfile0
+format and fails when the server is running with
+innodb_log_archive=ON
+. A backup tool that uses this format is being worked on.
+Enabling Log Archiving
+To enable log archiving, set the
+innodb_log_archive
+system variable to
+ON
+. This variable is dynamic and can be changed while the server is running:
+Copy
+SET
+GLOBAL
+innodb_log_archive
+=
+ON
+;
+When archiving is active, the server creates files in the data directory using the naming convention
+ib_
+lsn
+.log
+, where
+lsn
+is a 16-character hexadecimal value identifying the log sequence number that maps to file offset
+0x3000
+(12288) — the start of record payload within each file.
+File Format
+Each archive log file has a 12 KiB header. Completed checkpoints in the file are recorded in this header as 64-bit big-endian offsets to a
+FILE_MODIFY
+/
+FILE_CHECKPOINT
+mini-transaction within the file. With
+innodb_encrypt_log=OFF
+, the header can hold up to 1536 checkpoint slots; if a file produces more checkpoints than that, further checkpoints overwrite the last slot until the next log file is started.
+Technical Constraints
+Log file size:
+When
+innodb_log_archive
+is
+ON
+, changes to
+innodb_log_file_size
+take effect when the current log file fills up and a new file is created. There is no special upper bound on
+innodb_log_file_size
+in this mode.
+Encryption:
+While
+innodb_log_archive
+is
+ON
+,
+innodb_encrypt_log
+and related encryption parameters cannot be changed. Each
+ib_
+lsn
+.log
+file must use the same encryption parameters. To change encryption, set
+innodb_log_archive=OFF
+and restart the server — this permanently discards the archived log history.
+Startup:
+With
+innodb_log_archive=ON
+, the server refuses to start if
+ib_logfile0
+exists in the data directory.
+Data Dictionary:
+Log archiving tracks changes to InnoDB tables. It does not cover
+.frm
+files or other non-InnoDB metadata, which means point-in-time recovery of DDL operations is limited.
+Inspecting the Archive State
+When
+innodb_log_archive=ON
+, both the
+innodb_log_archive
+system variable and the
+Innodb_lsn_archived
+status variable remain constant by design.
+Innodb_lsn_archived
+reports the LSN since which a complete InnoDB log archive is available — that is, the first checkpoint in the first archived log file — and does not advance as new log records are written. It is the static lower bound of the archive.
+What does advance during normal operation are the
+Innodb_lsn_current
+status variable (the LSN of the most recent log write) and the
+Innodb_lsn_last_checkpoint
+status variable (the LSN of the most recent completed checkpoint). Query these to observe ongoing log activity:
+Managing Archived Log Files
+Once a checkpoint completes in a new log file, the previous file is marked read-only. You can safely move read-only
+ib_
+lsn
+.log
+files to offline storage.
+Before
+deleting
+an archived log file, check that
+Innodb_lsn_last_checkpoint
+is not older than the start LSN embedded in the first writable
+ib_
+lsn
+.log
+file. If it is, crash recovery still requires the previous log file — deleting it leaves the server unable to recover.
+Performing Recovery from Archived Logs
+The startup parameters
+innodb_log_recovery_start
+and
+innodb_log_recovery_target
+define the range of the log replay. Both default to
+0
+:
+innodb_log_recovery_start=0
+means start from the latest completed checkpoint (always present in one of the last two
+ib_
+lsn
+.log
+files).
+innodb_log_recovery_target=0
+means replay to the end of the available log.
+See
+Point-In-Time Recovery (InnoDB log archiving)
+for the full procedure.
+Previous
+InnoDB Lock Modes
+Next
+InnoDB Monitors
+Last updated
+1 month ago
+Was this helpful?
+Overview
+Enabling Log Archiving
+File Format
+Technical Constraints
+Inspecting the Archive State
+Managing Archived Log Files
+Performing Recovery from Archived Logs
+Was this helpful?
+Copy
+SELECT @@GLOBAL.innodb_log_archive AS archiving;
+SELECT VARIABLE_NAME, VARIABLE_VALUE
+FROM   INFORMATION_SCHEMA.GLOBAL_STATUS
+WHERE  VARIABLE_NAME IN ('INNODB_LSN_ARCHIVED',
+'INNODB_LSN_CURRENT',
+'INNODB_LSN_LAST_CHECKPOINT');

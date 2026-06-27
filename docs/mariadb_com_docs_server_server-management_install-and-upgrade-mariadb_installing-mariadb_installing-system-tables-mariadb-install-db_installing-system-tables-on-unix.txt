@@ -1,0 +1,119 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/installing-mariadb/installing-system-tables-mariadb-install-db/installing-system-tables-on-unix
+
+Installing System Tables on Unix | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+MariaDB ID Sign Up
+MariaDB Binary Packages
+Installing System Tables
+Installing System Tables on Unix
+Installing System Tables on Windows
+Troubleshooting Installation Issues
+Installing MariaDB on IBM Cloud
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Installing System Tables on Unix
+Instructions for running the `mariadb-install-db` script on Unix-like systems to initialize the MariaDB data directory and system tables.
+mariadb-install-db
+initializes the MariaDB data directory and creates the
+system tables
+in the
+mysql
+database, if they do not exist. MariaDB uses these tables to manage
+privileges
+,
+roles
+, and
+plugins
+. It also uses them to provide the data for the
+help
+command in the
+mariadb
+client.
+mariadb-install-db
+works by starting MariaDB Server's
+mysqld
+process in
+--bootstrap
+mode and sending commands to create the
+system tables
+and their content.
+There is a version specifically for Windows,
+mysql_install_db.exe
+.
+To invoke
+mariadb-install-db
+, use the following syntax:
+Copy
+mariadb-install-db
+--user=mysql
+For the options supported by
+mariadb-install-db
+, see
+mariadb-install-db: Options
+.
+For the option groups read by
+mariadb-install-db
+, see
+mariadb-install-db: Option Groups
+.
+See
+mariadb-install-db: Installing System Tables
+for information on the installation process.
+See
+mariadb-install-db: Troubleshooting Issues
+for information on how to troubleshoot the installation process.
+See Also
+mariadb-install-db
+The Windows version of
+mariadb-install-db
+:
+mysql_install_db.exe
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Installing System Tables
+Next
+Installing System Tables on Windows
+Last updated
+10 months ago
+Was this helpful?
+Was this helpful?

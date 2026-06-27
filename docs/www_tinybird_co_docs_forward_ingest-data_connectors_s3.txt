@@ -1,0 +1,664 @@
+Source: https://www.tinybird.com/docs/forward/ingest-data/connectors/s3
+
+S3 connector · Tinybird Docs
+Sign In
+Sign Up
+S3 connector
+¶
+Copy as MD
+You can set up an S3 connector to load your CSV, NDJSON, or Parquet files into Tinybird from any S3 bucket. Tinybird can detect new files in your buckets and ingest them automatically.
+Setting up the S3 connector requires:
+Configuring AWS
+permissions
+using
+IAM roles
+.
+Defining an S3 Connection in your Tinybird project.
+Defining a Data Source that uses this Connection.
+Environment considerations
+¶
+Before setting up the connector, understand how it works in different environments.
+Cloud environment
+¶
+In the Tinybird Cloud environment, Tinybird uses its own AWS account to assume the IAM role you create, allowing it to access your S3 bucket. When you deploy to your main Cloud Workspace, use
+tb --cloud deploy
+as usual.
+When you test S3 connector Data Sources in a Cloud Branch, include
+--with-connections
+so Tinybird creates the connector data linkers in the branch:
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb build --with-connections
+Local environment
+¶
+Tinybird Local runs in a container. To use the S3 connector locally, pass your local AWS credentials to the container so Tinybird Local can assume the IAM role you specify in your Connection. See
+Local environment details
+for setup options.
+When using the S3 connector in the
+--local
+environment, continuous file ingestion is limited. For continuous ingestion of new files, use the Cloud environment.
+AWS permissions
+¶
+The S3 connector requires an IAM Role with specific permissions to access objects in your Amazon S3 bucket:
+s3:GetObject
+s3:ListBucket
+s3:GetBucketNotification
+s3:PutBucketNotification
+s3:GetBucketLocation
+One IAM role can access multiple buckets
+: You can update the access policy to include multiple buckets by adding their ARNs to the
+Resource
+array. This allows you to reuse the same IAM role across multiple S3 connections for different buckets, simplifying credential management.
+You need to create both an access policy and a trust policy in AWS:
+AWS Access Policy
+AWS Trust Policy
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:GetBucketNotification",
+          "s3:PutBucketNotification",
+          "s3:GetBucketLocation"
+        ],
+        "Resource": [
+          "arn:aws:s3:::{bucket-name}",
+          "arn:aws:s3:::{bucket-name}/*"
+        ]
+      }
+    ]
+}
+For the AWS Trust Policy you need to replace placeholder values with values specific to your Tinybird environment:
+{AWS_ACCOUNT_ID}
+:
+For Cloud environments: Tinybird's AWS account ID, which varies depending on your region and provider
+For Local environments: The AWS account ID of the credentials you pass to the Docker container with
+--use-aws-creds
+{EXTERNAL_ID}
+: A unique identifier provided by Tinybird and generated from your connection name.
+To get the correct values for your Trust Policy:
+Use the guided CLI process with
+tb connection create s3
+(recommended)
+Or access the API endpoint
+/v0/integrations/s3/policies/trust-policy?external_id_seed={CONNECTION_NAME}
+for your workspace
+To allow access from both Local and Cloud environments with a single IAM role, add both account IDs to the
+Principal.AWS
+in array format:
+["arn:aws:iam::{LOCAL_ACCOUNT_ID}:root", "arn:aws:iam::{CLOUD_ACCOUNT_ID}:root"]
+in the Trust Policy. This is useful when you want to use the same IAM role for both environments to simplify credential management.
+Set up the connector
+¶
+1
+Create an S3 connection
+¶
+Define the S3 Connection in your project. For Tinybird CLI datafile projects,
+tb connection create s3
+is a useful helper for setting up the required AWS permissions and generating a
+.connection
+file you can edit.
+Run the guided CLI helper:
+tb connection create s3
+When prompted, you'll need to:
+Enter a name for your Connection.
+Specify whether you'll use this Connection for sinking or ingesting data.
+Enter the S3 bucket name.
+Enter the AWS region where your bucket is located.
+Copy the displayed AWS IAM policy to your clipboard (you'll need this to set up permissions in AWS).
+Copy the displayed AWS IAM role trust policy for your Local environment, then enter the ARN of the role you create.
+Copy the displayed AWS IAM role trust policy for your Cloud environment, then enter the ARN of the role you create.
+The ARN values will be stored securely using
+tb secret
+, which lets you use different roles for each environment.
+You can also define the Connection manually:
+Tinybird CLI
+TypeScript SDK
+Python SDK
+connections/s3_sample.connection
+TYPE s3
+S3_REGION "<S3_REGION>"
+S3_ARN {{ tb_secret("S3_ARN") }}
+When creating your connection manually, you need to set up the required AWS IAM role with appropriate permissions. See the
+AWS permissions
+section for details on the required access policy and trust policy configurations.
+See
+Connection files
+for more details on how to create a connection file and manage secrets.
+You need to create separate connections for each environment you're working with, Local and Cloud.
+For example, you can create:
+my-s3-local
+for your Local environment
+my-s3-cloud
+for your Cloud environment
+2
+Create an S3 Data Source
+¶
+After creating the Connection, create a Data Source that uses it. For Tinybird CLI datafile projects,
+tb datasource create --s3
+is a useful helper for generating the
+.datasource
+file.
+tb datasource create --s3
+Define the Data Source schema as with any other Data Source, then attach the S3 Connection. The connection name or object must match the Connection you created in the previous step.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+datasources/s3_sample.datasource
+DESCRIPTION >
+    Analytics events landing data source
+
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `session_id` String `json:$.session_id`,
+    `action` LowCardinality(String) `json:$.action`,
+    `version` LowCardinality(String) `json:$.version`,
+    `payload` String `json:$.payload`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SORTING_KEY "timestamp"
+ENGINE_TTL "timestamp + toIntervalDay(60)"
+
+IMPORT_CONNECTION_NAME s3_sample
+IMPORT_BUCKET_URI s3://my-bucket/*.csv
+IMPORT_SCHEDULE @auto
+3
+Deploy
+¶
+After defining your S3 Data Source and Connection, test it by running a deploy check:
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb --cloud deploy --check
+This runs the Connection locally and checks if the Connection is valid. To see the Connection details, run
+tb --cloud connection ls
+.
+When ready, push the datafile to your Workspace using
+tb deploy
+to create the S3 Data Source:
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb --cloud deploy
+.connection settings
+¶
+The S3 connector uses the following settings in .connection files:
+Instruction
+Required
+Description
+S3_REGION
+Yes
+Region of the S3 bucket.
+S3_ARN
+Yes
+ARN of the IAM role with the required permissions.
+Once a Connection is used in a Data Source, you can't change the ARN account ID or region. To modify these values, you must:
+Remove the Connection from the Data Source.
+Deploy the changes.
+Add the Connection again with the new values.
+.datasource settings
+¶
+The S3 connector uses the following settings in .datasource files:
+Instruction
+Required
+Description
+IMPORT_SCHEDULE
+Yes
+Use
+@auto
+to ingest new files automatically, or
+@once
+to only execute manually. Note that in the
+--local
+environment, even if you set
+@auto
+, only the initial sync will be performed, loading all existing files, but the connector will not continue to automatically ingest new files afterwards.
+IMPORT_CONNECTION_NAME
+Yes
+Name given to the Connection inside Tinybird. For example,
+'my_connection'
+. This is the name of the connection file you created in the previous step.
+IMPORT_BUCKET_URI
+Yes
+Full bucket path, including the
+s3://
+protocol, bucket name, object path, and an optional pattern to match against object keys. For example,
+s3://my-bucket/my-path
+discovers all files in the bucket
+my-bucket
+under the prefix
+/my-path
+. You can use patterns in the path to filter objects, for example, ending the path with
+*.csv
+matches all objects that end with the
+.csv
+suffix.
+IMPORT_FROM_TIMESTAMP
+No
+Sets the date and time from which to start ingesting files on an S3 bucket. The format is
+YYYY-MM-DDTHH:MM:SSZ
+.
+The only supported change is updating
+IMPORT_SCHEDULE
+from
+@once
+to
+@auto
+, which makes the connector ingest all files that match the bucket URI pattern since the last on-demand ingestion.
+For any other parameter changes, you must:
+Remove the Connection from the Data Source.
+Deploy the changes.
+Add the Connection again with the new values.
+Deploy again.
+Sync your data
+¶
+In case you go with the
+@on-demand
+option for your
+IMPORT_SCHEDULE
+, you can always trigger a
+Sync now
+action at any time. To do this, run the
+tb datasource sync <datasource_name>
+command from the CLI. The command prompts for confirmation to sync the Data Source. Enter
+y
+to confirm. The Data Source will then sync data from its last synchronization point, preventing duplicates.
+Be careful when using
+IMPORT_SCHEDULE
+with
+@on-demand
+. If you trigger a
+Sync now
+action while simultaneously uploading a large file to S3, a race condition may cause data loss.
+When a file starts uploading, its
+creation_time
+is unset until the upload completes. If a sync
+runs during the upload, the file won't be processed. When the upload completes,
+creation_time
+is
+set to the time when the file started uploading, and thus future syncs won't process it as its
+creation_time
+is earlier than when the last sync ran.
+Import sample data
+¶
+In branches and Tinybird Local, you can import a sample of files from S3 using the API. This is useful for validating schemas and testing pipelines without syncing all files from the bucket.
+curl -X POST "https://<your_host>/v0/datasources/my_datasource/sample" \
+  -H "Authorization: Bearer $TB_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"max_files": 1}'
+The sample import starts an asynchronous job that imports up to
+max_files
+files (maximum 10). The response includes a
+job_id
+that you can use to track progress:
+curl "https://<your_host>/v0/jobs/{job_id}?token=$TB_TOKEN"
+The sample import runs as a separate job and doesn't affect production sync state or offsets.
+S3 file URI
+¶
+The S3 connector supports the following wildcard patterns:
+Single asterisk or
+*
+: matches zero or more characters within a single directory level, excluding
+/
+. It doesn't cross directory boundaries. For example,
+s3://bucket-name/*.ndjson
+matches all
+.ndjson
+files in the root of your bucket but doesn't match files in subdirectories.
+Double asterisk or
+**
+: matches zero or more characters across multiple directory levels, including
+/
+. It can cross directory boundaries recursively. For example:
+s3://bucket-name/**/*.ndjson
+matches all
+.ndjson
+files in the bucket, regardless of their directory depth.
+Use the full S3 file URI and wildcards to select multiple files. The file extension is required to accurately match the desired files in your pattern.
+Due to a limitation in Amazon S3 bucket notifications, only one S3 data source with
+IMPORT_SCHEDULE=@auto
+can be configured per unique bucket URI pattern.
+What counts as a collision?
+Two URI patterns collide if one pattern would match files that the other pattern could also match. This happens when patterns share overlapping prefixes or wildcards.
+Examples of collisions:
+s3://my-bucket/stock_*.csv
+collides with
+s3://my-bucket/stock_prices*.csv
+(first pattern would match files from the second)
+s3://my-bucket/**/*.csv
+collides with
+s3://my-bucket/transactions/*.csv
+(first pattern would match files from the second)
+s3://my-bucket/*.csv
+collides with
+s3://my-bucket/export_*.csv
+(first pattern would match files from the second)
+Examples that work (non-overlapping prefixes):
+s3://my-bucket/export_*.csv
+and
+s3://my-bucket/import_*.csv
+(different prefixes)
+s3://my-bucket/prod/*.csv
+and
+s3://my-bucket/staging/*.csv
+(different directories)
+s3://my-bucket/data/*.json
+and
+s3://my-bucket/data/*.csv
+(different file extensions)
+Examples
+¶
+The following are examples of patterns you can use and whether they'd match the example file path:
+File path
+S3 File URI
+Will match?
+example.ndjson
+s3://bucket-name/*.ndjson
+Yes. Matches files in the root directory with the
+.ndjson
+extension.
+example.ndjson.gz
+s3://bucket-name/**/*.ndjson.gz
+Yes. Recursively matches
+.ndjson.gz
+files anywhere in the bucket.
+example.ndjson
+s3://bucket-name/example.ndjson
+Yes. Exact match to the file path.
+pending/example.ndjson
+s3://bucket-name/*.ndjson
+No.
+*
+doesn't cross directory boundaries.
+pending/example.ndjson
+s3://bucket-name/**/*.ndjson
+Yes. Recursively matches
+.ndjson
+files in any subdirectory.
+pending/example.ndjson
+s3://bucket-name/pending/example.ndjson
+Yes. Exact match to the file path.
+pending/example.ndjson
+s3://bucket-name/pending/*.ndjson
+Yes. Matches
+.ndjson
+files within the
+pending
+directory.
+pending/example.ndjson
+s3://bucket-name/pending/**/*.ndjson
+Yes. Recursively matches
+.ndjson
+files within
+pending
+and all its subdirectories.
+pending/example.ndjson
+s3://bucket-name/**/pending/example.ndjson
+Yes. Matches the exact path to
+pending/example.ndjson
+within any preceding directories.
+pending/example.ndjson
+s3://bucket-name/other/example.ndjson
+No. Doesn't match because the path includes directories which aren't part of the file's actual path.
+pending/example.ndjson.gz
+s3://bucket-name/pending/*.csv.gz
+No. The file extension
+.ndjson.gz
+doesn't match
+.csv.gz
+pending/o/inner/example.ndjson
+s3://bucket-name/*.ndjson
+No.
+*
+doesn't cross directory boundaries.
+pending/o/inner/example.ndjson
+s3://bucket-name/**/*.ndjson
+Yes. Recursively matches
+.ndjson
+files anywhere in the bucket.
+pending/o/inner/example.ndjson
+s3://bucket-name/**/inner/example.ndjson
+Yes. Matches the exact path to
+inner/example.ndjson
+within any preceding directories.
+pending/o/inner/example.ndjson
+s3://bucket-name/**/ex*.ndjson
+Yes. Recursively matches
+.ndjson
+files starting with
+ex
+at any depth.
+pending/o/inner/example.ndjson
+s3://bucket-name/**/**/*.ndjson
+Yes. Matches
+.ndjson
+files at any depth, even with multiple
+**
+wildcards.
+pending/o/inner/example.ndjson
+s3://bucket-name/pending/**/*.ndjson
+Yes. Matches
+.ndjson
+files within
+pending
+and all its subdirectories.
+pending/o/inner/example.ndjson
+s3://bucket-name/inner/example.ndjson
+No. Doesn't match because the path includes directories which aren't part of the file's actual path.
+pending/o/inner/example.ndjson
+s3://bucket-name/pending/example.ndjson
+No. Doesn't match because the path includes directories which aren't part of the file's actual path.
+pending/o/inner/example.ndjson.gz
+s3://bucket-name/pending/*.ndjson.gz
+No.
+*
+doesn't cross directory boundaries.
+pending/o/inner/example.ndjson.gz
+s3://bucket-name/other/example.ndjson.gz
+No. Doesn't match because the path includes directories which aren't part of the file's actual path.
+Considerations
+¶
+When using patterns:
+Use specific directory names or even specific file URIs to limit the scope of your search. The more specific your pattern, the narrower the search.
+Combine wildcards: you can combine
+**
+with other patterns to match files in subdirectories selectively. For example,
+s3://bucket-name/**/logs/*.ndjson
+matches
+.ndjson
+files within any logs directory at any depth.
+Avoid unintended matches: be cautious with
+**
+as it can match many files, which might impact performance and return partial matches.
+Supported file types
+¶
+The S3 connector supports the following file types:
+File type
+Accepted extensions
+Compression formats supported
+CSV
+.csv
+,
+.csv.gz
+gzip
+NDJSON
+.ndjson
+,
+.ndjson.gz
+,
+.jsonl
+,
+.jsonl.gz
+,
+.json
+,
+.json.gz
+gzip
+Parquet
+.parquet
+,
+.parquet.gz
+snappy
+,
+gzip
+,
+lzo
+,
+brotli
+,
+lz4
+,
+zstd
+You can upload files with .json extension, provided they follow the Newline Delimited JSON (NDJSON) format. Each line must be a valid JSON object and every line has to end with a
+\n
+character.
+Parquet schemas use the same format as NDJSON schemas, using
+JSONPath
+syntax.
+Best practices
+¶
+Choose the right ingestion method based on your data volume and frequency requirements:
+Use S3 connector when:
+¶
+File size
+: Your files are 1 GB or larger (minimum recommended)
+Frequency
+: You have less frequent batch ingestion needs
+Format
+: You're working with CSV, Parquet, or NDJSON files stored in S3
+Use case
+: Historical data loads, periodic batch processing, or large dataset ingestion
+Use Events API or Kafka connector when:
+¶
+Frequency
+: You need high-frequency, real-time data ingestion
+Throughput
+: You're sending up to 100 requests per second
+File size
+: You're working with smaller, frequent data updates
+Use case
+: Real-time analytics, streaming data, or event-driven architectures
+The S3 connector uses Tinybird's
+ingestion API (
+/v0/datasources
+)
+, which isn't optimized for small, frequent inserts. For streaming use cases, consider:
+Events API
+: Direct HTTP ingestion for real-time events
+Kafka connector
+: For existing Kafka infrastructure
+Limits
+¶
+The following limits apply to the S3 Connector:
+When using the
+auto
+mode, Tinybird automatically detects new files uploaded to the bucket, upserts included.
+Tinybird ingests a maximum of 5 files per minute by default. This is a Workspace-level limit, so it's shared across all Data Sources. See
+Ingestion limits
+.
+The following limits apply to file size per type and plan:
+File type
+Free plan
+Developer, SaaS, and Enterprise plans
+CSV
+10 GB
+32 GB
+NDJSON
+10 GB
+32 GB
+Parquet
+1 GB
+5 GB
+Local environment details
+¶
+When using the S3 connector in Tinybird Local, you need to pass your local AWS credentials to the container. These credentials must have the
+permissions described in the AWS permissions section
+, including access to S3 operations like
+GetObject
+and
+ListBucket
+. This allows Tinybird Local to assume the IAM role you specify in your Connection.
+To pass your AWS credentials, use the
+--use-aws-creds
+flag when starting Tinybird Local:
+tb local start --use-aws-creds
+
+» Starting Tinybird Local...
+✓ AWS credentials found and will be passed to Tinybird Local (region: us-east-1)
+* Waiting for Tinybird Local to be ready...
+✓ Tinybird Local is ready!
+If you're using a specific AWS profile, specify it using the
+AWS_PROFILE
+environment variable:
+AWS_PROFILE=my-profile tb local start --use-aws-creds
+Docker Compose setup
+¶
+If you're running Tinybird Local via Docker Compose instead of the CLI, pass AWS credentials using environment variables in your
+docker-compose.yml
+:
+services:
+  tinybird-local:
+    image: tinybirdco/tinybird-local:latest
+    container_name: tinybird-local
+    platform: linux/amd64
+    ports:
+      - "7181:7181"
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}  # Optional, for temporary credentials
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} # Optional, add region if available
+    volumes:
+      - ./:/workspace
+      - tinybird-data:/var/lib/tinybird
+
+volumes:
+  tinybird-data:
+You can then start the container with your AWS credentials set as environment variables:
+# Export your credentials
+export AWS_ACCESS_KEY_ID="your-access-key-id"
+export AWS_SECRET_ACCESS_KEY="your-secret-access-key"
+export AWS_DEFAULT_REGION="us-east-1"
+
+# Start Docker Compose
+docker compose up -d
+Alternatively, if you're using named AWS profiles, use the AWS CLI to export credentials:
+# Export credentials from a named profile
+eval "$(aws configure export-credentials --profile my-profile --format env)"
+
+# Start Docker Compose
+docker compose up -d
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+S3 connector
+Environment considerations
+Cloud environment
+Local environment
+AWS permissions
+Set up the connector
+Create an S3 connection
+Create an S3 Data Source
+Deploy
+.connection settings
+.datasource settings
+Sync your data
+Import sample data
+S3 file URI
+Examples
+Considerations
+Supported file types
+Best practices
+Use S3 connector when:
+Use Events API or Kafka connector when:
+Limits
+Local environment details
+Docker Compose setup
+forward
+Ask AI

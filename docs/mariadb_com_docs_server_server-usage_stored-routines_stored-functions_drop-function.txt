@@ -1,0 +1,178 @@
+Source: https://mariadb.com/docs/server/server-usage/stored-routines/stored-functions/drop-function
+
+DROP FUNCTION | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Stored Procedures
+Stored Functions
+Stored Function Overview
+Stored Aggregate Functions
+Stored Routine Privileges
+DROP FUNCTION
+Stored Function Limitations
+Binary Logging of Stored Routines
+Stored Routine Limitations
+DBMS_OUTPUT
+Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+DROP FUNCTION
+The DROP FUNCTION statement removes a stored function from the database, deleting its definition and associated privileges.
+Syntax
+Copy
+DROP FUNCTION [IF EXISTS] f_name
+Description
+The
+DROP FUNCTION
+statement is used to drop a
+stored function
+or a user-defined function (UDF). That is, the specified routine is removed from the server, along with all privileges specific to the function. You must have the
+ALTER ROUTINE
+privilege
+for the routine in order to drop it. If the
+automatic_sp_privileges
+server system variable is set, both the
+ALTER ROUTINE
+and
+EXECUTE
+privileges are granted automatically to the routine creator - see
+Stored Routine Privileges
+.
+IF EXISTS
+The
+IF EXISTS
+clause is a MySQL/MariaDB extension. It prevents an error from occurring if the function does not exist. A
+NOTE
+is produced that can be viewed with
+SHOW WARNINGS
+.
+For dropping a
+user-defined functions
+(UDF), see
+DROP FUNCTION UDF
+.
+Examples
+Copy
+DROP
+FUNCTION
+hello;
+Query OK,
+0
+rows
+affected (
+0
+.
+042
+sec)
+DROP
+FUNCTION
+hello;
+ERROR
+1305
+(
+42000
+):
+FUNCTION
+test
+.
+hello
+does
+not
+exist
+DROP
+FUNCTION
+IF
+EXISTS
+hello;
+Query OK,
+0
+rows
+affected,
+1
+warning (
+0
+.
+000
+sec)
+SHOW WARNINGS;
++
+--
+-----+------+------------------------------------+
+|
+Level
+| Code |
+Message
+|
++
+--
+-----+------+------------------------------------+
+| Note  |
+1305
+|
+FUNCTION
+test
+.
+hello
+does
+not
+exist |
++
+--
+-----+------+------------------------------------+
+See Also
+DROP PROCEDURE
+Stored Function Overview
+CREATE FUNCTION
+CREATE FUNCTION UDF
+ALTER FUNCTION
+SHOW CREATE FUNCTION
+SHOW FUNCTION STATUS
+Stored Routine Privileges
+INFORMATION_SCHEMA ROUTINES Table
+This page is licensed: GPLv2, originally from
+fill_help_tables.sql
+spinner
+Previous
+Stored Routine Privileges
+Next
+Stored Function Limitations
+Last updated
+22 days ago
+Was this helpful?
+Syntax
+Description
+Examples
+See Also
+Was this helpful?

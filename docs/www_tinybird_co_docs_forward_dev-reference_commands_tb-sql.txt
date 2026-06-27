@@ -1,0 +1,82 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-sql
+
+tb sql · Tinybird Docs
+Sign In
+Sign Up
+tb sql
+¶
+Copy as MD
+Run SQL query over data sources and pipes. Global options apply to this command. See
+Global options
+.
+Options
+¶
+Option
+Description
+--rows_limit INTEGER
+Max number of rows retrieved.
+--pipeline TEXT
+The name of the pipe to run the SQL Query.
+--pipe TEXT
+The path to the .pipe file to run the SQL Query of a specific NODE.
+--node TEXT
+The NODE name.
+--stats / --no-stats
+Shows query stats.
+Examples
+¶
+The following example shows how to run a SELECT statement with count:
+tb sql "SELECT count(*) from tinybird.endpoint_errors"
+
+Running against Tinybird Local
+  count()  
+   UInt64  
+───────────
+        0
+The following example shows how to use the
+--rows_limit
+and
+--stats
+options:
+tb sql --rows_limit 5 --stats "SELECT start_datetime, duration, pipe_name from tinybird.pipe_stats_rt"
+
+Running against Tinybird Local
+** Query took 0.004044331 seconds
+** Rows read: 142
+** Bytes read: 10.12 KB
+  start_datetime            duration   pipe_name  
+  DateTime                   Float32   String     
+──────────────────────────────────────────────────
+  2025-03-12 16:07:16     0.05388069   query_api  
+──────────────────────────────────────────────────
+  2025-03-12 16:07:27   0.0040593147   query_api  
+──────────────────────────────────────────────────
+  2025-03-12 16:09:03    0.026257038   query_api  
+──────────────────────────────────────────────────
+  2025-03-12 16:15:27     0.03177452   query_api  
+──────────────────────────────────────────────────
+  2025-03-12 16:15:33    0.010550499   query_api
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✓ Yes (default)
+Runs SQL queries locally.
+--cloud
+✓ Yes
+Runs SQL queries in Tinybird Cloud.
+--branch=BRANCH_NAME
+✓ Yes
+Runs SQL queries in a branch.
+Updated
+6 months ago
+Looking for Classic docs?
+On this page
+tb sql
+Options
+Examples
+Environment support
+forward
+Ask AI

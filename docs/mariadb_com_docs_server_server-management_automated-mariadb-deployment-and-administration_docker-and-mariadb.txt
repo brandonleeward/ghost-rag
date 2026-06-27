@@ -1,0 +1,104 @@
+Source: https://mariadb.com/docs/server/server-management/automated-mariadb-deployment-and-administration/docker-and-mariadb
+
+MariaDB Containers | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+Starting & Stopping
+Automated Deployment & Administration
+Why to Automate MariaDB Deployments and Management
+Comparison Between Automation Systems
+Automating MariaDB Tasks with Events
+Automating Upgrades with MariaDB.Org Downloads REST API
+HashiCorp Vault and MariaDB
+Orchestrator Overview
+Ansible and MariaDB
+Puppet and MariaDB
+MariaDB Containers
+Adding Plugins to the MariaDB Docker Official Image
+Benefits of Managing MariaDB Containers with Orchestration Software
+Container Backup and Restoration
+Container Security
+Creating a Custom Container Image
+Deploy MariaDB Enterprise Server with Docker
+MariaDB Enterprise Docker Registry for MariaDB Enterprise Server
+Docker and AWS EC2
+Docker and Google Cloud
+Docker and Microsoft Azure
+Docker Official Image Frequently Asked Questions
+Installing and Using MariaDB via Docker
+MariaDB Container Cheat Sheet
+MariaDB Enterprise Server Docker Official Image Environment Variables
+Setting Up a LAMP Stack with Docker Compose
+Using Healthcheck
+MariaDB Enterprise Container Image Configuration Reference
+Kubernetes and MariaDB
+Vagrant and MariaDB
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+MariaDB Containers
+Discusses running MariaDB in Docker containers, covering the benefits of isolation and ease of deployment for development and testing environments.
+Containers are an OCI standard format for software images and their specified time all bundled up into a single distributable time. They can be used for production, development or testing.
+Docker Inc. run a
+Docker Official Images
+program to provide users with an essential base implementation of MariaDB in a container and to exemplify best practices of a container.
+The containers are
+available on Docker Hub
+as
+docker.io/library/mariadb
+though many container runtime implementation will fill in the
+docker.io/library
+where the host/path isn't specified.
+The containers are in a Open Container Initiative format that allows the containers to be interoperable with a number of container runtime implementations. Docker, or more fully Docker Engine, is just one of the many available runtimes.
+Many people use MariaDB Docker Official Image containers in CI systems like GitHub Actions, though its possible to use these in production environments like kubernetes.
+The MariaDB Server container images are available with a number of tags:
+A full version, like 10.11.5
+A major version like 10.11
+The most recent stable GA version - latest
+The most recent stable LTS version - lts
+Versions that aren't stable will be suffixed with
+-rc
+, or
+-alpha
+to clearly show their release status, and enables
+Renovatebot
+and other that follow
+semantic versioning
+to follow updates.
+For a consistent application between testing an production environment using the SHA hash of the image is recommended like
+docker.io/library/mariadb@sha256:29fe5062baf36bae8ec68f21a3dce4f0372dadc185e687624f1252fc49d91c67
+. There is a list of mapping and history of tags to SHA hash on the
+Docker Library repository
+.
+Previous
+Bolt Examples
+Next
+Adding Plugins to the MariaDB Docker Official Image
+Last updated
+5 months ago
+Was this helpful?
+Was this helpful?

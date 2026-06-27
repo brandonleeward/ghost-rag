@@ -1,0 +1,2720 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/string-functions
+
+String Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Functions for Working with Strings
+¶
+Copy as MD
+Functions for
+searching
+in strings and for
+replacing
+in strings are described separately.
+empty
+¶
+Determines if a string is empty. A string is considered non-empty if it contains at least one byte, including spaces or null bytes. This function also works for arrays and UUIDs.
+Syntax
+¶
+empty(x)
+Arguments
+¶
+x
+: The input value to check.
+String
+.
+Returns
+¶
+1
+if the string is empty,
+0
+otherwise.
+UInt8
+.
+Example
+¶
+SELECT empty('')
+Result:
+┌─empty('')─┐
+│         1 │
+└───────────┘
+notEmpty
+¶
+Determines if a string is not empty. A string is considered non-empty if it contains at least one byte, including spaces or null bytes. This function also works for arrays and UUIDs.
+Syntax
+¶
+notEmpty(x)
+Arguments
+¶
+x
+: The input value to check.
+String
+.
+Returns
+¶
+1
+if the string is not empty,
+0
+otherwise.
+UInt8
+.
+Example
+¶
+SELECT notEmpty('text')
+Result:
+┌─notEmpty('text')─┐
+│                1 │
+└──────────────────┘
+length
+¶
+Calculates the length of a string in bytes. This function does not count characters or Unicode code points. It can also be used with arrays.
+Alias:
+OCTET_LENGTH
+Syntax
+¶
+length(s)
+Arguments
+¶
+s
+: The input string or array.
+String
+/
+Array
+.
+Returns
+¶
+The length of the string or array
+s
+in bytes.
+UInt64
+.
+Example
+¶
+SELECT length('Hello, world!')
+Result:
+┌─length('Hello, world!')─┐
+│                      13 │
+└─────────────────────────┘
+SELECT length([1, 2, 3, 4])
+Result:
+┌─length([1, 2, 3, 4])─┐
+│                    4 │
+└──────────────────────┘
+lengthUTF8
+¶
+Calculates the length of a string in Unicode code points, assuming the string is valid UTF-8 encoded text. If the string is not valid UTF-8, the result is undefined.
+Aliases:
+CHAR_LENGTH
+CHARACTER_LENGTH
+Syntax
+¶
+lengthUTF8(s)
+Arguments
+¶
+s
+: The input string, expected to be valid UTF-8.
+String
+.
+Returns
+¶
+The length of the string
+s
+in Unicode code points.
+UInt64
+.
+Example
+¶
+SELECT lengthUTF8('Здравствуй, мир!')
+Result:
+┌─lengthUTF8('Здравствуй, мир!')─┐
+│                             16 │
+└────────────────────────────────┘
+left
+¶
+Extracts a substring from the beginning of a string, based on a specified byte offset.
+Syntax
+¶
+left(s, offset)
+Arguments
+¶
+s
+: The source string.
+String
+or
+FixedString
+.
+offset
+: The number of bytes to extract from the left. A negative value extracts
+length(s) - |offset|
+bytes.
+(U)Int*
+.
+Returns
+¶
+A substring of
+s
+.
+String
+.
+Example
+¶
+SELECT left('Hello', 3)
+Result:
+Hel
+SELECT left('Hello', -3)
+Result:
+He
+leftUTF8
+¶
+Extracts a substring from the beginning of a UTF-8 encoded string, based on a specified Unicode code point offset.
+Syntax
+¶
+leftUTF8(s, offset)
+Arguments
+¶
+s
+: The source UTF-8 encoded string.
+String
+or
+FixedString
+.
+offset
+: The number of Unicode code points to extract from the left. A negative value extracts
+length(s) - |offset|
+code points.
+(U)Int*
+.
+Returns
+¶
+A substring of
+s
+.
+String
+.
+Example
+¶
+SELECT leftUTF8('Привет', 4)
+Result:
+Прив
+SELECT leftUTF8('Привет', -4)
+Result:
+Пр
+leftPad
+¶
+Adds padding characters to the left side of a string until it reaches a specified total length. If the string is already longer than the target length, it will be truncated.
+Alias:
+LPAD
+Syntax
+¶
+leftPad(string, length[, pad_string])
+Arguments
+¶
+string
+: The input string to pad.
+String
+.
+length
+: The desired total length of the resulting string. If
+length
+is less than the input string's length, the input string is truncated.
+UInt or Int
+.
+pad_string
+: The character(s) to use for padding. Optional. Defaults to a space character if not specified.
+String
+.
+Returns
+¶
+The left-padded string.
+String
+.
+Example
+¶
+SELECT leftPad('abc', 7, '*'), leftPad('def', 7)
+Result:
+┌─leftPad('abc', 7, '*')─┬─leftPad('def', 7)─┐
+│ ****abc                │     def           │
+└────────────────────────┴───────────────────┘
+leftPadUTF8
+¶
+Adds padding characters to the left side of a UTF-8 string until it reaches a specified total length, counting length in Unicode code points. If the string is already longer than the target length, it will be truncated.
+Syntax
+¶
+leftPadUTF8(string, length[, pad_string])
+Arguments
+¶
+string
+: The input string to pad.
+String
+.
+length
+: The desired total length of the resulting string in Unicode code points. If
+length
+is less than the input string's length, the input string is truncated.
+UInt or Int
+.
+pad_string
+: The character(s) to use for padding. Optional. Defaults to a space character if not specified.
+String
+.
+Returns
+¶
+The left-padded string.
+String
+.
+Example
+¶
+SELECT leftPadUTF8('абвг', 7, '*'), leftPadUTF8('дежз', 7)
+Result:
+┌─leftPadUTF8('абвг', 7, '*')─┬─leftPadUTF8('дежз', 7)─┐
+│ ***абвг                     │    дежз                │
+└─────────────────────────────┴────────────────────────┘
+right
+¶
+Extracts a substring from the end of a string, based on a specified byte offset.
+Syntax
+¶
+right(s, offset)
+Arguments
+¶
+s
+: The source string.
+String
+or
+FixedString
+.
+offset
+: The number of bytes to extract from the right. A negative value extracts
+length(s) - |offset|
+bytes.
+(U)Int*
+.
+Returns
+¶
+A substring of
+s
+.
+String
+.
+Example
+¶
+SELECT right('Hello', 3)
+Result:
+llo
+SELECT right('Hello', -3)
+Result:
+lo
+rightUTF8
+¶
+Extracts a substring from the end of a UTF-8 encoded string, based on a specified Unicode code point offset.
+Syntax
+¶
+rightUTF8(s, offset)
+Arguments
+¶
+s
+: The source UTF-8 encoded string.
+String
+or
+FixedString
+.
+offset
+: The number of Unicode code points to extract from the right. A negative value extracts
+length(s) - |offset|
+code points.
+(U)Int*
+.
+Returns
+¶
+A substring of
+s
+.
+String
+.
+Example
+¶
+SELECT rightUTF8('Привет', 4)
+Result:
+ивет
+SELECT rightUTF8('Привет', -4)
+Result:
+ет
+rightPad
+¶
+Adds padding characters to the right side of a string until it reaches a specified total length. If the string is already longer than the target length, it will be truncated.
+Alias:
+RPAD
+Syntax
+¶
+rightPad(string, length[, pad_string])
+Arguments
+¶
+string
+: The input string to pad.
+String
+.
+length
+: The desired total length of the resulting string. If
+length
+is less than the input string's length, the input string is truncated.
+UInt or Int
+.
+pad_string
+: The character(s) to use for padding. Optional. Defaults to a space character if not specified.
+String
+.
+Returns
+¶
+The right-padded string.
+String
+.
+Example
+¶
+SELECT rightPad('abc', 7, '*'), rightPad('abc', 7)
+Result:
+┌─rightPad('abc', 7, '*')─┬─rightPad('abc', 7)─┐
+│ abc****                 │ abc                │
+└─────────────────────────┴────────────────────┘
+rightPadUTF8
+¶
+Adds padding characters to the right side of a UTF-8 string until it reaches a specified total length, counting length in Unicode code points. If the string is already longer than the target length, it will be truncated.
+Syntax
+¶
+rightPadUTF8(string, length[, pad_string])
+Arguments
+¶
+string
+: The input string to pad.
+String
+.
+length
+: The desired total length of the resulting string in Unicode code points. If
+length
+is less than the input string's length, the input string is truncated.
+UInt or Int
+.
+pad_string
+: The character(s) to use for padding. Optional. Defaults to a space character if not specified.
+String
+.
+Returns
+¶
+The right-padded string.
+String
+.
+Example
+¶
+SELECT rightPadUTF8('абвг', 7, '*'), rightPadUTF8('абвг', 7)
+Result:
+┌─rightPadUTF8('абвг', 7, '*')─┬─rightPadUTF8('абвг', 7)─┐
+│ абвг***                      │ абвг                    │
+└──────────────────────────────┴─────────────────────────┘
+compareSubstrings
+¶
+Compares two substrings lexicographically, starting from specified offsets and comparing a given number of bytes.
+Syntax
+¶
+compareSubstrings(string1, string2, string1_offset, string2_offset, num_bytes)
+Arguments
+¶
+string1
+: The first string for comparison.
+String
+.
+string2
+: The second string for comparison.
+String
+.
+string1_offset
+: The zero-based starting position in
+string1
+.
+UInt*
+.
+string2_offset
+: The zero-based starting position in
+string2
+.
+UInt*
+.
+num_bytes
+: The maximum number of bytes to compare. If the specified range exceeds a string's length,
+num_bytes
+is adjusted.
+UInt*
+.
+Returns
+¶
+-1
+: If the substring from
+string1
+is lexicographically less than the substring from
+string2
+.
+0
+: If the substrings are lexicographically equal.
+1
+: If the substring from
+string1
+is lexicographically greater than the substring from
+string2
+.
+Example
+¶
+SELECT compareSubstrings('Saxony', 'Anglo-Saxon', 0, 6, 5) AS result
+Result:
+┌─result─┐
+│      0 │
+└────────┘
+lower
+¶
+Converts all ASCII Latin characters in a string to their lowercase equivalents.
+Alias:
+lcase
+Syntax
+¶
+lower(input)
+Arguments
+¶
+input
+: The string to convert.
+String
+.
+Returns
+¶
+The input string with ASCII Latin characters converted to lowercase.
+String
+.
+Example
+¶
+SELECT lower('TINYBIRD')
+Result:
+┌─lower('TINYBIRD')─┐
+│ tinybird           │
+└───────────────────┘
+upper
+¶
+Converts all ASCII Latin characters in a string to their uppercase equivalents.
+Alias:
+ucase
+Syntax
+¶
+upper(input)
+Arguments
+¶
+input
+: The string to convert.
+String
+.
+Returns
+¶
+The input string with ASCII Latin characters converted to uppercase.
+String
+.
+Example
+¶
+SELECT upper('tinybird')
+Result:
+┌─upper('tinybird')─┐
+│ TINYBIRD           │
+└────────────────────┘
+lowerUTF8
+¶
+Converts a string to lowercase, assuming it contains valid UTF-8 encoded text. If the UTF-8 encoding is invalid, the result is undefined.
+This function does not perform language-specific casing rules (e.g., for Turkish 'i' vs. 'İ'). If the byte length of a character changes between its uppercase and lowercase forms (e.g., German 'ẞ' to 'ß'), the result for that character might be incorrect.
+Syntax
+¶
+lowerUTF8(input)
+Arguments
+¶
+input
+: The UTF-8 encoded string to convert.
+String
+.
+Returns
+¶
+The input string with Unicode characters converted to lowercase.
+String
+.
+Example
+¶
+SELECT lowerUTF8('MÜNCHEN') as Lowerutf8
+Result:
+┌─Lowerutf8─┐
+│ münchen   │
+└───────────┘
+upperUTF8
+¶
+Converts a string to uppercase, assuming it contains valid UTF-8 encoded text. If the UTF-8 encoding is invalid, the result is undefined.
+This function does not perform language-specific casing rules (e.g., for Turkish 'i' vs. 'İ'). If the byte length of a character changes between its uppercase and lowercase forms (e.g., German 'ẞ' to 'ß'), the result for that character might be incorrect.
+Syntax
+¶
+upperUTF8(input)
+Arguments
+¶
+input
+: The UTF-8 encoded string to convert.
+String
+.
+Returns
+¶
+The input string with Unicode characters converted to uppercase.
+String
+.
+Example
+¶
+SELECT upperUTF8('München') as Upperutf8
+Result:
+┌─Upperutf8─┐
+│ MÜNCHEN   │
+└───────────┘
+isValidUTF8
+¶
+Checks if a byte sequence represents valid UTF-8 encoded text.
+Syntax
+¶
+isValidUTF8(input)
+Arguments
+¶
+input
+: The string to validate.
+String
+.
+Returns
+¶
+1
+if the string is valid UTF-8,
+0
+otherwise.
+UInt8
+.
+Example
+¶
+SELECT isValidUTF8('\xc3\xb1') AS valid, isValidUTF8('\xc3\x28') AS invalid
+Result:
+┌─valid─┬─invalid─┐
+│     1 │       0 │
+└───────┴─────────┘
+toValidUTF8
+¶
+Replaces any invalid UTF-8 sequences in a string with the Unicode replacement character `` (U+FFFD). Multiple consecutive invalid characters are collapsed into a single replacement character.
+Syntax
+¶
+toValidUTF8(input_string)
+Arguments
+¶
+input_string
+: The string containing potentially invalid UTF-8 bytes.
+String
+.
+Returns
+¶
+A string with all invalid UTF-8 sequences replaced.
+String
+.
+Example
+¶
+SELECT toValidUTF8('\x61\xF0\x80\x80\x80b')
+Result:
+┌─toValidUTF8('ab')─┐
+│ ab                   │
+└───────────────────────┘
+repeat
+¶
+Generates a new string by concatenating an input string with itself a specified number of times.
+Alias:
+REPEAT
+Syntax
+¶
+repeat(s, n)
+Arguments
+¶
+s
+: The string to repeat.
+String
+.
+n
+: The number of times to repeat the string. If
+n
+is less than or equal to 0, an empty string is returned.
+UInt* or Int*
+.
+Returns
+¶
+A new string consisting of
+s
+repeated
+n
+times.
+String
+.
+Example
+¶
+SELECT repeat('abc', 10)
+Result:
+┌─repeat('abc', 10)──────────────┐
+│ abcabcabcabcabcabcabcabcabcabc │
+└────────────────────────────────┘
+space
+¶
+Generates a string consisting of a specified number of space characters.
+Alias:
+SPACE
+.
+Syntax
+¶
+space(n)
+Arguments
+¶
+n
+: The number of space characters to include in the resulting string. If
+n
+is less than or equal to 0, an empty string is returned.
+UInt* or Int*
+.
+Returns
+¶
+A string containing
+n
+space characters.
+String
+.
+Example
+¶
+SELECT space(3)
+Result:
+┌─space(3) ────┐
+│              │
+└──────────────┘
+reverse
+¶
+Reverses the order of bytes within a string.
+Syntax
+¶
+reverse(s)
+Arguments
+¶
+s
+: The input string.
+String
+.
+Returns
+¶
+The string
+s
+with its bytes in reverse order.
+String
+.
+Example
+¶
+SELECT reverse('hello')
+Result:
+┌─reverse('hello')─┐
+│ olleh            │
+└──────────────────┘
+reverseUTF8
+¶
+Reverses the order of Unicode code points within a string, assuming the string is valid UTF-8 encoded text. If the UTF-8 encoding is invalid, the result is undefined.
+Syntax
+¶
+reverseUTF8(s)
+Arguments
+¶
+s
+: The input UTF-8 encoded string.
+String
+.
+Returns
+¶
+The string
+s
+with its Unicode code points in reverse order.
+String
+.
+Example
+¶
+SELECT reverseUTF8('Привет')
+Result:
+┌─reverseUTF8('Привет')─┐
+│ тевирП                │
+└───────────────────────┘
+concat
+¶
+Combines multiple input values into a single string. Non-string arguments are converted to strings using their default serialization.
+Syntax
+¶
+concat(s1, s2, ...)
+Arguments
+¶
+s1, s2, ...
+: Any number of values of arbitrary types. For optimal performance, use
+String
+or
+FixedString
+types.
+Returns
+¶
+A single string formed by joining all arguments. If any argument is
+NULL
+, the function returns
+NULL
+.
+String
+.
+Example
+¶
+SELECT concat('Hello, ', 'World!')
+Result:
+┌─concat('Hello, ', 'World!')─┐
+│ Hello, World!               │
+└─────────────────────────────┘
+SELECT concat(42, 144)
+Result:
+┌─concat(42, 144)─┐
+│ 42144           │
+└─────────────────┘
+The
+||
+operator can be used as a concise alternative to
+concat()
+for string concatenation. For example,
+'Hello, ' || 'World!'
+is equivalent to
+concat('Hello, ', 'World!')
+.
+concatAssumeInjective
+¶
+Concatenates arguments like
+concat()
+, but includes an assumption that the concatenation operation is injective. This means different input combinations will always produce different results, which can enable query optimizations, especially for
+GROUP BY
+clauses.
+Syntax
+¶
+concatAssumeInjective(s1, s2, ...)
+Arguments
+¶
+s1, s2, ...
+: Values of type
+String
+or
+FixedString
+.
+Returns
+¶
+A single string formed by joining all arguments. If any argument is
+NULL
+, the function returns
+NULL
+.
+String
+.
+Example
+¶
+Input table:
+key_val.datasource
+SCHEMA >
+    key1 String,
+    key2 String,
+    value UInt32
+
+ENGINE "MergeTree"
+tb push datasources/key_val.datasource
+
+echo "\
+'Hello, ','World',1\n\
+'Hello, ','World',2\n\
+'Hello, ','World!',3\n\
+'Hello',', World!',2\
+" > key_val.csv
+
+tb datasource append key_val key_val.csv
+
+tb sql "select * from key_val"
+------------------------------
+| key1    | key2     | value |
+------------------------------
+| Hello   | , World! |     2 |
+| Hello,  | World    |     1 |
+| Hello,  | World    |     2 |
+| Hello,  | World!   |     3 |
+------------------------------
+Query:
+SELECT concatAssumeInjective(key1, key2), sum(value) FROM key_val GROUP BY concatAssumeInjective(key1, key2)
+Result:
+--------------------------------------------------
+| concatAssumeInjective(key1, key2) | sum(value) |
+--------------------------------------------------
+| Hello, World!                     |          3 |
+| Hello, World!                     |          2 |
+| Hello, World                      |          3 |
+--------------------------------------------------
+concatWithSeparator
+¶
+Combines multiple input values into a single string, inserting a specified separator between each value. Non-string arguments are converted to strings using their default serialization.
+Alias:
+concat_ws
+Syntax
+¶
+concatWithSeparator(sep, expr1, expr2, expr3...)
+Arguments
+¶
+sep
+: The separator string to insert between concatenated expressions.
+String
+or
+FixedString
+.
+exprN
+: The expressions to concatenate. For optimal performance, use
+String
+or
+FixedString
+types.
+Returns
+¶
+A single string formed by joining all expressions with the separator. If any argument is
+NULL
+, the function returns
+NULL
+.
+String
+.
+Example
+¶
+SELECT concatWithSeparator('a', '1', '2', '3', '4')
+Result:
+┌─concatWithSeparator('a', '1', '2', '3', '4')─┐
+│ 1a2a3a4                                      │
+└──────────────────────────────────────────────┘
+concatWithSeparatorAssumeInjective
+¶
+Concatenates arguments with a separator like
+concatWithSeparator()
+, but includes an assumption that the operation is injective. This means different input combinations will always produce different results, which can enable query optimizations, especially for
+GROUP BY
+clauses.
+Syntax
+¶
+concatWithSeparatorAssumeInjective(sep, expr1, expr2, expr3...)
+Arguments
+¶
+sep
+: The separator string to insert between concatenated expressions.
+String
+or
+FixedString
+.
+exprN
+: The expressions to concatenate.
+String
+or
+FixedString
+.
+Returns
+¶
+A single string formed by joining all expressions with the separator. If any argument is
+NULL
+, the function returns
+NULL
+.
+String
+.
+Example
+¶
+SELECT concatWithSeparatorAssumeInjective('-', 'apple', 'banana', 'cherry')
+Result:
+┌─concatWithSeparatorAssumeInjective('-', 'apple', 'banana', 'cherry')─┐
+│ apple-banana-cherry                                                  │
+└──────────────────────────────────────────────────────────────────────┘
+substring
+¶
+Extracts a portion of a string based on a starting byte index and an optional length. Byte indexing starts from 1.
+Aliases:
+substr
+mid
+byteSlice
+Syntax
+¶
+substring(s, offset[, length])
+Arguments
+¶
+s
+: The source string.
+String
+,
+FixedString
+or
+Enum
+.
+offset
+: The 1-based starting byte position of the substring. A negative
+offset
+counts from the end of the string. If
+offset
+is 0, an empty string is returned.
+(U)Int*
+.
+length
+: The maximum number of bytes to include in the substring. Optional.
+(U)Int*
+.
+Returns
+¶
+The extracted substring.
+String
+.
+Example
+¶
+SELECT 'database' AS db, substring(db, 5), substring(db, 5, 1)
+Result:
+┌─db───────┬─substring('database', 5)─┬─substring('database', 5, 1)─┐
+│ database │ base                     │ b                           │
+└──────────┴──────────────────────────┴─────────────────────────────┘
+substringUTF8
+¶
+Extracts a portion of a UTF-8 encoded string based on a starting Unicode code point index and an optional length. Code point indexing starts from 1. If the string is not valid UTF-8, the result is undefined.
+Syntax
+¶
+substringUTF8(s, offset[, length])
+Arguments
+¶
+s
+: The source UTF-8 encoded string.
+String
+,
+FixedString
+or
+Enum
+.
+offset
+: The 1-based starting Unicode code point position of the substring. A negative
+offset
+counts from the end of the string. If
+offset
+is 0, an empty string is returned.
+(U)Int*
+.
+length
+: The maximum number of Unicode code points to include in the substring. Optional.
+(U)Int*
+.
+Returns
+¶
+The extracted substring.
+String
+.
+Example
+¶
+SELECT 'Täglich grüßt das Murmeltier.' AS str,
+       substringUTF8(str, 9),
+       substringUTF8(str, 9, 5)
+Result:
+Täglich grüßt das Murmeltier.	grüßt das Murmeltier.	grüßt
+substringIndex
+¶
+Extracts a substring from the beginning of a string up to a specified occurrence of a delimiter. The direction of counting (from left or right) depends on the
+count
+argument.
+Alias:
+SUBSTRING_INDEX
+Syntax
+¶
+substringIndex(s, delim, count)
+Arguments
+¶
+s
+: The string from which to extract the substring.
+String
+.
+delim
+: The delimiter character(s).
+String
+.
+count
+: The number of delimiter occurrences to count. If positive, it counts from the left. If negative, it counts from the right.
+(U)Int or Int
+.
+Returns
+¶
+The extracted substring.
+String
+.
+Example
+¶
+SELECT substringIndex('www.tinybird.co', '.', 2)
+Result:
+┌─substringIndex('www.tinybird.co', '.', 2)─┐
+│ www.tinybird                              │
+└───────────────────────────────────────────┘
+substringIndexUTF8
+¶
+Extracts a substring from the beginning of a UTF-8 encoded string up to a specified occurrence of a delimiter, counting in Unicode code points. The direction of counting depends on the
+count
+argument. If the string is not valid UTF-8, the result is undefined.
+Syntax
+¶
+substringIndexUTF8(s, delim, count)
+Arguments
+¶
+s
+: The UTF-8 encoded string from which to extract the substring.
+String
+.
+delim
+: The delimiter character(s).
+String
+.
+count
+: The number of delimiter occurrences to count. If positive, it counts from the left. If negative, it counts from the right.
+(U)Int or Int
+.
+Returns
+¶
+The extracted substring.
+String
+.
+Example
+¶
+SELECT substringIndexUTF8('www.straßen-in-europa.de', '.', 2)
+Result:
+www.straßen-in-europa
+appendTrailingCharIfAbsent
+¶
+Appends a specified character to a string if the string is not empty and does not already end with that character.
+Syntax
+¶
+appendTrailingCharIfAbsent(s, c)
+Arguments
+¶
+s
+: The input string.
+String
+.
+c
+: The character to append.
+String
+.
+Returns
+¶
+The modified string with the character appended if necessary.
+String
+.
+Example
+¶
+SELECT appendTrailingCharIfAbsent('hello', '/')
+Result:
+┌─appendTrailingCharIfAbsent('hello', '/')─┐
+│ hello/                                   │
+└──────────────────────────────────────────┘
+convertCharset
+¶
+Converts a string from one character encoding to another.
+Syntax
+¶
+convertCharset(s, from, to)
+Arguments
+¶
+s
+: The input string to convert.
+String
+.
+from
+: The name of the source character encoding.
+String
+.
+to
+: The name of the target character encoding.
+String
+.
+Returns
+¶
+The converted string in the target encoding.
+String
+.
+Example
+¶
+SELECT convertCharset('hello', 'UTF-8', 'UTF-8')
+Result:
+┌─convertCharset('hello', 'UTF-8', 'UTF-8')─┐
+│ hello                                     │
+└───────────────────────────────────────────┘
+base58Encode
+¶
+Encodes a string using the Base58 encoding scheme, specifically with the "Bitcoin" alphabet.
+Syntax
+¶
+base58Encode(plaintext)
+Arguments
+¶
+plaintext
+: The string to encode.
+String
+.
+Returns
+¶
+A string containing the Base58 encoded value.
+String
+or
+FixedString
+.
+Example
+¶
+SELECT base58Encode('Encoded')
+Result:
+┌─base58Encode('Encoded')─┐
+│ 3dc8KtHrwM              │
+└─────────────────────────┘
+base58Decode
+¶
+Decodes a Base58 encoded string using the "Bitcoin" alphabet. An exception is thrown if the input is not a valid Base58 string.
+Syntax
+¶
+base58Decode(encoded)
+Arguments
+¶
+encoded
+: The Base58 encoded string to decode.
+String
+or
+FixedString
+.
+Returns
+¶
+A string containing the decoded value.
+String
+.
+Example
+¶
+SELECT base58Decode('3dc8KtHrwM')
+Result:
+┌─base58Decode('3dc8KtHrwM')─┐
+│ Encoded                    │
+└────────────────────────────┘
+tryBase58Decode
+¶
+Decodes a Base58 encoded string. If the input is not a valid Base58 string, it returns an empty string instead of throwing an exception.
+Syntax
+¶
+tryBase58Decode(encoded)
+Arguments
+¶
+encoded
+: The Base58 encoded string to decode.
+String
+or
+FixedString
+.
+Returns
+¶
+A string containing the decoded value, or an empty string if decoding fails.
+String
+.
+Example
+¶
+SELECT tryBase58Decode('3dc8KtHrwM') as res, tryBase58Decode('invalid') as res_invalid
+Result:
+┌─res─────┬─res_invalid─┐
+│ Encoded │             │
+└─────────┴─────────────┘
+base64Encode
+¶
+Encodes a string using the Base64 encoding scheme, as defined by
+RFC 4648
+.
+Alias:
+TO_BASE64
+.
+Syntax
+¶
+base64Encode(plaintext)
+Arguments
+¶
+plaintext
+: The string to encode.
+String
+.
+Returns
+¶
+A string containing the Base64 encoded value.
+String
+.
+Example
+¶
+SELECT base64Encode('tinybird')
+Result:
+┌─base64Encode('tinybird')--─┐
+│ dGlueWJpcmQ=               │
+└────────────────────────────┘
+base64URLEncode
+¶
+Encodes a URL string using a Base64 variant with URL-specific modifications, as defined by
+RFC 4648
+.
+Syntax
+¶
+base64URLEncode(url)
+Arguments
+¶
+url
+: The URL string to encode.
+String
+.
+Returns
+¶
+A string containing the URL-safe Base64 encoded value.
+String
+.
+Example
+¶
+SELECT base64URLEncode('https://tinybird.com')
+Result:
+┌─base64URLEncode('https://tinybird.com')--─┐
+│ aHR0cHM6Ly90aW55YmlyZC5jb20               │
+└───────────────────────────────────────────┘
+base64Decode
+¶
+Decodes a Base64 encoded string according to
+RFC 4648
+. Throws an exception if the input is not a valid Base64 string.
+Alias:
+FROM_BASE64
+.
+Syntax
+¶
+base64Decode(encoded)
+Arguments
+¶
+encoded
+: The Base64 encoded string to decode.
+String
+.
+Returns
+¶
+A string containing the decoded value.
+String
+.
+Example
+¶
+SELECT base64Decode('dGlueWJpcmQ=')
+Result:
+┌─base64Decode('dGlueWJpcmQ=')─┐
+│ tinybird                     │
+└──────────────────────────────┘
+base64URLDecode
+¶
+Decodes a URL-safe Base64 encoded string, applying URL-specific modifications as defined by
+RFC 4648
+. Throws an exception if the input is not a valid URL-safe Base64 string.
+Syntax
+¶
+base64URLDecode(encodedUrl)
+Arguments
+¶
+encodedURL
+: The URL-safe Base64 encoded string to decode.
+String
+.
+Returns
+¶
+A string containing the decoded URL value.
+String
+.
+Example
+¶
+SELECT base64URLDecode('aHR0cHM6Ly90aW55YmlyZC5jb20')
+Result:
+┌─base64URLDecode('aHR0cHM6Ly90aW55YmlyZC5jb20')─┐
+│ https://tinybird.com                          │
+└───────────────────────────────────────────────┘
+tryBase64Decode
+¶
+Decodes a Base64 encoded string. If the input is not a valid Base64 string, it returns an empty string instead of throwing an exception.
+Syntax
+¶
+tryBase64Decode(encoded)
+Arguments
+¶
+encoded
+: The Base64 encoded string to decode.
+String
+.
+Returns
+¶
+A string containing the decoded value, or an empty string if decoding fails.
+String
+.
+Example
+¶
+SELECT tryBase64Decode('dGlueWJpcmQ=') as res, tryBase64Decode('invalid') as res_invalid
+Result:
+┌─res────────┬─res_invalid─┐
+│ tinybird   │             │
+└────────────┴─────────────┘
+tryBase64URLDecode
+¶
+Decodes a URL-safe Base64 encoded string. If the input is not a valid URL-safe Base64 string, it returns an empty string instead of throwing an exception.
+Syntax
+¶
+tryBase64URLDecode(encodedUrl)
+Arguments
+¶
+encodedURL
+: The URL-safe Base64 encoded string to decode.
+String
+.
+Returns
+¶
+A string containing the decoded URL value, or an empty string if decoding fails.
+String
+.
+Example
+¶
+SELECT tryBase64URLDecode('aHR0cHM6Ly90aW55YmlyZC5jb20') as res, tryBase64URLDecode('aHR0cHM6Ly9jbGlja') as res_invalid
+Result:
+┌─res────────────────────┬─res_invalid─┐
+│ https://tinybird.com   │             │
+└────────────────────────┴─────────────┘
+endsWith
+¶
+Checks if a string ends with a specified suffix.
+Syntax
+¶
+endsWith(str, suffix)
+Arguments
+¶
+str
+: The string to check.
+String
+.
+suffix
+: The suffix to look for.
+String
+.
+Returns
+¶
+1
+if
+str
+ends with
+suffix
+,
+0
+otherwise.
+UInt8
+.
+Example
+¶
+SELECT endsWith('hello world', 'world')
+Result:
+┌─endsWith('hello world', 'world')─┐
+│                                1 │
+└──────────────────────────────────┘
+endsWithUTF8
+¶
+Checks if a UTF-8 encoded string ends with a specified suffix, performing the comparison based on Unicode characters rather than bytes.
+Syntax
+¶
+endsWithUTF8(str, suffix)
+Arguments
+¶
+str
+: The UTF-8 encoded string to check.
+String
+.
+suffix
+: The UTF-8 encoded suffix to look for.
+String
+.
+Returns
+¶
+1
+if
+str
+ends with
+suffix
+,
+0
+otherwise.
+UInt8
+.
+Example
+¶
+SELECT endsWithUTF8('中国', '\xbd'), endsWith('中国', '\xbd')
+Result:
+┌─endsWithUTF8('中国', '½')─┬─endsWith('中国', '½')─┐
+│                        0 │                    1 │
+└──────────────────────────┴──────────────────────┘
+startsWith
+¶
+Checks if a string begins with a specified prefix.
+Syntax
+¶
+startsWith(str, prefix)
+Arguments
+¶
+str
+: The string to check.
+String
+.
+prefix
+: The prefix to look for.
+String
+.
+Returns
+¶
+1
+if
+str
+starts with
+prefix
+,
+0
+otherwise.
+UInt8
+.
+Example
+¶
+SELECT startsWith('Spider-Man', 'Spi')
+Result:
+┌─startsWith('Spider-Man', 'Spi')─┐
+│                               1 │
+└─────────────────────────────────┘
+startsWithUTF8
+¶
+<VersionBadge minVersion='23.8' />
+Checks if a UTF-8 encoded string begins with a specified prefix, performing the comparison based on Unicode characters rather than bytes.
+Syntax
+¶
+startsWithUTF8(str, prefix)
+Arguments
+¶
+str
+: The UTF-8 encoded string to check.
+String
+.
+prefix
+: The UTF-8 encoded prefix to look for.
+String
+.
+Returns
+¶
+1
+if
+str
+starts with
+prefix
+,
+0
+otherwise.
+UInt8
+.
+Example
+¶
+SELECT startsWithUTF8('中国', '\xe4'), startsWith('中国', '\xe4')
+Result:
+┌─startsWithUTF8('中国', '⥩─┬─startsWith('中国', '⥩─┐
+│                          0 │                      1 │
+└────────────────────────────┴────────────────────────┘
+trim
+¶
+Removes specified characters from the beginning, end, or both ends of a string. By default, it removes whitespace characters.
+Syntax
+¶
+trim([[LEADING|TRAILING|BOTH] trim_character FROM] input_string)
+Arguments
+¶
+trim_character
+: The character(s) to remove. Optional. If omitted, whitespace (ASCII 32) is removed.
+String
+.
+input_string
+: The string to trim.
+String
+.
+Returns
+¶
+The string with the specified characters removed from the designated ends.
+String
+.
+Example
+¶
+SELECT trim(BOTH ' ()' FROM '(   Hello, world!   )')
+Result:
+┌─trim(BOTH ' ()' FROM '(   Hello, world!   )')─┐
+│ Hello, world!                                 │
+└───────────────────────────────────────────────┘
+trimLeft
+¶
+Removes leading occurrences of specified characters from a string. By default, it removes leading whitespace characters.
+Alias:
+ltrim
+.
+Syntax
+¶
+trimLeft(input_string[, trim_characters])
+Arguments
+¶
+input_string
+: The string to trim.
+String
+.
+trim_characters
+: The character(s) to remove from the left. Optional. Defaults to a single whitespace character if not specified.
+String
+.
+Returns
+¶
+The string with leading specified characters removed.
+String
+.
+Example
+¶
+SELECT trimLeft('     Hello, world!     ')
+Result:
+┌─trimLeft('     Hello, world!     ')─┐
+│ Hello, world!                       │
+└─────────────────────────────────────┘
+trimRight
+¶
+Removes trailing occurrences of specified characters from a string. By default, it removes trailing whitespace characters.
+Alias:
+rtrim
+.
+Syntax
+¶
+trimRight(input_string[, trim_characters])
+Arguments
+¶
+input_string
+: The string to trim.
+String
+.
+trim_characters
+: The character(s) to remove from the right. Optional. Defaults to a single whitespace character if not specified.
+String
+.
+Returns
+¶
+The string with trailing specified characters removed.
+String
+.
+Example
+¶
+SELECT trimRight('     Hello, world!     ')
+Result:
+┌─trimRight('     Hello, world!     ')─┐
+│      Hello, world!                   │
+└──────────────────────────────────────┘
+trimBoth
+¶
+Removes leading and trailing occurrences of specified characters from a string. By default, it removes leading and trailing whitespace characters.
+Alias:
+trim
+.
+Syntax
+¶
+trimBoth(input_string[, trim_characters])
+Arguments
+¶
+input_string
+: The string to trim.
+String
+.
+trim_characters
+: The character(s) to remove from both ends. Optional. Defaults to a single whitespace character if not specified.
+String
+.
+Returns
+¶
+The string with leading and trailing specified characters removed.
+String
+.
+Example
+¶
+SELECT trimBoth('     Hello, world!     ')
+Result:
+┌─trimBoth('     Hello, world!     ')─┐
+│ Hello, world!                       │
+└─────────────────────────────────────┘
+CRC32
+¶
+Calculates the CRC32 checksum of a string using the CRC-32-IEEE 802.3 polynomial and an initial value of
+0xffffffff
+(zlib implementation).
+Syntax
+¶
+CRC32(s)
+Arguments
+¶
+s
+: The input string.
+String
+.
+Returns
+¶
+The CRC32 checksum as a 32-bit unsigned integer.
+UInt32
+.
+Example
+¶
+SELECT CRC32('Tinybird')
+Result:
+┌─CRC32('Tinybird')─┐
+│        1009000000 │
+└───────────────────┘
+CRC32IEEE
+¶
+Calculates the CRC32 checksum of a string using the CRC-32-IEEE 802.3 polynomial.
+Syntax
+¶
+CRC32IEEE(s)
+Arguments
+¶
+s
+: The input string.
+String
+.
+Returns
+¶
+The CRC32 checksum as a 32-bit unsigned integer.
+UInt32
+.
+Example
+¶
+SELECT CRC32IEEE('Tinybird')
+Result:
+┌─CRC32IEEE('Tinybird')─┐
+│            1009000000 │
+└───────────────────────┘
+CRC64
+¶
+Calculates the CRC64 checksum of a string using the CRC-64-ECMA polynomial.
+Syntax
+¶
+CRC64(s)
+Arguments
+¶
+s
+: The input string.
+String
+.
+Returns
+¶
+The CRC64 checksum as a 64-bit unsigned integer.
+UInt64
+.
+Example
+¶
+SELECT CRC64('Tinybird')
+Result:
+┌─CRC64('Tinybird')─┐
+│ 1234567890123456789 │
+└───────────────────┘
+normalizeUTF8NFC
+¶
+Converts a UTF-8 encoded string to its Unicode Normalization Form C (NFC). This form ensures canonical equivalence by composing characters into their shortest possible representation.
+Syntax
+¶
+normalizeUTF8NFC(words)
+Arguments
+¶
+words
+: The UTF-8 encoded input string.
+String
+.
+Returns
+¶
+The string transformed into NFC normalization form.
+String
+.
+Example
+¶
+SELECT length('â'), normalizeUTF8NFC('â') AS nfc, length(nfc) AS nfc_len
+Result:
+┌─length('â')─┬─nfc─┬─nfc_len─┐
+│           2 │ â   │       2 │
+└─────────────┴─────┴─────────┘
+normalizeUTF8NFD
+¶
+Converts a UTF-8 encoded string to its Unicode Normalization Form D (NFD). This form ensures canonical equivalence by decomposing characters into their base characters and combining diacritics.
+Syntax
+¶
+normalizeUTF8NFD(words)
+Arguments
+¶
+words
+: The UTF-8 encoded input string.
+String
+.
+Returns
+¶
+The string transformed into NFD normalization form.
+String
+.
+Example
+¶
+SELECT length('â'), normalizeUTF8NFD('â') AS nfd, length(nfd) AS nfd_len
+Result:
+┌─length('â')─┬─nfd─┬─nfd_len─┐
+│           2 │ â   │       3 │
+└─────────────┴─────┴─────────┘
+normalizeUTF8NFKC
+¶
+Converts a UTF-8 encoded string to its Unicode Normalization Form KC (NFKC). This form ensures compatibility equivalence by decomposing characters and then recomposing them, often resulting in a loss of formatting distinctions.
+Syntax
+¶
+normalizeUTF8NFKC(words)
+Arguments
+¶
+words
+: The UTF-8 encoded input string.
+String
+.
+Returns
+¶
+The string transformed into NFKC normalization form.
+String
+.
+Example
+¶
+SELECT length('â'), normalizeUTF8NFKC('â') AS nfkc, length(nfkc) AS nfkc_len
+Result:
+┌─length('â')─┬─nfkc─┬─nfkc_len─┐
+│           2 │ â    │        2 │
+└─────────────┴──────┴──────────┘
+normalizeUTF8NFKD
+¶
+Converts a UTF-8 encoded string to its Unicode Normalization Form KD (NFKD). This form ensures compatibility equivalence by decomposing characters into their base characters and combining diacritics, often resulting in a loss of formatting distinctions.
+Syntax
+¶
+normalizeUTF8NFKD(words)
+Arguments
+¶
+words
+: The UTF-8 encoded input string.
+String
+.
+Returns
+¶
+The string transformed into NFKD normalization form.
+String
+.
+Example
+¶
+SELECT length('â'), normalizeUTF8NFKD('â') AS nfkd, length(nfkd) AS nfkd_len
+Result:
+┌─length('â')─┬─nfkd─┬─nfkd_len─┐
+│           2 │ â    │        3 │
+└─────────────┴──────┴──────────┘
+encodeXMLComponent
+¶
+Escapes characters in a string that have special meaning in XML, making the string safe to embed within XML text nodes or attributes. Specifically,
+<
+,
+&
+,
+>
+,
+"
+, and
+'
+are replaced with their corresponding XML entities.
+Syntax
+¶
+encodeXMLComponent(x)
+Arguments
+¶
+x
+: The input string to escape.
+String
+.
+Returns
+¶
+The escaped string.
+String
+.
+Example
+¶
+SELECT encodeXMLComponent('Hello, "world"!')
+SELECT encodeXMLComponent('<123>')
+SELECT encodeXMLComponent('&tinybird')
+SELECT encodeXMLComponent('\'foo\'')
+Result:
+Hello, &quot;world&quot;!
+&lt;123&gt;
+&amp;tinybird
+&apos;foo&apos;
+decodeXMLComponent
+¶
+Un-escapes common XML entities (
+&quot;
+,
+&amp;
+,
+&apos;
+,
+&gt;
+,
+&lt;
+) and numeric character references (both decimal and hexadecimal) back into their original characters.
+Syntax
+¶
+decodeXMLComponent(x)
+Arguments
+¶
+x
+: The input string containing XML entities.
+String
+.
+Returns
+¶
+The un-escaped string.
+String
+.
+Example
+¶
+SELECT decodeXMLComponent('&apos;foo&apos;')
+SELECT decodeXMLComponent('&lt; &#x3A3; &gt;')
+Result:
+'foo'
+< Σ >
+decodeHTMLComponent
+¶
+Un-escapes common HTML entities (e.g.,
+&hbar;
+,
+&gt;
+,
+&diamondsuit;
+,
+&heartsuit;
+,
+&lt;
+) and numeric character references (both decimal and hexadecimal) back into their original characters.
+Syntax
+¶
+decodeHTMLComponent(x)
+Arguments
+¶
+x
+: The input string containing HTML entities.
+String
+.
+Returns
+¶
+The un-escaped string.
+String
+.
+Example
+¶
+SELECT decodeHTMLComponent('I&heartsuit;Tinybird')
+Result:
+┌─decodeHTMLComponent('I&heartsuit;Tinybird')─┐
+│ I♥Tinybird                                  │
+└─────────────────────────────────────────────┘
+extractTextFromHTML
+¶
+Extracts plain text content from HTML or XHTML input, removing tags, comments, and script/style blocks. It also normalizes whitespace.
+Syntax
+¶
+extractTextFromHTML(x)
+Arguments
+¶
+x
+: The input HTML or XHTML text.
+String
+.
+Returns
+¶
+The extracted plain text.
+String
+.
+Example
+¶
+The first example contains several tags and a comment and also shows whitespace processing.
+The second example shows
+CDATA
+and
+script
+tag processing.
+In the third example text is extracted from the full HTML response received by the url function.
+SELECT extractTextFromHTML(' <p> A text <i>with</i><b>tags</b>. <!-- comments --> </p> ')
+SELECT extractTextFromHTML('<![CDATA[The content within <b>CDATA</b>]]> <script>alert("Script");</script>')
+SELECT extractTextFromHTML(html) FROM url('http://www.donothingfor2minutes.com/', RawBLOB, 'html String')
+Result:
+A text with tags .
+The content within <b>CDATA</b>
+Do Nothing for 2 Minutes 2:00 &nbsp
+ascii
+¶
+Returns the ASCII decimal value of the first character of a string.
+Syntax
+¶
+ascii(s)
+Arguments
+¶
+s
+: The input string.
+String
+.
+Returns
+¶
+The ASCII code point as an
+Int32
+. Returns
+0
+if the string is empty. The result is undefined if the first character is not an ASCII character or not within the Latin-1 supplement range.
+Example
+¶
+SELECT ascii('A')
+Result:
+┌─ascii('A')─┐
+│         65 │
+└────────────┘
+soundex
+¶
+Generates the Soundex code for a given string, which is a phonetic algorithm for indexing names by sound.
+Syntax
+¶
+soundex(val)
+Arguments
+¶
+val
+: The input string.
+String
+.
+Returns
+¶
+The Soundex code of the input string.
+String
+.
+Example
+¶
+select soundex('aksel')
+Result:
+┌─soundex('aksel')─┐
+│ A240             │
+└──────────────────┘
+punycodeEncode
+¶
+Converts a Unicode string into its Punycode representation. The input string must be UTF-8 encoded.
+Syntax
+¶
+punycodeEncode(val)
+Arguments
+¶
+val
+: The input UTF-8 encoded string.
+String
+.
+Returns
+¶
+The Punycode representation of the input string.
+String
+.
+Example
+¶
+select punycodeEncode('München')
+Result:
+┌─punycodeEncode('München')─┐
+│ Mnchen-3ya                │
+└───────────────────────────┘
+punycodeDecode
+¶
+Converts a Punycode-encoded string back to its UTF-8 encoded plaintext. An exception is thrown if the input is not a valid Punycode string.
+Syntax
+¶
+punycodeDecode(val)
+Arguments
+¶
+val
+: The Punycode-encoded string.
+String
+.
+Returns
+¶
+The UTF-8 encoded plaintext of the input string.
+String
+.
+Example
+¶
+select punycodeDecode('Mnchen-3ya')
+Result:
+┌─punycodeDecode('Mnchen-3ya')─┐
+│ München                      │
+└──────────────────────────────┘
+tryPunycodeDecode
+¶
+Converts a Punycode-encoded string back to its UTF-8 encoded plaintext. If the input is not a valid Punycode string, it returns an empty string instead of throwing an exception.
+Syntax
+¶
+tryPunycodeDecode(val)
+Arguments
+¶
+val
+: The Punycode-encoded string.
+String
+.
+Returns
+¶
+The UTF-8 encoded plaintext, or an empty string if decoding fails.
+String
+.
+Example
+¶
+SELECT tryPunycodeDecode('Mnchen-3ya') AS res, tryPunycodeDecode('invalid') AS res_invalid
+Result:
+┌─res─────┬─res_invalid─┐
+│ München │             │
+└─────────┴─────────────┘
+idnaEncode
+¶
+Converts a domain name to its ASCII representation using the ToASCII algorithm from the Internationalized Domain Names in Applications (IDNA) mechanism. The input string must be UTF-8 encoded and translatable to ASCII.
+Syntax
+¶
+idnaEncode(val)
+Arguments
+¶
+val
+: The input domain name string.
+String
+.
+Returns
+¶
+The ASCII representation of the domain name according to IDNA.
+String
+.
+Example
+¶
+select idnaEncode('straße.münchen.de')
+Result:
+┌─idnaEncode('straße.münchen.de')─────┐
+│ xn--strae-oqa.xn--mnchen-3ya.de     │
+└─────────────────────────────────────┘
+tryIdnaEncode
+¶
+Converts a domain name to its ASCII representation using the IDNA ToASCII algorithm. If an error occurs during conversion, it returns an empty string instead of throwing an exception.
+Syntax
+¶
+tryIdnaEncode(val)
+Arguments
+¶
+val
+: The input domain name string.
+String
+.
+Returns
+¶
+The ASCII representation of the domain name, or an empty string if conversion fails.
+String
+.
+Example
+¶
+SELECT tryIdnaEncode('straße.münchen.de') AS res, tryIdnaEncode('invalid.domain.😊') AS res_invalid
+Result:
+┌─res───────────────────────────┬─res_invalid─┐
+│ xn--strae-oqa.xn--mnchen-3ya.de │             │
+└───────────────────────────────┴─────────────┘
+idnaDecode
+¶
+Converts an IDNA-encoded domain name back to its Unicode (UTF-8) representation using the ToUnicode algorithm. If an error occurs, the original input string is returned.
+Syntax
+¶
+idnaDecode(val)
+Arguments
+¶
+val
+: The IDNA-encoded domain name string.
+String
+.
+Returns
+¶
+The Unicode (UTF-8) representation of the domain name.
+String
+.
+Example
+¶
+select idnaDecode('xn--strae-oqa.xn--mnchen-3ya.de')
+Result:
+┌─idnaDecode('xn--strae-oqa.xn--mnchen-3ya.de')─┐
+│ straße.münchen.de                             │
+└───────────────────────────────────────────────┘
+byteHammingDistance
+¶
+Calculates the Hamming distance between two byte strings, which is the number of positions at which the corresponding bytes are different. The strings must be of equal length.
+Alias:
+mismatches
+Syntax
+¶
+byteHammingDistance(string1, string2)
+Arguments
+¶
+string1
+: The first byte string.
+String
+.
+string2
+: The second byte string.
+String
+.
+Returns
+¶
+The Hamming distance as an integer.
+UInt64
+.
+Example
+¶
+SELECT byteHammingDistance('karolin', 'kathrin')
+Result:
+┌─byteHammingDistance('karolin', 'kathrin')─┐
+│                                         3 │
+└───────────────────────────────────────────┘
+stringJaccardIndex
+¶
+Calculates the Jaccard similarity index between two byte strings. This index measures the similarity between finite sample sets, defined as the size of the intersection divided by the size of the union of the sample sets.
+Syntax
+¶
+stringJaccardIndex(string1, string2)
+Arguments
+¶
+string1
+: The first byte string.
+String
+.
+string2
+: The second byte string.
+String
+.
+Returns
+¶
+The Jaccard similarity index as a floating-point number between 0 and 1.
+Float64
+.
+Example
+¶
+SELECT stringJaccardIndex('Tinybird', 'mouse')
+Result:
+┌─stringJaccardIndex('Tinybird', 'mouse')─┐
+│                                       0.4 │
+└───────────────────────────────────────────┘
+stringJaccardIndexUTF8
+¶
+Calculates the Jaccard similarity index between two UTF-8 encoded strings, performing the comparison based on Unicode characters.
+Syntax
+¶
+stringJaccardIndexUTF8(string1, string2)
+Arguments
+¶
+string1
+: The first UTF-8 encoded string.
+String
+.
+string2
+: The second UTF-8 encoded string.
+String
+.
+Returns
+¶
+The Jaccard similarity index as a floating-point number between 0 and 1.
+Float64
+.
+Example
+¶
+SELECT stringJaccardIndexUTF8('Tinybird', 'Тайнибёрд')
+Result:
+┌─stringJaccardIndexUTF8('Tinybird', 'Тайнибёрд')─┐
+│                                            0.125 │
+└──────────────────────────────────────────────────┘
+editDistance
+¶
+Calculates the Edit distance (also known as Levenshtein distance) between two byte strings. This measures the minimum number of single-character edits (insertions, deletions, or substitutions) required to change one string into the other.
+Alias:
+levenshteinDistance
+Syntax
+¶
+editDistance(string1, string2)
+Arguments
+¶
+string1
+: The first byte string.
+String
+.
+string2
+: The second byte string.
+String
+.
+Returns
+¶
+The Edit distance as an integer.
+UInt64
+.
+Example
+¶
+SELECT editDistance('Tinybird', 'mouse')
+Result:
+┌─editDistance('Tinybird', 'mouse')─┐
+│                                   6 │
+└─────────────────────────────────────┘
+editDistanceUTF8
+¶
+Calculates the Edit distance (Levenshtein distance) between two UTF-8 encoded strings, performing the comparison based on Unicode characters.
+Alias:
+levenshteinDistanceUTF8
+Syntax
+¶
+editDistanceUTF8(string1, string2)
+Arguments
+¶
+string1
+: The first UTF-8 encoded string.
+String
+.
+string2
+: The second UTF-8 encoded string.
+String
+.
+Returns
+¶
+The Edit distance as an integer.
+UInt64
+.
+Example
+¶
+SELECT editDistanceUTF8('我是谁', '我是我')
+Result:
+┌─editDistanceUTF8('我是谁', '我是我')──┐
+│                                   1 │
+└─────────────────────────────────────┘
+damerauLevenshteinDistance
+¶
+Calculates the Damerau-Levenshtein distance between two byte strings. This metric extends the Levenshtein distance by including transpositions (swapping two adjacent characters) as a single edit operation.
+Syntax
+¶
+damerauLevenshteinDistance(string1, string2)
+Arguments
+¶
+string1
+: The first byte string.
+String
+.
+string2
+: The second byte string.
+String
+.
+Returns
+¶
+The Damerau-Levenshtein distance as an integer.
+UInt64
+.
+Example
+¶
+SELECT damerauLevenshteinDistance('Tinybird', 'mouse')
+Result:
+┌─damerauLevenshteinDistance('Tinybird', 'mouse')─┐
+│                                                 6 │
+└───────────────────────────────────────────────────┘
+jaroSimilarity
+¶
+Calculates the Jaro similarity between two byte strings. This metric measures the similarity between two strings, with a higher value indicating greater similarity.
+Syntax
+¶
+jaroSimilarity(string1, string2)
+Arguments
+¶
+string1
+: The first byte string.
+String
+.
+string2
+: The second byte string.
+String
+.
+Returns
+¶
+The Jaro similarity as a floating-point number between 0 and 1.
+Float64
+.
+Example
+¶
+SELECT jaroSimilarity('Tinybird', 'click')
+Result:
+┌─jaroSimilarity('Tinybird', 'click')─┐
+│                    0.8333333333333333 │
+└───────────────────────────────────────┘
+jaroWinklerSimilarity
+¶
+Calculates the Jaro-Winkler similarity between two byte strings. This is a refinement of the Jaro similarity that gives more favorable ratings to strings that match from the beginning.
+Syntax
+¶
+jaroWinklerSimilarity(string1, string2)
+Arguments
+¶
+string1
+: The first byte string.
+String
+.
+string2
+: The second byte string.
+String
+.
+Returns
+¶
+The Jaro-Winkler similarity as a floating-point number between 0 and 1.
+Float64
+.
+Example
+¶
+SELECT jaroWinklerSimilarity('Tinybird', 'click')
+Result:
+┌─jaroWinklerSimilarity('Tinybird', 'click')─┐
+│                           0.8999999999999999 │
+└──────────────────────────────────────────────┘
+initcap
+¶
+Converts the first letter of each word in a string to uppercase and the remaining letters to lowercase. Words are identified as sequences of alphanumeric characters separated by non-alphanumeric characters.
+Because
+initCap
+converts only the first letter of each word to upper case you may observe unexpected behaviour for words containing apostrophes or capital letters. For example:
+SELECT initCap('mother''s daughter'), initCap('joe McAdam')
+will return
+┌─initCap('mother\'s daughter')─┬─initCap('joe McAdam')─┐
+│ Mother'S Daughter             │ Joe Mcadam            │
+└───────────────────────────────┴───────────────────────┘
+This is a known behaviour, with no plans currently to fix it.
+Syntax
+¶
+initcap(val)
+Arguments
+¶
+val
+: The input string.
+String
+.
+Returns
+¶
+The string with the first letter of each word capitalized.
+String
+.
+Example
+¶
+SELECT initcap('building for fast')
+Result:
+┌─initcap('building for fast')─┐
+│ Building For Fast            │
+└──────────────────────────────┘
+initcapUTF8
+¶
+Converts the first letter of each word in a UTF-8 encoded string to uppercase and the remaining letters to lowercase, based on Unicode characters. If the string is not valid UTF-8, the result is undefined.
+This function does not perform language-specific casing rules (e.g., for Turkish 'i' vs. 'İ'). If the byte length of a character changes between its uppercase and lowercase forms, the result for that character might be incorrect.
+Syntax
+¶
+initcapUTF8(val)
+Arguments
+¶
+val
+: The input UTF-8 encoded string.
+String
+.
+Returns
+¶
+The string with the first Unicode character of each word capitalized.
+String
+.
+Example
+¶
+SELECT initcapUTF8('не тормозит')
+Result:
+┌─initcapUTF8('не тормозит')─┐
+│ Не Тормозит                │
+└────────────────────────────┘
+firstLine
+¶
+Extracts and returns the first line from a multi-line string. If the string contains no line separators, the entire string is returned.
+Syntax
+¶
+firstLine(val)
+Arguments
+¶
+val
+: The input string, potentially containing multiple lines.
+String
+.
+Returns
+¶
+The first line of the string.
+String
+.
+Example
+¶
+select firstLine('foo\nbar\nbaz')
+Result:
+┌─firstLine('foo\nbar\nbaz')─┐
+│ foo                        │
+└────────────────────────────┘
+stringCompare
+¶
+Compares two strings lexicographically. It can optionally compare specific substrings by providing offsets and a maximum number of bytes.
+Syntax
+¶
+stringCompare(string1, string2[, str1_off, string2_offset, num_bytes])
+Arguments
+¶
+string1
+: The first string for comparison.
+String
+.
+string2
+: The second string for comparison.
+String
+.
+str1_off
+: The zero-based starting position in
+string1
+. Optional.
+UInt*
+.
+string2_offset
+: The zero-based starting position in
+string2
+. Optional.
+UInt*
+.
+num_bytes
+: The maximum number of bytes to compare. If the specified range exceeds a string's length,
+num_bytes
+is adjusted. Optional.
+UInt*
+.
+Returns
+¶
+-1
+: If
+string1
+(or its specified substring) is lexicographically less than
+string2
+(or its specified substring).
+0
+: If the strings (or their specified substrings) are lexicographically equal.
+1
+: If
+string1
+(or its specified substring) is lexicographically greater than
+string2
+(or its specified substring).
+Example
+¶
+SELECT
+    stringCompare('alice', 'bob', 0, 0, 3) as result1,
+    stringCompare('alice', 'alicia', 0, 0, 3) as result2,
+    stringCompare('bob', 'alice', 0, 0, 3) as result3
+Result:
+┌─result1─┬─result2─┬─result3─┐
+1. │      -1 │       0 │       1 │
+   └─────────┴─────────┴─────────┘
+SELECT
+    stringCompare('alice', 'alicia') as result2,
+    stringCompare('alice', 'alice') as result1,
+    stringCompare('bob', 'alice') as result3
+Result:
+┌─result2─┬─result1─┬─result3─┐
+1. │      -1 │       0 │       1 │
+   └─────────┴─────────┴─────────┘
+normalizeQuery
+¶
+Replaces literals, sequences of literals, and complex aliases (those containing whitespace, more than two digits, or at least 36 bytes long like UUIDs) within a query string with a placeholder
+?
+.
+Syntax
+¶
+normalizeQuery(x)
+Arguments
+¶
+x
+: The query string.
+String
+.
+Returns
+¶
+The query string with literals and complex aliases replaced by placeholders.
+String
+.
+Example
+¶
+SELECT normalizeQuery('[1, 2, 3, x]') AS query
+Result:
+┌─query────┐
+│ [?.., x] │
+└──────────┘
+normalizeQueryKeepNames
+¶
+Replaces literals and sequences of literals within a query string with a placeholder
+?
+, but preserves complex aliases (those containing whitespace, more than two digits, or at least 36 bytes long like UUIDs). This can be useful for analyzing query logs while retaining meaningful alias names.
+Syntax
+¶
+normalizeQueryKeepNames(x)
+Arguments
+¶
+x
+: The query string.
+String
+.
+Returns
+¶
+The query string with literals replaced by placeholders, but complex aliases kept intact.
+String
+.
+Example
+¶
+SELECT normalizeQuery('SELECT 1 AS aComplexName123'), normalizeQueryKeepNames('SELECT 1 AS aComplexName123')
+Result:
+┌─normalizeQuery('SELECT 1 AS aComplexName123')─┬─normalizeQueryKeepNames('SELECT 1 AS aComplexName123')─┐
+│ SELECT ? AS `?`                               │ SELECT ? AS aComplexName123                            │
+└───────────────────────────────────────────────┴────────────────────────────────────────────────────────┘
+normalizedQueryHash
+¶
+Generates a 64-bit hash value for a query string, where the hash is identical for similar queries regardless of the specific literal values used. This is useful for grouping and analyzing query patterns in logs.
+Syntax
+¶
+normalizedQueryHash(x)
+Arguments
+¶
+x
+: The query string.
+String
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT normalizedQueryHash('SELECT 1 AS `xyz`') != normalizedQueryHash('SELECT 1 AS `abc`') AS res
+Result:
+┌─res─┐
+│   1 │
+└─────┘
+normalizedQueryHashKeepNames
+¶
+Generates a 64-bit hash value for a query string, similar to
+normalizedQueryHash()
+, but it preserves complex aliases (those containing whitespace, more than two digits, or at least 36 bytes long like UUIDs) before hashing. This allows for more granular analysis of query patterns where alias names are significant.
+Syntax
+¶
+normalizedQueryHashKeepNames(x)
+Arguments
+¶
+x
+: The query string.
+String
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT normalizedQueryHash('SELECT 1 AS `xyz123`') != normalizedQueryHash('SELECT 1 AS `abc123`') AS normalizedQueryHash
+SELECT normalizedQueryHashKeepNames('SELECT 1 AS `xyz123`') != normalizedQueryHashKeepNames('SELECT 1 AS `abc123`') AS normalizedQueryHashKeepNames
+Result:
+┌─normalizedQueryHash─┐
+│                   0 │
+└─────────────────────┘
+┌─normalizedQueryHashKeepNames─┐
+│                            1 │
+└──────────────────────────────┘
+Updated
+3 weeks ago
+On this page
+Functions for Working with Strings
+empty
+notEmpty
+length
+lengthUTF8
+left
+leftUTF8
+leftPad
+leftPadUTF8
+right
+rightUTF8
+rightPad
+rightPadUTF8
+compareSubstrings
+lower
+upper
+lowerUTF8
+upperUTF8
+isValidUTF8
+toValidUTF8
+repeat
+space
+reverse
+reverseUTF8
+concat
+concatAssumeInjective
+concatWithSeparator
+concatWithSeparatorAssumeInjective
+substring
+substringUTF8
+substringIndex
+substringIndexUTF8
+appendTrailingCharIfAbsent
+convertCharset
+base58Encode
+base58Decode
+tryBase58Decode
+base64Encode
+base64URLEncode
+base64Decode
+base64URLDecode
+tryBase64Decode
+tryBase64URLDecode
+endsWith
+endsWithUTF8
+startsWith
+startsWithUTF8
+trim
+trimLeft
+trimRight
+trimBoth
+CRC32
+CRC32IEEE
+CRC64
+normalizeUTF8NFC
+normalizeUTF8NFD
+normalizeUTF8NFKC
+normalizeUTF8NFKD
+encodeXMLComponent
+decodeXMLComponent
+decodeHTMLComponent
+extractTextFromHTML
+ascii
+soundex
+punycodeEncode
+punycodeDecode
+tryPunycodeDecode
+idnaEncode
+tryIdnaEncode
+idnaDecode
+byteHammingDistance
+stringJaccardIndex
+stringJaccardIndexUTF8
+editDistance
+editDistanceUTF8
+damerauLevenshteinDistance
+jaroSimilarity
+jaroWinklerSimilarity
+initcap
+initcapUTF8
+firstLine
+stringCompare
+normalizeQuery
+normalizeQueryKeepNames
+normalizedQueryHash
+normalizedQueryHashKeepNames
+forward
+classic
+Ask AI

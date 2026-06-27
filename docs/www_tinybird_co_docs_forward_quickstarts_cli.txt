@@ -1,0 +1,272 @@
+Source: https://www.tinybird.com/docs/forward/quickstarts/cli
+
+Quickstart: Tinybird CLI · Tinybird Docs
+Sign In
+Sign Up
+Quickstart: Tinybird CLI
+¶
+Copy as MD
+Follow these steps to install the Tinybird CLI, build your first data project in a Tinybird branch, and deploy it to Tinybird Cloud.
+See
+Core concepts
+for a complete overview of Tinybird.
+This quickstart is based on the Tinybird CLI and datafiles. If you're looking for a different approach with SDKs, see
+Quickstarts
+.
+If you use a coding agent like Cursor, Claude Code, Amp, or Open Code, install Tinybird agent skills so your agent understands Tinybird project structure and workflows:
+npx skills add tinybirdco/tinybird-agent-skills
+Before you begin
+¶
+To get started, you need the following:
+A Tinybird account. You can create one at
+cloud.tinybird.co
+.
+Git.
+Deploy a new project in five minutes
+¶
+Install Tinybird CLI
+¶
+Run the following command to install the Tinybird CLI:
+For macOS and Linux
+For Windows
+curl https://tinybird.co | sh
+Already have Tinybird Classic CLI installed?
+Both Classic and Forward CLIs use the
+tb
+command. Run
+which tb
+to check if you already have a
+tb
+binary installed. If you do, see
+Managing CLI versions
+to avoid conflicts.
+Create a project
+¶
+Create a new directory and initialize the project:
+mkdir tinybird-cli-quickstart
+cd tinybird-cli-quickstart
+git init
+
+tb init
+This creates the standard project folders (
+datasources/
+,
+pipes/
+,
+endpoints/
+,
+fixtures/
+,
+tests/
+, and others), plus other useful resources like CI/CD templates or Agent Skills. It also creates a
+tinybird.config.json
+containing your project settings, like the folder where the project is located and the default development environment.
+{
+  "dev_mode": "branch",
+  "include": [
+    "tinybird"
+  ]
+}
+If you log in during this step, a file called
+.tinyb
+is created. This contains your auth details, so never commit it to git.
+First things first, you need a data source. The schema and engine stay the same regardless of how you ingest data. The difference is how data arrives: via the Events API, from a Kafka topic, or from an S3 bucket.
+Create the
+.datasource
+file. If you want to ingest from Kafka or S3 instead of the Events API, add a
+.connection
+file and reference it in the
+.datasource
+:
+Events
+Kafka
+S3
+datasources/page_views.datasource
+DESCRIPTION >
+    Page view tracking data
+
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `session_id` String `json:$.session_id`,
+    `pathname` String `json:$.pathname`,
+    `referrer` Nullable(String) `json:$.referrer`
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "pathname, timestamp"
+Data Sources define the schema and properties of the database tables where you store your data. For more information, see
+Data Source files
+.
+Create an endpoint
+¶
+Create a new file
+endpoints/top_pages.pipe
+:
+endpoints/top_pages.pipe
+TOKEN top_pages_read READ
+
+DESCRIPTION >
+    Get the most visited pages
+
+NODE aggregated
+SQL >
+    %
+    SELECT
+        pathname,
+        count() AS views
+    FROM page_views
+    WHERE timestamp >= {{DateTime(start_date, '2026-01-01 00:00:00')}}
+      AND timestamp <= {{DateTime(end_date, '2026-12-31 23:59:59')}}
+    GROUP BY pathname
+    ORDER BY views DESC
+    LIMIT {{Int32(limit, 10)}}
+
+TYPE endpoint
+Build the project
+¶
+Checkout a new git branch:
+git add tinybird.config.json && git commit -m "initial commit" && git checkout -b tinybird_intro
+Run a build to create your resources in your Tinybird development environment:
+tb build
+Git integration
+¶
+You may have noticed that the quickstart example had a
+git checkout -b tinybird_intro
+. Tinybird detects you're on a git project and creates a branch with the git branch name in your Tinybird development environment.
+Ingest data and query
+¶
+Ingest
+¶
+Send events using the Events API with
+curl
+:
+TB_HOST=$(cat .tinyb | jq -r ".host")
+tb --branch=tinybird_intro token copy "admin"
+TB_TOKEN="<paste-your-admin-token-here>"
+
+curl -X POST "$TB_HOST/v0/events?name=page_views&token=$TB_TOKEN" \
+  -d '{"timestamp": "2026-01-15 10:00:00", "session_id": "s1", "pathname": "/home", "referrer": "https://google.com"}
+{"timestamp": "2026-01-15 10:01:00", "session_id": "s2", "pathname": "/docs", "referrer": null}
+{"timestamp": "2026-01-15 10:02:00", "session_id": "s1", "pathname": "/pricing", "referrer": "/home"}'
+If you configured a Kafka or S3 connector, data is ingested automatically after you deploy. You don't need to call the Events API manually.
+Query
+¶
+Query the endpoint with
+curl
+. All Tinybird API calls require a
+token
+for authentication.
+curl -X GET "$TB_HOST/v0/pipes/top_pages.json?token=$TB_TOKEN"
+{
+  "meta": [
+    { "name": "pathname", "type": "String" },
+    { "name": "views", "type": "UInt64" }
+  ],
+  "data": [
+    { "pathname": "/home", "views": 1 },
+    { "pathname": "/docs", "views": 1 },
+    { "pathname": "/pricing", "views": 1 }
+  ]
+}
+Deploy to Tinybird Cloud
+¶
+tb deploy
+Open the project in Tinybird Cloud:
+tb --cloud open
+Iterate in a branch
+¶
+Add a materialized view in another branch, test the app against that branch, and deploy to Tinybird Cloud when you're finished.
+git checkout -b materialization
+Create a new Data Source for the materialized rollup in
+datasources/daily_page_views.datasource
+:
+datasources/daily_page_views.datasource
+DESCRIPTION >
+    Daily page view counts populated by a materialized view
+
+SCHEMA >
+    `date` Date,
+    `pathname` String,
+    `views` AggregateFunction(count)
+
+ENGINE "AggregatingMergeTree"
+ENGINE_SORTING_KEY "date, pathname"
+Create the materialized view in
+pipes/daily_page_views_mv.pipe
+:
+pipes/daily_page_views_mv.pipe
+DESCRIPTION >
+    Materialized rollup of page views by day and pathname
+
+NODE aggregate
+SQL >
+    SELECT
+        toDate(timestamp) AS date,
+        pathname,
+        countState() AS views
+    FROM page_views
+    GROUP BY date, pathname
+
+TYPE materialized
+DATASOURCE daily_page_views
+Update the endpoint in
+endpoints/top_pages.pipe
+to read from the materialized Data Source:
+endpoints/top_pages.pipe
+TOKEN top_pages_read READ
+
+DESCRIPTION >
+    Get the most visited pages from MV-backed datasource
+
+NODE aggregated
+SQL >
+    %
+    SELECT
+        pathname,
+        countMerge(views) AS views
+    FROM daily_page_views
+    WHERE date >= toDate({{DateTime(start_date, '2026-01-01 00:00:00')}})
+      AND date <= toDate({{DateTime(end_date, '2026-12-31 23:59:59')}})
+    GROUP BY pathname
+    ORDER BY views DESC
+    LIMIT {{Int32(limit, 10)}}
+
+TYPE endpoint
+Build against the branch:
+tb build
+Once validated, you can deploy to Tinybird Cloud with
+tb deploy
+if you haven't set up a CI/CD script.
+Next steps
+¶
+Familiarize yourself with Tinybird concepts. See
+Core concepts
+.
+Learn about datafiles, like .datasource and .pipe files. See
+Datafiles
+.
+Get data into Tinybird from a variety of sources. See
+Get data in
+.
+Learn about authentication and securing your Endpoints. See
+Tokens
+.
+Browse the Tinybird CLI commands reference. See
+Commands reference
+.
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Quickstart: Tinybird CLI
+Before you begin
+Deploy a new project in five minutes
+Install Tinybird CLI
+Create a project
+Create an endpoint
+Build the project
+Ingest data and query
+Deploy to Tinybird Cloud
+Iterate in a branch
+Next steps
+forward
+Ask AI

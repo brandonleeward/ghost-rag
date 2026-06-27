@@ -1,0 +1,101 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-token
+
+tb token · Tinybird Docs
+Sign In
+Sign Up
+tb token
+¶
+Copy as MD
+Manage your workspace tokens. See
+Authentication
+.
+Subcommand
+Description
+copy OPTIONS TOKEN_ID
+Copies a token.
+ls OPTIONS
+Lists tokens. Use
+--match TEXT
+to retrieve any token matching the pattern. For example,
+--match _test
+.
+refresh OPTIONS TOKEN_ID
+Refreshes a token. Adding
+--yes
+removes the need for confirmation.
+rm OPTIONS TOKEN_ID
+Removes a token. Adding
+--yes
+removes the need for confirmation.
+scopes OPTIONS TOKEN_ID
+Lists token scopes.
+create static OPTIONS TOKEN_NAME
+Creates a static token that lasts forever. If a token with the same name already exists, it updates it.
+create jwt OPTIONS TOKEN_NAME
+Creates a JWT token with a fixed expiration time.
+tb token create static
+¶
+Creates a static token. Note that
+resource-scoped tokens
+are automatically generated when defined and deployed in a
+.datasource
+file. This command provides an alternative method to generating resource-scoped tokens.
+For example:
+tb token create static my_static_token --scope ORG_DATASOURCES:READ
+The following options are available:
+Option
+Description
+--scope
+Scope for the token, for example
+DATASOURCES:READ
+. Required.
+tb token create jwt
+¶
+Creates a JWT token.
+For example:
+tb token create jwt my_jwt --ttl 1h --scope PIPES:READ --resource my_pipe --fixed-params "param_name=value"
+The following options are available:
+Option
+Description
+--ttl
+Time to live. For example,
+1h
+,
+30min
+,
+1d
+. Required.
+--scope
+Scope for the token. Only
+PIPES:READ
+is allowed for JWT tokens. Required.
+--resource
+Resource you want to associate the scope with. Required
+--fixed-params
+Fixed parameters in
+key=value
+format. You can separate multiple values using commas.
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✓ Yes (default)
+Manages tokens for Tinybird Local.
+--cloud
+✓ Yes
+Manages tokens in Tinybird Cloud.
+--branch=BRANCH_NAME
+✓ Yes
+Manages tokens in a branch.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+tb token
+tb token create static
+tb token create jwt
+Environment support
+forward
+Ask AI

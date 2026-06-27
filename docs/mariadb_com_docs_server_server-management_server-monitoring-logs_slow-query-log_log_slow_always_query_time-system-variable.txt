@@ -1,0 +1,83 @@
+Source: https://mariadb.com/docs/server/server-management/server-monitoring-logs/slow-query-log/log_slow_always_query_time-system-variable
+
+log_slow_always_query_time System Variable | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Overview of MariaDB Logs
+Securing MariaDB Logs
+Binary Log
+Error Log
+General Query Log
+MyISAM Log
+Rotating Logs on Unix and Linux
+Slow Query Log
+Slow Query Log Overview
+EXPLAIN in the Slow Query Log
+log_slow_always_query_time System Variable
+SQL Error Log Plugin
+Transaction Coordinator Log
+Writing Logs Into Tables
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+log_slow_always_query_time System Variable
+Documentation for the `log_slow_always_query_time` variable, which forces queries executed by a specific function or user to be logged regardless of their execution time.
+Description: Queries slower than log_slow_always_query_time are not affected by
+log_slow_rate_limit
+or
+log_slow_min_examined_row_limit
+. Query will be logged to the
+slow query log
+if the execution time of the query is longer than
+log_slow_query_time
+and log_slow_always_query_time. The argument will be treated as a decimal value with microsecond precision.
+Command line:
+--log-slow-always-query-time=num
+Scope: Global, Session
+Dynamic: Yes
+Data Type:
+numeric (double)
+Default Value:
+31536000.000000
+Range:
+0
+to
+31536000
+Introduced:
+MariaDB 11.7
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+EXPLAIN in the Slow Query Log
+Next
+SQL Error Log Plugin
+Last updated
+5 months ago
+Was this helpful?
+Was this helpful?

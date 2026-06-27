@@ -1,0 +1,455 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/python-sdk-resources
+
+Python SDK resources · Tinybird Docs
+Sign In
+Sign Up
+Python SDK resources
+¶
+Copy as MD
+Use the Python SDK to define Tinybird resources as code. You can define Data Sources, Pipes, Endpoints, Materialized Views, Copy Pipes, Sink Pipes, and Connections in Python and sync them to Tinybird.
+Supported Python versions for Python SDK workflows are 3.11, 3.12, and 3.13. Python 3.14 is not supported yet because these workflows rely on the Tinybird CLI.
+Project layout
+¶
+A Python SDK project usually includes:
+tinybird.config.json
+tb_project/resources.py
+tb_project/client.py
+tinybird.config.json
+points
+include
+at the folder or files where you define resources.
+Configure credentials
+¶
+Create a
+.env.local
+file in your project root:
+TINYBIRD_TOKEN=p.your_token_here
+TINYBIRD_URL=https://api.tinybird.co
+Tokens
+¶
+Use
+define_token
+to declare reusable token names, then attach them to Data Sources or Pipes through each resource's
+tokens
+option.
+from tinybird_sdk import define_datasource, define_endpoint, define_token, engine, node, t
+
+events_append = define_token("events_append")
+events_read = define_token("events_read")
+
+events = define_datasource("events", {
+    "schema": {
+        "timestamp": t.date_time(),
+        "payload": t.string(),
+    },
+    "engine": engine.merge_tree({"sorting_key": ["timestamp"]}),
+    "tokens": [
+        {"token": events_append, "scope": "APPEND"},
+        {"token": events_read, "scope": "READ"},
+    ],
+})
+
+events_api = define_endpoint("events_api", {
+    "nodes": [
+        node({
+            "name": "latest",
+            "sql": "SELECT timestamp, payload FROM events ORDER BY timestamp DESC LIMIT 100",
+        }),
+    ],
+    "output": {
+        "timestamp": t.date_time(),
+        "payload": t.string(),
+    },
+    "tokens": [
+        {"token": events_read, "scope": "READ"},
+    ],
+})
+Token names must start with a letter or underscore and then use only alphanumeric characters or underscores. In Data Source token bindings, use
+READ
+or
+APPEND
+scopes. In Pipe or Endpoint token bindings, use
+READ
+.
+Datasources
+¶
+Define Data Sources with
+define_datasource
+:
+from tinybird_sdk import define_datasource, engine, t
+
+page_views = define_datasource("page_views", {
+    "description": "Page view tracking data",
+    "schema": {
+        "timestamp": t.date_time(),
+        "pathname": t.string(),
+        "session_id": t.string(),
+        "country": t.string().low_cardinality().nullable(),
+    },
+    "engine": engine.merge_tree({
+        "sorting_key": ["pathname", "timestamp"],
+    }),
+})
+Column JSON paths
+¶
+Use
+column()
+when you need custom JSONPath mappings:
+from tinybird_sdk import column, define_datasource, engine, t
+
+events = define_datasource("events", {
+    "schema": {
+        "event_id": column(t.string(), {"json_path": "$.id"}),
+        "timestamp": column(t.date_time(), {"json_path": "$.ts"}),
+    },
+    "engine": engine.merge_tree({"sorting_key": ["event_id"]}),
+})
+Endpoints
+¶
+Define API endpoints with
+define_endpoint
+:
+from tinybird_sdk import define_endpoint, node, p, t
+
+top_pages = define_endpoint("top_pages", {
+    "description": "Get the most visited pages",
+    "params": {
+        "start_date": p.date_time(),
+        "end_date": p.date_time(),
+        "limit": p.int32().optional(10),
+    },
+    "nodes": [
+        node({
+            "name": "aggregated",
+            "sql": """
+                SELECT pathname, count() AS views
+                FROM page_views
+                WHERE timestamp >= {{DateTime(start_date)}}
+                  AND timestamp <= {{DateTime(end_date)}}
+                GROUP BY pathname
+                ORDER BY views DESC
+                LIMIT {{Int32(limit, 10)}}
+            """,
+        }),
+    ],
+    "output": {
+        "pathname": t.string(),
+        "views": t.uint64(),
+    },
+})
+Pipes
+¶
+Define internal pipes with
+define_pipe
+:
+from tinybird_sdk import define_pipe, node, p
+
+filtered_events = define_pipe("filtered_events", {
+    "params": {
+        "start_date": p.date_time(),
+        "end_date": p.date_time(),
+    },
+    "nodes": [
+        node({
+            "name": "filtered",
+            "sql": """
+                SELECT *
+                FROM events
+                WHERE timestamp >= {{DateTime(start_date)}}
+                  AND timestamp <= {{DateTime(end_date)}}
+            """,
+        }),
+    ],
+})
+Materialized views
+¶
+Use
+define_materialized_view
+to populate derived Data Sources:
+from tinybird_sdk import define_datasource, define_materialized_view, engine, node, t
+
+daily_stats = define_datasource("daily_stats", {
+    "schema": {
+        "date": t.date(),
+        "pathname": t.string(),
+        "views": t.simple_aggregate_function("sum", t.uint64()),
+    },
+    "engine": engine.aggregating_merge_tree({
+        "sorting_key": ["date", "pathname"],
+    }),
+})
+
+daily_stats_mv = define_materialized_view("daily_stats_mv", {
+    "datasource": daily_stats,
+    "nodes": [
+        node({
+            "name": "aggregate",
+            "sql": """
+                SELECT toDate(timestamp) AS date, pathname, count() AS views
+                FROM page_views
+                GROUP BY date, pathname
+            """,
+        }),
+    ],
+})
+Copy pipes
+¶
+Use
+define_copy_pipe
+for scheduled snapshots:
+from tinybird_sdk import define_copy_pipe, node
+
+daily_snapshot = define_copy_pipe("daily_snapshot", {
+    "datasource": daily_stats,
+    "copy_schedule": "0 0 * * *",
+    "copy_mode": "append",
+    "nodes": [
+        node({
+            "name": "snapshot",
+            "sql": "SELECT * FROM daily_stats WHERE date = today() - 1",
+        }),
+    ],
+})
+Sink pipes
+¶
+Use
+define_sink_pipe
+to publish query results to Kafka or S3:
+from tinybird_sdk import define_sink_pipe, node
+
+kafka_events_sink = define_sink_pipe("kafka_events_sink", {
+    "sink": {
+        "connection": events_kafka,
+        "topic": "events_export",
+        "schedule": "@on-demand",
+    },
+    "nodes": [
+        node({
+            "name": "publish",
+            "sql": "SELECT timestamp, payload FROM kafka_events",
+        }),
+    ],
+})
+
+s3_events_sink = define_sink_pipe("s3_events_sink", {
+    "sink": {
+        "connection": landing_s3,
+        "bucket_uri": "s3://my-bucket/exports/",
+        "file_template": "events_{date}",
+        "format": "csv",
+        "schedule": "@once",
+    },
+    "nodes": [
+        node({
+            "name": "export",
+            "sql": "SELECT timestamp, session_id FROM events",
+        }),
+    ],
+})
+Connections
+¶
+Define connector connections with
+define_kafka_connection
+,
+define_s3_connection
+,
+define_gcs_connection
+, and
+define_dynamodb_connection
+:
+from tinybird_sdk import (
+    define_dynamodb_connection,
+    define_gcs_connection,
+    define_kafka_connection,
+    define_s3_connection,
+    secret,
+)
+
+events_kafka = define_kafka_connection("events_kafka", {
+    "bootstrap_servers": "kafka.example.com:9092",
+    "security_protocol": "SASL_SSL",
+    "sasl_mechanism": "PLAIN",
+    "key": secret("KAFKA_KEY"),
+    "secret": secret("KAFKA_SECRET"),
+})
+
+landing_s3 = define_s3_connection("landing_s3", {
+    "region": "eu-west-1",
+    "arn": secret("AWS_ROLE_ARN"),
+})
+
+landing_gcs = define_gcs_connection("landing_gcs", {
+    "service_account_credentials_json": secret("GCS_SERVICE_ACCOUNT_CREDENTIALS_JSON"),
+})
+
+events_dynamodb = define_dynamodb_connection("events_dynamodb", {
+    "region": "us-east-1",
+    "arn": secret("DYNAMODB_ROLE_ARN"),
+})
+A DynamoDB connection takes a
+region
+and an
+arn
+. The
+arn
+is the IAM role Tinybird assumes to read your table, its stream, and the S3 export bucket. Both fields are required.
+Datasource ingestion config
+¶
+You can attach Kafka, S3, GCS, or DynamoDB ingestion directly to a Data Source:
+from tinybird_sdk import define_datasource, engine, t
+
+kafka_events = define_datasource("kafka_events", {
+    "schema": {
+        "timestamp": t.date_time(),
+        "payload": t.string(),
+    },
+    "engine": engine.merge_tree({"sorting_key": ["timestamp"]}),
+    "kafka": {
+        "connection": events_kafka,
+        "topic": "events",
+        "group_id": "events-consumer",
+    },
+})
+DynamoDB
+¶
+The DynamoDB connector mirrors an Amazon DynamoDB table into Tinybird: an initial backfill via a Point-in-Time Recovery export to S3, followed by continuous Change Data Capture from DynamoDB Streams. See the
+DynamoDB connector
+page for the table requirements and IAM setup.
+Defining the connection in code isn't enough. Tinybird assumes an IAM role in your own AWS account, and the role's trust policy must include a Workspace-specific external ID that only Tinybird generates. Run
+tinybird connection create dynamodb
+to get the external ID, the
+Principal
+account, and the policy JSON, then create the role in AWS and store its ARN as the
+DYNAMODB_ROLE_ARN
+secret (see below). Without the correct external ID,
+deploy
+fails with a
+403 ... external ID
+error. See the
+DynamoDB connector
+page for the full setup.
+Each row in the Data Source represents a
+change
+to your table, not the current state. To keep its size under control DynamoDB Data Sources use the
+ReplacingMergeTree
+engine
+. See
+Querying the data
+below for considerations.
+from tinybird_sdk import column, define_datasource, engine, t
+
+orders = define_datasource("orders", {
+    "schema": {
+        "id": column(t.string(), {"json_path": "$.Item.id"}),
+        "_record": column(t.string(), {"json_path": "$.NewImage"}),
+        "_timestamp": column(t.date_time64(3), {"json_path": "$.ApproximateCreationDateTime"}),
+        "_event_name": column(t.string().low_cardinality(), {"json_path": "$.eventName"}),
+        "_is_deleted": column(t.uint8(), {"json_path": "$._is_deleted"}),
+    },
+    "engine": engine.replacing_merge_tree({
+        "sorting_key": ["id"],
+        "ver": "_timestamp",
+        "is_deleted": "_is_deleted",
+    }),
+    "dynamodb": {
+        "connection": events_dynamodb,
+        "table_arn": "arn:aws:dynamodb:us-east-1:123456789012:table/orders",
+        "export_bucket": "s3://my-tinybird-dynamodb-exports",
+    },
+})
+Set the role ARN secret before deploying
+¶
+secret("DYNAMODB_ROLE_ARN")
+resolves to a
+secret
+that must already exist in the target Workspace. Set it before you deploy:
+tinybird --cloud secret set DYNAMODB_ROLE_ARN "arn:aws:iam::123456789012:role/TinybirdRole"
+tinybird --cloud secret ls
+CLI commands such as
+secret set
+and
+deploy
+authenticate separately from the runtime client. They use the Workspace admin Token from
+tinybird login
+(or an explicit
+--token
+/
+--host
+), not the
+TINYBIRD_TOKEN
+in
+.env.local
+.
+.env.local
+feeds only the
+Tinybird(...)
+runtime client.
+If
+deploy
+or
+secret
+reports
+Forbidden: invalid authentication token
+, or runs against an unexpected Workspace, the CLI is using a stale or foreign Token rather than your
+.env.local
+. Re-run
+tinybird login
+, or pass the Workspace admin Token explicitly:
+tinybird --cloud --host https://api.tinybird.co \
+  --token "<workspace-admin-token>" deploy --check
+secret set
+and
+deploy
+are Workspace operations, so they need the Workspace admin Token, not an Organization or user Token.
+Runtime client
+¶
+Create a typed runtime client with
+Tinybird
+:
+from tinybird_sdk import Tinybird
+from .resources import page_views, top_pages
+
+tinybird = Tinybird({
+    "datasources": {"page_views": page_views},
+    "pipes": {"top_pages": top_pages},
+})
+Then ingest and query:
+tinybird.page_views.ingest({
+    "timestamp": "2026-01-01 10:00:00",
+    "pathname": "/home",
+    "session_id": "abc123",
+})
+
+result = tinybird.top_pages.query({
+    "start_date": "2026-01-01 00:00:00",
+    "end_date": "2026-01-02 00:00:00",
+    "limit": 5,
+})
+Next steps
+¶
+Review CLI commands:
+Python SDK CLI commands
+Follow the setup and deployment flow:
+Quick start: Python SDK
+Updated
+5 days ago
+Looking for Classic docs?
+On this page
+Python SDK resources
+Project layout
+Configure credentials
+Tokens
+Datasources
+Column JSON paths
+Endpoints
+Pipes
+Materialized views
+Copy pipes
+Sink pipes
+Connections
+Datasource ingestion config
+DynamoDB
+Runtime client
+Next steps
+forward
+Ask AI

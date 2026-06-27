@@ -1,0 +1,126 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions-troubleshooting
+
+Function-specific issues · Tinybird Docs
+Sign In
+Sign Up
+Function-specific issues
+¶
+Copy as MD
+Common issues and solutions when working with specific function types in ClickHouse and Tinybird.
+Overview
+¶
+This section covers troubleshooting for specific function categories that commonly cause issues in ClickHouse and Tinybird.
+Function categories
+¶
+Date and time functions
+¶
+Common issues with date and time operations:
+ILLEGAL_TYPE_OF_ARGUMENT
+- Wrong data types passed to date functions
+CANNOT_PARSE_DATETIME
+- Invalid date formats
+Timezone handling
+- Unexpected timezone conversions
+Date arithmetic
+- Performance issues in Pipes
+View date and time troubleshooting →
+String manipulation
+¶
+Common issues with string operations:
+ILLEGAL_TYPE_OF_ARGUMENT
+- Non-string data passed to string functions
+BAD_ARGUMENTS
+- String index out of bounds
+UTF-8 encoding
+- Special character handling
+String concatenation
+- Type conversion issues
+View string manipulation troubleshooting →
+Array operations
+¶
+Common issues with array functions:
+SIZES_OF_ARRAYS_DONT_MATCH
+- Arrays of different lengths
+ZERO_ARRAY_OR_TUPLE_INDEX
+- 0-based indexing (should be 1-based)
+Nested arrays
+- Complex nested structure handling
+Array type mismatches
+- Mixed element types
+View array operations troubleshooting →
+Join keys and aliases
+¶
+Common issues with joins and aliases:
+INVALID_JOIN_ON_EXPRESSION
+- Incorrect join conditions
+AMBIGUOUS_COLUMN_NAME
+- Same column name in multiple tables
+Type mismatches
+- Different data types in join keys
+Nullable join keys
+- Handling null values in joins
+View join keys and aliases troubleshooting →
+Common patterns
+¶
+Type conversion issues
+¶
+Many function errors stem from type conversion problems:
+Check data types
+- Use
+toTypeName()
+to verify types
+Use safe conversions
+- Use
+toTypeOrNull()
+functions
+Handle nulls explicitly
+- Check for null values before operations
+Validate inputs
+- Ensure data meets function requirements
+Performance considerations
+¶
+Function usage can impact performance:
+Pre-calculate in data sources
+- Do heavy operations in data sources
+Use intermediate columns
+- Break down complex operations
+Avoid chaining
+- Limit function chaining in queries
+Monitor resource usage
+- Watch for memory and CPU impact
+Best practices
+¶
+Always validate inputs
+- Check data types and values before function calls
+Use safe functions
+- Prefer functions that handle errors gracefully
+Test with sample data
+- Verify function behavior with real data
+Document function usage
+- Keep track of function patterns and solutions
+Monitor performance
+- Watch for function-related performance issues
+Related documentation
+¶
+SQL functions reference
+Data types
+Common error patterns
+ClickHouse errors
+Updated
+7 months ago
+On this page
+Function-specific issues
+Overview
+Function categories
+Date and time functions
+String manipulation
+Array operations
+Join keys and aliases
+Common patterns
+Type conversion issues
+Performance considerations
+Best practices
+Related documentation
+forward
+classic
+Ask AI

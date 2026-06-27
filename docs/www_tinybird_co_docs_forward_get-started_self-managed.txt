@@ -1,0 +1,79 @@
+Source: https://www.tinybird.co/docs/forward/get-started/self-managed
+
+Self-managed · Tinybird Docs
+Sign In
+Sign Up
+Self-managed
+¶
+Copy as MD
+By default, Tinybird runs on
+Tinybird managed regions
+. Self-managed regions let you run Tinybird infrastructure in your own cloud environment while Tinybird Cloud manages the control plane. Use them when you need control over data residency, compliance requirements, or infrastructure costs.
+Self-managed regions are currently in beta. Use them for development environments only; avoid production workloads. Features, requirements, and implementation details might change as we continue to improve this capability.
+Key benefits
+¶
+Key benefits of self-managed regions include:
+Data sovereignty and compliance: Keep your data in specific geographic locations to meet regulatory requirements.
+Integration: Connect directly to your existing data sources and internal systems without data leaving your network.
+Infrastructure control: Tune hardware resources for your workload patterns.
+Cost efficiency: Avoid egress fees and use your existing cloud commitments and reserved instances.
+Limitations
+¶
+Self-managed regions have some limitations compared to Tinybird managed regions:
+You are responsible for infrastructure maintenance, scaling, and security.
+Some advanced features may require additional configuration.
+Performance tuning and optimization are your responsibility.
+Upgrades must be managed manually by redeploying with newer container versions.
+How self-managed regions work
+¶
+When you set up a self-managed region:
+You register a region with Tinybird Cloud.
+You deploy the Tinybird Local container in your cloud environment.
+You interact with your self-managed region directly using the Tinybird CLI with the
+--cloud
+flag.
+This approach keeps your data and infrastructure in your cloud environment while Tinybird Cloud manages the region metadata.
+Add a self-managed region
+¶
+There are two main ways to create a self-managed region:
+Manually
+: See
+Create a self-managed region manually
+.
+Using the CLI
+: See
+Use the CLI to add a self-managed region
+.
+Supported clouds
+¶
+The following cloud service providers are supported:
+AWS
+GCP (Coming soon)
+Azure (Coming soon)
+You can also create a self-managed region by deploying the container on the following Platform as a Service (PaaS) providers:
+Fly.io
+Zeet
+Google Cloud Run
+CloudFoundry
+Azure Container Instances
+DigitalOcean App Platform
+When deploying Tinybird Local on a PaaS, make sure to expose the following environment variables to the container:
+TB_INFRA_TOKEN
+TB_INFRA_WORKSPACE
+TB_INFRA_ORGANIZATION
+TB_INFRA_USER
+See
+tb infra
+for more information.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Self-managed
+Key benefits
+Limitations
+How self-managed regions work
+Add a self-managed region
+Supported clouds
+forward
+Ask AI

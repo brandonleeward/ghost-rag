@@ -1,0 +1,166 @@
+Source: https://www.tinybird.com/docs/classic/get-data-in/events-api
+
+Classic: Events API · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Events API
+¶
+Copy as MD
+The Events API enables high-throughput streaming ingestion into Tinybird from an easy-to-use HTTP API.
+This page gives examples of how to use the Events API to perform various tasks. For more information, read the
+Events API Reference
+docs.
+Send individual JSON events
+¶
+You can send individual JSON events to the Events API by including the JSON event in the Request body.
+Supported event format is NDJSON (newline delimited JSON).
+For example, to send an individual NDJSON event using cURL:
+Sending individual NDJSON events
+curl \
+-H "Authorization: Bearer <DATASOURCE:APPEND token>" \
+-d '{"date": "2020-04-05 00:05:38", "city": "Chicago"}' \
+'https://<your_host>/v0/events?name=events_test'
+The
+name
+parameter defines the name of the Data Source in which to insert events. If the Data Source doesn't exist, Tinybird creates the Data Source by inferring the schema of the JSON.
+The Token used to send data to the Events API needs the appropriate scopes. To append data to an existing Data Source, the
+DATASOURCE:APPEND
+scope is required. If the Data Source doesn't already exist, the
+DATASOURCE:CREATE
+scope is required to create the new Data Source.
+Define the schema
+¶
+Defining your schema allows you to set data types, sorting key, TTL and more. Read the
+schema definition docs here
+.
+Send batches of JSON events
+¶
+Sending batches of events enables you to achieve much higher total throughput than sending individual events.
+You can send batches of JSON events to the Events API by formatting the events as NDJSON (newline delimited JSON). Each individual JSON event should be separated by a newline (
+\n
+) character.
+Sending batches of JSON events
+curl \
+-H "Authorization: Bearer <import_token>" \
+-d $'{"date": "2020-04-05 00:05:38", "city": "Chicago"}\n{"date": "2020-04-05 00:07:22", "city": "Madrid"}\n' \
+'https://<your_host>/v0/events?name=events_test'
+The
+name
+parameter defines the name of the Data Source in which to insert events. If the Data Source doesn't exist, Tinybird creates the Data Source by inferring the schema of the JSON.
+The Token used to send data to the Events API must have the appropriate scopes. To append data to an existing Data Source, the
+DATASOURCE:APPEND
+scope is required. If the Data Source doesn't already exist, the
+DATASOURCE:CREATE
+scope is required to create the new Data Source.
+Limits
+¶
+The Events API delivers a default capacity of:
+Up to 100 requests/second per Data Source
+Up to 10 MB per request per Data Source for free users and up to 100 MB on Developer and Enterprise plans
+If you reach this limit you'll receive a
+HTTP 413 - Request Entity Too Large
+error. For larger requests, we recommend splitting them into multiple smaller ones to ensure smooth data ingestion.
+Throughput beyond these limits is offered as best-effort.
+The Events API is able to scale beyond these limits. If you are reaching these limits, contact
+support@tinybird.co
+.
+Rate limit headers
+Header Name
+Description
+X-RateLimit-Limit
+The maximum number of requests you're permitted to make in the current limit window.
+X-RateLimit-Remaining
+The number of requests remaining in the current rate limit window.
+X-RateLimit-Reset
+The time in seconds after the current rate limit window resets.
+Retry-After
+The time to wait before making a another request. Only present on 429 responses.
+Events API is a high-throughput streaming ingestion and as a distributed system, the values in these headers are offered as best-effort.
+Check the payload size
+¶
+To avoid hitting the request limit size, you can check your payload size before sending. For example:
+shell
+python
+js
+echo '{"date": "2020-04-05", "city": "Chicago"}' | wc -c | awk '{print $1/1024/1024 " MB"}'
+Compression
+¶
+NDJSON events sent to the Events API can be compressed with Gzip or Zstandard. However, it's only recommended to do this when necessary, such as when you have big events that are grouped into large batches. Compressing events adds overhead to the ingestion process, which can introduce latency, although it's typically minimal.
+Here is an example of sending a JSON event compressed with Gzip from the command line:
+echo '{"timestamp":"2022-10-27T11:43:02.099Z","transaction_id":"8d1e1533-6071-4b10-9cda-b8429c1c7a67","name":"Bobby Drake","email":"bobby.drake@pressure.io","age":42,"passport_number":3847665,"flight_from":"Barcelona","flight_to":"London","extra_bags":1,"flight_class":"economy","priority_boarding":false,"meal_choice":"vegetarian","seat_number":"15D","airline":"Red Balloon"}' | gzip > body.gz 
+
+curl \
+    -X POST 'https://<your_host>/v0/events?name=gzip_events_example' \
+    -H "Authorization: Bearer <AUTH_TOKEN>." \
+    -H "Content-Encoding: gzip" \
+    --data-binary @body.gz
+Here is an example of sending a single NDJSON event, compressed with Zstandard, using a pipe from the command line:
+echo '{"timestamp":"2022-10-27T11:43:02.099Z","transaction_id":"8d1e1533-6071-4b10-9cda-b8429c1c7a67","name":"Bobby Drake","email":"bobby.drake@pressure.io","age":42,"passport_number":3847665,"flight_from":"Barcelona","flight_to":"London","extra_bags":1,"flight_class":"economy","priority_boarding":false,"meal_choice":"vegetarian","seat_number":"15D","airline":"Red Balloon"}' |
+    | zstd \
+    | curl \
+        -X POST 'https://<your_host>/v0/events?name=zstd_events_example' \
+        -H "Authorization: Bearer <AUTH_TOKEN>" \
+        -H "Content-Encoding: zstd" \
+        --data-binary @-
+Write acknowledgements
+¶
+When you send data to the Events API, you usually receive a
+HTTP202
+response, which indicates that the request was successful - however it doesn't confirm that the data has been committed into the underlying database. This is useful when guarantees on writes aren't strictly necessary. Typically, it should take under 2 seconds to receive a response from the Events API in this case.
+curl \
+    -X POST 'https://<your_host>/v0/events?name=events_example' \
+    -H "Authorization: Bearer <AUTH_TOKEN>" \
+    -d $'{"timestamp":"2022-10-27T11:43:02.099Z"}'
+
+< HTTP/2 202 
+< content-type: application/json
+< content-length: 42
+< 
+{"successful_rows":2,"quarantined_rows":0}
+However, if your use case requires absolute guarantees that data is committed, use the
+wait
+parameter.
+The
+wait
+parameter is a boolean that accepts a value of
+true
+or
+false
+. A value of
+false
+is the default behavior, equivalent to omitting the parameter entirely.
+Using
+wait=true
+with your request will ask the Events API to wait for acknowledgement that the data you sent has been committed into the underlying database. You will receive a
+HTTP200
+response that confirms data has been committed.
+Note that adding
+wait=true
+to your request can result in a slower response time. Use a time-out of at least 10 seconds when waiting for the response.
+For example:
+curl \
+    -X POST 'https://<your_host>/v0/events?name=events_example&wait=true' \
+    -H "Authorization: Bearer <AUTH_TOKEN>" \
+    -d $'{"timestamp":"2022-10-27T11:43:02.099Z"}'
+
+< HTTP/2 200 
+< content-type: application/json
+< content-length: 42
+< 
+{"successful_rows":2,"quarantined_rows":0}
+It is good practice to log your requests to, and responses from, the Events API. This will help to give you visibility into any failures for reporting or recovery.
+Updated
+9 months ago
+On this page
+Events API
+Send individual JSON events
+Define the schema
+Send batches of JSON events
+Limits
+Check the payload size
+Compression
+Write acknowledgements
+classic
+Ask AI

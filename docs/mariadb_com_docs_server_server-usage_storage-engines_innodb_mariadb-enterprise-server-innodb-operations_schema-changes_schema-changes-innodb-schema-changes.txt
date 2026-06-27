@@ -1,0 +1,168 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/innodb/mariadb-enterprise-server-innodb-operations/schema-changes/schema-changes-innodb-schema-changes
+
+InnoDB Schema Changes | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+InnoDB Introduction
+InnoDB File Format
+InnoDB Limitations
+AUTO_INCREMENT Handling in InnoDB
+Binary Log Group Commit and InnoDB Flushing Performance
+InnoDB Asynchronous I/O
+InnoDB Buffer Pool
+InnoDB Change Buffering
+InnoDB Data Scrubbing
+InnoDB Doublewrite Buffer
+InnoDB Flush Method
+InnoDB Lock Modes
+InnoDB Log Archiving
+InnoDB Monitors
+InnoDB Page Compression
+InnoDB Page Flushing
+InnoDB Purge
+InnoDB Undo Log
+InnoDB Redo Log
+InnoDB Strict Mode
+InnoDB System Variables
+InnoDB Versions
+InnoDB Architecture for MariaDB Enterprise Server
+InnoDB Online DDL
+InnoDB Row Formats
+InnoDB Tablespaces
+InnoDB Troubleshooting
+MariaDB Enterprise Server InnoDB Operations
+Configure the InnoDB Buffer Pool
+Configure the InnoDB I/O Threads
+Configure the InnoDB Purge Threads
+Configure the InnoDB Redo Log
+Configure the InnoDB Undo Log
+Schema Changes
+InnoDB Schema Changes
+InnoDB - Unmaintained
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+InnoDB Schema Changes
+A detailed reference list of specific schema change operations (like adding columns or indexes) and their compatibility with INSTANT, INPLACE, and NOCOPY algorithms.
+MariaDB Enterprise Server InnoDB Schema Changes with the INPLACE Algorithm
+Changes in enterprise databases and applications are inevitable. Schema changes often block other workloads, incur unique production situations that cannot be fully simulated for testing, and may have unpredictable execution times.
+MariaDB Enterprise Server includes the In-place
+ALTER
+functionality for the InnoDB storage engine, such that:
+When possible, schema change operations are performed
+INPLACE
+, minimizing impact on other workloads.
+When the
+alter_algorithm
+system variable is set to
+INPLACE
+, schema change operations will not run unless they can be performed
+INPLACE
+, minimizing the risk of unpredictable behavior.
+Additional information is available
+here
+.
+MariaDB Enterprise Server InnoDB Schema Changes with the INSTANT Algorithm
+Changes in enterprise databases and applications are inevitable. Schema changes often block other workloads, incur unique production situations that cannot be fully simulated for testing, and may have unpredictable execution times.
+MariaDB Enterprise Server includes the Instant
+ALTER
+functionality for the InnoDB storage engine, such that:
+When possible, schema change operations are performed
+INSTANT
+, minimizing impact on other workloads.
+When the
+alter_algorithm
+system variable is set to
+INSTANT
+, schema change operations will not run unless they can be performed
+INSTANT
+, minimizing the risk of unpredictable behavior.
+Additional information is available
+here
+.
+MariaDB Enterprise Server InnoDB Schema Changes with the NOCOPY Algorithm
+Changes in enterprise databases and applications are inevitable. Schema changes often block other workloads, incur unique production situations that cannot be fully simulated for testing, and may have unpredictable execution times.
+MariaDB Enterprise Server includes the No-copy
+ALTER
+functionality for the InnoDB storage engine, such that:
+When possible, schema change operations are performed
+NOCOPY
+, minimizing impact on other workloads.
+When the alter_algorithm system variable is set to
+NOCOPY
+, schema change operations will not run unless they can be performed
+NOCOPY
+, minimizing the risk of unpredictable behavior.
+Additional information is available
+here
+.
+This page is: Copyright © 2025 MariaDB. All rights reserved.
+spinner
+Previous
+Schema Changes
+Next
+InnoDB - Unmaintained
+Last updated
+1 year ago
+Was this helpful?
+MariaDB Enterprise Server InnoDB Schema Changes with the INPLACE Algorithm
+MariaDB Enterprise Server InnoDB Schema Changes with the INSTANT Algorithm
+MariaDB Enterprise Server InnoDB Schema Changes with the NOCOPY Algorithm
+Was this helpful?

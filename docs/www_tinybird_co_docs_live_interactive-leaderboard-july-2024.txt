@@ -1,0 +1,33 @@
+Source: https://www.tinybird.com/docs/live/interactive-leaderboard-july-2024
+
+Build an Interactive Leaderboard for your SaaS · Tinybird
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+← Back to Live
+Build an Interactive Leaderboard for your SaaS
+A technical course for developers looking to build dashboards for their SaaS product.
+Why do people love apps like Peloton and Strava so much? Because real-time feedback is highly motivating, and both companies have incorporated high-quality, interactive leaderboards into their user experiences.
+Join this workshop to learn how to incorporate real-time, interactive leaderboards into your SaaS app. We'll augment a game built with React to include a few real-time charts to help motivate our users to go faster and perform better.
+In this workshop, you'll learn how to:
+Stream events from your React app to Tinybird using just a few lines of code
+Build highly optimized SQL queries for performance and speed
+Publish SQL queries as REST APIs and integrate them into your app
+Build real-time chart components using remote and in-session data to motivate your users
+Secure requests made from your app using JWTs and row-level security policies
+Have questions?
+Join us on Slack
+Start building
+Live coding session
+When:
+July 23, 2024 at 15:00 UTC
+Duration:
+60 minutes
+Who:
+Cameron Archer
+Product Marketing Manager
+Start building
+Ask AI
+Search...

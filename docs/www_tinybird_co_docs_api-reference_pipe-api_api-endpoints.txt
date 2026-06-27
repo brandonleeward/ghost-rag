@@ -1,0 +1,211 @@
+Source: https://www.tinybird.com/docs/api-reference/pipe-api/api-endpoints
+
+Pipes API endpoints reference · Tinybird Docs
+Sign In
+Sign Up
+Pipes API endpoint service
+¶
+Copy as MD
+The API host in the following examples must match your Workspace's region. See the full list of
+regions and hosts
+The Pipes API helps you interact with your Pipes. Several services are included under Pipes:
+Pipes
+: List, create, update, or delete your Tinybird Pipes.
+API Endpoints
+: Publish or unpublish your Pipes as API Endpoints.
+Materialized Views and Populates
+: Create, delete, or populate Materialized Views.
+Scheduled Copy (Copy Pipes API)
+: Create, delete, schedule, and trigger Copy jobs.
+Adding or modifying pipes or data sources in
+Tinybird Local
+and
+Tinybird Forward
+can only be done through deployments.
+API Endpoints
+¶
+POST
+/v0/pipes/(.+)/nodes/(.+)/endpoint
+¶
+Publishes an API endpoint
+Publishing an endpoint
+¶
+curl
+-X
+POST
+\
+-H
+"Authorization: Bearer <PIPE:CREATE token>"
+\
+"
+https://<your_host>
+/v0/pipes/:pipe/nodes/:node/endpoint"
+Successful response
+¶
+{
+"id"
+:
+"t_60d8f84ce5d349b28160013ce99758c7"
+,
+"name"
+:
+"my_pipe"
+,
+"description"
+:
+"this is my pipe description"
+,
+"nodes"
+:
+[{
+"id"
+:
+"t_bd1e095da943494d9410a812b24cea81"
+,
+"name"
+:
+"get_all"
+,
+"sql"
+:
+"SELECT * FROM my_datasource"
+,
+"description"
+:
+"This is a description for the **first** node"
+,
+"materialized"
+:
+null
+,
+"dependencies"
+:
+[
+"my_datasource"
+],
+"tags"
+:
+{},
+"created_at"
+:
+"2019-09-03 19:56:03.704840"
+,
+"updated_at"
+:
+"2019-09-04 07:05:53.191437"
+,
+"version"
+:
+0
+,
+"project"
+:
+null
+,
+"result"
+:
+null
+,
+"ignore_sql_errors"
+:
+false
+}],
+"endpoint"
+:
+"t_bd1e095da943494d9410a812b24cea81"
+,
+"created_at"
+:
+"2019-09-03 19:56:03.193446"
+,
+"updated_at"
+:
+"2019-09-10 07:18:39.797083"
+,
+"parent"
+:
+null
+}
+The response will contain a
+token
+if there’s a
+unique READ token
+for this pipe. You could use this token to share your endpoint.
+Response codes
+¶
+Code
+Description
+200
+No error
+400
+Wrong node id
+403
+Forbidden. Provided token doesn’t have permissions to publish a pipe, it needs
+ADMIN
+or
+PIPE:CREATE
+404
+Pipe not found
+DELETE
+/v0/pipes/(.+)/nodes/(.+)/endpoint
+¶
+Unpublishes an API endpoint
+Unpublishing an endpoint
+¶
+curl
+-X
+DELETE
+\
+-H
+"Authorization: Bearer <PIPE:CREATE token>"
+\
+"
+https://<your_host>
+/v0/pipes/:pipe/nodes/:node/endpoint"
+Response codes
+¶
+Code
+Description
+200
+No error
+400
+Wrong node id
+403
+Forbidden. Provided token doesn’t have permissions to publish a pipe, it needs
+ADMIN
+or
+PIPE:CREATE
+404
+Pipe not found
+Response formats
+¶
+API Endpoints support multiple response formats, which can be specified by appending the format extension to the endpoint URL:
+.json
+- Returns data in JSON format (default)
+.csv
+- Returns data in CSV format
+.csvwithnames
+- Returns data in CSV format with column headers
+.ndjson
+- Returns data as newline-delimited JSON
+.parquet
+- Returns data in Parquet format
+.prometheus
+- Returns data in Prometheus format (requires specific data structure)
+Examples of endpoints with different formats
+https://<your_host>/v0/pipes/your_pipe_name.json
+https://<your_host>/v0/pipes/your_pipe_name.csv
+https://<your_host>/v0/pipes/your_pipe_name.ndjson
+https://<your_host>/v0/pipes/your_pipe_name.parquet
+https://<your_host>/v0/pipes/your_pipe_name.prometheus
+Updated
+1 month ago
+On this page
+Pipes API endpoint service
+API Endpoints
+POST /v0/pipes/(.+)/nodes/(.+)/endpoint
+DELETE /v0/pipes/(.+)/nodes/(.+)/endpoint
+Response formats
+forward
+classic
+Ask AI

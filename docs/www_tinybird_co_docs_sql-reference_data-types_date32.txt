@@ -1,0 +1,20 @@
+Source: https://www.tinybird.com/docs/sql-reference/data-types/date32
+
+Date32 Data Type reference · Tinybird Docs
+Sign In
+Sign Up
+Date32
+¶
+Copy as MD
+The
+Date32
+data type stores a calendar date, supporting a wide range of dates similar to
+DateTime64
+. It is internally represented as a signed 32-bit integer, where the value signifies the number of days that have passed since January 1, 1970. Negative values represent dates before January 1, 1970.
+Updated
+4 months ago
+On this page
+Date32
+forward
+classic
+Ask AI

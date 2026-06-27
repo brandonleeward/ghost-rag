@@ -1,0 +1,124 @@
+Source: https://www.tinybird.com/docs/sql-reference/ingestion/cannot-parse-date
+
+Cannot parse date troubleshooting · Tinybird Docs
+Sign In
+Sign Up
+Cannot parse date troubleshooting
+¶
+Copy as MD
+Common issues and solutions for date parsing problems in ClickHouse and Tinybird.
+Common errors
+¶
+CANNOT_PARSE_DATE
+¶
+Error
+:
+CANNOT_PARSE_DATE: Cannot parse date from string "invalid_date"
+Cause
+: Date string in unexpected format
+Solution
+: Use proper date format or handle invalid dates
+-- Handle invalid dates
+SELECT toDateOrNull(date_string) as safe_date
+FROM events
+CANNOT_PARSE_DATETIME
+¶
+Error
+:
+CANNOT_PARSE_DATETIME: Cannot parse DateTime from string "invalid_datetime"
+Cause
+: DateTime string in unexpected format
+Solution
+: Use proper DateTime format
+-- Use specific format
+SELECT toDateTime(date_string, 'YYYY-MM-DD HH:MM:SS') as parsed_datetime
+FROM events
+Date format issues
+¶
+Unexpected date formats
+¶
+Issue
+: Dates in non-standard format
+Solution
+: Use parseDateTimeBestEffort or specific format
+-- Use best effort parsing
+SELECT parseDateTimeBestEffort(date_string) as parsed_date
+FROM events
+
+-- Or use specific format
+SELECT toDateTime(date_string, 'MM/DD/YYYY HH:MM:SS') as parsed_date
+FROM events
+Timezone issues
+¶
+Issue
+: Dates with timezone information
+Solution
+: Handle timezones explicitly
+-- Parse with timezone
+SELECT toDateTime(date_string, 'UTC') as utc_datetime
+FROM events
+Data validation
+¶
+Mixed date formats
+¶
+Issue
+: Same column has different date formats
+Solution
+: Handle multiple formats
+-- Handle multiple date formats
+SELECT
+  CASE
+    WHEN toDateOrNull(date_string) IS NOT NULL THEN toDate(date_string)
+    WHEN parseDateTimeBestEffort(date_string) IS NOT NULL
+      THEN toDate(parseDateTimeBestEffort(date_string))
+    ELSE NULL
+  END as parsed_date
+FROM events
+Invalid date values
+¶
+Issue
+: Date strings that can't be parsed
+Solution
+: Use safe parsing functions
+-- Use safe parsing
+SELECT toDateOrNull(date_string) as safe_date
+FROM events
+WHERE toDateOrNull(date_string) IS NOT NULL
+Best practices
+¶
+Use safe parsing
+- Use
+toDateOrNull()
+instead of
+toDate()
+Handle timezones
+- Be explicit about timezone handling
+Validate dates
+- Check date format before parsing
+Use consistent formats
+- Standardize date formats in data
+Handle edge cases
+- Account for invalid or missing dates
+Related documentation
+¶
+Date and time functions
+Data types
+Common error patterns
+Updated
+7 months ago
+On this page
+Cannot parse date troubleshooting
+Common errors
+CANNOT_PARSE_DATE
+CANNOT_PARSE_DATETIME
+Date format issues
+Unexpected date formats
+Timezone issues
+Data validation
+Mixed date formats
+Invalid date values
+Best practices
+Related documentation
+forward
+classic
+Ask AI

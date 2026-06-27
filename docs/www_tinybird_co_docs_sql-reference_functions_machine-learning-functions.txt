@@ -1,0 +1,128 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/machine-learning-functions
+
+Machine Learning Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Machine Learning functions
+¶
+Copy as MD
+The following functions are used for machine learning tasks, primarily for training and applying linear and logistic regression models.
+evalMLMethod
+¶
+Applies a previously trained machine learning model to new input features to generate a prediction. This function is used to make inferences after a model has been trained using an aggregate function like
+stochasticLinearRegressionState
+or
+stochasticLogisticRegressionState
+.
+Syntax
+¶
+evalMLMethod(model_state, feature1, feature2, ...)
+Arguments
+¶
+model_state
+:
+AggregateFunctionState
+. The internal state of a trained machine learning model, typically obtained from an aggregate function.
+feature1
+,
+feature2
+, ...:
+Numeric
+. One or more input features for which to make a prediction.
+Returns
+¶
+The predicted numerical value from the model.
+Float64
+.
+stochasticLinearRegression
+¶
+An aggregate function that trains a linear regression model using the stochastic gradient descent method. It aims to minimize the mean squared error (MSE) loss function. The result of this aggregate function is a model state that can then be used with
+evalMLMethod
+for predictions.
+Syntax
+¶
+stochasticLinearRegression(learning_rate, L1, L2, no_bias, target, feature1, feature2, ...)
+Arguments
+¶
+learning_rate
+:
+Float64
+. The step size at each iteration while moving toward a minimum of the loss function.
+L1
+:
+Float64
+. The L1 regularization parameter.
+L2
+:
+Float64
+. The L2 regularization parameter.
+no_bias
+:
+UInt8
+. A flag (0 or 1) to indicate whether to exclude the bias term from the model.
+target
+:
+Numeric
+. The dependent variable (label) for training.
+feature1
+,
+feature2
+, ...:
+Numeric
+. One or more independent variables (features) for training.
+Returns
+¶
+An internal state representing the trained linear regression model.
+AggregateFunctionState
+.
+stochasticLogisticRegression
+¶
+An aggregate function that trains a logistic regression model using the stochastic gradient descent method, primarily for binary classification problems. The output is a model state that can be used with
+evalMLMethod
+to predict class probabilities.
+Syntax
+¶
+stochasticLogisticRegression(learning_rate, L1, L2, no_bias, target, feature1, feature2, ...)
+Arguments
+¶
+learning_rate
+:
+Float64
+. The step size at each iteration while moving toward a minimum of the loss function.
+L1
+:
+Float64
+. The L1 regularization parameter.
+L2
+:
+Float64
+. The L2 regularization parameter.
+no_bias
+:
+UInt8
+. A flag (0 or 1) to indicate whether to exclude the bias term from the model.
+target
+:
+Numeric
+. The dependent variable (label) for training, typically 0 or 1 for binary classification.
+feature1
+,
+feature2
+, ...:
+Numeric
+. One or more independent variables (features) for training.
+Returns
+¶
+An internal state representing the trained logistic regression model.
+AggregateFunctionState
+.
+Updated
+4 months ago
+On this page
+Machine Learning functions
+evalMLMethod
+stochasticLinearRegression
+stochasticLogisticRegression
+forward
+classic
+Ask AI

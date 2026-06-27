@@ -1,0 +1,400 @@
+Source: https://www.tinybird.com/docs/administration/auth-tokens
+
+Classic: Authentication · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Tokens
+¶
+Copy as MD
+Tokens protect access to your Tinybird resources. Any operations to manage your Tinybird resources using the CLI or REST API require a valid Token with the necessary permissions. Access to the APIs you publish in Tinybird are also protected with Tokens.
+Tokens can have different scopes. This means you can limit which operations a specific Token can do. You can create Tokens that are, for example, only able to do admin operations on Tinybird resources, or only have READ permission for a specific Data Source.
+Tinybird represents tokens using the
+icon.
+Token types
+¶
+There are two types of tokens:
+Static
+tokens
+: Use them to perform operations on your account, like importing data, creating data sources, or publishing APIs using the CLI or REST API. Use them to read data as well, just be mindful of their permanent nature.
+JWT tokens
+: Use them to read from published endpoints that expose your data to an application, when you want to implement filtering per user via fixed parameters (RBAC) or to apply rate limiting for different end users of Tinybird endpoints.
+Static tokens
+¶
+Static tokens are permanent and long-term. They're stored inside Tinybird and don't have an expiration date or time. They will be valid until deleted or refreshed. They're useful for backend-to-backend integrations, where you call Tinybird as another service.
+Token scopes
+¶
+When a Token is created, you can give it a set of scopes that define which tables can be accessed by that Token, and which methods can be used to access them.
+A
+READ
+Token can be augmented with an SQL filter. A filter allows you to further restrict what data a Token grants access to. Using a filter, you can also
+implement row-level security
+on a READ-scoped Token.
+The following scopes are available:
+Value
+Description
+DATASOURCES:CREATE
+Enables your Token to create, append, and delete data in Data Sources.
+DATASOURCES:APPEND:datasource_name
+Allows your Token to append data to the defined Data Sources.
+DATASOURCES:DROP:datasource_name
+Allows your Token to delete the specified Data Sources.
+DATASOURCES:READ:datasource_name
+Gives your Token read permissions for the specified Data Sources. Also gives read for the quarantine Data Source.
+DATASOURCES:READ:datasource_name:sql_filter
+Gives your Token read permissions for the specified table with the sql_filter applied.
+PIPES:CREATE
+Allows your Token to create new Pipes and manipulate existing ones.
+PIPES:DROP:pipe_name
+Allows your Token to delete the specified Pipe.
+PIPES:READ:pipe_name
+Gives your Token read permissions for the specified Pipe.
+PIPES:READ:pipe_name:sql_filter
+Gives your Token read permissions for the specified Pipe with the sql_filter applied.
+TOKENS
+Allows your token to manage tokens.
+ADMIN
+All permissions are granted. Do not use this token except in exceptional circumstances.
+WORKSPACE:READ_ALL
+Gives your Token read permission to all workspace resources: datasources, pipes,
+tinybird.*
+service data sources, and
+system.*
+tables. Particularly useful for BI Tools.
+ORG_DATASOURCES:READ
+Gives your Token the capacity of reading
+organization service datasources
+, without using an org admin-level token.
+When adding the
+DATASOURCES:READ
+scope to a Token, it automatically gives read permissions to the
+quarantine Data Source
+associated with it.
+The
+:sql_filter
+suffix on resource-scoped tokens (e.g.
+DATASOURCES:READ:datasource_name:sql_filter
+and
+PIPES:READ:pipe_name:sql_filter
+) is not supported in
+Tinybird Forward
+and will result in an error.
+Applying Tokens with filters to queries that use the FINAL clause isn't supported. If you need to apply auth filters to deduplications, use an alternative strategy. See
+deduplication strategies
+.
+Default workspace tokens
+¶
+All workspaces are created with a set of basic tokens that you can add to by creating additional tokens:
+admin token
+for that workspace, used for signing JWTs.
+admin <your-email> token
+for that workspace that belongs specifically to your user account for CLI usage.
+create datasource token
+for creating data sources in that workspace.
+user token
+for creating new workspaces or deleting ones where you are an admin.
+Other Tokens are created automatically by Tinybird during certain operations like scheduled copies, and
+can be updated
+.
+User tokens
+¶
+Your user token is specific to your user account. It's a permanent token that lets you perform operations that aren't limited to a single workspace, such as creating new workspaces.
+Each user in your organization has their own user token. User tokens are not affected by deployments.
+View and manage tokens
+¶
+You can view your existing tokens in two ways:
+CLI
+: Run
+tb token ls
+to list all tokens in your workspace
+UI
+: Browse to the "Tokens" section in your Tinybird workspace
+Create a Token
+¶
+UI
+: Browse to Tokens section in your Tinybird workspace > Plus (+) icon. Rename the new Token and update its scopes using the previous table as a guide.
+CLI
+: Run
+tb token create static --help
+for options
+JSON Web tokens (JWTs)
+¶
+JWTs are signed tokens that allow you to independently and securely authorize and share data between your application and Tinybird.
+Unlike static tokens,
+JWTs are not stored in Tinybird
+. They're created by you, inside your application, and signed with a shared secret between your application and Tinybird. Tinybird validates the signature of the JWT, using the shared secret, to ensure it's authentic.
+A great use case for JWTs is when you want to allow your app to call Tinybird API endpoints directly from the browser without proxying through your backend.
+The typical pattern looks like this:
+A user starts a session in your application.
+The frontend requests a JWT from your backend.
+Your backend generates a new JWT, signed with the Tinybird shared secret, and returns to the frontend.
+The frontend uses the JWT to call the Tinybird API endpoints directly.
+JWT payload
+¶
+The payload of a JWT is a JSON object that contains the following fields:
+Key
+Example Value
+Required
+Description
+workspace_id
+workspaces_id
+Yes
+The UUID of your Tinybird workspace, found in the workspace list.
+name
+frontend_jwt
+Yes
+Used to identify the token in the
+tinybird.pipe_stats_rt
+table, useful for analytics. Doesn't need to be unique.
+exp
+123123123123
+Yes
+The Unix timestamp (UTC) showing the expiry date & time. After a token has expired, Tinybird returns a 403 HTTP status code.
+scopes
+[{"type": "PIPES:READ", "resource": "requests_per_day", "fixed_params": {"org_id": "testing"}}]
+Yes
+Used to pass data to Tinybird, including the Tinybird scope, resources and fixed parameters.
+scopes.type
+PIPES:READ
+Yes
+The type of scope, for example
+READ
+. See
+JWT scopes
+for supported scopes.
+scopes.resource
+t_b9427fe2bcd543d1a8923d18c094e8c1 or top_airlines
+Yes
+The ID or name of the pipe that the scope applies to, like which API endpoint the token can access.
+scopes.fixed_params
+{"org_id": "testing"}
+No
+Pass arbitrary fixed values to the API endpoint. These values can be accessed by pipe templates to supply dynamic values at query time.
+limits
+{"rps": 10}
+No
+You can limit the number of requests per second the JWT can perform. See
+JWT rate limit
+.
+Check out the
+JWT example
+to see what a complete payload looks like.
+JWT algorithm
+¶
+Tinybird always uses HS256 as the algorithm for JWTs and doesn't read the
+alg
+field in the JWT header. You can skip the
+alg
+field in the header.
+JWT scopes
+¶
+Value
+Description
+PIPES:READ:pipe_name
+Gives your token read permissions for the specified pipe
+JWT expiration
+¶
+JWTs can have an expiration time that gives each token a finite lifespan.
+Setting the
+exp
+field in the JWT payload is mandatory, and not setting it results in a 403 HTTP status code from Tinybird when requesting the API endpoint.
+Tinybird validates that a JWT hasn't expired before allowing access to the API endpoint.
+If a token has expired, Tinybird returns a 403 HTTP status code.
+JWT fixed parameters
+¶
+Fixed parameters allow you to pass arbitrary values to the API endpoint. These values can be accessed by pipe templates to supply dynamic values at query time.
+For example, consider the following API Endpoint that accepts a parameter called
+org
+that filters by the
+org_id
+column:
+example.pipe
+SELECT fieldA, fieldB FROM my_ds WHERE org_id = '{{ String(org) }}'
+TYPE ENDPOINT
+The following JWT payload passes a parameter called
+org
+with the value
+test_org
+to the API endpoint:
+Example fixed parameters
+{
+  "fixed_params": {
+    "org": "test_org"
+  }
+}
+This is particularly useful when you want to pass dynamic values to an API endpoint that are set by your backend and must be safe from user tampering. A good example is multi-tenant applications that require row-level security, where you need to filter data based on a user or tenant ID.
+The value for the
+org
+parameter is always the one specified in the
+fixed_params
+. Even if you specify a new value in the URL when requesting the endpoint, Tinybird always uses the one specified in the JWT.
+JWT example
+¶
+Consider the following payload with all
+required and optional fields
+:
+Example payload
+{
+    "workspace_id": "workspaces_id",
+    "name": "frontend_jwt",
+    "exp": 123123123123,
+    "scopes": [
+        {
+            "type": "PIPES:READ",
+            "resource": "requests_per_day",
+            "fixed_params": {
+                "org_id": "testing"
+            }
+        }
+    ],
+    "limits": {
+      "rps": 10
+    }
+}
+Use the workspace admin token as your signing key (
+TINYBIRD_SIGNING_KEY
+), for example:
+Example workspace admin token
+p.eyJ1IjogIjA1ZDhiYmI0LTdlYjctND...
+With the payload and admin token, the signed JWT payload would look like this:
+Example JWT
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ3b3Jrc3BhY2V...
+JWT limitations
+¶
+The following limitations apply to JWTs:
+You can't refresh JWTs individually from inside Tinybird as they aren't stored in Tinybird. You must do this from your application, or you can globally invalidate all JWTs by refreshing your admin token.
+If you refresh your admin token, all the tokens are invalidated.
+If your token expires or is invalidated, you get a 403 HTTP status code from Tinybird when requesting the API endpoint.
+Create a JWT in production
+¶
+There is wide support for creating JWTs in many programming languages and frameworks. Any library that supports JWTs should work with Tinybird.
+JavaScript (Next.js)
+Python
+Create a JWT in Python using pyjwt
+import jwt
+import datetime
+import os
+
+TINYBIRD_SIGNING_KEY = os.getenv('TINYBIRD_SIGNING_KEY')
+
+def generate_jwt():
+  expiration_time = datetime.datetime.utcnow() + datetime.timedelta(hours=3)
+  payload = {
+      "workspace_id": "workspaces_id",
+      "name": "frontend_jwt",
+      "exp": expiration_time,
+      "scopes": [
+          {
+              "type": "PIPES:READ",
+              "resource": "requests_per_day",
+              "fixed_params": {
+                  "org_id": "testing"
+              }
+          }
+      ]
+  }
+
+  return jwt.encode(payload, TINYBIRD_SIGNING_KEY, algorithm='HS256')
+Create a JWT token
+¶
+If for any reason you don't want to generate a JWT on your own, Tinybird provides a command and an endpoint to create a JWT token.
+API
+Tinybird CLI
+Create a JWT with the Tinybird CLI
+tb token create jwt my_jwt --ttl 1h --scope PIPES:READ --resource my_pipe --fixed-params "column_name=value"
+Error handling
+¶
+There are many reasons why a request might return a
+403
+status code. When a
+403
+is received, check the following:
+Confirm the JWT is valid and hasn't expired. The expiration time is in the
+exp
+field in the JWT's payload.
+The generated JWTs can only read Tinybird API endpoints. Confirm you're not trying to use the JWT to access other APIs.
+Confirm the JWT has a scope to read the endpoint you are trying to read.
+If you generated the JWT outside of Tinybird, without using the API or the CLI, make sure you are using the
+workspace
+admin token
+, not your personal one.
+Rate limits for JWTs
+¶
+Check the
+limits page
+for limits on ingestion, queries, API Endpoints, and more.
+When you specify a
+limits.rps
+field in the payload of the JWT, Tinybird uses the name specified in the payload of the JWT to track the number of requests being done. If the number of requests goes beyond the limit, Tinybird starts rejecting new requests and returns an "HTTP 429 Too Many Requests" error.
+The following example shows the tracking of all requests done by
+frontend_jwt
+. Once you reach 10 requests per second, Tinybird would start rejecting requests:
+Example payload with global rate limit
+{
+    "workspace_id": "workspaces_id",
+    "name": "frontend_jwt",
+    "exp": 123123123123,
+    "scopes": [
+        {
+            "type": "PIPES:READ",
+            "resource": "requests_per_day",
+            "fixed_params": {
+                "org_id": "testing"
+            }
+        }
+    ],
+    "limits": {
+      "rps": 10
+    }
+}
+If
+rps <= 0
+, Tinybird ignores the limit and assumes there is no limit.
+As the
+name
+field doesn't have to be unique, all the tokens generated using the
+name=frontend_jwt
+would be under the same umbrella. This can be useful if you want to have a global limit in one of your apps or components.
+If you want to limit for each specific user, you can generate a JWT using the following payload. In this case, you would specify a unique name so the limits only apply to each user:
+Example of a payload with isolated rate limit
+{
+    "workspace_id": "workspaces_id",
+    "name": "frontend_jwt_user_<unique identifier>",
+    "exp": 123123123123,
+    "scopes": [
+        {
+            "type": "PIPES:READ",
+            "resource": "requests_per_day",
+            "fixed_params": {
+                "org_id": "testing"
+            }
+        }
+    ],
+    "limits": {
+      "rps": 10
+    }
+}
+Next steps
+¶
+Learn about
+workspaces
+.
+Learn about
+endpoints
+.
+Using
+Clerk.com
+in your app?
+Let Clerk.com create your Tinybird JWTs automatically
+.
+Updated
+3 weeks ago
+On this page
+Tokens
+Token types
+Static tokens
+JSON Web tokens (JWTs)
+Next steps
+classic
+Ask AI

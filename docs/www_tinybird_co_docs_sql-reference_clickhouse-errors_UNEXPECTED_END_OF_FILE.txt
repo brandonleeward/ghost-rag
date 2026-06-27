@@ -1,0 +1,436 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/UNEXPECTED_END_OF_FILE
+
+UNEXPECTED_END_OF_FILE ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+UNEXPECTED_END_OF_FILE ClickHouse error
+¶
+Copy as MD
+This error occurs when ClickHouse encounters an unexpected end of file during data processing. It's common with corrupted data files, incomplete imports, or malformed data streams.
+The
+UNEXPECTED_END_OF_FILE
+error in ClickHouse (and Tinybird) happens when the system encounters an unexpected end of file during data processing operations. This typically occurs when data files are corrupted, incomplete, or malformed, or when data streams are interrupted unexpectedly during import operations.
+What causes this error
+¶
+You'll typically see it when:
+Data files are corrupted or incomplete
+File import operations are interrupted
+Data streams end unexpectedly
+Malformed data files with missing content
+Network interruptions during file transfer
+Incomplete data uploads
+Corrupted backup or archive files
+File system issues causing truncation
+Memory issues during large file processing
+This error often indicates data corruption or incomplete transfers. Check file integrity and retry the operation.
+Example errors
+¶
+Fails: corrupted data file
+INSERT INTO events FROM INFILE '/path/to/corrupted_file.csv'
+-- Error: UNEXPECTED_END_OF_FILE
+Fails: incomplete import
+INSERT INTO users FROM INFILE '/path/to/incomplete_users.csv'
+-- Error: UNEXPECTED_END_OF_FILE
+Fails: interrupted data stream
+-- When streaming data from external source
+INSERT INTO metrics FROM INFILE '/path/to/streaming_data.csv'
+-- Error: UNEXPECTED_END_OF_FILE
+Fails: malformed JSON file
+INSERT INTO json_data FROM INFILE '/path/to/malformed.json'
+-- Error: UNEXPECTED_END_OF_FILE
+How to fix it
+¶
+Check file integrity
+¶
+Verify the file is complete and not corrupted:
+Check file integrity
+-- Check file size and basic integrity
+-- Example for Linux:
+-- ls -la /path/to/your_file.csv
+-- file /path/to/your_file.csv
+-- md5sum /path/to/your_file.csv
+--
+-- Example for Python:
+-- import os
+-- file_size = os.path.getsize('/path/to/your_file.csv')
+-- print(f"File size: {file_size} bytes")
+Verify file completion
+¶
+Ensure the file transfer or creation completed successfully:
+Verify file completion
+-- Check if file transfer completed
+-- Example for Linux:
+-- tail -n 5 /path/to/your_file.csv
+-- wc -l /path/to/your_file.csv
+--
+-- Example for Python:
+-- with open('/path/to/your_file.csv', 'r') as f:
+--     lines = f.readlines()
+--     print(f"Total lines: {len(lines)}")
+--     print(f"Last line: {lines[-1] if lines else 'Empty file'}")
+Check file format
+¶
+Verify the file format is correct:
+Check file format
+-- Validate CSV format
+-- Example for Python:
+-- import csv
+-- try:
+--     with open('/path/to/your_file.csv', 'r') as f:
+--         reader = csv.reader(f)
+--         for i, row in enumerate(reader):
+--             if i == 0:  # Check header
+--                 print(f"Header: {row}")
+--             if i < 5:   # Check first few rows
+--                 print(f"Row {i}: {row}")
+-- except Exception as e:
+--     print(f"File format error: {e}")
+Retry the operation
+¶
+Attempt the import operation again:
+Retry import
+-- Try importing again with the same file
+INSERT INTO events FROM INFILE '/path/to/your_file.csv'
+FORMAT CSV
+SETTINGS
+    input_format_allow_errors_num = 10,
+    input_format_allow_errors_ratio = 0.1
+Common patterns and solutions
+¶
+File validation
+¶
+Implement file validation before import:
+File validation
+-- Validate file before import
+-- Example pseudo-code:
+--
+-- def validate_file(file_path):
+--     try:
+--         # Check file exists
+--         if not os.path.exists(file_path):
+--             return False, "File does not exist"
+--
+--         # Check file size
+--         file_size = os.path.getsize(file_path)
+--         if file_size == 0:
+--             return False, "File is empty"
+--
+--         # Check file format
+--         with open(file_path, 'r') as f:
+--             first_line = f.readline().strip()
+--             if not first_line:
+--                 return False, "File appears to be empty"
+--
+--         return True, "File is valid"
+--     except Exception as e:
+--         return False, f"Validation error: {e}"
+Error-tolerant import
+¶
+Use error-tolerant import settings:
+Error-tolerant import
+-- Import with error tolerance
+INSERT INTO events FROM INFILE '/path/to/your_file.csv'
+FORMAT CSV
+SETTINGS
+    input_format_allow_errors_num = 100,        -- Allow up to 100 errors
+    input_format_allow_errors_ratio = 0.05,     -- Allow up to 5% errors
+    input_format_skip_unknown_fields = 1,       -- Skip unknown fields
+    input_format_null_as_default = 1            -- Use defaults for NULL values
+Incremental import
+¶
+Import data in smaller chunks:
+Incremental import
+-- Import in smaller chunks to avoid file issues
+-- Example pseudo-code:
+--
+-- def import_in_chunks(file_path, chunk_size=10000):
+--     with open(file_path, 'r') as f:
+--         header = f.readline()  # Skip header
+--
+--         chunk = []
+--         for i, line in enumerate(f):
+--             chunk.append(line)
+--
+--             if len(chunk) >= chunk_size:
+--                 # Import chunk
+--                 import_chunk(chunk)
+--                 chunk = []
+--
+--         # Import remaining lines
+--         if chunk:
+--             import_chunk(chunk)
+File repair
+¶
+Attempt to repair corrupted files:
+File repair
+-- Try to repair corrupted files
+-- Example pseudo-code:
+--
+-- def repair_file(file_path):
+--     try:
+--         # Read file and remove corrupted lines
+--         with open(file_path, 'r') as f:
+--             lines = f.readlines()
+--
+--         # Filter out corrupted lines
+--         valid_lines = []
+--         for line in lines:
+--             if line.strip() and len(line.split(',')) == expected_columns:
+--                 valid_lines.append(line)
+--
+--         # Write repaired file
+--         with open(file_path + '.repaired', 'w') as f:
+--             f.writelines(valid_lines)
+--
+--         return file_path + '.repaired'
+--     except Exception as e:
+--         print(f"Repair failed: {e}")
+--         return None
+Tinybird-specific notes
+¶
+In Tinybird, UNEXPECTED_END_OF_FILE errors often occur when:
+Data Source imports are interrupted
+File uploads are incomplete
+Pipe transformations encounter corrupted data
+External data sources have connectivity issues
+Data streaming operations are interrupted
+To debug in Tinybird:
+Check Data Source import status
+Verify file upload completion
+Review Pipe transformation logs
+Check external data source connectivity
+In Tinybird, use the Data Source preview to validate data before processing it in Pipes.
+Best practices
+¶
+File handling
+¶
+Validate files before import
+Implement checksums for file integrity
+Use error-tolerant import settings
+Monitor import operations for completion
+Error handling
+¶
+Implement retry logic for failed imports
+Log file validation results
+Provide clear error messages
+Handle partial import failures gracefully
+Data quality
+¶
+Validate data format before import
+Check for data corruption indicators
+Implement data quality checks
+Monitor import success rates
+Configuration options
+¶
+Import settings
+¶
+Import configuration
+-- Configure import behavior
+SET input_format_allow_errors_num = 100;
+SET input_format_allow_errors_ratio = 0.05;
+SET input_format_skip_unknown_fields = 1;
+SET input_format_null_as_default = 1;
+File processing settings
+¶
+File processing configuration
+-- Configure file processing
+SET max_insert_block_size = 1000000;
+SET min_insert_block_size_rows = 1000;
+SET min_insert_block_size_bytes = 1000000;
+Error handling settings
+¶
+Error handling configuration
+-- Configure error handling
+SET max_errors_to_log = 1000;
+SET log_error_rate_prob = 1.0;
+SET log_errors = 1;
+Alternative solutions
+¶
+Use streaming import
+¶
+Import data in streaming mode:
+Streaming import
+-- Use streaming import for large files
+INSERT INTO events FROM INFILE '/path/to/your_file.csv'
+FORMAT CSV
+SETTINGS
+    input_format_parallel_parsing = 1,
+    max_insert_block_size = 100000,
+    min_insert_block_size_rows = 1000
+Implement file monitoring
+¶
+Monitor file import progress:
+File monitoring
+-- Monitor import progress
+-- Example pseudo-code:
+--
+-- class FileImportMonitor:
+--     def __init__(self, file_path):
+--         self.file_path = file_path
+--         self.total_lines = 0
+--         self.processed_lines = 0
+--
+--     def start_monitoring(self):
+--         # Count total lines
+--         with open(self.file_path, 'r') as f:
+--             self.total_lines = sum(1 for line in f)
+--
+--         print(f"Total lines to process: {self.total_lines}")
+--
+--     def update_progress(self, processed):
+--         self.processed_lines = processed
+--         progress = (processed / self.total_lines) * 100
+--         print(f"Progress: {progress:.2f}% ({processed}/{self.total_lines})")
+Use backup files
+¶
+Implement backup and recovery:
+Backup and recovery
+-- Implement backup strategy
+-- Example pseudo-code:
+--
+-- def backup_file(file_path):
+--     import shutil
+--     from datetime import datetime
+--
+--     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+--     backup_path = f"{file_path}.backup_{timestamp}"
+--
+--     shutil.copy2(file_path, backup_path)
+--     print(f"Backup created: {backup_path}")
+--     return backup_path
+--
+-- def restore_from_backup(backup_path, original_path):
+--     shutil.copy2(backup_path, original_path)
+--     print(f"File restored from backup: {backup_path}")
+Monitoring and prevention
+¶
+Import monitoring
+¶
+Import tracking
+-- Monitor import operations
+-- Example pseudo-code:
+--
+-- def track_import_operation(file_path, operation_type, status, error=None):
+--     logger.info(f"Import operation: {operation_type} on {file_path}")
+--     logger.info(f"Status: {status}")
+--
+--     if error:
+--         logger.error(f"Import error: {error}")
+--
+--     # Track import metrics
+--     increment_counter('import_operations', {
+--         'file_path': file_path,
+--         'operation_type': operation_type,
+--         'status': status,
+--         'error': error
+--     })
+File health monitoring
+¶
+File health tracking
+-- Monitor file health metrics
+-- Example pseudo-code:
+--
+-- class FileHealthMonitor:
+--     def __init__(self):
+--         self.file_checks = []
+--
+--     def check_file_health(self, file_path):
+--         try:
+--             # Check file size
+--             file_size = os.path.getsize(file_path)
+--
+--             # Check file readability
+--             with open(file_path, 'r') as f:
+--                 first_line = f.readline()
+--                 last_line = None
+--                 line_count = 0
+--
+--                 for line in f:
+--                     last_line = line
+--                     line_count += 1
+--
+--             health_status = {
+--                 'file_path': file_path,
+--                 'file_size': file_size,
+--                 'line_count': line_count,
+--                 'first_line': first_line.strip() if first_line else None,
+--                 'last_line': last_line.strip() if last_line else None,
+--                 'status': 'healthy'
+--             }
+--
+--             self.file_checks.append(health_status)
+--             return health_status
+--
+--         except Exception as e:
+--             health_status = {
+--                 'file_path': file_path,
+--                 'status': 'unhealthy',
+--                 'error': str(e)
+--             }
+--             self.file_checks.append(health_status)
+--             return health_status
+Error prevention
+¶
+Error prevention
+-- Implement error prevention measures
+-- Example pseudo-code:
+--
+-- def prevent_file_errors(file_path):
+--     # Check file before processing
+--     if not os.path.exists(file_path):
+--         raise FileNotFoundError(f"File not found: {file_path}")
+--
+--     # Check file size
+--     file_size = os.path.getsize(file_path)
+--     if file_size == 0:
+--         raise ValueError(f"File is empty: {file_path}")
+--
+--     # Check file permissions
+--     if not os.access(file_path, os.R_OK):
+--         raise PermissionError(f"Cannot read file: {file_path}")
+--
+--     # Validate file format
+--     validate_file_format(file_path)
+See also
+¶
+Data Import
+File Formats
+Error Handling
+Data Quality
+Updated
+4 weeks ago
+On this page
+UNEXPECTED_END_OF_FILE ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Check file integrity
+Verify file completion
+Check file format
+Retry the operation
+Common patterns and solutions
+File validation
+Error-tolerant import
+Incremental import
+File repair
+Tinybird-specific notes
+Best practices
+File handling
+Error handling
+Data quality
+Configuration options
+Import settings
+File processing settings
+Error handling settings
+Alternative solutions
+Use streaming import
+Implement file monitoring
+Use backup files
+Monitoring and prevention
+Import monitoring
+File health monitoring
+Error prevention
+See also
+forward
+classic
+Ask AI

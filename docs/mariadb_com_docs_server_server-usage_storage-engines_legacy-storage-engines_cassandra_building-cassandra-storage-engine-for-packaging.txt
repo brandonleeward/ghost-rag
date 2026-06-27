@@ -1,0 +1,183 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/legacy-storage-engines/cassandra/building-cassandra-storage-engine-for-packaging
+
+Building Cassandra Storage Engine for Packaging | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+FEDERATED Storage Engine
+Cassandra Storage Engine
+Building Cassandra Storage Engine for Packaging
+Building Cassandra Storage Engine
+Cassandra Status Variables
+Cassandra Storage Engine Future Plans
+Cassandra Storage Engine Issues
+Cassandra Storage Engine Overview
+Cassandra Storage Engine Use Example
+Cassandra System Variables
+Handling Joins With Cassandra
+Virtual Machine to Test the Cassandra Storage Engine
+TokuDB
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Building Cassandra Storage Engine for Packaging
+Legacy Cassandra storage engine description. Cassandra was removed from MariaDB in MariaDB 10.6.
+The Cassandra storage engine was removed in MariaDB 10.6.
+These are instructions on how exactly we build Cassandra SE packages.
+Getting into build environment
+See How_to_access_buildbot_VMs page on the internal wiki. The build VM to use is
+Copy
+ezvm  precise-amd64-build
+Get into the VM and continue to next section.
+Set up Thrift
+Copy
+mkdir build
+cd build
+wget https://dist.apache.org/repos/dist/release/thrift/0.8.0/thrift-0.8.0.tar.gz
+sudo apt-get install bzr
+sudo apt-get install flex
+tar zxvf thrift-0.8.0.tar.gz
+cd thrift-0.8.0/
+./configure --prefix=/home/buildbot/build/thrift-inst --without-qt4 --without-c_glib --without-csharp --without-java --without-erlang --without-python --without-perl --without-php --without-php_extension --without-ruby --without-haskell --without-go --without-d
+make
+make install
+# free some space
+make clean
+cd ..
+Get the bzr checkout
+Create another SSH connection to terrier, run the script suggested by motd.
+Press (C-a C-c) to create another window
+Copy the base bazaar repository into the VM:
+Then, get back to the window with VM, and run in VM:
+Compile
+This should end with:
+Free up some disk space:
+Patch the tarball to include Thrift
+Verify that mysqld was built with Cassandra SE:
+This should point to libthrift-0.8.0.so.
+Copy the data out of VM
+In the second window (the one that's on terrier, but not in VM), run:
+References
+2578
+1907
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Cassandra Storage Engine
+Next
+Building Cassandra Storage Engine
+Last updated
+6 months ago
+Was this helpful?
+Getting into build environment
+Set up Thrift
+Get the bzr checkout
+Compile
+Patch the tarball to include Thrift
+Copy the data out of VM
+References
+Was this helpful?
+Copy
+scp /home/psergey/5.5-cassandra-base.tgz runvm:
+Copy
+tar zxvf ../5.5-cassandra-base.tgz
+rm -rf ../5.5-cassandra-base.tgz
+cd 5.5-cassandra/
+bzr pull lp:~maria-captains/maria/5.5-cassandra
+Copy
+export LIBS="-lthrift"
+export LDFLAGS=-L/home/buildbot/build/thrift-inst/lib
+mkdir mkdist
+cd mkdist
+cmake ..
+make dist
+Copy
+basename mariadb-*.tar.gz .tar.gz > ../distdirname.txt
+cp mariadb-5.5.25.tar.gz ../
+cd ..
+tar zxf "mariadb-5.5.25.tar.gz"
+mv "mariadb-5.5.25" build
+cd build
+mkdir mkbin
+cd mkbin
+cmake -DBUILD_CONFIG=mysql_release ..
+make -j4 package
+Copy
+CPack: - package: /home/buildbot/build/5.5-cassandra/build/mkbin/mariadb-5.5.25-linux-x86_64.tar.gz generated.
+Copy
+rm -fr ../../mkdist/
+Copy
+mv mariadb-5.5.25-linux-x86_64.tar.gz ../..
+cd ../..
+rm -rf build
+Copy
+mkdir fix-package
+cd fix-package
+tar zxvf ../mariadb-5.5.25-linux-x86_64.tar.gz
+Copy
+ldd mariadb-5.5.25-linux-x86_64/bin/mysqld
+Copy
+cp /home/buildbot/build/thrift-inst/lib/libthrift* mariadb-5.5.25-linux-x86_64/lib/
+tar czf mariadb-5.5.25-linux-x86_64.tar.gz mariadb-5.5.25-linux-x86_64/
+cp mariadb-5.5.25-linux-x86_64.tar.gz ..
+Copy
+mkdir build-cassandra
+cd build-cassandra
+scp runvm:/home/buildbot/build/5.5-cassandra/mariadb-5.5.25.tar.gz .
+scp runvm:/home/buildbot/build/5.5-cassandra/mariadb-5.5.25-linux-x86_64.tar.gz .

@@ -1,0 +1,164 @@
+Source: https://www.tinybird.co/docs/version-control/datafiles
+
+Datafiles · Tinybird Docs
+Sign In
+Sign Up
+Datafiles
+¶
+Copy as MD
+Datafiles describe your Tinybird resources, like data sources, pipes, and so on. They're the source code of your project.
+You can use datafiles to manage your projects as source code and take advantage of version control. Tinybird CLI helps you produce and push datafiles to the Tinybird platform.
+Data projects
+¶
+A data project is a collection of datafiles that describe your Tinybird resources.
+The minimal data project includes:
+A .datasource file, which describes the source and schema of your data.
+A pipe, typically a .endpoint file, which describes how to process and serve the data.
+For example:
+Data source
+Pipe
+SCHEMA >
+    `day` Date `json:$.day`,
+    `station` String `json:$.station`,
+    `abslevel` Nullable(Float32) `json:$.abslevel`,
+    `percentagevolume` Float32 `json:$.percentagevolume`,
+    `volume` Float32 `json:$.volume`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "station"
+ENGINE_SORTING_KEY "day, station"
+Folder structure
+¶
+Tinybird projects are organized in a folder structure that helps you organize the source for each resource type.
+The datafiles that you generate when you run
+tb init
+are organized in the following folders:
+connections
+: Contains
+connection files
+.
+copies
+: Contains the
+copy pipes
+.
+datasources
+: Contains the
+data sources
+.
+endpoints
+: Contains the
+endpoint pipes
+.
+fixtures
+: Contains test fixtures and test data.
+infra
+: Contains the infrastructure files. See
+tb infra
+.
+materializations
+: Contains
+materialized views
+.
+pipes
+: Contains non-published
+pipes
+.
+sinks
+: Contains the
+sink pipes
+.
+tests
+: Contains the test suites.
+The following example shows a typical
+tinybird
+project folder structure that includes subfolders for supported types:
+Example file structure
+.
+├── .tinyb
+├── tinybird.config.json
+├── connections
+├── copies
+├── datasources
+│   └── user_actions.datasource
+├── endpoints
+│   ├── user_actions_line_chart.pipe
+│   └── user_actions_total_widget.pipe
+├── fixtures
+│   ├── user_actions.prompt
+│   └── user_actions_d1046873.ndjson
+├── infra
+│   └── aws
+│       ├── config.json
+│       ├── k8s.yaml
+│       └── main.tf
+├── materializations
+├── pipes
+├── sinks
+└── tests
+    └── user_actions_line_chart.yaml
+The
+.tinyb
+file contains local authentication context, and
+tinybird.config.json
+contains project settings like the included project path and default development mode. See
+Config files
+.
+Types of datafiles
+¶
+Tinybird uses the following types of datafiles:
+Datasource files (.datasource) represent data sources. See
+Datasource files
+.
+Pipe files (.pipe) represent pipes of various types. See
+Pipe files
+.
+Syntactic conventions
+¶
+Datafiles follow the same syntactic conventions.
+Casing
+¶
+Instructions always appear at the beginning of a line in upper case. For example:
+Basic syntax
+COMMAND value
+ANOTHER_INSTR "Value with multiple words"
+Multiple lines
+¶
+Instructions can span multiples lines. For example:
+Multiline syntax
+SCHEMA >
+    `d` DateTime,
+    `total` Int32,
+    `from_novoa` Int16
+Comments
+¶
+You can add comments using the
+#
+character. For example:
+# This is a comment
+COMMAND value
+Next steps
+¶
+Learn about
+datasource files
+.
+Learn about
+connection files
+.
+Learn about
+pipe files
+.
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Datafiles
+Data projects
+Folder structure
+Types of datafiles
+Syntactic conventions
+Casing
+Multiple lines
+Comments
+Next steps
+forward
+Ask AI

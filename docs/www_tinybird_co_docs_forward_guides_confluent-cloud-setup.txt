@@ -1,0 +1,213 @@
+Source: https://www.tinybird.com/docs/forward/guides/confluent-cloud-setup
+
+Confluent Cloud setup guide · Tinybird Docs
+Sign In
+Sign Up
+Confluent Cloud setup guide
+¶
+Copy as MD
+This guide walks you through setting up Tinybird's Kafka connector with Confluent Cloud, including authentication, network configuration, and Schema Registry integration.
+Prerequisites
+¶
+A Confluent Cloud account with an active cluster
+API keys for your Confluent Cloud cluster
+Access to your Confluent Cloud console
+A Tinybird workspace
+Step 1: Get your Confluent Cloud connection details
+¶
+Bootstrap servers
+¶
+Log in to the
+Confluent Cloud console
+Navigate to your cluster
+Go to
+Cluster settings
+>
+Bootstrap server
+Copy the bootstrap server address (for example,
+pkc-xxxxx.us-east-1.aws.confluent.cloud:9092
+)
+API keys
+¶
+In Confluent Cloud, go to
+API Keys
+Select
+Add key
+and select
+Global access
+or
+Resource-specific
+Copy the
+API Key
+and
+API Secret
+Save these securely - you need them for the Tinybird connection
+Step 2: Create the Kafka connection
+¶
+You can create the Kafka connection using the CLI wizard or by manually creating a connection file.
+Option 1: Use the CLI wizard (recommended)
+¶
+Run the following command to create a connection interactively:
+tb connection create kafka
+The wizard prompts you for:
+Connection name
+Bootstrap server
+Kafka key (API Key)
+Kafka secret (API Secret)
+After the wizard completes, you can edit the generated
+.connection
+file to add additional settings like
+KAFKA_SCHEMA_REGISTRY_URL
+if needed.
+Option 2: Manually create a connection file
+¶
+Create a
+.connection
+file in your Tinybird project:
+connections/confluent_cloud.connection
+TYPE kafka
+KAFKA_BOOTSTRAP_SERVERS <YOUR_BOOTSTRAP_SERVER>
+KAFKA_SECURITY_PROTOCOL SASL_SSL
+KAFKA_SASL_MECHANISM PLAIN
+KAFKA_KEY {{ tb_secret("CONFLUENT_API_KEY") }}
+KAFKA_SECRET {{ tb_secret("CONFLUENT_API_SECRET") }}
+Set the secrets:
+tb [--cloud] secret set CONFLUENT_API_KEY <YOUR_API_KEY>
+tb [--cloud] secret set CONFLUENT_API_SECRET <YOUR_API_SECRET>
+Step 3: Configure Schema Registry (optional)
+¶
+If you're using Avro or JSON Schema with Schema Registry:
+In Confluent Cloud, go to
+Schema Registry
+Get the Schema Registry endpoint URL
+Create API keys for Schema Registry (separate from cluster API keys)
+Add to your connection file:
+connections/confluent_cloud_with_registry.connection
+TYPE kafka
+KAFKA_BOOTSTRAP_SERVERS <YOUR_BOOTSTRAP_SERVER>
+KAFKA_SECURITY_PROTOCOL SASL_SSL
+KAFKA_SASL_MECHANISM PLAIN
+KAFKA_KEY {{ tb_secret("CONFLUENT_API_KEY") }}
+KAFKA_SECRET {{ tb_secret("CONFLUENT_API_SECRET") }}
+KAFKA_SCHEMA_REGISTRY_URL https://<REGISTRY_API_KEY>:<REGISTRY_API_SECRET>@<REGISTRY_ENDPOINT>
+Set the Schema Registry credentials:
+tb [--cloud] secret set CONFLUENT_REGISTRY_API_KEY <YOUR_REGISTRY_API_KEY>
+tb [--cloud] secret set CONFLUENT_REGISTRY_API_SECRET <YOUR_REGISTRY_API_SECRET>
+Then use in the connection:
+KAFKA_SCHEMA_REGISTRY_URL https://{{ tb_secret("CONFLUENT_REGISTRY_API_KEY") }}:{{ tb_secret("CONFLUENT_REGISTRY_API_SECRET") }}@<REGISTRY_ENDPOINT>
+Step 4: Network configuration
+¶
+Standard setup
+¶
+For most Confluent Cloud clusters, no additional network configuration is needed. Tinybird connects directly to Confluent Cloud's public endpoints.
+Private Link (Enterprise only)
+¶
+If you're using Confluent Cloud Private Link:
+Ensure your Confluent Cloud cluster has Private Link turned on
+Contact Tinybird support to set up Private Link connectivity
+Use the Private Link endpoint as your bootstrap server
+For Private Link setup, contact
+support@tinybird.co
+with:
+Your Confluent Cloud cluster details
+Private Link endpoint information
+Your Tinybird organization name
+Step 5: Create the Kafka Data Source
+¶
+Now that your connection is configured, create a Kafka Data Source. See
+Create a Kafka data source
+in the main Kafka connector guide for detailed instructions on:
+Using
+tb datasource create --kafka
+for a guided setup
+Manually creating
+.datasource
+files
+Defining schemas with JSONPath expressions
+Configuring Kafka-specific settings
+Step 6: Test the connection
+¶
+Test your connection and preview data:
+tb connection data confluent_cloud
+This command prompts you to select a topic and consumer group ID, then returns preview data. This verifies that Tinybird can connect to your Confluent Cloud cluster, authenticate, and consume messages.
+Common Confluent Cloud issues
+¶
+Issue: Authentication failed
+¶
+Symptoms:
+"Authentication failed" errors in
+kafka_ops_log
+Connection check fails
+Solutions:
+Verify API keys are correct and active in Confluent Cloud
+Check API key has the correct permissions (read access to topics)
+Ensure you're using
+PLAIN
+as the SASL mechanism
+Verify the API key hasn't been deleted or rotated
+Issue: Schema Registry connection failed
+¶
+Symptoms:
+"Schema Registry connection failed" errors
+Avro messages not being ingested
+Solutions:
+Verify Schema Registry endpoint URL is correct
+Check Schema Registry API keys are separate from cluster API keys
+Ensure Schema Registry API keys have read permissions
+Verify the schema exists in Schema Registry for your topic
+Issue: Network connectivity
+¶
+Symptoms:
+Connection timeout errors
+Broker unreachable
+Solutions:
+Verify bootstrap server address is correct
+Check if your Confluent Cloud cluster allows public access
+For Private Link, ensure the connection is properly configured
+Verify firewall rules allow outbound connections
+Best practices
+¶
+Use separate API keys for different environments
+(dev, staging, prod)
+Rotate API keys regularly
+for security
+Use resource-specific API keys
+instead of global access when possible
+Monitor API key usage
+in Confluent Cloud console
+Set up alerts
+for authentication failures
+Related documentation
+¶
+Kafka connector documentation
+- Main setup and configuration guide
+Monitor Kafka connectors
+- Set up monitoring and alerts
+Troubleshooting guide
+- Common issues and solutions
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Confluent Cloud setup guide
+Prerequisites
+Step 1: Get your Confluent Cloud connection details
+Bootstrap servers
+API keys
+Step 2: Create the Kafka connection
+Option 1: Use the CLI wizard (recommended)
+Option 2: Manually create a connection file
+Step 3: Configure Schema Registry (optional)
+Step 4: Network configuration
+Standard setup
+Private Link (Enterprise only)
+Step 5: Create the Kafka Data Source
+Step 6: Test the connection
+Common Confluent Cloud issues
+Issue: Authentication failed
+Issue: Schema Registry connection failed
+Issue: Network connectivity
+Best practices
+Related documentation
+forward
+Ask AI

@@ -1,0 +1,75 @@
+Source: https://mariadb.com/docs/server/server-usage/partitioning-tables
+
+Partitioning Tables | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Partitioning Overview
+Partition Pruning and Selection
+Partition Maintenance
+Partitioning Types
+Partitioning Limitations
+Partitions Files
+Partitions Metadata
+Stored Routines
+Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Partitioning Tables
+Optimize large tables in MariaDB Server with partitioning. Learn how to divide tables into smaller, manageable parts for improved performance, easier maintenance, and scalability.
+Partitioning Overview
+Complete Partitioning Overview guide for MariaDB. Complete reference documentation for implementation, configuration, and usage for production use.
+Partition Pruning and Selection
+Understand how the optimizer automatically prunes irrelevant partitions and how to explicitly select partitions in your queries for efficiency.
+Partition Maintenance
+Discover administrative tasks for managing partitions, such as adding, dropping, reorganizing, and coalescing them to keep your data optimized.
+Partitioning Types Overview
+An introduction to the various partitioning strategies available in MariaDB, helping you choose the right method for your data distribution needs. For a complete list of partitioning types,
+see this page
+.
+Partitioning Limitations
+This page outlines constraints when using partitioning, such as the maximum number of partitions and restrictions on foreign keys and query cache usage.
+Partitions Files
+Learn how MariaDB stores partitioned tables on the filesystem, typically creating separate .ibd files for each partition when using InnoDB.
+Partitions Metadata
+Understand how to retrieve metadata about partitions using the
+INFORMATION_SCHEMA.PARTITIONS
+table to monitor row counts and storage usage.
+Previous
+Views
+Next
+Partitioning Overview
+Last updated
+4 months ago
+Was this helpful?
+Was this helpful?

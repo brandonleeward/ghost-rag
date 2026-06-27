@@ -1,0 +1,356 @@
+Source: https://www.tinybird.co/docs/forward/get-data-in/connectors/kafka/guides/aws-msk-setup
+
+AWS MSK setup guide · Tinybird Docs
+Sign In
+Sign Up
+AWS MSK setup guide
+¶
+Copy as MD
+This guide walks you through setting up Tinybird's Kafka connector with Amazon MSK (Managed Streaming for Apache Kafka), including IAM authentication, network configuration, and security group setup.
+Prerequisites
+¶
+An AWS account with an MSK cluster
+AWS IAM permissions to create roles and policies
+Access to AWS Console
+A Tinybird workspace
+Step 1: Get your MSK cluster details
+¶
+Bootstrap servers
+¶
+In AWS Console, navigate to
+Amazon MSK
+Select your cluster
+Go to
+Properties
+tab
+Copy the
+Bootstrap broker string
+(for example,
+b-1.example-cluster.abc123.c2.kafka.us-east-1.amazonaws.com:9098,b-2.example-cluster.abc123.c2.kafka.us-east-1.amazonaws.com:9098
+)
+Important:
+Use the port that matches your authentication method:
+Port 9098 for SASL/IAM (OAUTHBEARER)
+Port 9096 for SASL/SCRAM
+Port 9094 for TLS
+Port 9092 for plaintext (not recommended for production)
+Cluster ARN
+¶
+In the cluster
+Properties
+tab
+Copy the
+Cluster ARN
+(for example,
+arn:aws:kafka:us-east-1:123456789012:cluster/example-cluster/abc123-def456-789
+)
+You need this for the IAM policy configuration.
+Step 2: Create the Kafka connection
+¶
+You can create the Kafka connection using the CLI wizard or by manually creating a Connection file.
+Option 1: Use the CLI wizard (recommended)
+¶
+Run the following command to create a connection interactively:
+tb connection create kafka
+The wizard prompts you for:
+Connection name
+Bootstrap server
+Kafka key (for SASL/SCRAM) or IAM role ARN (for IAM authentication)
+Kafka secret (for SASL/SCRAM) or external ID (for IAM authentication)
+After the wizard completes, edit the generated Connection file to add AWS MSK-specific settings like
+KAFKA_SASL_OAUTHBEARER_METHOD AWS
+and
+AWS_ROLE_ARN
+for IAM authentication.
+Option 2: Manually create a Connection file
+¶
+For AWS MSK with IAM authentication, manually create the Connection file with the specific IAM settings. See
+Step 5: Create the Kafka connection (manual method)
+after completing IAM and security group setup.
+Step 3: Set up IAM authentication
+¶
+MSK supports IAM authentication using OAUTHBEARER. You need to create an IAM role that Tinybird can assume.
+Create IAM role
+¶
+In AWS Console, go to
+IAM
+>
+Roles
+Select
+Create role
+Select
+AWS account
+as the trusted entity type
+For
+Account ID
+, use Tinybird's AWS account ID (contact support for the correct ID for your region)
+Check
+Require external ID
+and enter a unique external ID (save this for later)
+Select
+Next
+Create access policy
+¶
+Create a policy that grants access to your MSK cluster:
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "kafka-cluster:Connect",
+                "kafka-cluster:DescribeCluster"
+            ],
+            "Resource": "arn:aws:kafka:<REGION>:<ACCOUNT_ID>:cluster/<CLUSTER_NAME>/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "kafka-cluster:DescribeTopic",
+                "kafka-cluster:ReadData"
+            ],
+            "Resource": "arn:aws:kafka:<REGION>:<ACCOUNT_ID>:topic/<CLUSTER_NAME>/*/<TOPIC_NAME>"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "kafka-cluster:AlterGroup",
+                "kafka-cluster:DescribeGroup"
+            ],
+            "Resource": "arn:aws:kafka:<REGION>:<ACCOUNT_ID>:group/<CLUSTER_NAME>/*/<GROUP_ID>"
+        }
+    ]
+}
+Replace:
+<REGION>
+: Your AWS region (for example,
+us-east-1
+)
+<ACCOUNT_ID>
+: Your AWS account ID
+<CLUSTER_NAME>
+: Your MSK cluster name
+<TOPIC_NAME>
+: Your Kafka topic name (or
+*
+for all topics)
+<GROUP_ID>
+: Your consumer group ID (or
+*
+for all groups)
+Alternative:
+Use Tinybird's API to generate the policy:
+curl "https://<your_host>/v0/integrations/kafka/policies/read-access-policy?msk_cluster_arn=<CLUSTER_ARN>&topics=<TOPIC_NAME>&groups=<GROUP_ID>"
+Create trust policy
+¶
+The trust policy allows Tinybird to assume the role:
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "sts:AssumeRole",
+            "Principal": {
+                "AWS": "arn:aws:iam::<TINYBIRD_ACCOUNT_ID>:root"
+            },
+            "Condition": {
+                "StringEquals": {
+                    "sts:ExternalId": "<EXTERNAL_ID>"
+                }
+            }
+        }
+    ]
+}
+Replace:
+<TINYBIRD_ACCOUNT_ID>
+: Tinybird's AWS account ID (contact support for your region)
+<EXTERNAL_ID>
+: The external ID you set when creating the role
+Alternative:
+Use Tinybird's API:
+curl "https://<your_host>/v0/integrations/kafka/policies/trust-policy?external_id_seed=<CONNECTION_NAME>"
+Attach policies to role
+¶
+Attach the access policy to your IAM role
+Set the trust policy on the role
+Copy the
+Role ARN
+(for example,
+arn:aws:iam::123456789012:role/msk-tinybird-role
+)
+Step 4: Configure security groups
+¶
+MSK security group
+¶
+In AWS Console, go to
+EC2
+>
+Security Groups
+Find the security group used by your MSK cluster
+Add an inbound rule:
+Type:
+Custom TCP
+Port:
+9098 (or the port matching your authentication)
+Source:
+0.0.0.0/0
+Tinybird's egress IP addresses change dynamically, so you can't use a fixed IP allowlist. IAM authentication with role assumption and external ID provides the security boundary for your connection.
+If your security policy requires restricting network access, use a
+PrivateLink setup
+instead.
+Step 5: Create the Kafka connection (manual method)
+¶
+If you didn't use the CLI wizard in Step 2, create a Connection file manually:
+connections/aws_msk.connection
+TYPE kafka
+KAFKA_BOOTSTRAP_SERVERS <BOOTSTRAP_BROKER_STRING>
+KAFKA_SECURITY_PROTOCOL SASL_SSL
+KAFKA_SASL_MECHANISM OAUTHBEARER
+KAFKA_SASL_OAUTHBEARER_METHOD AWS
+KAFKA_SASL_OAUTHBEARER_AWS_REGION <REGION>
+KAFKA_SASL_OAUTHBEARER_AWS_ROLE_ARN {{ tb_secret("AWS_ROLE_ARN") }}
+KAFKA_SASL_OAUTHBEARER_AWS_EXTERNAL_ID <EXTERNAL_ID>
+Set the role ARN secret:
+tb [--cloud] secret set AWS_ROLE_ARN <YOUR_ROLE_ARN>
+Replace:
+<BOOTSTRAP_BROKER_STRING>
+: The bootstrap broker string from Step 1
+<EXTERNAL_ID>
+: The external ID you set in the IAM role in Step 3
+<REGION>
+: Your AWS region (for example,
+us-east-1
+)
+Step 6: VPC and network configuration
+¶
+Standard setup
+¶
+For most MSK clusters, Tinybird connects via the public endpoint. Ensure:
+Your MSK cluster has public access turned on
+Security groups allow inbound connections from Tinybird
+Network ACLs don't block the connection
+PrivateLink setup (Enterprise only)
+¶
+For PrivateLink connectivity:
+Ensure your MSK cluster supports PrivateLink
+Contact Tinybird support to set up PrivateLink endpoint
+Use the PrivateLink endpoint as your bootstrap server
+Contact
+support@tinybird.co
+with:
+Your MSK cluster details
+VPC and subnet information
+Your Tinybird organization name
+Step 7: Create the Kafka Data Source
+¶
+Now that your connection is configured, create a Kafka Data Source. See
+Create a Kafka data source
+in the main Kafka connector guide for detailed instructions on:
+Using
+tb datasource create --kafka
+for a guided setup
+Manually creating Data Source files
+Defining schemas with JSONPath expressions
+Configuring Kafka-specific settings
+Step 8: Test the connection
+¶
+Test your connection and preview data:
+tb connection data aws_msk
+This command prompts you to select a topic and consumer group ID, then returns preview data. This verifies that Tinybird can:
+Assume the IAM role
+Connect to your MSK cluster
+Authenticate using OAUTHBEARER
+Consume messages from the topic
+Common AWS MSK issues
+¶
+Issue: IAM authentication failed
+¶
+Symptoms:
+"Authentication failed" errors
+"Unable to assume role" errors
+Solutions:
+Verify the IAM role ARN is correct
+Check the trust policy allows Tinybird's AWS account
+Verify the external ID matches between connection and trust policy
+Ensure the IAM role has the correct access policy attached
+Verify the region in your Connection file matches your MSK cluster region
+Use AWS CloudTrail to see detailed error messages for IAM authentication failures
+Issue: Security group blocking connection
+¶
+Symptoms:
+Connection timeout errors
+Broker unreachable
+Solutions:
+Verify security group allows inbound traffic on the correct port
+Check the security group allows
+0.0.0.0/0
+on the correct port, as Tinybird IPs change dynamically
+Verify network ACLs don't block the connection
+For PrivateLink, ensure VPC endpoint is configured correctly
+Issue: Network connectivity
+¶
+Symptoms:
+Connection timeout
+Unable to reach bootstrap servers
+Solutions:
+Verify bootstrap server address is correct
+Check if MSK cluster has public access turned on
+Verify DNS resolution for MSK cluster endpoints
+For PrivateLink, ensure endpoint is active and accessible
+Best practices
+¶
+Use least privilege IAM policies
+- Only grant access to specific topics and groups
+Use unique external IDs
+for each connection
+Monitor IAM role usage
+in CloudTrail
+Rotate IAM roles periodically
+for security
+Use separate roles
+for different environments (dev, staging, prod)
+Turn on VPC flow logs
+to monitor network traffic
+Set up CloudWatch alarms
+for MSK cluster health
+Related documentation
+¶
+Kafka connector documentation
+- Main setup and configuration guide
+Monitor Kafka connectors
+- Set up monitoring and alerts
+Troubleshooting guide
+- Common issues and solutions
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+AWS MSK setup guide
+Prerequisites
+Step 1: Get your MSK cluster details
+Bootstrap servers
+Cluster ARN
+Step 2: Create the Kafka connection
+Option 1: Use the CLI wizard (recommended)
+Option 2: Manually create a Connection file
+Step 3: Set up IAM authentication
+Create IAM role
+Create access policy
+Create trust policy
+Attach policies to role
+Step 4: Configure security groups
+MSK security group
+Step 5: Create the Kafka connection (manual method)
+Step 6: VPC and network configuration
+Standard setup
+PrivateLink setup (Enterprise only)
+Step 7: Create the Kafka Data Source
+Step 8: Test the connection
+Common AWS MSK issues
+Issue: IAM authentication failed
+Issue: Security group blocking connection
+Issue: Network connectivity
+Best practices
+Related documentation
+forward
+Ask AI

@@ -1,0 +1,124 @@
+Source: https://mariadb.com/docs/server/server-usage/basics/mariadb-sql-cheat-cheat-guide-1
+
+Basic SQL Statements | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+A MariaDB Primer
+Basic Queries
+Basic SQL Debugging
+Basic SQL Statements
+Commonly Used Queries
+String Functions
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Basic SQL Statements
+A quick reference guide for essential SQL statements in MariaDB, categorized by Data Definition, Data Manipulation, and Transaction Control.
+WEBINAR
+MariaDB 101: Learning the Basics of MariaDB
+Watch Now
+This page lists the most important SQL statements and contains links to their documentation pages. If you need a basic tutorial on how to use the MariaDB database server and how to execute simple commands, see
+A MariaDB Primer
+.
+Also see
+Common MariaDB Queries
+for examples of commonly-used queries.
+Defining How Your Data Is Stored
+CREATE DATABASE
+is used to create a new, empty database.
+DROP DATABASE
+is used to completely destroy an existing database.
+USE
+is used to select a default database.
+CREATE TABLE
+is used to create a new table, which is where your data is actually stored.
+ALTER TABLE
+is used to modify an existing table's definition.
+DROP TABLE
+is used to completely destroy an existing table.
+DESCRIBE
+shows the structure of a table.
+Manipulating Your Data
+SELECT
+is used when you want to read (or select) your data.
+INSERT
+is used when you want to add (or insert) new data.
+UPDATE
+is used when you want to change (or update) existing data.
+DELETE
+is used when you want to remove (or delete) existing data.
+REPLACE
+is used when you want to add or change (or replace) new or existing data.
+TRUNCATE
+is used when you want to empty (or delete) all data from the template.
+Transactions
+START TRANSACTION
+is used to begin a transaction.
+COMMIT
+is used to apply changes and end transaction.
+ROLLBACK
+is used to discard changes and end transaction.
+A Simple Example
+The first version of this article was copied, with permission, from
+Basic_SQL_Statements
+on 2012-10-05.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Basic SQL Debugging
+Next
+Commonly Used Queries
+Last updated
+8 months ago
+Was this helpful?
+Defining How Your Data Is Stored
+Manipulating Your Data
+Transactions
+A Simple Example
+Was this helpful?
+Copy
+CREATE DATABASE mydb;
+USE mydb;
+CREATE TABLE mytable ( id INT PRIMARY KEY, name VARCHAR(20) );
+INSERT INTO mytable VALUES ( 1, 'Will' );
+INSERT INTO mytable VALUES ( 2, 'Marry' );
+INSERT INTO mytable VALUES ( 3, 'Dean' );
+SELECT id, name FROM mytable WHERE id = 1;
+UPDATE mytable SET name = 'Willy' WHERE id = 1;
+SELECT id, name FROM mytable;
+DELETE FROM mytable WHERE id = 1;
+SELECT id, name FROM mytable;
+DROP DATABASE mydb;
+SELECT COUNT(1) FROM mytable; gives the NUMBER OF records IN the TABLE

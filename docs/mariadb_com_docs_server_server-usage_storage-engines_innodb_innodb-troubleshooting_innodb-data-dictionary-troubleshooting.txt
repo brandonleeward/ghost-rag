@@ -1,0 +1,186 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/innodb/innodb-troubleshooting/innodb-data-dictionary-troubleshooting
+
+InnoDB Data Dictionary Troubleshooting | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+InnoDB Introduction
+InnoDB File Format
+InnoDB Limitations
+AUTO_INCREMENT Handling in InnoDB
+Binary Log Group Commit and InnoDB Flushing Performance
+InnoDB Asynchronous I/O
+InnoDB Buffer Pool
+InnoDB Change Buffering
+InnoDB Data Scrubbing
+InnoDB Doublewrite Buffer
+InnoDB Flush Method
+InnoDB Lock Modes
+InnoDB Log Archiving
+InnoDB Monitors
+InnoDB Page Compression
+InnoDB Page Flushing
+InnoDB Purge
+InnoDB Undo Log
+InnoDB Redo Log
+InnoDB Strict Mode
+InnoDB System Variables
+InnoDB Versions
+InnoDB Architecture for MariaDB Enterprise Server
+InnoDB Online DDL
+InnoDB Row Formats
+InnoDB Tablespaces
+InnoDB Troubleshooting
+InnoDB Troubleshooting Overview
+InnoDB Data Dictionary Troubleshooting
+InnoDB Recovery Modes
+MariaDB Enterprise Server InnoDB Operations
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+InnoDB Data Dictionary Troubleshooting
+Learn how to resolve inconsistencies between the InnoDB internal data dictionary and the file system, such as orphan .frm or .ibd files.
+Can't Open File
+If InnoDB returns something like the following error:
+Copy
+ERROR 1016: Can't open file: 'x.ibd'. (errno: 1)
+it may be that an orphan
+.frm
+file exists. Something like the following may also appear in the
+error log
+:
+Copy
+InnoDB: Cannot find table test/x from the internal data dictionary
+InnoDB: of InnoDB though the .frm file for the table exists. Maybe you
+InnoDB: have deleted and recreated InnoDB data files but have forgotten
+InnoDB: to delete the corresponding .frm files of InnoDB tables?
+If this is the case, as the text describes, delete the orphan
+.frm
+file on the filesystem.
+Could not find a valid tablespace file
+In this case the table definition, the
+.frm
+file, is missing and the InnoDB dictionary expects it to be there. To remove the InnoDB dictionary entry, the existence of the file needs to faked and then dropped. The existence of the file is faked by creating the
+tablename.frm
+and potential the database directory if it is missing. Then a
+DROP TABLE
+or
+DROP DATABASE
+can be executed which will remove the InnoDB dictionary entry.
+Use the query to identify potentially other tablespaces that are known but missing with:
+Copy
+SELECT
+*
+FROM
+INFORMATION_SCHEMA
+.
+INNODB_SYS_TABLES
+WHERE
+NAME
+LIKE
+'
+dbname/%
+'
+;
+Removing Orphan Intermediate Tables
+An orphan intermediate table may prevent you from dropping the tablespace even if it is otherwise empty, and generally takes up unnecessary space.
+It may come about if MariaDB exits in the middle of an
+ALTER TABLE ... ALGORITHM=INPLACE
+operation. They are listed in the
+INFORMATION_SCHEMA.INNODB_SYS_TABLES
+table, and always start with an
+#sql-ib
+prefix. The accompanying
+.frm
+file also begins with
+#sql-
+, but has a different name.
+To identify orphan tables, run:
+When
+innodb_file_per_table
+is set, the
+#sql-*.ibd
+file will also be visible in the database directory.
+To remove an orphan intermediate table:
+Rename the
+#sql-*.frm
+file (in the database directory) to match the base name of the orphan intermediate table, for example:
+Drop the table, for example:
+See Also
+InnoDB Troubleshooting Overview
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+InnoDB Troubleshooting Overview
+Next
+InnoDB Recovery Modes
+Last updated
+11 months ago
+Was this helpful?
+Can't Open File
+Could not find a valid tablespace file
+Removing Orphan Intermediate Tables
+See Also
+Was this helpful?
+Copy
+SELECT * FROM INFORMATION_SCHEMA.INNODB_SYS_TABLES WHERE NAME LIKE '%#sql%';
+Copy
+mv #sql-36ab_2.frm #sql-ib87-856498050.frm
+Copy
+DROP TABLE `#mysql50##sql-ib87-856498050`;

@@ -1,0 +1,541 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/distance-functions
+
+Distance Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Distance functions
+¶
+Copy as MD
+The following functions are used to calculate distances between two points or to normalize vectors.
+L1Norm
+¶
+Calculates the L1-norm (Manhattan distance or taxicab geometry) of a vector, which is the sum of the absolute values of its components.
+Syntax
+¶
+L1Norm(vector)
+Alias:
+normL1
+.
+Arguments
+¶
+vector
+:
+Tuple
+or
+Array
+. The input vector.
+Returns
+¶
+The L1-norm of the vector.
+UInt
+,
+Float
+or
+Decimal
+.
+Example
+¶
+SELECT L1Norm((1, 2))
+Result:
+┌─L1Norm((1, 2))─┐
+│              3 │
+└────────────────┘
+L2Norm
+¶
+Calculates the L2-norm (Euclidean norm) of a vector, which is the square root of the sum of the squares of its components.
+Syntax
+¶
+L2Norm(vector)
+Alias:
+normL2
+.
+Arguments
+¶
+vector
+:
+Tuple
+or
+Array
+. The input vector.
+Returns
+¶
+The L2-norm of the vector.
+Float
+.
+Example
+¶
+SELECT L2Norm((1, 2))
+Result:
+┌───L2Norm((1, 2))─┐
+│ 2.23606797749979 │
+└──────────────────┘
+L2SquaredNorm
+¶
+Calculates the squared L2-norm of a vector, which is the sum of the squares of its components. This is equivalent to the square of the Euclidean distance from the origin.
+Syntax
+¶
+L2SquaredNorm(vector)
+Alias:
+normL2Squared
+.
+Arguments
+¶
+vector
+:
+Tuple
+or
+Array
+. The input vector.
+Returns
+¶
+The squared L2-norm of the vector.
+Float
+.
+Example
+¶
+SELECT L2SquaredNorm((1, 2))
+Result:
+┌─L2SquaredNorm((1, 2))─┐
+│                     5 │
+└───────────────────────┘
+LinfNorm
+¶
+Calculates the L-infinity norm (maximum norm) of a vector, which is the maximum absolute value among its components.
+Syntax
+¶
+LinfNorm(vector)
+Alias:
+normLinf
+.
+Arguments
+¶
+vector
+:
+Tuple
+or
+Array
+. The input vector.
+Returns
+¶
+The L-infinity norm of the vector.
+Float
+.
+Example
+¶
+SELECT LinfNorm((1, -2))
+Result:
+┌─LinfNorm((1, -2))─┐
+│                 2 │
+└───────────────────┘
+LpNorm
+¶
+Calculates the Lp-norm of a vector, which is a generalization of the L1 and L2 norms. It is the p-th root of the sum of the p-th powers of the absolute values of the vector's components.
+Syntax
+¶
+LpNorm(vector, p)
+Alias:
+normLp
+.
+Arguments
+¶
+vector
+:
+Tuple
+or
+Array
+. The input vector.
+p
+:
+UInt
+or
+Float
+. The power
+p
+, where
+p
+must be a real number in the range
+[1; inf)
+.
+Returns
+¶
+The Lp-norm of the vector.
+Float
+.
+Example
+¶
+SELECT LpNorm((1, -2), 2)
+Result:
+┌─LpNorm((1, -2), 2)─┐
+│   2.23606797749979 │
+└────────────────────┘
+L1Distance
+¶
+Calculates the L1 distance (Manhattan distance or taxicab geometry) between two vectors. This is the sum of the absolute differences between their corresponding components.
+Syntax
+¶
+L1Distance(vector1, vector2)
+Alias:
+distanceL1
+.
+Arguments
+¶
+vector1
+:
+Tuple
+or
+Array
+. The first vector.
+vector2
+:
+Tuple
+or
+Array
+. The second vector.
+Returns
+¶
+The L1 distance between the two vectors.
+Float
+.
+Example
+¶
+SELECT L1Distance((1, 2), (2, 3))
+Result:
+┌─L1Distance((1, 2), (2, 3))─┐
+│                          2 │
+└────────────────────────────┘
+L2Distance
+¶
+Calculates the L2 distance (Euclidean distance) between two vectors. This is the square root of the sum of the squared differences between their corresponding components.
+Syntax
+¶
+L2Distance(vector1, vector2)
+Alias:
+distanceL2
+.
+Arguments
+¶
+vector1
+:
+Tuple
+or
+Array
+. The first vector.
+vector2
+:
+Tuple
+or
+Array
+. The second vector.
+Returns
+¶
+The L2 distance between the two vectors.
+Float
+.
+Example
+¶
+SELECT L2Distance((1, 2), (2, 3))
+Result:
+┌─L2Distance((1, 2), (2, 3))─┐
+│         1.4142135623730951 │
+└────────────────────────────┘
+L2SquaredDistance
+¶
+Calculates the squared L2 distance between two vectors. This is the sum of the squared differences between their corresponding components.
+Syntax
+¶
+L2SquaredDistance(vector1, vector2)
+Alias:
+distanceL2Squared
+.
+Arguments
+¶
+vector1
+:
+Tuple
+or
+Array
+. The first vector.
+vector2
+:
+Tuple
+or
+Array
+. The second vector.
+Returns
+¶
+The squared L2 distance between the two vectors.
+Float
+.
+Example
+¶
+SELECT L2SquaredDistance([1, 2, 3], [0, 0, 0])
+Result:
+┌─L2SquaredDistance([1, 2, 3], [0, 0, 0])─┐
+│                                      14 │
+└─────────────────────────────────────────┘
+LinfDistance
+¶
+Calculates the L-infinity distance (Chebyshev distance or maximum norm distance) between two vectors. This is the maximum absolute difference between any pair of corresponding components.
+Syntax
+¶
+LinfDistance(vector1, vector2)
+Alias:
+distanceLinf
+.
+Arguments
+¶
+vector1
+:
+Tuple
+or
+Array
+. The first vector.
+vector2
+:
+Tuple
+or
+Array
+. The second vector.
+Returns
+¶
+The L-infinity distance between the two vectors.
+Float
+.
+Example
+¶
+SELECT LinfDistance((1, 2), (2, 3))
+Result:
+┌─LinfDistance((1, 2), (2, 3))─┐
+│                            1 │
+└──────────────────────────────┘
+LpDistance
+¶
+Calculates the Lp distance between two vectors, a generalized distance metric. It is the p-th root of the sum of the p-th powers of the absolute differences between their corresponding components.
+Syntax
+¶
+LpDistance(vector1, vector2, p)
+Alias:
+distanceLp
+.
+Arguments
+¶
+vector1
+:
+Tuple
+or
+Array
+. The first vector.
+vector2
+:
+Tuple
+or
+Array
+. The second vector.
+p
+:
+UInt
+or
+Float
+. The power
+p
+, where
+p
+must be a real number in the range
+[1; inf)
+.
+Returns
+¶
+The Lp distance between the two vectors.
+Float
+.
+Example
+¶
+SELECT LpDistance((1, 2), (2, 3), 3)
+Result:
+┌─LpDistance((1, 2), (2, 3), 3)─┐
+│            1.2599210498948732 │
+└───────────────────────────────┘
+L1Normalize
+¶
+Normalizes a vector to have an L1-norm of 1. This means scaling the vector such that the sum of the absolute values of its components equals 1.
+Syntax
+¶
+L1Normalize(tuple)
+Alias:
+normalizeL1
+.
+Arguments
+¶
+tuple
+:
+Tuple
+. The input vector as a tuple.
+Returns
+¶
+A unit vector with an L1-norm of 1.
+Tuple
+of
+Float
+.
+Example
+¶
+SELECT L1Normalize((1, 2))
+Result:
+┌─L1Normalize((1, 2))─────────────────────┐
+│ (0.3333333333333333,0.6666666666666666) │
+└─────────────────────────────────────────┘
+L2Normalize
+¶
+Normalizes a vector to have an L2-norm (Euclidean norm) of 1. This means scaling the vector such that the square root of the sum of the squares of its components equals 1.
+Syntax
+¶
+L2Normalize(tuple)
+Alias:
+normalizeL1
+.
+Arguments
+¶
+tuple
+:
+Tuple
+. The input vector as a tuple.
+Returns
+¶
+A unit vector with an L2-norm of 1.
+Tuple
+of
+Float
+.
+Example
+¶
+SELECT L2Normalize((3, 4))
+Result:
+┌─L2Normalize((3, 4))─┐
+│ (0.6,0.8)           │
+└─────────────────────┘
+LinfNormalize
+¶
+Normalizes a vector to have an L-infinity norm of 1. This means scaling the vector such that the maximum absolute value among its components equals 1.
+Syntax
+¶
+LinfNormalize(tuple)
+Alias:
+normalizeLinf
+.
+Arguments
+¶
+tuple
+:
+Tuple
+. The input vector as a tuple.
+Returns
+¶
+A unit vector with an L-infinity norm of 1.
+Tuple
+of
+Float
+.
+Example
+¶
+SELECT LinfNormalize((3, 4))
+Result:
+┌─LinfNormalize((3, 4))─┐
+│ (0.75,1)              │
+└───────────────────────┘
+LpNormalize
+¶
+Normalizes a vector to have an Lp-norm of 1. This means scaling the vector such that its Lp-norm equals 1.
+Syntax
+¶
+LpNormalize(tuple, p)
+Alias:
+normalizeLp
+.
+Arguments
+¶
+tuple
+:
+Tuple
+. The input vector as a tuple.
+p
+:
+UInt
+or
+Float
+. The power
+p
+, where
+p
+must be a real number in the range
+[1; inf)
+.
+Returns
+¶
+A unit vector with an Lp-norm of 1.
+Tuple
+of
+Float
+.
+Example
+¶
+SELECT LpNormalize((3, 4),5)
+Result:
+┌─LpNormalize((3, 4), 5)──────────────────┐
+│ (0.7187302630182624,0.9583070173576831) │
+└─────────────────────────────────────────┘
+cosineDistance
+¶
+Calculates the cosine distance between two vectors. This metric measures the angular separation between two vectors, indicating their similarity regardless of magnitude. A smaller value indicates greater similarity.
+Syntax
+¶
+cosineDistance(vector1, vector2)
+Arguments
+¶
+vector1
+:
+Tuple
+or
+Array
+. The first vector.
+vector2
+:
+Tuple
+or
+Array
+. The second vector.
+Returns
+¶
+The cosine distance, which is
+1 - cosine_similarity
+.
+Float
+.
+Example
+¶
+SELECT cosineDistance((1, 2), (2, 3))
+Result:
+┌─cosineDistance((1, 2), (2, 3))─┐
+│           0.007722123286332261 │
+└────────────────────────────────┘
+Updated
+3 weeks ago
+On this page
+Distance functions
+L1Norm
+L2Norm
+L2SquaredNorm
+LinfNorm
+LpNorm
+L1Distance
+L2Distance
+L2SquaredDistance
+LinfDistance
+LpDistance
+L1Normalize
+L2Normalize
+LinfNormalize
+LpNormalize
+cosineDistance
+forward
+classic
+Ask AI

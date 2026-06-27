@@ -1,0 +1,170 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/compiling-mariadb-from-source/legacy-guides/creating_a_debian_repository
+
+Creating a Debian Repository | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Compiling MariaDB From Source: The Master Guide
+Building MariaDB on Windows
+Cross-compiling MariaDB
+Compiling MariaDB with Extra Modules/Options
+Legacy Guides
+Build Environment Setup for macOS
+Building MariaDB on Gentoo
+Creating a Debian Repository
+Creating the MariaDB Source Tarball
+Build Environment Setup for Linux
+Building MariaDB from a Source RPM
+Building MariaDB From Source Using musl-based GNU/Linux
+Building MariaDB on CentOS
+Building MariaDB on Debian
+Building MariaDB on Fedora
+Building MariaDB on FreeBSD
+Building MariaDB on Solaris and OpenSolaris
+Building MariaDB on Ubuntu
+Building RPM Packages From Source
+Compile and Using MariaDB with Sanitizers (ASAN, UBSAN, TSAN, MSAN)
+Creating the MariaDB Binary Tarball
+Compiling with the InnoDB Plugin from Oracle
+Compiling MariaDB with Vanilla XtraDB
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Creating a Debian Repository
+Instructions on how to create a custom Debian repository for MariaDB packages using `dpkg-scanpackages`.
+Below are instructions for creating your own Debian repository. The instructions are based on
+repository-howto.en.html
+Copy
+REPO_DIR
+=
+{
+pick
+some
+location}
+mkdir
+$REPO_DIR
+mkdir
+$REPO_DIR
+/binary
+mkdir
+$REPO_DIR
+/source
+cp
+*
+.deb
+*
+.ddeb
+$REPO_DIR
+/binary
+cd
+$REPO_DIR
+dpkg-scanpackages
+binary
+/dev/null
+|
+gzip
+-9c
+>
+binary/Packages.gz
+dpkg-scansources
+source
+/dev/null
+|
+gzip
+-9c
+>
+source/Sources.gz
+Using the Debian repository you just created
+One needs to add a new file to the
+/etc/apt/sources.list.d/
+directory. For instance a new file called
+mariadb.list
+Copy
+#
+sergey's MariaDB repository
+#
+deb
+file:///home/psergey/testrepo
+binary/
+deb-src
+file:///home/psergey/testrepo
+source/
+after which one can run
+Copy
+apt-get
+update
+#
+Let apt learn about the new repository
+apt-get
+install
+mariadb-server
+and collect bugs :-).
+apt-get install
+will spray output of scripts and servers all over
+/var/log
+. It is also possible to set
+DEBIAN_SCRIPT_DEBUG=1
+to get some (not all) of it to
+stdout
+.
+Cleaning up after failed installation
+Run
+to see what is installed, and then
+until the former produces empty output. Note: after some failures,
+/etc/mysql
+and
+/var/lib/mysql
+are not cleaned and still need to be removed manually.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Building MariaDB on Gentoo
+Next
+Creating the MariaDB Source Tarball
+Last updated
+5 months ago
+Was this helpful?
+Using the Debian repository you just created
+Cleaning up after failed installation
+Was this helpful?
+Copy
+dpkg --get-selections | grep mariadb
+dpkg --get-selections | grep mysql
+Copy
+dpkg --purge <packages>

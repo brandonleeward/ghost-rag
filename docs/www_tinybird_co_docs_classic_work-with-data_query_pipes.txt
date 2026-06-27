@@ -1,0 +1,113 @@
+Source: https://www.tinybird.com/docs/classic/work-with-data/query/pipes
+
+Classic: Pipes · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Pipes
+¶
+Copy as MD
+What is a Pipe?
+¶
+A Pipe is a collection of one or more SQL queries (each query is called a
+Node
+).
+Tinybird represents Pipes using the
+icon.
+What should I use Pipes for?
+¶
+Use Pipes to build features over your data.
+Write SQL that joins, aggregates, or otherwise transforms your data and publish the result.
+You have three options to publish the result of a Pipe:
+API Endpoints
+,
+Materialized Views
+, and
+Copy Pipes
+.
+A Pipe can only have a single output at one time. This means that you can't create a Materialized View and an API Endpoint from the same Pipe, at the same time.
+Once your Pipe is published as an API Endpoint, you can create
+Tinybird Charts
+: Interactive, customizable charts of your data.
+Creating Pipes
+¶
+You can create as many Pipes in your Workspace as you need.
+Creating Pipes in the UI
+¶
+To add a Pipe, click the Plus (+) icon in the left side navigation bar next to the Pipes section (see Mark 1 below).
+At the top of your new Pipe, you can change the name & description.
+Click on the name or description
+to start entering text (see Mark 1 below).
+In time, you might end up with a lot of Pipes. Tinybird doesn't yet offer a way to organize your Pipes into folders, but a quick and easy alternative is to group your Pipe names by name - like
+mktg-<pipe-name>
+so all your marketing Pipes are together. Pipes are ordered alphabetically, and must always start with a letter (but you can use numbers, dots, and underscores in the rest of the name).
+Creating Pipes in the CLI
+¶
+tb pipe generate
+¶
+You can use
+tb pipe generate
+to generate a .pipe file. You must provide a name for the Pipe & a single SQL statement.
+This command will generate the necessary syntax for a single-Node Pipe inside the file. You can open the file in any text editor to change the name, description, query and add more nodes.
+Defining your Pipes in files allows you to version control your Tinybird resources with git.
+The SQL statement must be wrapped in quotes or the command will fail.
+tb pipe generate my_pipe_name "SELECT 1"
+Generating the .pipe file does
+not
+create the Pipe in Tinybird. When you are finished editing the file, you must push the Pipe to Tinybird.
+tb push my_pipe_name.pipe
+If you list your Pipes, you'll see that your Pipe exists in Tinybird.
+tb pipe ls
+
+** Pipes:
+--------------------------------------------------------------------
+| version | name                     | published date      | nodes |
+--------------------------------------------------------------------
+|         | my_pipe_name             | 2022-11-30 21:44:55 |     1 |
+--------------------------------------------------------------------
+Format descriptions using Markdown
+¶
+It is possible to use Markdown syntax in Pipe description fields so you can add richer formatting.
+Here's an example using headings, bold, and external links:
+## This is my first Pipe!
+
+You can use **Markdown** in descriptions.
+
+Add [links](https://www.tinybird.co) to other bits of info!
+This will be rendered in the UI like this:
+Nodes
+¶
+What is a Node?
+¶
+A node is a container for a single SQL
+SELECT
+statement. Nodes live within Pipes, and you can have many sequential nodes inside the same Pipe.
+A query in a node can read data from a
+Data Source
+, other nodes inside the same Pipe, or from
+API Endpoint
+nodes in other Pipes.
+What should I use nodes for?
+¶
+Nodes allow you to break your query logic down into multiple smaller queries. You can then chain nodes together to build the logic incrementally.
+Each node can be developed & tested individually. This makes it much easier to build complex query logic in Tinybird as you avoid creating large monolithic queries with many sub-queries.
+Display limits
+¶
+When viewing query results in the UI, there is a 5000 character limit for displaying data in a cell value. If a cell contains more than 5000 characters, the data will be truncated. This limit applies only to the UI display and does not affect the actual data or query results returned through API Endpoints.
+Updated
+3 weeks ago
+On this page
+Pipes
+What is a Pipe?
+What should I use Pipes for?
+Creating Pipes
+Creating Pipes in the UI
+Creating Pipes in the CLI
+Format descriptions using Markdown
+Nodes
+What is a Node?
+What should I use nodes for?
+Display limits
+classic
+Ask AI

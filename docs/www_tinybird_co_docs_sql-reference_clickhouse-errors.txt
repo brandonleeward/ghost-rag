@@ -1,0 +1,158 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors
+
+ClickHouse Errors · Tinybird Docs
+Sign In
+Sign Up
+ClickHouse Errors
+¶
+Copy as MD
+This section provides detailed documentation for the most common ClickHouse database errors you'll encounter when working with Tinybird. Each error page includes explanations, examples, and step-by-step solutions.
+Error categories
+¶
+Syntax and Structure Errors
+¶
+These errors occur when SQL syntax is incorrect or queries are malformed:
+SYNTAX_ERROR
+- Malformed SQL statements
+UNKNOWN_IDENTIFIER
+- Undefined table or column names
+UNKNOWN_FUNCTION
+- Non-existent functions
+UNKNOWN_TYPE
+- Unsupported data types
+Type and Conversion Errors
+¶
+These errors happen when data types are incompatible or conversion fails:
+ILLEGAL_TYPE_OF_ARGUMENT
+- Wrong argument types for functions
+TYPE_MISMATCH
+- Incompatible data types in operations
+NO_COMMON_TYPE
+- Cannot determine common type for operation
+CANNOT_PARSE_DATE
+- Invalid date string formats
+CANNOT_PARSE_DATETIME
+- Invalid datetime string formats
+CANNOT_PARSE_TEXT
+- Text parsing failures
+CANNOT_READ_ARRAY_FROM_TEXT
+- Array parsing issues
+Function and Argument Errors
+¶
+These errors occur when functions are used incorrectly:
+BAD_ARGUMENTS
+- Invalid function arguments
+NUMBER_OF_ARGUMENTS_DOESNT_MATCH
+- Wrong number of function arguments
+Aggregation and Grouping Errors
+¶
+These errors happen with aggregate functions and GROUP BY clauses:
+NOT_AN_AGGREGATE
+- Non-aggregate functions in aggregate context
+ILLEGAL_AGGREGATION
+- Invalid aggregation operations
+ILLEGAL_COLUMN
+- Unsupported column usage
+JOIN and Relationship Errors
+¶
+These errors occur with table joins and relationships:
+INVALID_JOIN_ON_EXPRESSION
+- Invalid JOIN conditions
+UNSUPPORTED_JOIN_KEYS
+- Unsupported JOIN key types
+UNION_ALL_RESULT_STRUCTURES_MISMATCH
+- Incompatible UNION structures
+Query and Performance Errors
+¶
+These errors relate to query execution and performance:
+TOO_MANY_ROWS_OR_BYTES
+- Query result too large
+QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING
+- Duplicate query execution
+Table and Engine Errors
+¶
+These errors occur with table operations and engines:
+ILLEGAL_FINAL
+- FINAL keyword usage issues
+MULTIPLE_EXPRESSIONS_FOR_ALIAS
+- Alias conflicts
+System and Implementation Errors
+¶
+These errors relate to system limitations and unsupported features:
+NOT_IMPLEMENTED
+- Unsupported features or operations
+UNSUPPORTED_METHOD
+- Unsupported methods or operations
+Quick reference
+¶
+Most common errors
+¶
+Error
+Frequency
+Typical Cause
+UNKNOWN_IDENTIFIER
+Very High
+Misspelled column/table names
+NOT_AN_AGGREGATE
+High
+Non-aggregate columns in GROUP BY
+ILLEGAL_TYPE_OF_ARGUMENT
+High
+Wrong argument types
+TOO_MANY_ROWS_OR_BYTES
+Medium
+Large result sets
+Error prevention tips
+¶
+Always test queries
+with small datasets first
+Use appropriate data types
+for your columns
+Check function documentation
+before using new functions
+Use aliases
+to avoid column name conflicts
+Implement proper error handling
+in your applications
+Need help with a specific error?
+¶
+If you can't find your error in this documentation:
+Search for the error code
+in the ClickHouse documentation
+Check the error context
+- what operation were you performing?
+Simplify your query
+- try to isolate the problematic part
+Use the Query Builder
+- test your query step by step
+See also
+¶
+SQL Reference Overview
+- SQL reference guide
+Common Error Patterns
+- Recurring error patterns
+ClickHouse Functions
+- Function documentation
+Data Types
+- ClickHouse data type reference
+Updated
+7 months ago
+On this page
+ClickHouse Errors
+Error categories
+Syntax and Structure Errors
+Type and Conversion Errors
+Function and Argument Errors
+Aggregation and Grouping Errors
+JOIN and Relationship Errors
+Query and Performance Errors
+Table and Engine Errors
+System and Implementation Errors
+Quick reference
+Most common errors
+Error prevention tips
+Need help with a specific error?
+See also
+forward
+classic
+Ask AI

@@ -1,0 +1,80 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading/mariadb-community-server-upgrade-paths
+
+MariaDB Community Server Upgrade Paths | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Platform Specific Upgrade Guides
+MariaDB Community Server Upgrade Paths
+Upgrading from MariaDB 11.8 to MariaDB 12.3
+Upgrading from MariaDB 11.4 to MariaDB 11.8
+Upgrading from MariaDB 11.3 to MariaDB 11.4
+Upgrading from MariaDB 10.11 to MariaDB 11.4
+Upgrading from MariaDB 10.6 to MariaDB 10.11
+Upgrading from MariaDB 10.5 to MariaDB 10.6
+Archived Guides (Unmaintained CS Versions)
+General Upgrade Information
+MariaDB Enterprise Server Upgrade Paths
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+MariaDB Community Server Upgrade Paths
+An overview of supported upgrade paths for MariaDB Community Server, linking to specific guides for upgrading between major versions like 10.x and 11.x.
+Upgrading from MariaDB 11.8 to MariaDB 12.3
+Upgrade guide for moving from MariaDB 11.8 to 12.3, covering removed options and replication caveats.
+Upgrading from MariaDB 11.4 to MariaDB 11.8
+Upgrade guide for moving from MariaDB 11.4 to 11.8, covering new features like vector search, optimizer improvements, and data type enhancements.
+Upgrading from MariaDB 11.3 to MariaDB 11.4
+Instructions for upgrading from the rolling release 11.3 to the long-term support release 11.4, detailing package updates and system table upgrades.
+Upgrading from MariaDB 10.11 to MariaDB 11.4
+Guide for upgrading from the previous LTS version 10.11 to 11.4, highlighting major optimizer changes, replication improvements, and SSL defaults.
+Upgrading from MariaDB 10.6 to MariaDB 10.11
+Complete MariaDB 10.6 to 10.11 upgrade: repository config, apt-get/yum/zypper remove+install, my.cnf option changes, and run mariadb-upgrade.
+Upgrading from MariaDB 10.5 to MariaDB 10.6
+Instructions for upgrading to MariaDB 10.6, noting significant changes like the default character set switch to
+utf8mb3
+and atomic DDL support.
+Previous
+Upgrading MariaDB on Windows
+Next
+Upgrading from MariaDB 11.8 to MariaDB 12.3
+Last updated
+8 days ago
+Was this helpful?
+Was this helpful?

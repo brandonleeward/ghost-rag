@@ -1,0 +1,2325 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/hash-functions
+
+Hash Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Hash functions
+¶
+Copy as MD
+Hash functions are used to generate a fixed-size output (a hash value) from input data. They are often used for data integrity checks, unique identification, or distributing data across buckets.
+Simhash
+is a specific type of hash function that produces similar hash values for similar input arguments, useful for detecting near-duplicate content.
+Most hash functions in Tinybird can accept multiple arguments of various data types.
+A hash of
+NULL
+is
+NULL
+. To generate a non-
+NULL
+hash for a
+Nullable
+column, wrap the column in a
+tuple
+:
+SELECT cityHash64(tuple(NULL))
+halfMD5
+¶
+This function processes all input parameters as strings, computes their MD5 hash, and then combines these hashes. It extracts the first 8 bytes of the resulting hash and interprets them as a
+UInt64
+value in big-endian order.
+Syntax
+¶
+halfMD5(par1, ...)
+Arguments
+¶
+par1, ...
+: A variable number of input parameters of any
+supported data type
+. These are implicitly converted to strings for hashing.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT halfMD5(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS halfMD5hash, toTypeName(halfMD5hash) AS type
+Result:
+┌────────halfMD5hash─┬─type───┐
+│ 186182704141653334 │ UInt64 │
+└────────────────────┴────────┘
+MD4
+¶
+Calculates the MD4 hash of a string input.
+Syntax
+¶
+MD4(input_string)
+Arguments
+¶
+input_string
+: The string to hash.
+String
+.
+Returns
+¶
+A 128-bit MD4 hash value.
+FixedString(16)
+.
+Example
+¶
+SELECT MD4('Tinybird') AS md4_hash
+Result:
+┌─md4_hash─────────┐
+│ 0000000000000000 │
+└──────────────────┘
+MD5
+¶
+Calculates the MD5 hash of a string input.
+Syntax
+¶
+MD5(input_string)
+Arguments
+¶
+input_string
+: The string to hash.
+String
+.
+Returns
+¶
+A 128-bit MD5 hash value.
+FixedString(16)
+.
+Example
+¶
+SELECT MD5('Tinybird') AS md5_hash
+Result:
+┌─md5_hash─────────┐
+│ 0000000000000000 │
+└──────────────────┘
+RIPEMD160
+¶
+Generates a RIPEMD-160 hash value from a given string.
+Syntax
+¶
+RIPEMD160(input)
+Arguments
+¶
+input
+: The string to hash.
+String
+.
+Returns
+¶
+A 160-bit RIPEMD-160 hash value.
+FixedString(20)
+.
+Example
+¶
+Use the
+hex
+function to represent the result as a hex-encoded string.
+SELECT HEX(RIPEMD160('The quick brown fox jumps over the lazy dog'))
+Result:
+┌─HEX(RIPEMD160('The quick brown fox jumps over the lazy dog'))─┐
+│ 37F332F68DB77BD9D7EDD4969571AD671CF9DD3B                      │
+└───────────────────────────────────────────────────────────────┘
+sipHash64
+¶
+Computes a 64-bit SipHash value for one or more input parameters. This cryptographic hash function is generally faster than MD5.
+Syntax
+¶
+sipHash64(par1,...)
+Arguments
+¶
+par1, ...
+: A variable number of input parameters of any
+supported data type
+. These are implicitly converted to strings for hashing.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT sipHash64(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS SipHash, toTypeName(SipHash) AS type
+Result:
+┌──────────────SipHash─┬─type───┐
+│ 11400366955626497465 │ UInt64 │
+└──────────────────────┴────────┘
+sipHash64Keyed
+¶
+Calculates a 64-bit SipHash value using an explicitly provided key, similar to
+sipHash64
+.
+Syntax
+¶
+sipHash64Keyed((k0, k1), par1,...)
+Arguments
+¶
+(k0, k1)
+: A
+tuple
+of two
+UInt64
+values that serve as the cryptographic key.
+par1, ...
+: A variable number of input parameters of any
+supported data type
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT sipHash64Keyed((506097522914230528, 1084818905618843912), array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS SipHash, toTypeName(SipHash) AS type
+Result:
+┌─────────────SipHash─┬─type───┐
+│ 8017656310194184311 │ UInt64 │
+└─────────────────────┴────────┘
+sipHash128
+¶
+Generates a 128-bit SipHash value, extending the 64-bit version by performing a 128-bit XOR folding of the final state.
+This 128-bit variant differs from the reference implementation and is considered weaker. For new projects,
+sipHash128Reference
+is generally recommended.
+Syntax
+¶
+sipHash128(par1,...)
+Arguments
+¶
+par1, ...
+: A variable number of input parameters of any
+supported data type
+.
+Returns
+¶
+A 128-bit SipHash value.
+FixedString(16)
+.
+Example
+¶
+SELECT hex(sipHash128('foo', '\x01', 3))
+Result:
+┌─hex(sipHash128('foo', '', 3))────┐
+│ 9DE516A64A414D4B1B609415E4523F24 │
+└──────────────────────────────────┘
+sipHash128Keyed
+¶
+Calculates a 128-bit SipHash value using an explicit key, similar to
+sipHash128
+.
+This 128-bit variant differs from the reference implementation and is considered weaker. For new projects,
+sipHash128ReferenceKeyed
+is generally recommended.
+Syntax
+¶
+sipHash128Keyed((k0, k1), par1,...)
+Arguments
+¶
+(k0, k1)
+: A
+tuple
+of two
+UInt64
+values that serve as the cryptographic key.
+par1, ...
+: A variable number of input parameters of any
+supported data type
+.
+Returns
+¶
+A 128-bit SipHash value.
+FixedString(16)
+.
+Example
+¶
+SELECT hex(sipHash128Keyed((506097522914230528, 1084818905618843912),'foo', '\x01', 3))
+Result:
+┌─hex(sipHash128Keyed((506097522914230528, 1084818905618843912), 'foo', '', 3))─┐
+│ B8467F65C8B4CFD9A5F8BD733917D9BF                                              │
+└───────────────────────────────────────────────────────────────────────────────┘
+sipHash128Reference
+¶
+Generates a 128-bit SipHash value using the official 128-bit algorithm from the original authors of SipHash.
+Syntax
+¶
+sipHash128Reference(par1,...)
+Arguments
+¶
+par1, ...
+: A variable number of input parameters of any
+supported data type
+.
+Returns
+¶
+A 128-bit SipHash value.
+FixedString(16)
+.
+Example
+¶
+SELECT hex(sipHash128Reference('foo', '\x01', 3))
+Result:
+┌─hex(sipHash128Reference('foo', '', 3))─┐
+│ 4D1BE1A22D7F5933C0873E1698426260       │
+└────────────────────────────────────────┘
+sipHash128ReferenceKeyed
+¶
+Calculates a 128-bit SipHash value using the official reference algorithm and an explicitly provided key.
+Syntax
+¶
+sipHash128ReferenceKeyed((k0, k1), par1,...)
+Arguments
+¶
+(k0, k1)
+: A
+tuple
+of two
+UInt64
+values that serve as the cryptographic key.
+par1, ...
+: A variable number of input parameters of any
+supported data type
+.
+Returns
+¶
+A 128-bit SipHash value.
+FixedString(16)
+.
+Example
+¶
+SELECT hex(sipHash128ReferenceKeyed((506097522914230528, 1084818905618843912),'foo', '\x01', 3))
+Result:
+┌─hex(sipHash128ReferenceKeyed((506097522914230528, 1084818905618843912), 'foo', '', 3))─┐
+│ 630133C9722DC08646156B8130C4CDC8                                                       │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+cityHash64
+¶
+Produces a 64-bit CityHash value, a fast non-cryptographic hash function. It uses the CityHash algorithm for string inputs and a specific non-cryptographic hash for other data types, combining results with the CityHash combinator.
+Syntax
+¶
+cityHash64(par1,...)
+Arguments
+¶
+par1, ...
+: A variable number of input parameters of any
+supported data type
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT cityHash64(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS CityHash, toTypeName(CityHash) AS type
+Result:
+┌─────────────CityHash─┬─type───┐
+│ 12072650598913549138 │ UInt64 │
+└──────────────────────┴────────┘
+intHash32
+¶
+Calculates a 32-bit hash code from any integer input. This is a relatively fast, non-cryptographic hash function suitable for numbers.
+Syntax
+¶
+intHash32(int)
+Arguments
+¶
+int
+: The integer value to hash.
+(U)Int*
+.
+Returns
+¶
+A 32-bit hash code.
+UInt32
+.
+Example
+¶
+SELECT intHash32(42)
+Result:
+┌─intHash32(42)─┐
+│    1228623923 │
+└───────────────┘
+intHash64
+¶
+Calculates a 64-bit hash code from any integer input. This non-cryptographic hash function is faster than
+intHash32
+and provides a higher quality hash for numbers.
+Syntax
+¶
+intHash64(int)
+Arguments
+¶
+int
+: The integer value to hash.
+(U)Int*
+.
+Returns
+¶
+A 64-bit hash code.
+UInt64
+.
+Example
+¶
+SELECT intHash64(42)
+Result:
+┌────────intHash64(42)─┐
+│ 11490350930367293593 │
+└──────────────────────┘
+SHA1, SHA224, SHA256, SHA512, SHA512_256
+¶
+These functions compute various SHA (Secure Hash Algorithm) hashes (SHA-1, SHA-224, SHA-256, SHA-512, SHA-512/256) from a string input.
+Syntax
+¶
+SHA1('s')
+SHA224('s')
+SHA256('s')
+SHA512('s')
+SHA512_256('s')
+Arguments
+¶
+s
+: The input string for SHA hash calculation.
+String
+.
+Returns
+¶
+The SHA hash as a hex-unencoded
+FixedString
+.
+SHA1
+:
+FixedString(20)
+SHA224
+:
+FixedString(28)
+SHA256
+:
+FixedString(32)
+SHA512
+:
+FixedString(64)
+SHA512_256
+:
+FixedString(32)
+Example
+¶
+Use the
+hex
+function to represent the result as a hex-encoded string.
+SELECT hex(SHA1('abc'))
+Result:
+┌─hex(SHA1('abc'))─────────────────────────┐
+│ A9993E364706816ABA3E25717850C26C9CD0D89D │
+└──────────────────────────────────────────┘
+BLAKE3
+¶
+Calculates the BLAKE3 hash of a string input. This cryptographic hash function is known for its speed, offering performance approximately twice as fast as SHA-2 while producing hashes of the same length as SHA-256.
+Syntax
+¶
+BLAKE3('s')
+Arguments
+¶
+s
+: The input string for BLAKE3 hash calculation.
+String
+.
+Returns
+¶
+The BLAKE3 hash as a byte array.
+FixedString(32)
+.
+Example
+¶
+Use the
+hex
+function to represent the result as a hex-encoded string.
+SELECT hex(BLAKE3('ABC'))
+Result:
+┌─hex(BLAKE3('ABC'))───────────────────────────────────────────────┐
+│ D1717274597CF0289694F75D96D444B992A096F1AFD8E7BBFA6EBB1D360FEDFC │
+└──────────────────────────────────────────────────────────────────┘
+URLHash(url[, N])
+¶
+This function computes a fast, non-cryptographic hash for a URL string after applying some normalization. It can hash the entire URL or up to a specified level in its hierarchy.
+Syntax
+¶
+URLHash(url)
+URLHash(url, N)
+Arguments
+¶
+url
+: The URL string to hash.
+String
+.
+N
+: An optional integer specifying the URL hierarchy level up to which the hash should be calculated.
+UInt8
+.
+Returns
+¶
+A hash value.
+UInt64
+.
+Example
+¶
+SELECT URLHash('https://tinybird.co/docs/sql-reference/functions/hash-functions') AS full_url_hash,
+       URLHash('https://tinybird.co/docs/sql-reference/functions/hash-functions', 2) AS level_2_hash
+Result:
+┌─full_url_hash──────┬─level_2_hash───────┐
+│ 123456789012345678 │ 987654321098765432 │
+└────────────────────┴────────────────────┘
+farmFingerprint64
+¶
+This function computes a 64-bit Fingerprint value using the FarmHash algorithm. It is recommended for generating stable and portable hash values.
+Syntax
+¶
+farmFingerprint64(par1, ...)
+Arguments
+¶
+par1, ...
+: A variable number of input parameters of any
+supported data type
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT farmFingerprint64('Tinybird') AS fingerprint_hash
+Result:
+┌─fingerprint_hash───┐
+│ 123456789012345678 │
+└────────────────────┘
+farmHash64
+¶
+This function computes a 64-bit hash value using the FarmHash algorithm.
+Syntax
+¶
+farmHash64(par1, ...)
+Arguments
+¶
+par1, ...
+: A variable number of input parameters of any
+supported data type
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT farmHash64(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS FarmHash, toTypeName(FarmHash) AS type
+Result:
+┌─────────────FarmHash─┬─type───┐
+│ 17790458267262532859 │ UInt64 │
+└──────────────────────┴────────┘
+javaHash
+¶
+Calculates a hash value compatible with Java's
+hashCode()
+method for strings, bytes, shorts, integers, and longs. This function is primarily useful for compatibility with existing Java systems rather than for high-quality or fast hashing.
+Syntax
+¶
+javaHash(value)
+Arguments
+¶
+value
+: The input value to hash. Can be a
+String
+or an integer type.
+Returns
+¶
+A 32-bit signed integer hash value.
+Int32
+.
+Example
+¶
+SELECT javaHash(toInt32(123))
+Result:
+┌─javaHash(toInt32(123))─┐
+│               123      │
+└────────────────────────┘
+SELECT javaHash('Hello, world!')
+Result:
+┌─javaHash('Hello, world!')─┐
+│               -1880044555 │
+└───────────────────────────┘
+javaHashUTF16LE
+¶
+Calculates a Java-compatible hash value for a string, assuming the input string is encoded in UTF-16LE.
+Syntax
+¶
+javaHashUTF16LE(stringUtf16le)
+Arguments
+¶
+stringUtf16le
+: A string encoded in UTF-16LE.
+String
+.
+Returns
+¶
+A 32-bit signed integer hash value.
+Int32
+.
+Example
+¶
+SELECT javaHashUTF16LE(convertCharset('test', 'utf-8', 'utf-16le'))
+Result:
+┌─javaHashUTF16LE(convertCharset('test', 'utf-8', 'utf-16le'))─┐
+│                                                      3556498 │
+└──────────────────────────────────────────────────────────────┘
+hiveHash
+¶
+Calculates a hash value compatible with Apache Hive versions prior to 3.0. This function is essentially
+javaHash
+with the sign bit zeroed out, and is primarily used for compatibility with existing Hive systems.
+Syntax
+¶
+hiveHash(value)
+Arguments
+¶
+value
+: The input value to hash.
+String
+.
+Returns
+¶
+A 32-bit signed integer hash value.
+Int32
+.
+Example
+¶
+SELECT hiveHash('Hello, world!')
+Result:
+┌─hiveHash('Hello, world!')─┐
+│                 267439093 │
+└───────────────────────────┘
+metroHash64
+¶
+Produces a 64-bit MetroHash value, a fast non-cryptographic hash function.
+Syntax
+¶
+metroHash64(par1, ...)
+Arguments
+¶
+par1, ...
+: A variable number of input parameters of any
+supported data type
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT metroHash64(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS MetroHash, toTypeName(MetroHash) AS type
+Result:
+┌────────────MetroHash─┬─type───┐
+│ 14235658766382344533 │ UInt64 │
+└──────────────────────┴────────┘
+jumpConsistentHash
+¶
+Calculates a Jump Consistent Hash for a given key and number of buckets. This algorithm provides a simple and fast way to assign keys to buckets in a consistent manner.
+Syntax
+¶
+jumpConsistentHash(key, num_buckets)
+Arguments
+¶
+key
+: A 64-bit unsigned integer key.
+UInt64
+.
+num_buckets
+: The number of available buckets.
+Int32
+.
+Returns
+¶
+The assigned bucket index.
+Int32
+.
+Example
+¶
+SELECT jumpConsistentHash(1234567890123456789, 100) AS bucket_id
+Result:
+┌─bucket_id─┐
+│        42 │
+└───────────┘
+kostikConsistentHash
+¶
+This function implements an O(1) time and space consistent hashing algorithm. It efficiently distributes keys among a fixed number of buckets.
+Alias:
+yandexConsistentHash
+Syntax
+¶
+kostikConsistentHash(input, n)
+Arguments
+¶
+input
+: A 64-bit unsigned integer key.
+UInt64
+.
+n
+: The number of buckets.
+UInt16
+.
+Returns
+¶
+A 16-bit unsigned integer hash value representing the assigned bucket.
+UInt16
+.
+Example
+¶
+SELECT kostikConsistentHash(16045690984833335023, 2)
+Result:
+┌─kostikConsistentHash(16045690984833335023, 2)─┐
+│                                             1 │
+└───────────────────────────────────────────────┘
+murmurHash2_32, murmurHash2_64
+¶
+These functions produce 32-bit or 64-bit MurmurHash2 values, which are fast, non-cryptographic hash functions suitable for general-purpose hashing.
+Syntax
+¶
+murmurHash2_32(par1, ...)
+murmurHash2_64(par1, ...)
+Arguments
+¶
+par1, ...
+: A variable number of input parameters of any
+supported data type
+.
+Returns
+¶
+murmurHash2_32
+: A 32-bit hash value.
+UInt32
+.
+murmurHash2_64
+: A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT murmurHash2_64(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS MurmurHash2, toTypeName(MurmurHash2) AS type
+Result:
+┌──────────MurmurHash2─┬─type───┐
+│ 11832096901709403633 │ UInt64 │
+└──────────────────────┴────────┘
+gccMurmurHash
+¶
+Calculates a 64-bit MurmurHash2 value using the same hash seed as GCC's standard library. This ensures portability of hash results between different compilers like Clang and GCC.
+Syntax
+¶
+gccMurmurHash(par1, ...)
+Arguments
+¶
+par1, ...
+: A variable number of parameters of any
+supported data type
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT
+    gccMurmurHash(1, 2, 3) AS res1,
+    gccMurmurHash(('a', [1, 2, 3], 4, (4, ['foo', 'bar'], 1, (1, 2)))) AS res2
+Result:
+┌─────────────────res1─┬────────────────res2─┐
+│ 12384823029245979431 │ 1188926775431157506 │
+└──────────────────────┴─────────────────────┘
+kafkaMurmurHash
+¶
+Calculates a 32-bit MurmurHash2 value, specifically designed to be compatible with Apache Kafka's default partitioner. It uses Kafka's hash seed and clears the highest bit of the result.
+Syntax
+¶
+kafkaMurmurHash(par1, ...)
+Arguments
+¶
+par1, ...
+: A variable number of parameters of any
+supported data type
+.
+Returns
+¶
+A 32-bit hash value.
+UInt32
+.
+Example
+¶
+SELECT
+    kafkaMurmurHash('foobar') AS res1,
+    kafkaMurmurHash(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS res2
+Result:
+┌───────res1─┬─────res2─┐
+│ 1357151166 │ 85479775 │
+└────────────┴──────────┘
+murmurHash3_32, murmurHash3_64
+¶
+These functions produce 32-bit or 64-bit MurmurHash3 values, which are fast, non-cryptographic hash functions offering improved collision resistance over MurmurHash2.
+Syntax
+¶
+murmurHash3_32(par1, ...)
+murmurHash3_64(par1, ...)
+Arguments
+¶
+par1, ...
+: A variable number of input parameters of any
+supported data type
+.
+Returns
+¶
+murmurHash3_32
+: A 32-bit hash value.
+UInt32
+.
+murmurHash3_64
+: A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT murmurHash3_32(array('e','x','a'), 'mple', 10, toDateTime('2019-06-15 23:00:00')) AS MurmurHash3, toTypeName(MurmurHash3) AS type
+Result:
+┌─MurmurHash3─┬─type───┐
+│     2152717 │ UInt32 │
+└─────────────┴────────┘
+murmurHash3_128
+¶
+Produces a 128-bit MurmurHash3 value, providing a longer hash for increased uniqueness and reduced collision probability.
+Syntax
+¶
+murmurHash3_128(expr)
+Arguments
+¶
+expr
+: A list of expressions to hash.
+String
+.
+Returns
+¶
+A 128-bit MurmurHash3 hash value.
+FixedString(16)
+.
+Example
+¶
+SELECT hex(murmurHash3_128('foo', 'foo', 'foo'))
+Result:
+┌─hex(murmurHash3_128('foo', 'foo', 'foo'))─┐
+│ F8F7AD9B6CD4CF117A71E277E2EC2931          │
+└───────────────────────────────────────────┘
+xxh3
+¶
+Produces a 64-bit hash value using the xxh3 algorithm, known for its extreme speed and good hash quality.
+Syntax
+¶
+xxh3(expr)
+Arguments
+¶
+expr
+: A list of expressions of any data type to hash.
+Returns
+¶
+A 64-bit xxh3 hash value.
+UInt64
+.
+Example
+¶
+SELECT xxh3('Hello', 'world')
+Result:
+┌─xxh3('Hello', 'world')─┐
+│    5607458076371731292 │
+└────────────────────────┘
+xxHash32, xxHash64
+¶
+These functions calculate
+xxHash
+values from a string input, available in 32-bit and 64-bit versions. xxHash is a very fast non-cryptographic hash algorithm.
+Syntax
+¶
+xxHash32(input_string)
+xxHash64(input_string)
+Arguments
+¶
+input_string
+: The string to hash.
+String
+.
+Returns
+¶
+xxHash32
+: A 32-bit hash value.
+UInt32
+.
+xxHash64
+: A 64-bit hash value.
+UInt64
+.
+The return type will be
+UInt32
+for
+xxHash32
+and
+UInt64
+for
+xxHash64
+.
+Example
+¶
+SELECT xxHash32('Hello, world!')
+Result:
+┌─xxHash32('Hello, world!')─┐
+│                 834093149 │
+└───────────────────────────┘
+ngramSimHash
+¶
+Splits an ASCII string into n-grams (sequences of
+ngramsize
+symbols) and computes a
+simhash
+for these n-grams. This function is case-sensitive.
+This function is useful for identifying similar strings; a smaller
+Hamming Distance
+between two
+simhashes
+indicates greater similarity between the original strings.
+Syntax
+¶
+ngramSimHash(string[, ngramsize])
+Arguments
+¶
+string
+: The ASCII string to process.
+String
+.
+ngramsize
+: The length of each n-gram. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT ngramSimHash('Bazinga') AS Hash
+Result:
+┌───────Hash─┐
+│ 1627567969 │
+└────────────┘
+ngramSimHashCaseInsensitive
+¶
+Splits an ASCII string into n-grams (sequences of
+ngramsize
+symbols) and computes a
+simhash
+for these n-grams, ignoring case.
+This function is useful for identifying similar strings; a smaller
+Hamming Distance
+between two
+simhashes
+indicates greater similarity between the original strings.
+Syntax
+¶
+ngramSimHashCaseInsensitive(string[, ngramsize])
+Arguments
+¶
+string
+: The ASCII string to process.
+String
+.
+ngramsize
+: The length of each n-gram. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT ngramSimHashCaseInsensitive('Bazinga') AS Hash
+Result:
+┌──────Hash─┐
+│ 562180645 │
+└───────────┘
+ngramSimHashUTF8
+¶
+Splits a UTF-8 string into n-grams (sequences of
+ngramsize
+symbols) and computes a
+simhash
+for these n-grams. This function is case-sensitive.
+This function is useful for identifying similar strings; a smaller
+Hamming Distance
+between two
+simhashes
+indicates greater similarity between the original strings.
+Syntax
+¶
+ngramSimHashUTF8(string[, ngramsize])
+Arguments
+¶
+string
+: The UTF-8 string to process.
+String
+.
+ngramsize
+: The length of each n-gram. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT ngramSimHashUTF8('Bazinga') AS Hash
+Result:
+┌───────Hash─┐
+│ 1628157797 │
+└────────────┘
+ngramSimHashCaseInsensitiveUTF8
+¶
+Splits a UTF-8 string into n-grams (sequences of
+ngramsize
+symbols) and computes a
+simhash
+for these n-grams, ignoring case.
+This function is useful for identifying similar strings; a smaller
+Hamming Distance
+between two
+simhashes
+indicates greater similarity between the original strings.
+Syntax
+¶
+ngramSimHashCaseInsensitiveUTF8(string[, ngramsize])
+Arguments
+¶
+string
+: The UTF-8 string to process.
+String
+.
+ngramsize
+: The length of each n-gram. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT ngramSimHashCaseInsensitiveUTF8('Bazinga') AS Hash
+Result:
+┌───────Hash─┐
+│ 1636742693 │
+└────────────┘
+wordShingleSimHash
+¶
+Splits an ASCII string into word shingles (sequences of
+shinglesize
+words) and computes a
+simhash
+for these shingles. This function is case-sensitive.
+This function is useful for identifying similar strings; a smaller
+Hamming Distance
+between two
+simhashes
+indicates greater similarity between the original strings.
+Syntax
+¶
+wordShingleSimHash(string[, shinglesize])
+Arguments
+¶
+string
+: The ASCII string to process.
+String
+.
+shinglesize
+: The number of words in each shingle. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT wordShingleSimHash('Bazinga® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).') AS Hash
+Result:
+┌───────Hash─┐
+│ 2328277067 │
+└────────────┘
+wordShingleSimHashCaseInsensitive
+¶
+Splits an ASCII string into word shingles (sequences of
+shinglesize
+words) and computes a
+simhash
+for these shingles, ignoring case.
+This function is useful for identifying similar strings; a smaller
+Hamming Distance
+between two
+simhashes
+indicates greater similarity between the original strings.
+Syntax
+¶
+wordShingleSimHashCaseInsensitive(string[, shinglesize])
+Arguments
+¶
+string
+: The ASCII string to process.
+String
+.
+shinglesize
+: The number of words in each shingle. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT wordShingleSimHashCaseInsensitive('Bazinga® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).') AS Hash
+Result:
+┌───────Hash─┐
+│ 2194812424 │
+└────────────┘
+wordShingleSimHashUTF8
+¶
+Splits a UTF-8 string into word shingles (sequences of
+shinglesize
+words) and computes a
+simhash
+for these shingles. This function is case-sensitive.
+This function is useful for identifying similar strings; a smaller
+Hamming Distance
+between two
+simhashes
+indicates greater similarity between the original strings.
+Syntax
+¶
+wordShingleSimHashUTF8(string[, shinglesize])
+Arguments
+¶
+string
+: The UTF-8 string to process.
+String
+.
+shinglesize
+: The number of words in each shingle. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT wordShingleSimHashUTF8('Bazinga® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).') AS Hash
+Result:
+┌───────Hash─┐
+│ 2328277067 │
+└────────────┘
+wordShingleSimHashCaseInsensitiveUTF8
+¶
+Splits a UTF-8 string into word shingles (sequences of
+shinglesize
+words) and computes a
+simhash
+for these shingles, ignoring case.
+This function is useful for identifying similar strings; a smaller
+Hamming Distance
+between two
+simhashes
+indicates greater similarity between the original strings.
+Syntax
+¶
+wordShingleSimHashCaseInsensitiveUTF8(string[, shinglesize])
+Arguments
+¶
+string
+: The UTF-8 string to process.
+String
+.
+shinglesize
+: The number of words in each shingle. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT wordShingleSimHashCaseInsensitiveUTF8('Bazinga® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).') AS Hash
+Result:
+┌───────Hash─┐
+│ 2194812424 │
+└────────────┘
+wyHash64
+¶
+Produces a 64-bit hash value using the wyHash64 algorithm, a fast and high-quality non-cryptographic hash function.
+Syntax
+¶
+wyHash64(string)
+Arguments
+¶
+string
+: The string to hash.
+String
+.
+Returns
+¶
+A 64-bit hash value.
+UInt64
+.
+Example
+¶
+SELECT wyHash64('Bazinga') AS Hash
+Result:
+┌─────────────────Hash─┐
+│ 12336419557878201794 │
+└──────────────────────┘
+ngramMinHash
+¶
+Splits an ASCII string into n-grams and calculates minimum and maximum hash values for these n-grams. It returns a tuple containing these two hashes and is case-sensitive.
+This function is useful for detecting semi-duplicate strings. If one of the returned hashes is identical for two strings, it suggests a high degree of similarity.
+Syntax
+¶
+ngramMinHash(string[, ngramsize, hashnum])
+Arguments
+¶
+string
+: The ASCII string to process.
+String
+.
+ngramsize
+: The length of each n-gram. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+hashnum
+: The number of minimum and maximum hashes to use. Optional. Valid values are
+1
+to
+25
+. Default is
+6
+.
+UInt8
+.
+Returns
+¶
+A
+tuple
+containing two
+UInt64
+hash values (minimum and maximum).
+Tuple
+(
+UInt64
+,
+UInt64
+).
+Example
+¶
+SELECT ngramMinHash('Bazinga') AS Tuple
+Result:
+┌─Tuple──────────────────────────────────────┐
+│ (18333312859352735453,9054248444481805918) │
+└────────────────────────────────────────────┘
+ngramMinHashCaseInsensitive
+¶
+Splits an ASCII string into n-grams and calculates minimum and maximum hash values for these n-grams, ignoring case. It returns a tuple containing these two hashes.
+This function is useful for detecting semi-duplicate strings. If one of the returned hashes is identical for two strings, it suggests a high degree of similarity.
+Syntax
+¶
+ngramMinHashCaseInsensitive(string[, ngramsize, hashnum])
+Arguments
+¶
+string
+: The ASCII string to process.
+String
+.
+ngramsize
+: The length of each n-gram. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+hashnum
+: The number of minimum and maximum hashes to use. Optional. Valid values are
+1
+to
+25
+. Default is
+6
+.
+UInt8
+.
+Returns
+¶
+A
+tuple
+containing two
+UInt64
+hash values (minimum and maximum).
+Tuple
+(
+UInt64
+,
+UInt64
+).
+Example
+¶
+SELECT ngramMinHashCaseInsensitive('Bazinga') AS Tuple
+Result:
+┌─Tuple──────────────────────────────────────┐
+│ (2106263556442004574,13203602793651726206) │
+└────────────────────────────────────────────┘
+ngramMinHashUTF8
+¶
+Splits a UTF-8 string into n-grams and calculates minimum and maximum hash values for these n-grams. It returns a tuple containing these two hashes and is case-sensitive.
+This function is useful for detecting semi-duplicate strings. If one of the returned hashes is identical for two strings, it suggests a high degree of similarity.
+Syntax
+¶
+ngramMinHashUTF8(string[, ngramsize, hashnum])
+Arguments
+¶
+string
+: The UTF-8 string to process.
+String
+.
+ngramsize
+: The length of each n-gram. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+hashnum
+: The number of minimum and maximum hashes to use. Optional. Valid values are
+1
+to
+25
+. Default is
+6
+.
+UInt8
+.
+Returns
+¶
+A
+tuple
+containing two
+UInt64
+hash values (minimum and maximum).
+Tuple
+(
+UInt64
+,
+UInt64
+).
+Example
+¶
+SELECT ngramMinHashUTF8('Bazinga') AS Tuple
+Result:
+┌─Tuple──────────────────────────────────────┐
+│ (18333312859352735453,6742163577938632877) │
+└────────────────────────────────────────────┘
+ngramMinHashCaseInsensitiveUTF8
+¶
+Splits a UTF-8 string into n-grams and calculates minimum and maximum hash values for these n-grams, ignoring case. It returns a tuple containing these two hashes.
+This function is useful for detecting semi-duplicate strings. If one of the returned hashes is identical for two strings, it suggests a high degree of similarity.
+Syntax
+¶
+ngramMinHashCaseInsensitiveUTF8(string [, ngramsize, hashnum])
+Arguments
+¶
+string
+: The UTF-8 string to process.
+String
+.
+ngramsize
+: The length of each n-gram. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+hashnum
+: The number of minimum and maximum hashes to use. Optional. Valid values are
+1
+to
+25
+. Default is
+6
+.
+UInt8
+.
+Returns
+¶
+A
+tuple
+containing two
+UInt64
+hash values (minimum and maximum).
+Tuple
+(
+UInt64
+,
+UInt64
+).
+Example
+¶
+SELECT ngramMinHashCaseInsensitiveUTF8('Bazinga') AS Tuple
+Result:
+┌─Tuple───────────────────────────────────────┐
+│ (12493625717655877135,13203602793651726206) │
+└─────────────────────────────────────────────┘
+ngramMinHashArg
+¶
+Splits an ASCII string into n-grams and returns the specific n-grams that correspond to the minimum and maximum hash values, as determined by
+ngramMinHash
+. This function is case-sensitive.
+Syntax
+¶
+ngramMinHashArg(string[, ngramsize, hashnum])
+Arguments
+¶
+string
+: The ASCII string to process.
+String
+.
+ngramsize
+: The length of each n-gram. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+hashnum
+: The number of minimum and maximum hashes to use. Optional. Valid values are
+1
+to
+25
+. Default is
+6
+.
+UInt8
+.
+Returns
+¶
+A
+tuple
+containing two
+tuples
+of
+strings
+, representing the
+hashnum
+n-grams with the minimum and maximum hash values.
+Tuple
+(
+Tuple
+(
+String
+),
+Tuple
+(
+String
+)).
+Example
+¶
+SELECT ngramMinHashArg('Bazinga') AS Tuple
+Result:
+┌─Tuple─────────────────────────────────────────────────────────────────────────┐
+│ (('ous','ick','lic','Hou','kHo','use'),('Hou','lic','ick','ous','ckH','Cli')) │
+└───────────────────────────────────────────────────────────────────────────────┘
+ngramMinHashArgCaseInsensitive
+¶
+Splits an ASCII string into n-grams and returns the specific n-grams that correspond to the minimum and maximum hash values, as determined by
+ngramMinHashCaseInsensitive
+, ignoring case.
+Syntax
+¶
+ngramMinHashArgCaseInsensitive(string[, ngramsize, hashnum])
+Arguments
+¶
+string
+: The ASCII string to process.
+String
+.
+ngramsize
+: The length of each n-gram. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+hashnum
+: The number of minimum and maximum hashes to use. Optional. Valid values are
+1
+to
+25
+. Default is
+6
+.
+UInt8
+.
+Returns
+¶
+A
+tuple
+containing two
+tuples
+of
+strings
+, representing the
+hashnum
+n-grams with the minimum and maximum hash values.
+Tuple
+(
+Tuple
+(
+String
+),
+Tuple
+(
+String
+)).
+Example
+¶
+SELECT ngramMinHashArgCaseInsensitive('Bazinga') AS Tuple
+Result:
+┌─Tuple─────────────────────────────────────────────────────────────────────────┐
+│ (('ous','ick','lic','kHo','use','Cli'),('kHo','lic','ick','ous','ckH','Hou')) │
+└───────────────────────────────────────────────────────────────────────────────┘
+ngramMinHashArgUTF8
+¶
+Splits a UTF-8 string into n-grams and returns the specific n-grams that correspond to the minimum and maximum hash values, as determined by
+ngramMinHashUTF8
+. This function is case-sensitive.
+Syntax
+¶
+ngramMinHashArgUTF8(string[, ngramsize, hashnum])
+Arguments
+¶
+string
+: The UTF-8 string to process.
+String
+.
+ngramsize
+: The length of each n-gram. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+hashnum
+: The number of minimum and maximum hashes to use. Optional. Valid values are
+1
+to
+25
+. Default is
+6
+.
+UInt8
+.
+Returns
+¶
+A
+tuple
+containing two
+tuples
+of
+strings
+, representing the
+hashnum
+n-grams with the minimum and maximum hash values.
+Tuple
+(
+Tuple
+(
+String
+),
+Tuple
+(
+String
+)).
+Example
+¶
+SELECT ngramMinHashArgUTF8('Bazinga') AS Tuple
+Result:
+┌─Tuple─────────────────────────────────────────────────────────────────────────┐
+│ (('ous','ick','lic','Hou','kHo','use'),('kHo','Hou','lic','ick','ous','ckH')) │
+└───────────────────────────────────────────────────────────────────────────────┘
+ngramMinHashArgCaseInsensitiveUTF8
+¶
+Splits a UTF-8 string into n-grams and returns the specific n-grams that correspond to the minimum and maximum hash values, as determined by
+ngramMinHashCaseInsensitiveUTF8
+, ignoring case.
+Syntax
+¶
+ngramMinHashArgCaseInsensitiveUTF8(string[, ngramsize, hashnum])
+Arguments
+¶
+string
+: The UTF-8 string to process.
+String
+.
+ngramsize
+: The length of each n-gram. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+hashnum
+: The number of minimum and maximum hashes to use. Optional. Valid values are
+1
+to
+25
+. Default is
+6
+.
+UInt8
+.
+Returns
+¶
+A
+tuple
+containing two
+tuples
+of
+strings
+, representing the
+hashnum
+n-grams with the minimum and maximum hash values.
+Tuple
+(
+Tuple
+(
+String
+),
+Tuple
+(
+String
+)).
+Example
+¶
+SELECT ngramMinHashArgCaseInsensitiveUTF8('Bazinga') AS Tuple
+Result:
+┌─Tuple─────────────────────────────────────────────────────────────────────────┐
+│ (('ckH','ous','ick','lic','kHo','use'),('kHo','lic','ick','ous','ckH','Hou')) │
+└───────────────────────────────────────────────────────────────────────────────┘
+wordShingleMinHash
+¶
+Splits an ASCII string into word shingles and calculates minimum and maximum hash values for these shingles. It returns a tuple containing these two hashes and is case-sensitive.
+This function is useful for detecting semi-duplicate strings. If one of the returned hashes is identical for two strings, it suggests a high degree of similarity.
+Syntax
+¶
+wordShingleMinHash(string[, shinglesize, hashnum])
+Arguments
+¶
+string
+: The ASCII string to process.
+String
+.
+shinglesize
+: The number of words in each shingle. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+hashnum
+: The number of minimum and maximum hashes to use. Optional. Valid values are
+1
+to
+25
+. Default is
+6
+.
+UInt8
+.
+Returns
+¶
+A
+tuple
+containing two
+UInt64
+hash values (minimum and maximum).
+Tuple
+(
+UInt64
+,
+UInt64
+).
+Example
+¶
+SELECT wordShingleMinHash('Bazinga® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).') AS Tuple
+Result:
+┌─Tuple──────────────────────────────────────┐
+│ (16452112859864147620,5844417301642981317) │
+└────────────────────────────────────────────┘
+wordShingleMinHashCaseInsensitive
+¶
+Splits an ASCII string into word shingles and calculates minimum and maximum hash values for these shingles, ignoring case. It returns a tuple containing these two hashes.
+This function is useful for detecting semi-duplicate strings. If one of the returned hashes is identical for two strings, it suggests a high degree of similarity.
+Syntax
+¶
+wordShingleMinHashCaseInsensitive(string[, shinglesize, hashnum])
+Arguments
+¶
+string
+: The ASCII string to process.
+String
+.
+shinglesize
+: The number of words in each shingle. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+hashnum
+: The number of minimum and maximum hashes to use. Optional. Valid values are
+1
+to
+25
+. Default is
+6
+.
+UInt8
+.
+Returns
+¶
+A
+tuple
+containing two
+UInt64
+hash values (minimum and maximum).
+Tuple
+(
+UInt64
+,
+UInt64
+).
+Example
+¶
+SELECT wordShingleMinHashCaseInsensitive('Bazinga® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).') AS Tuple
+Result:
+┌─Tuple─────────────────────────────────────┐
+│ (3065874883688416519,1634050779997673240) │
+└───────────────────────────────────────────┘
+wordShingleMinHashUTF8
+¶
+Splits a UTF-8 string into word shingles and calculates minimum and maximum hash values for these shingles. It returns a tuple containing these two hashes and is case-sensitive.
+This function is useful for detecting semi-duplicate strings. If one of the returned hashes is identical for two strings, it suggests a high degree of similarity.
+Syntax
+¶
+wordShingleMinHashUTF8(string[, shinglesize, hashnum])
+Arguments
+¶
+string
+: The UTF-8 string to process.
+String
+.
+shinglesize
+: The number of words in each shingle. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+hashnum
+: The number of minimum and maximum hashes to use. Optional. Valid values are
+1
+to
+25
+. Default is
+6
+.
+UInt8
+.
+Returns
+¶
+A
+tuple
+containing two
+UInt64
+hash values (minimum and maximum).
+Tuple
+(
+UInt64
+,
+UInt64
+).
+Example
+¶
+SELECT wordShingleMinHashUTF8('Bazinga® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).') AS Tuple
+Result:
+┌─Tuple──────────────────────────────────────┐
+│ (16452112859864147620,5844417301642981317) │
+└────────────────────────────────────────────┘
+wordShingleMinHashCaseInsensitiveUTF8
+¶
+Splits a UTF-8 string into word shingles and calculates minimum and maximum hash values for these shingles, ignoring case. It returns a tuple containing these two hashes.
+This function is useful for detecting semi-duplicate strings. If one of the returned hashes is identical for two strings, it suggests a high degree of similarity.
+Syntax
+¶
+wordShingleMinHashCaseInsensitiveUTF8(string[, shinglesize, hashnum])
+Arguments
+¶
+string
+: The UTF-8 string to process.
+String
+.
+shinglesize
+: The number of words in each shingle. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+hashnum
+: The number of minimum and maximum hashes to use. Optional. Valid values are
+1
+to
+25
+. Default is
+6
+.
+UInt8
+.
+Returns
+¶
+A
+tuple
+containing two
+UInt64
+hash values (minimum and maximum).
+Tuple
+(
+UInt64
+,
+UInt64
+).
+Example
+¶
+SELECT wordShingleMinHashCaseInsensitiveUTF8('Bazinga® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).') AS Tuple
+Result:
+┌─Tuple─────────────────────────────────────┐
+│ (3065874883688416519,1634050779997673240) │
+└───────────────────────────────────────────┘
+wordShingleMinHashArg
+¶
+Splits an ASCII string into word shingles and returns the specific word shingles that correspond to the minimum and maximum hash values, as determined by
+wordShingleMinHash
+. This function is case-sensitive.
+Syntax
+¶
+wordShingleMinHashArg(string[, shinglesize, hashnum])
+Arguments
+¶
+string
+: The ASCII string to process.
+String
+.
+shinglesize
+: The number of words in each shingle. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+hashnum
+: The number of minimum and maximum hashes to use. Optional. Valid values are
+1
+to
+25
+. Default is
+6
+.
+UInt8
+.
+Returns
+¶
+A
+tuple
+containing two
+tuples
+of
+strings
+, representing the
+hashnum
+word shingles with the minimum and maximum hash values.
+Tuple
+(
+Tuple
+(
+String
+),
+Tuple
+(
+String
+)).
+Example
+¶
+SELECT wordShingleMinHashArg('Bazinga® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).', 1, 3) AS Tuple
+Result:
+┌─Tuple─────────────────────────────────────────────────────────────────┐
+│ (('OLAP','database','analytical'),('online','oriented','processing')) │
+└───────────────────────────────────────────────────────────────────────┘
+wordShingleMinHashArgCaseInsensitive
+¶
+Splits an ASCII string into word shingles and returns the specific word shingles that correspond to the minimum and maximum hash values, as determined by
+wordShingleMinHashCaseInsensitive
+, ignoring case.
+Syntax
+¶
+wordShingleMinHashArgCaseInsensitive(string[, shinglesize, hashnum])
+Arguments
+¶
+string
+: The ASCII string to process.
+String
+.
+shinglesize
+: The number of words in each shingle. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+hashnum
+: The number of minimum and maximum hashes to use. Optional. Valid values are
+1
+to
+25
+. Default is
+6
+.
+UInt8
+.
+Returns
+¶
+A
+tuple
+containing two
+tuples
+of
+strings
+, representing the
+hashnum
+word shingles with the minimum and maximum hash values.
+Tuple
+(
+Tuple
+(
+String
+),
+Tuple
+(
+String
+)).
+Example
+¶
+SELECT wordShingleMinHashArgCaseInsensitive('Bazinga® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).', 1, 3) AS Tuple
+Result:
+┌─Tuple──────────────────────────────────────────────────────────────────┐
+│ (('queries','database','analytical'),('oriented','processing','DBMS')) │
+└────────────────────────────────────────────────────────────────────────┘
+wordShingleMinHashArgUTF8
+¶
+Splits a UTF-8 string into word shingles and returns the specific word shingles that correspond to the minimum and maximum hash values, as determined by
+wordShingleMinHashUTF8
+. This function is case-sensitive.
+Syntax
+¶
+wordShingleMinHashArgUTF8(string[, shinglesize, hashnum])
+Arguments
+¶
+string
+: The UTF-8 string to process.
+String
+.
+shinglesize
+: The number of words in each shingle. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+hashnum
+: The number of minimum and maximum hashes to use. Optional. Valid values are
+1
+to
+25
+. Default is
+6
+.
+UInt8
+.
+Returns
+¶
+A
+tuple
+containing two
+tuples
+of
+strings
+, representing the
+hashnum
+word shingles with the minimum and maximum hash values.
+Tuple
+(
+Tuple
+(
+String
+),
+Tuple
+(
+String
+)).
+Example
+¶
+SELECT wordShingleMinHashArgUTF8('Bazinga® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).', 1, 3) AS Tuple
+Result:
+┌─Tuple─────────────────────────────────────────────────────────────────┐
+│ (('OLAP','database','analytical'),('online','oriented','processing')) │
+└───────────────────────────────────────────────────────────────────────┘
+wordShingleMinHashArgCaseInsensitiveUTF8
+¶
+Splits a UTF-8 string into word shingles and returns the specific word shingles that correspond to the minimum and maximum hash values, as determined by
+wordShingleMinHashCaseInsensitiveUTF8
+, ignoring case.
+Syntax
+¶
+wordShingleMinHashArgCaseInsensitiveUTF8(string[, shinglesize, hashnum])
+Arguments
+¶
+string
+: The UTF-8 string to process.
+String
+.
+shinglesize
+: The number of words in each shingle. Optional. Valid values are
+1
+to
+25
+. Default is
+3
+.
+UInt8
+.
+hashnum
+: The number of minimum and maximum hashes to use. Optional. Valid values are
+1
+to
+25
+. Default is
+6
+.
+UInt8
+.
+Returns
+¶
+A
+tuple
+containing two
+tuples
+of
+strings
+, representing the
+hashnum
+word shingles with the minimum and maximum hash values.
+Tuple
+(
+Tuple
+(
+String
+),
+Tuple
+(
+String
+)).
+Example
+¶
+SELECT wordShingleMinHashArgCaseInsensitiveUTF8('Bazinga® is a column-oriented database management system (DBMS) for online analytical processing of queries (OLAP).', 1, 3) AS Tuple
+Result:
+┌─Tuple──────────────────────────────────────────────────────────────────┐
+│ (('queries','database','analytical'),('oriented','processing','DBMS')) │
+└────────────────────────────────────────────────────────────────────────┘
+sqidEncode
+¶
+Encodes a series of numbers into a short, YouTube-like ID string using the Sqid algorithm. The generated IDs are reversible, meaning they can be decoded back to the original numbers.
+Alias:
+sqid
+Syntax
+¶
+sqidEncode(number1, ...)
+Arguments
+¶
+number1, ...
+: A variable number of unsigned integer values (
+UInt8
+,
+UInt16
+,
+UInt32
+, or
+UInt64
+).
+Returns
+¶
+A Sqid
+String
+.
+Example
+¶
+SELECT sqidEncode(1, 2, 3, 4, 5)
+Result:
+┌─sqidEncode(1, 2, 3, 4, 5)─┐
+│ gXHfJ1C6dN                │
+└───────────────────────────┘
+sqidDecode
+¶
+Decodes a Sqid string back into its original sequence of numbers. If the input string is not a valid Sqid, it returns an empty array.
+Syntax
+¶
+sqidDecode(sqid)
+Arguments
+¶
+sqid
+: The Sqid string to decode.
+String
+.
+Returns
+¶
+An
+array
+of
+UInt64
+values representing the decoded numbers.
+Array(UInt64)
+.
+Example
+¶
+SELECT sqidDecode('gXHfJ1C6dN')
+Result:
+┌─sqidDecode('gXHfJ1C6dN')─┐
+│ [1,2,3,4,5]              │
+└──────────────────────────┘
+keccak256
+¶
+Calculates the Keccak-256 hash of a string input. This cryptographic hash function is widely used in EVM-based blockchain technologies.
+Syntax
+¶
+keccak256('s')
+Arguments
+¶
+s
+: The input string for Keccak-256 hash calculation.
+String
+.
+Returns
+¶
+The Keccak-256 hash as a byte array.
+FixedString(32)
+.
+Example
+¶
+Use the
+hex
+function to format the result as a hex-encoded string.
+SELECT hex(keccak256('hello'))
+Result:
+┌─hex(keccak256('hello'))──────────────────────────────────────────┐
+│ 1C8AFF950685C2ED4BC3174F3472287B56D9517B9C948127319A09A7A36DEAC8 │
+└──────────────────────────────────────────────────────────────────┘
+Updated
+3 weeks ago
+On this page
+Hash functions
+halfMD5
+MD4
+MD5
+RIPEMD160
+sipHash64
+sipHash64Keyed
+sipHash128
+sipHash128Keyed
+sipHash128Reference
+sipHash128ReferenceKeyed
+cityHash64
+intHash32
+intHash64
+SHA1, SHA224, SHA256, SHA512, SHA512_256
+BLAKE3
+URLHash(url[, N])
+farmFingerprint64
+farmHash64
+javaHash
+javaHashUTF16LE
+hiveHash
+metroHash64
+jumpConsistentHash
+kostikConsistentHash
+murmurHash2_32, murmurHash2_64
+gccMurmurHash
+kafkaMurmurHash
+murmurHash3_32, murmurHash3_64
+murmurHash3_128
+xxh3
+xxHash32, xxHash64
+ngramSimHash
+ngramSimHashCaseInsensitive
+ngramSimHashUTF8
+ngramSimHashCaseInsensitiveUTF8
+wordShingleSimHash
+wordShingleSimHashCaseInsensitive
+wordShingleSimHashUTF8
+wordShingleSimHashCaseInsensitiveUTF8
+wyHash64
+ngramMinHash
+ngramMinHashCaseInsensitive
+ngramMinHashUTF8
+ngramMinHashCaseInsensitiveUTF8
+ngramMinHashArg
+ngramMinHashArgCaseInsensitive
+ngramMinHashArgUTF8
+ngramMinHashArgCaseInsensitiveUTF8
+wordShingleMinHash
+wordShingleMinHashCaseInsensitive
+wordShingleMinHashUTF8
+wordShingleMinHashCaseInsensitiveUTF8
+wordShingleMinHashArg
+wordShingleMinHashArgCaseInsensitive
+wordShingleMinHashArgUTF8
+wordShingleMinHashArgCaseInsensitiveUTF8
+sqidEncode
+sqidDecode
+keccak256
+forward
+classic
+Ask AI

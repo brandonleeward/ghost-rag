@@ -1,0 +1,32 @@
+Source: https://www.tinybird.com/docs/live/dynamodb-cdc-july-2024
+
+Capturing DynamoDB Change Streams for Real-Time Analytics · Tinybird
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+← Back to Live
+Capturing DynamoDB Change Streams for Real-Time Analytics
+A technical course for developers looking to ingest data into Tinybird from Amazon DynamoDB.
+This workshop is intended for developers looking to ingest data from Amazon DynamoDB in real-time. Current Rockset customers, in particular, will be able to use this session to migrate their real-time user-facing analytics products and features to Tinybird.
+In this free technical training, you will:
+Use DynamoDB Streams to capture changes
+Push changes to Tinybird with AWS Lambda
+Load historical data with point-in-time snapshots
+Finalize the change stream in Tinybird
+Build user-facing analytics from DynamoDB data
+Have questions?
+Join us on Slack
+Start building
+Live coding session
+When:
+July 11, 2024 at 15:00 UTC
+Duration:
+60 minutes
+Who:
+Alasdair Brown
+Developer Advocate
+Start building
+Ask AI
+Search...

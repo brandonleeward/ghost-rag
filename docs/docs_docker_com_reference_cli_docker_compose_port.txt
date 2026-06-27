@@ -1,0 +1,36 @@
+Source: https://docs.docker.com/reference/cli/docker/compose/port/
+
+docker compose port | Docker Docs
+Gordon
+Gordon, your AI assistant for Docker docs
+Search
+Start a new chat
+When enabled, Gordon considers the current page you're viewing
+to provide more relevant answers.
+Share feedback
+Answers are generated based on the documentation.
+Back
+Reference
+Get started
+Guides
+Manuals
+docker compose port
+Ask Gordon
+Copy Markdown
+View Markdown
+Description
+Print the public port for a port binding
+Usage
+docker compose port [OPTIONS] SERVICE PRIVATE_PORT
+Description
+Prints the public port for a port binding
+Options
+Option
+Default
+Description
+--index
+Index of the container if service has multiple replicas
+--protocol
+tcp
+tcp or udp
+Table of contents

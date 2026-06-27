@@ -1,0 +1,39 @@
+Source: https://docs.ghost.org/admin-api/users/deleting-a-user
+
+Deleting a user - Ghost Developer Docs
+Documentation Index
+Fetch the complete documentation index at:
+/llms.txt
+Use this file to discover all available pages before exploring further.
+Skip to main content
+Ghost Developer Docs
+home page
+Search...
+⌘
+K
+Search...
+Navigation
+Users
+Deleting a user
+Home
+Documentation
+Migration Guides
+Advanced Tools
+Admin API
+Users
+Deleting a user
+DELETE
+/
+admin
+/
+users
+/{
+id
+}/
+This will delete the user. Note: You cannot delete the Owner user.
+Suggest edits
+Raise issue
+Updating a user
+Overview
+⌘
+I

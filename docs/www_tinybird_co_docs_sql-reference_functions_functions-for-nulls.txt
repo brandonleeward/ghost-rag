@@ -1,0 +1,438 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/functions-for-nulls
+
+Functions for Nullable Values reference · Tinybird Docs
+Sign In
+Sign Up
+Functions for working with nullable values
+¶
+Copy as MD
+isNull
+¶
+Checks if a given value is
+NULL
+. It returns
+1
+if the value is
+NULL
+and
+0
+otherwise.
+Syntax
+¶
+isNull(x)
+Alias:
+ISNULL
+.
+Arguments
+¶
+x
+: Any value of a non-compound data type.
+Returns
+¶
+1
+(UInt8) if
+x
+is
+NULL
+,
+0
+(UInt8) if
+x
+is not
+NULL
+.
+Example
+¶
+SELECT
+    isNull(NULL) AS is_null_value,
+    isNull(123) AS is_not_null_value,
+    isNull('hello') AS is_not_null_string;
+Result:
+┌─is_null_value─┬─is_not_null_value─┬─is_not_null_string─┐
+│             1 │                 0 │                  0 │
+└───────────────┴───────────────────┴────────────────────┘
+isNullable
+¶
+Determines if a column's data type allows
+NULL
+values. It returns
+1
+if the column is
+Nullable
+and
+0
+if it is not.
+Syntax
+¶
+isNullable(x)
+Arguments
+¶
+x
+: A column or expression.
+Returns
+¶
+1
+(UInt8) if
+x
+is of a
+Nullable
+type,
+0
+(UInt8) if
+x
+is not of a
+Nullable
+type.
+Example
+¶
+SELECT
+    isNullable(ordinary_col) AS ordinary_col_nullable,
+    isNullable(nullable_col) AS nullable_col_nullable
+FROM
+    (SELECT 1::UInt32 AS ordinary_col, 1::Nullable(UInt32) AS nullable_col);
+Result:
+┌─ordinary_col_nullable─┬─nullable_col_nullable─┐
+│                     0 │                     1 │
+└───────────────────────┴───────────────────────┘
+isNotNull
+¶
+Checks if a given value is not
+NULL
+. It returns
+1
+if the value is not
+NULL
+and
+0
+if it is
+NULL
+.
+Syntax
+¶
+isNotNull(x)
+Arguments
+¶
+x
+: Any value of a non-compound data type.
+Returns
+¶
+1
+(UInt8) if
+x
+is not
+NULL
+,
+0
+(UInt8) if
+x
+is
+NULL
+.
+Example
+¶
+SELECT
+    isNotNull(NULL) AS is_null_value,
+    isNotNull(123) AS is_not_null_value,
+    isNotNull('hello') AS is_not_null_string;
+Result:
+┌─is_null_value─┬─is_not_null_value─┬─is_not_null_string─┐
+│             0 │                 1 │                  1 │
+└───────────────┴───────────────────┴────────────────────┘
+isNotDistinctFrom
+¶
+Compares two values, treating
+NULL
+values as equal to each other. This function is primarily used internally for
+JOIN
+operations.
+Syntax
+¶
+isNotDistinctFrom(x, y)
+Arguments
+¶
+x
+: The first value to compare.
+y
+: The second value to compare.
+Returns
+¶
+true
+(UInt8) if
+x
+and
+y
+are equal, or if both
+x
+and
+y
+are
+NULL
+. Returns
+false
+otherwise.
+Example
+¶
+SELECT
+    isNotDistinctFrom(1, 1) AS same_numbers,
+    isNotDistinctFrom(1, 2) AS different_numbers,
+    isNotDistinctFrom(NULL, NULL) AS both_null,
+    isNotDistinctFrom(1, NULL) AS one_null;
+Result:
+┌─same_numbers─┬─different_numbers─┬─both_null─┬─one_null─┐
+│            1 │                 0 │         1 │        0 │
+└──────────────┴───────────────────┴───────────┴──────────┘
+This function is an internal function used by the implementation of JOIN ON. Please don't use it manually in queries.
+isZeroOrNull
+¶
+Checks if a value is either
+0
+(zero) or
+NULL
+. It returns
+1
+if the condition is met and
+0
+otherwise.
+Syntax
+¶
+isZeroOrNull(x)
+Arguments
+¶
+x
+: Any value of a non-compound data type.
+Returns
+¶
+1
+(UInt8) if
+x
+is
+0
+or
+NULL
+,
+0
+(UInt8) otherwise.
+Example
+¶
+SELECT
+    isZeroOrNull(0) AS is_zero,
+    isZeroOrNull(NULL) AS is_null,
+    isZeroOrNull(5) AS is_positive,
+    isZeroOrNull(-1) AS is_negative;
+Result:
+┌─is_zero─┬─is_null─┬─is_positive─┬─is_negative─┐
+│       1 │       1 │           0 │           0 │
+└─────────┴─────────┴─────────────┴─────────────┘
+coalesce
+¶
+Returns the first non-
+NULL
+expression from a list of arguments. If all arguments are
+NULL
+, it returns
+NULL
+.
+Syntax
+¶
+coalesce(x, ...)
+Arguments
+¶
+Any number of parameters of non-compound type. All parameters must be of mutually compatible data types.
+Returns
+¶
+The first non-
+NULL
+argument in the list. If all arguments are
+NULL
+, it returns
+NULL
+. The return type is the common type of the arguments.
+Example
+¶
+SELECT
+    coalesce(NULL, NULL, 'fallback_value', 'another_value') AS first_non_null_string,
+    coalesce(NULL, 10, 20) AS first_non_null_number,
+    coalesce(NULL, NULL) AS all_nulls;
+Result:
+┌─first_non_null_string─┬─first_non_null_number─┬─all_nulls─┐
+│ fallback_value        │                    10 │      ᴺᵁᴸᴸ │
+└───────────────────────┴───────────────────────┴───────────┘
+ifNull
+¶
+Returns an alternative value if the primary argument is
+NULL
+. If the primary argument is not
+NULL
+, its original value is returned.
+Syntax
+¶
+ifNull(x, alt)
+Arguments
+¶
+x
+: The value to check for
+NULL
+.
+alt
+: The value to return if
+x
+is
+NULL
+.
+Returns
+¶
+x
+if
+x
+is not
+NULL
+, otherwise
+alt
+. The return type is the common type of
+x
+and
+alt
+.
+Example
+¶
+SELECT
+    ifNull('original_value', 'alternative') AS not_null_case,
+    ifNull(NULL, 'alternative') AS null_case,
+    ifNull(NULL, 0) AS null_to_number;
+Result:
+┌─not_null_case─┬─null_case─┬─null_to_number─┐
+│ original_value│ alternative │              0 │
+└───────────────┴───────────┴────────────────┘
+nullIf
+¶
+Compares two arguments and returns
+NULL
+if they are equal. If the arguments are not equal, it returns the first argument.
+Syntax
+¶
+nullIf(x, y)
+Arguments
+¶
+x
+: The first value.
+y
+: The second value to compare against
+x
+. Must be of a compatible type with
+x
+.
+Returns
+¶
+NULL
+if
+x
+is equal to
+y
+. Otherwise, it returns
+x
+. The return type is
+Nullable
+of the type of
+x
+.
+Example
+¶
+SELECT
+    nullIf(10, 10) AS equal_values,
+    nullIf(10, 20) AS different_values,
+    nullIf('hello', 'world') AS different_strings;
+Result:
+┌─equal_values─┬─different_values─┬─different_strings─┐
+│         ᴺᵁᴸᴸ │               10 │ hello             │
+└──────────────┴──────────────────┴───────────────────┘
+assumeNotNull
+¶
+Converts a
+Nullable
+value to its non-
+Nullable
+base type. If the input value is
+NULL
+, the result is an arbitrary default value for the base type, which should be handled carefully.
+Syntax
+¶
+assumeNotNull(x)
+Arguments
+¶
+x
+: A value of a
+Nullable
+type.
+Returns
+¶
+The input value as its non-
+Nullable
+base type. If
+x
+was
+NULL
+, the result is an arbitrary value (e.g.,
+0
+for numbers, empty string for strings).
+Example
+¶
+SELECT
+    assumeNotNull(10::Nullable(Int32)) AS not_null_int,
+    assumeNotNull(NULL::Nullable(String)) AS null_string_assumed,
+    assumeNotNull(NULL::Nullable(Int32)) AS null_int_assumed;
+Result:
+┌─not_null_int─┬─null_string_assumed─┬─null_int_assumed─┐
+│           10 │                     │                0 │
+└──────────────┴─────────────────────┴──────────────────┘
+toNullable
+¶
+Converts a value to its
+Nullable
+equivalent type. This allows a non-
+Nullable
+value to explicitly accept
+NULL
+s.
+Syntax
+¶
+toNullable(x)
+Arguments
+¶
+x
+: Any value of a non-compound type.
+Returns
+¶
+The input value, but with its type converted to
+Nullable(T)
+, where
+T
+is the original type of
+x
+.
+Example
+¶
+SELECT
+    toTypeName(10) AS original_type,
+    toTypeName(toNullable(10)) AS nullable_type,
+    toNullable('text') AS nullable_string;
+Result:
+┌─original_type─┬─nullable_type───┬─nullable_string─┐
+│ UInt8         │ Nullable(UInt8) │ text            │
+└───────────────┴─────────────────┴─────────────────┘
+Updated
+3 weeks ago
+On this page
+Functions for working with nullable values
+isNull
+isNullable
+isNotNull
+isNotDistinctFrom
+isZeroOrNull
+coalesce
+ifNull
+nullIf
+assumeNotNull
+toNullable
+forward
+classic
+Ask AI

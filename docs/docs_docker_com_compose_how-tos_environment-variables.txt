@@ -1,0 +1,39 @@
+Source: https://docs.docker.com/compose/how-tos/environment-variables/
+
+Environment variables in Compose | Docker Docs
+Gordon
+Gordon, your AI assistant for Docker docs
+Search
+Start a new chat
+When enabled, Gordon considers the current page you're viewing
+to provide more relevant answers.
+Share feedback
+Answers are generated based on the documentation.
+Back
+Manuals
+Get started
+Guides
+Reference
+Environment variables in Compose
+Ask Gordon
+Copy Markdown
+View Markdown
+Environment variables and interpolation in Docker Compose help you create reusable, flexible configurations. This makes Dockerized applications easier to manage and deploy across environments.
+Tip
+Before using environment variables, read through all of the information first to get a full picture of environment variables in Docker Compose.
+This section covers:
+How to set environment variables within your container's environment
+.
+How environment variable precedence works within your container's environment
+.
+Pre-defined environment variables
+.
+It also covers:
+How
+interpolation
+can be used to set variables within your Compose file and how it relates to a container's environment.
+Some
+best practices
+.
+Edit this page
+Request changes

@@ -1,0 +1,314 @@
+Source: https://www.tinybird.com/docs/forward/guides/migrate-from-classic
+
+Migrate from Tinybird Classic · Tinybird Docs
+Sign In
+Sign Up
+Migrate from Tinybird Classic
+¶
+Copy as MD
+Tinybird Forward introduces a new way of working with your data projects, with changes to APIs and CLI that may be incompatible with Tinybird Classic. If you're starting a new project, see the
+Get started
+guide.
+Why migrate to Forward
+¶
+Forward is a significant evolution of the Tinybird developer experience. Migrating unlocks the following benefits:
+Deployments
+: Project iteration is easier. You ship a new version of the project, and Tinybird handles all the backfills, tables exchanges... automatically. No more
+tb push datasource_v2
+and copy data from
+datasource_v1
+.
+Git-native deployments and CI/CD
+: Every change ships through your repository. Use the built-in
+CI/CD workflows
+for automated validation,
+preview deployments
+, and safe rollouts to production.
+Local development
+: Build and iterate against
+Tinybird Local
+with full parity to Tinybird Cloud. Test changes on your machine before they ever reach a shared environment. And easier to verify in your CI with the local image.
+Faster, simpler testing
+:
+Fixture tests
+make it easier to define realistic scenarios and catch regressions before deploy, replacing the heavier regression and data quality test workflows from Classic.
+Cleaner project structure
+: First-class
+connection files
+,
+secrets
+, and
+generic pipes
+replace ad-hoc include files and per-environment glue, so projects stay portable and reviewable in code.
+Modern, consistent CLI
+: A redesigned
+tb
+command provides a unified workflow for local development, cloud deployments, and testing, with clearer commands and better feedback.
+AI friendly
+: Use the agent skills
+npx skills add tinybirdco/tinybird-agent-skills
+to teach Tinybird best practices to your coding agent.
+Active development
+: New features land in Forward first. Classic continues to receive critical fixes, but the roadmap (new connectors, deployment improvements, agent integrations) is Forward-only.
+Choose your migration path
+¶
+There are two paths to migrate to Forward, depending on whether your project uses
+connectors
+(S3, GCS, Kafka, DynamoDB, and similar):
+Migrate without connectors
+: Use this path if your project ingests data through the Events API, direct HTTP requests, or any other method that doesn't rely on a managed connector. This is the fastest path and can be run entirely from the CLI.
+Migrate with connectors
+: Use this path if your project uses S3, GCS, Kafka, DynamoDB, or other connectors. Connection configuration changes between Classic and Forward, so these projects need additional steps.
+If you're unsure, check your workspace for connection resources (Kafka, S3, GCS, or DynamoDB data sources). If you have any, follow the migration steps below.
+Considerations before migrating
+¶
+Before migrating your workspace from Tinybird Classic, understand these key differences in Forward:
+Development is files based. You edit the .pipe, .datasource... in a Cloud Branch or locally using
+Tinybird Local
+. Check
+Development Workflow
+for more details.
+Before starting the migration, remove all the branches that are not the main one. That can be done from the UI or using
+the CLI
+.
+Contact the Tinybird support team if you cannot remove any existing rollback releases. Only the live release must remain to proceed with the migration.
+If you are not doing the automated migration with the CLI flow
+tb migrate-to-forward
+, contact Tinybird support team to
+enable a feature flag
+to enable the migration to Forward.
+The following features have limitations or require changes:
+Feature
+Status
+Solution/Alternative
+BI Connector
+Not supported
+Use the
+ClickHouse HTTP Interface
+instead. Most BI tools support ClickHouse HTTP connections.
+Include files
+Not supported
+Use
+tb secret
+for connector credentials and
+generic pipes
+to reuse query logic. See
+Replace include files
+for migration steps.
+VERSION
+tag in datafiles
+Not supported
+Remove any
+VERSION
+tags from your datafiles before migrating.
+CI/CD workflows
+Different commands
+Forward uses different CLI commands. See
+CI/CD
+for details.
+Testing strategy
+Different approach
+Regression tests and data quality tests are not supported in Forward. Fixture tests have been enhanced for easier test creation and management. See
+Test your project
+for details.
+Resource-scoped tokens with
+:sql_filter
+Not supported
+Remove all tokens using the
+:sql_filter
+suffix (e.g.,
+DATASOURCES:READ:datasource_name:sql_filter
+) before migrating. Use
+JWTs
+instead.
+AWS External IDs (S3 connectors/Sinks)
+Breaking change
+External IDs change from workspace ID to connection name. Update AWS Trust Policies before migrating. See
+External ID changes for AWS integrations
+for details.
+If these changes work for your use case, continue reading to learn how to migrate.
+Migration is permanent and cannot be reversed. After deploying with Forward, you cannot switch your workspace back to Classic.
+External ID changes for AWS integrations
+¶
+If you use AWS integrations (S3 connectors or S3 Sinks), you must update your AWS Trust Policies before migrating to Forward.
+In Classic, Tinybird uses the workspace ID as the seed for generating External IDs, while in Forward it uses the connection name. This means the same connection will have a different External ID after migration.
+Update AWS Trust Policy
+¶
+To get the new External ID for your connection, access:
+https://<your_host>/v0/integrations/s3/policies/trust-policy \
+  ?external_id_seed={CONNECTION_NAME} \ # Replace with your connection name
+  &token={YOUR_ADMIN_TOKEN} # Replace with your admin token
+This returns a Trust Policy with the new External ID. Add this new External ID to your existing Trust Policy's
+sts:ExternalId
+array to maintain access during and after migration.
+Additional S3 Sinks permission
+¶
+If you use S3 Sinks, add the
+s3:GetBucketLocation
+permission to your AWS Access Policy. This requirement allows connections to work with buckets across multiple regions without specifying the region when creating the connection, making it more flexible for multi-region deployments.
+Migrate your workspace
+¶
+1
+Install the Tinybird Forward CLI
+¶
+Run the following command to install the Tinybird Forward CLI and the Tinybird Local container:
+For macOS and Linux
+For Windows
+curl https://tinybird.co | sh
+See
+Tinybird Local
+for more information.
+Managing CLI Versions
+: Having both Tinybird Classic and Forward CLIs installed can cause version conflicts since both use the
+tb
+command. To avoid these conflicts, consider:
+Using the uv Python package manager to keep both CLIs completely isolated (recommended):
+# For Classic CLI
+uvx --from tinybird-cli@latest tb
+
+# For Forward CLI
+uvx --from tinybird@latest tb
+Creating aliases in your shell configuration:
+# Add to .bashrc or .zshrc
+alias tb-classic="path/to/classic/tb"
+alias tb-forward="path/to/forward/tb"
+Using separate virtual environments for each CLI version.
+This ensures you use the correct CLI version for each operation during migration.
+The following steps use the uv Python package.
+2
+Authenticate to your workspace
+¶
+Authenticate to your workspace using the Classic CLI:
+uvx --from tinybird-cli@latest tb auth --interactive
+Follow the prompts to complete authentication.
+3
+Pull your project
+¶
+If you already have the latest version of your datafiles locally (e.g. from your Git repo), skip to the next step.
+If you don't have your datafiles locally, pull them from Tinybird using the Forward CLI:
+uvx --from tinybird@latest tb --cloud pull
+4
+Check deployment compatibility
+¶
+Validate your project's compatibility with the Forward CLI:
+uvx --from tinybird@latest tb --cloud deploy --check
+You should see:
+* No changes to be deployed
+* No changes in tokens to be deployed
+If you encounter any errors, it's recommended to fix them in your Classic workspace so you can have a "clean" first Forward deployment. See
+common migration errors
+for information about common errors and fixes.
+Fix all of the errors, repull your workspace (if necessary), and rerun the deployment check until there are no changes detected.
+5
+Contact support to enable the Forward feature flag
+¶
+Once your project passes the compatibility check, contact Tinybird support (
+support@tinybird.co
+) to enable the Forward feature flag for your workspace.
+6
+Trigger a deployment
+¶
+Once the feature flag is enabled, it's time to trigger a deployment.
+To create a simple first deployment, generate a dummy endpoint as the only change:
+forward_dummy_endpoint.pipe
+NODE n
+SQL >
+    SELECT 'forward'
+
+TYPE endpoint
+There are two ways to
+deploy your project
+:
+Option 1: CI/CD (recommended)
+¶
+In an empty directory outside of your existing project, generate default CI/CD workflows by running the following command:
+uvx --from tinybird@latest tb init --type cli --dev-mode manual --folder .
+tb init
+creates the scaffolding for a new project. Use
+--cicd github
+or
+--cicd gitlab
+to generate CI/CD templates. Review the workflows, edit them as desired, and add the files to the root of your project.
+Finally, trigger the deployment by committing your project to Git and creating a merge/pull request.
+Option 2: CLI
+¶
+If you don't have CI/CD configured, you can deploy manually:
+uvx --from tinybird@latest tb --cloud deploy
+7
+Open the project in Tinybird Cloud
+¶
+After the deployment succeeds, open the project in Tinybird Cloud by running the following command:
+uvx --from tinybird@latest tb --cloud open
+The migration is complete! Your project will continue working as expected; you do not need to change your tokens, endpoint URLs, or anything else.
+Common migration errors
+¶
+Common errors and changes include (but are not limited to):
+Missing connection files
+¶
+In Forward,
+.connection files
+are used to store your connector details.
+You need to create .connection files to enable your connections to Kafka, S3, or GCS. If you manually pulled your datafiles, the .connection files were created, but they are empty.
+See
+Connectors
+for more information about the syntax.
+Kafka settings have been deprecated
+¶
+Some settings in the Kafka connector have been deprecated. You need to update your Kafka .connection file to use the most up-to-date
+Kafka settings
+.
+Replace include files
+¶
+Include files are not supported in Forward. The fix depends on your use of include files:
+If you use include files to store secrets, use
+tb secret
+to set secrets in your local and cloud environments.
+If you use include files to reuse query logic, you can create
+generic pipes
+and reference them in your endpoint pipes. For example:
+reusable_filters.pipe
+NODE apply_params
+SQL >
+    %
+    SELECT * FROM my_datasource
+    WHERE
+        tenant_id = {{ String(tenant) }}
+        AND date BETWEEN {{ Date(start_date) }} AND {{ Date(end_date) }}
+my_endpoint.pipe
+NODE endpoint
+SQL >
+    %
+    SELECT * FROM reusable_filters
+
+TYPE endpoint
+Next steps
+¶
+Learn about working with Forward in the
+Forward documentation
+.
+Updated
+5 days ago
+Looking for Classic docs?
+On this page
+Migrate from Tinybird Classic
+Why migrate to Forward
+Choose your migration path
+Considerations before migrating
+External ID changes for AWS integrations
+Update AWS Trust Policy
+Additional S3 Sinks permission
+Migrate your workspace
+Install the Tinybird Forward CLI
+Authenticate to your workspace
+Pull your project
+Check deployment compatibility
+Contact support to enable the Forward feature flag
+Trigger a deployment
+Open the project in Tinybird Cloud
+Common migration errors
+Missing connection files
+Kafka settings have been deprecated
+Replace include files
+Next steps
+forward
+Ask AI

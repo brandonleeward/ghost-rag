@@ -1,0 +1,56 @@
+Source: https://mariadb.com/docs/server/server-management/variables-and-modes
+
+Variables and Modes | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Options, System & Status Variables
+Server Status Variables
+Server System Variables
+NEW_MODE
+OLD_MODE
+SQL_MODE
+SQL_MODE=MSSQL
+SQL_MODE=ORACLE
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Variables and Modes
+Explore MariaDB Server variables and modes. This section explains how to configure global and session variables, and how different SQL modes influence database behavior and compatibility.
+Options, System & Status Variables
+Server Status Variables
+Server System Variables
+NEW_MODE
+OLD_MODE
+SQL_MODE
+SQL_MODE=MSSQL
+SQL_MODE=ORACLE
+Last updated
+5 months ago
+Was this helpful?
+Was this helpful?

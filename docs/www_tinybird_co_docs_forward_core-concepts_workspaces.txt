@@ -1,0 +1,146 @@
+Source: https://www.tinybird.com/docs/forward/core-concepts/workspaces
+
+Workspaces · Tinybird Docs
+Sign In
+Sign Up
+Workspaces
+¶
+Copy as MD
+A Workspace is the cloud environment for a Tinybird project. It contains your resources, data, tokens, branches, deployments, service data sources, and member permissions.
+Use Workspaces for long-lived project boundaries: production, staging, separate products, or separate customers when you need hard isolation. Use
+Branches
+for short-lived development and preview environments inside a Workspace.
+Every Workspace belongs to an
+Organization
+. Organization settings control billing, plan limits, member policy, and the regions or clusters where Workspaces can run.
+What belongs to a Workspace
+¶
+A Workspace contains the resources you define and deploy:
+Data Sources
+Connections
+Pipes
+API Endpoints
+Materialized Views
+Copy Pipes
+Sinks
+Tokens
+Workspace state also includes ingested data, secrets, service data sources, branch metadata, deployments, and member roles.
+You define resources in code, test them locally or in a branch, then deploy to the workspace.
+You can build Forward projects with:
+TypeScript SDK
+Python SDK
+Tinybird CLI datafiles
+Create a workspace
+¶
+Create new workspaces from Tinybird Cloud:
+Open
+Tinybird Cloud
+.
+Use the workspace switcher or the
+Organization settings
+>
+Workspaces
+page.
+Select
+Create workspace
+.
+Choose the organization, region, or cluster if your organization has more than one option.
+Choose how you want to start: TypeScript SDK, Python SDK, CLI datafiles, or the UI.
+New workspaces can show SDK onboarding directly in the UI. For example, the TypeScript SDK path gives you project setup instructions, credentials, and an agent-ready prompt you can copy into your coding agent.
+You can also create a workspace with the Tinybird CLI:
+tb workspace create <workspace_name>
+If your account has access to multiple organizations, pass the organization ID:
+tb workspace create <workspace_name> --organization-id <organization_id>
+Manage workspace members
+¶
+In Tinybird Cloud, open the workspace and go to
+Settings
+>
+Members
+.
+From there you can:
+Invite users by email.
+Assign a workspace role.
+Resend or copy invite links.
+Remove members from the workspace.
+Organization admins can also manage workspace membership from
+Organization settings
+>
+Members
+without being a member of every workspace.
+Workspace roles
+¶
+Members always have a workspace role. You can change a member's role at any time.
+Role
+Manage resources
+Manage users
+Create a branch
+Admin
+Yes
+Yes
+Yes
+Guest
+Yes
+No
+Yes
+Viewer
+No
+No
+Yes
+Connect local tooling to a workspace
+¶
+After creating a workspace, connect your local project to it.
+For CLI datafile projects, authenticate with
+tb login
+:
+tb login
+This writes workspace credentials to
+.tinyb
+.
+For TypeScript SDK projects, authenticate with the SDK CLI:
+tinybird login
+This writes workspace credentials to
+.env.local
+.
+To see the workspace your CLI session points to, run:
+tb workspace current
+To list the workspaces you can access:
+tb workspace ls
+To switch your CLI session to another workspace:
+tb workspace use <workspace_name_or_id>
+Workspace ID
+¶
+Each workspace has a unique ID. You need it for some API calls, JWT configuration, and support requests.
+Find it in Tinybird Cloud from the workspace list, or run:
+tb workspace current
+Example output:
+** Current workspace:
+--------------------------------------------------------------------------------------------
+| name                   | id                                   | role  | plan   | current |
+--------------------------------------------------------------------------------------------
+| analytics_prod         | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx | admin | Custom | True    |
+--------------------------------------------------------------------------------------------
+Delete a workspace
+¶
+Deleting a workspace deletes all resources and data in it, including Data Sources, ingested data, Pipes, published endpoints, tokens, branches, and deployments.
+Deleted workspaces can't be recovered.
+You can delete a workspace from Tinybird Cloud, or with the CLI if you are a workspace admin:
+tb workspace delete <workspace_name_or_id>
+Use
+--yes
+to skip the confirmation prompt in automation:
+tb workspace delete <workspace_name_or_id> --yes
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Workspaces
+What belongs to a Workspace
+Create a workspace
+Manage workspace members
+Workspace roles
+Connect local tooling to a workspace
+Workspace ID
+Delete a workspace
+forward
+Ask AI

@@ -1,0 +1,89 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/legacy-storage-engines/tokudb
+
+TokuDB | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+FEDERATED Storage Engine
+Cassandra Storage Engine
+TokuDB
+TokuDB Overview
+Installing TokuDB
+TokuDB Differences
+TokuDB Resources
+TokuDB Status Variables
+TokuDB System Variables
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+TokuDB
+The TokuDB storage engine has been removed from MariaDB.
+TokuDB has been deprecated by its upstream maintainer. It is disabled from MariaDB 10.5 and has been removed in MariaDB 10.6 -
+MDEV-19780
+. We recommend
+MyRocks
+as a long-term migration path.
+Previous
+Virtual Machine to Test the Cassandra Storage Engine
+Next
+TokuDB Overview
+Last updated
+7 months ago
+Was this helpful?
+Was this helpful?

@@ -1,0 +1,95 @@
+Source: https://www.tinybird.com/docs/classic/cli/workspaces
+
+Classic: Manage Workspaces using the CLI · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Manage Workspaces using the CLI
+¶
+Copy as MD
+If you are a member of different Workspaces, you might need to frequently switch between Workspaces when working on a project using Tinybird CLI. This requires to authenticate and select the right Workspace.
+Authenticate
+¶
+Authenticate using the admin Token. For example:
+Authenticate
+tb auth --token <your_admin_token>
+List Workspaces
+¶
+List the Workspaces you have access to, and the one that you're currently authenticated to:
+List Workspaces
+tb workspace ls
+Create a Workspace
+¶
+You can create new empty Workspaces or create a Workspace from a template.
+To create Workspaces using Tinybird CLI, you need
+your user Token
+.
+Run the following command to create a Workspace following instructions:
+Authenticate
+tb workspace create
+You can create a Workspace directly by defining the user Token using the
+--user_token
+flag:
+Authenticate
+tb workspace create workspace_name --user_token <token>
+Switch to another Workspace
+¶
+You can switch to another Workspace using
+--use
+. For example:
+Switch to a Workspace using the Workspace id or the Workspace name
+# Use the Workspace ID
+tb workspace use 841717b1-2472-44f9-9a81-42f1263cabe7
+# Use the Workspace name
+tb workspace use Production
+To find out the IDs and names of available Workspaces, run
+tb workspace ls
+:
+tb workspace ls
+You can also check which Workspace you're currently in:
+Show current Workspace
+tb workspace current
+Manage Workspace members
+¶
+You can manage Workspace members using the
+workspace members
+commands.
+List members
+¶
+To list members, run
+tb workspace members ls
+. For example:
+Listing current Workspace members
+tb workspace members ls
+Add members
+¶
+To add members, run
+tb workspace members add
+. For example:
+Adding users to the current Workspace
+tb workspace members add "user1@example.com,user2@example.com,user3@example.com"
+Remove members
+¶
+To remove members, run
+tb workspace members rm
+. For example:
+Removing members from current Workspace
+tb workspace members rm user3@example.com
+You can also manage roles. For example, to set a user as admin:
+Add admin role to user
+tb workspace members set-role admin user@example.com
+Updated
+1 year ago
+On this page
+Manage Workspaces using the CLI
+Authenticate
+List Workspaces
+Create a Workspace
+Switch to another Workspace
+Manage Workspace members
+List members
+Add members
+Remove members
+classic
+Ask AI

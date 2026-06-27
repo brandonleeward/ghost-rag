@@ -1,0 +1,128 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/compiling-mariadb-from-source/legacy-guides/compiling-mariadb-with-vanilla-xtradb
+
+Compiling MariaDB with Vanilla XtraDB | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Compiling MariaDB From Source: The Master Guide
+Building MariaDB on Windows
+Cross-compiling MariaDB
+Compiling MariaDB with Extra Modules/Options
+Legacy Guides
+Build Environment Setup for macOS
+Building MariaDB on Gentoo
+Creating a Debian Repository
+Creating the MariaDB Source Tarball
+Build Environment Setup for Linux
+Building MariaDB from a Source RPM
+Building MariaDB From Source Using musl-based GNU/Linux
+Building MariaDB on CentOS
+Building MariaDB on Debian
+Building MariaDB on Fedora
+Building MariaDB on FreeBSD
+Building MariaDB on Solaris and OpenSolaris
+Building MariaDB on Ubuntu
+Building RPM Packages From Source
+Compile and Using MariaDB with Sanitizers (ASAN, UBSAN, TSAN, MSAN)
+Creating the MariaDB Binary Tarball
+Compiling with the InnoDB Plugin from Oracle
+Compiling MariaDB with Vanilla XtraDB
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Compiling MariaDB with Vanilla XtraDB
+A guide for compiling older versions of MariaDB (specifically 5.3) with the original XtraDB engine from Percona Server, useful for testing purposes.
+Sometimes, one needs to have MariaDB compiled with Vanilla XtraDB. This page describes the process to do this. The process is rather crude, as my goal was just a once-off compile for testing (that is, not packaging or shipping) purposes.
+The process is applicable to
+MariaDB 5.3.4
+and XtraDB from Percona Server 5.1.61.
+Copy
+wget
+http://s.petrunia.net/scratch/make-vanilla-xtradb-work-with-mariadb.diff
+bzr
+branch
+/path/to/mariadb-5.3
+5.3-vanilla-xtradb-r3
+cd
+5.3-vanilla-xtradb-r3/storage/
+tar
+czf
+innodb_plugin.tgz
+innodb_plugin/
+rm
+-rf
+innodb_plugin
+tar
+czf
+xtradb.tgz
+xtradb/
+rm
+-rf
+xtradb
+cd
+../../
+tar
+zxvf
+~/Percona-Server-5.1.61.tar.gz
+cp
+-r
+Percona-Server-5.1.61/storage/innodb_plugin
+5.3-vanilla-xtradb-r3/storage/
+patch
+-p1
+-d
+5.3-vanilla-xtradb-r3/storage/innodb_plugin/
+<
+make-vanilla-xtradb-work-with-mariadb.diff
+cd
+5.3-vanilla-xtradb-r3/
+BUILD/autorun.sh
+./configure
+--with-plugin-innodb_plugin
+make
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Compiling with the InnoDB Plugin from Oracle
+Next
+Configuring MariaDB
+Last updated
+3 months ago
+Was this helpful?
+Was this helpful?

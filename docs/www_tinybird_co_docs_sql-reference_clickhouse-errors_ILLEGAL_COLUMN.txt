@@ -1,0 +1,200 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/ILLEGAL_COLUMN
+
+ILLEGAL_COLUMN ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+ILLEGAL_COLUMN ClickHouse error
+¶
+Copy as MD
+This error usually means you're trying to use a column in a context where it's not allowed, such as in certain functions or operations that have restrictions on column usage.
+The
+ILLEGAL_COLUMN
+error in ClickHouse (and Tinybird) happens when you try to use a column in a context where it's not permitted. This can occur in certain functions, operations, or when using columns in ways that violate ClickHouse's rules and restrictions.
+What causes this error
+¶
+You'll typically see it when:
+Using columns in functions that don't accept them
+Using columns in contexts where they're not allowed
+Using columns with certain table engines that have restrictions
+Using columns in operations that have specific requirements
+Using columns in Materialized Views with limitations
+Example errors
+¶
+Fails: column in unsupported function
+SELECT some_function(column_name) FROM events
+Fails: column in unsupported function
+SELECT some_function(column_name) FROM events
+Fails: column in wrong context
+SELECT * FROM events WHERE column_name IN (SELECT column_name FROM events)
+Fails: column with unsupported operation
+SELECT column_name FROM events ORDER BY column_name
+How to fix it
+¶
+Check function documentation
+¶
+Verify that the function supports the column type:
+Fix: use supported function
+SELECT supported_function(column_name) FROM events
+Use appropriate column types
+¶
+Ensure the column type is compatible with the operation:
+Fix: use compatible column type
+SELECT function_name(compatible_column) FROM events
+Use supported functions
+¶
+Fix: use supported function
+SELECT supported_function(column_name) FROM events
+Check table engine restrictions
+¶
+Verify the table engine supports the operation:
+Check table engine
+SELECT * FROM system.tables WHERE name = 'events'
+Use alternative approaches
+¶
+Find alternative ways to achieve the same result:
+Fix: use alternative approach
+SELECT alternative_function(column_name) FROM events
+Common patterns and solutions
+¶
+String functions
+¶
+When using string functions:
+String function usage
+SELECT substring(column_name, 1, 5) FROM events
+SELECT replace(column_name, 'old', 'new') FROM events
+SELECT concat(column_name, 'suffix') FROM events
+Numeric functions
+¶
+When using numeric functions:
+Numeric function usage
+SELECT abs(column_name) FROM events
+SELECT round(column_name, 2) FROM events
+SELECT sqrt(column_name) FROM events
+Date and time functions
+¶
+When using date/time functions:
+Date function usage
+SELECT toDate(column_name) FROM events
+SELECT formatDateTime(column_name, '%Y-%m-%d') FROM events
+SELECT addDays(column_name, 7) FROM events
+Aggregate functions
+¶
+When using aggregate functions:
+Aggregate function usage
+SELECT count(column_name) FROM events
+SELECT sum(column_name) FROM events
+SELECT avg(column_name) FROM events
+Advanced solutions
+¶
+Using type conversion
+¶
+Convert columns to compatible types:
+Type conversion
+SELECT function_name(toString(column_name)) FROM events
+SELECT function_name(toInt32(column_name)) FROM events
+Using conditional logic
+¶
+Handle different column types conditionally:
+Conditional column usage
+SELECT CASE
+    WHEN isString(column_name) THEN string_function(column_name)
+    WHEN isNumeric(column_name) THEN numeric_function(column_name)
+    ELSE column_name
+END as result
+FROM events
+Using subqueries
+¶
+Break down complex operations:
+Subquery approach
+SELECT * FROM (
+    SELECT compatible_function(column_name) as result
+    FROM events
+) t
+Table engine considerations
+¶
+MergeTree engines
+¶
+Most operations are supported:
+MergeTree operations
+SELECT * FROM events ORDER BY column_name
+SELECT * FROM events GROUP BY column_name
+SELECT * FROM events WHERE column_name = 'value'
+Specialized engines
+¶
+Some engines have restrictions:
+Specialized engine considerations
+-- Check engine-specific limitations
+SELECT * FROM system.tables WHERE name = 'table_name'
+Certain table engines (e.g., MergeTree) don't allow ALIAS columns with default expressions referencing the same alias.
+Note
+: ILLEGAL_COLUMN errors are often engine-specific and may be difficult to reproduce in all environments. The examples above illustrate common scenarios where this error might occur.
+Tinybird-specific notes
+¶
+In Tinybird, this error often occurs when:
+Using columns in Pipes with unsupported operations
+Working with Materialized Views that have column restrictions
+Using Data Sources with incompatible column types
+Creating API endpoints with restricted column usage
+To debug in Tinybird:
+Check your Data Source schema for column types
+Verify Pipe node operations support your column types
+Test column usage in the Query Builder first
+Use type conversion when needed
+Best practices
+¶
+Column validation
+¶
+Check column types before using in functions
+Verify function compatibility with column types
+Use type conversion when necessary
+Test column usage with sample data
+Error handling
+¶
+Implement proper error handling for column operations
+Use try functions for potentially problematic operations
+Provide fallback approaches for unsupported operations
+Log column usage errors for debugging
+Performance considerations
+¶
+Use appropriate column types for your operations
+Consider using indexes for frequently queried columns
+Monitor query performance with different column types
+Use specialized column types when appropriate
+See also
+¶
+ClickHouse Data Types
+Working with Data Sources
+Common function errors
+Updated
+4 weeks ago
+On this page
+ILLEGAL_COLUMN ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Check function documentation
+Use appropriate column types
+Use supported functions
+Check table engine restrictions
+Use alternative approaches
+Common patterns and solutions
+String functions
+Numeric functions
+Date and time functions
+Aggregate functions
+Advanced solutions
+Using type conversion
+Using conditional logic
+Using subqueries
+Table engine considerations
+MergeTree engines
+Specialized engines
+Tinybird-specific notes
+Best practices
+Column validation
+Error handling
+Performance considerations
+See also
+forward
+classic
+Ask AI

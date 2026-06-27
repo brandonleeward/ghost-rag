@@ -1,0 +1,332 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/spider/spider-storage-engine-introduction/mariadb-enterprise-spider-schema-design
+
+MariaDB Enterprise Spider Schema Design | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+Spider Storage Engine Overview
+Spider Storage Engine Introduction
+MariaDB Enterprise Spider Schema Design
+MariaDB Enterprise Spider Operations
+Spider Differences Between SpiderForMySQL and MariaDB
+Spider Feature Matrix
+Spider Use Cases
+Spider Installation
+Spider Cluster Management
+Spider Case Studies
+Spider Benchmarks
+Information Schema SPIDER_WRAPPER_PROTOCOLS Table
+Spider Storage Engine Core Concepts
+Spider System Variables
+Spider Table Parameters
+Spider Functions
+Spider FAQ
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+MariaDB Enterprise Spider Schema Design
+Learn about the schema design of the Spider storage engine.
+Create Tables
+Spider Tables can be created with MariaDB Enterprise Spider using the
+CREATE TABLE
+statement. The
+Enterprise Spider storage engine
+can be chosen for the table by specifying
+ENGINE=Spider
+.
+For each Spider Table, MariaDB Enterprise Spider requires connection details for the Data Nodes. The connection details are provided by specifying
+Connection Options
+in the
+COMMENT
+option for the table or partition, depending on the topology.
+Create Tables in a Federated Topology
+In a Federated MariaDB Enterprise Spider topology, the
+Connection Options
+are specified in the
+COMMENT
+table option for the Spider Table:
+Copy
+CREATE
+SERVER
+hq_server
+FOREIGN
+DATA
+WRAPPER mariadb
+OPTIONS (
+HOST
+"
+192.0.2.2
+"
+,
+PORT
+5801
+,
+USER
+"
+spider_user
+"
+,
+PASSWORD
+"
+password
+"
+,
+DATABASE
+"
+hq_sales
+"
+);
+CREATE
+DATABASE
+spider_hq_sales
+;
+CREATE
+TABLE
+spider_hq_sales
+.invoices (
+branch_id
+INT
+NOT NULL
+,
+invoice_id
+INT
+NOT NULL
+,
+customer_id
+INT
+,
+invoice_date
+DATETIME
+(
+6
+),
+invoice_total
+DECIMAL
+(
+13
+,
+2
+),
+payment_method ENUM(
+'
+NONE
+'
+,
+'
+CASH
+'
+,
+'
+WIRE_TRANSFER
+'
+,
+'
+CREDIT_CARD
+'
+,
+'
+GIFT_CARD
+'
+),
+PRIMARY KEY
+(branch_id, invoice_id)
+) ENGINE
+=
+Spider
+COMMENT
+=
+'
+server "hq_server", table "invoices"
+'
+;
+An alternative syntax is available. When you don't want to create a server object, the full connection details for the Data Node can be specified in the COMMENT table option:
+Create Tables in a Sharded Topology
+In a Sharded MariaDB Enterprise Spider topology, the
+Connection Options
+are specified in the
+COMMENT
+partition option for each partition of the Spider Table:
+An alternative syntax is available. When you don't want to create a server object, the full connection details for the Data Nodes can be specified in the COMMENT partition option:
+Connection Options
+The following connection options are supported in the COMMENT table option for Federated Spider Tables and in the COMMENT partition option for Sharded Spider Tables:
+Option
+Data Type
+Definition
+database
+String
+The database to select when connecting to the Data Node.
+host
+String
+The hostname or IP address for the Data Node. This option is mutually exclusive with socket.
+password
+String
+The password to use when connecting to the Data Node.
+port
+Integer
+The port to use when connecting to the Data Node. This option is mutually exclusive with socket.
+socket
+String
+The path to the Unix socket file to use when connecting to the Data Node. This option is mutually exclusive with port.
+ssl_ca
+String
+The path to the file with the TLS certificate authority chain.
+ssl_capath
+String
+The path to the directory with the TLS certificate authority chain files.
+ssl_cert
+String
+The path to the TLS client certificate.
+ssl_key
+String
+The path to the TLS private key.
+ssl_cipher
+String
+The path to the TLS certificate authority chain.
+table
+String
+The table to query.
+user
+String
+The username to use when connecting to the Data Node.
+wrapper
+String
+The foreign data wrapper should be mariadb for the Federated and Sharded topologies or odbc for the ODBC topology.
+This page is: Copyright © 2025 MariaDB. All rights reserved.
+spinner
+Previous
+Spider Storage Engine Introduction
+Next
+MariaDB Enterprise Spider Operations
+Last updated
+6 months ago
+Was this helpful?
+Create Tables
+Create Tables in a Federated Topology
+Create Tables in a Sharded Topology
+Connection Options
+Was this helpful?
+Copy
+CREATE TABLE spider_hq_sales.invoices_alternate (
+branch_id INT NOT NULL,
+invoice_id INT NOT NULL,
+customer_id INT,
+invoice_date DATETIME(6),
+invoice_total DECIMAL(13, 2),
+payment_method ENUM('NONE', 'CASH', 'WIRE_TRANSFER', 'CREDIT_CARD', 'GIFT_CARD'),
+PRIMARY KEY(branch_id, invoice_id)
+) ENGINE=Spider
+COMMENT='table "invoices", host "192.0.2.2", port "5801", user "spider_user", password "password", database "hq_sales"';
+Copy
+CREATE SERVER hq_server
+FOREIGN DATA WRAPPER mariadb
+OPTIONS (
+HOST "192.0.2.2",
+PORT 5801,
+USER "spider_user",
+PASSWORD "password",
+DATABASE "hq_sales"
+);
+CREATE SERVER eastern_server
+FOREIGN DATA WRAPPER mariadb
+OPTIONS (
+HOST "192.0.2.3",
+PORT 5801,
+USER "spider_user",
+PASSWORD "password",
+DATABASE "eastern_sales"
+);
+CREATE SERVER western_server
+FOREIGN DATA WRAPPER mariadb
+OPTIONS (
+HOST "192.0.2.4",
+PORT 5801,
+USER "spider_user",
+PASSWORD "password",
+DATABASE "western_sales"
+);
+CREATE DATABASE spider_sharded_sales;
+CREATE TABLE spider_sharded_sales.invoices (
+branch_id INT NOT NULL,
+invoice_id INT NOT NULL,
+customer_id INT,
+invoice_date DATETIME(6),
+invoice_total DECIMAL(13, 2),
+payment_method ENUM('NONE', 'CASH', 'WIRE_TRANSFER', 'CREDIT_CARD', 'GIFT_CARD'),
+PRIMARY KEY(branch_id, invoice_id)
+) ENGINE=Spider
+PARTITION BY LIST(branch_id) (
+PARTITION hq_partition VALUES IN (1) COMMENT = 'server "hq_server", table "invoices"',
+PARTITION eastern_partition VALUES IN (2) COMMENT = 'server "eastern_server", table "invoices"',
+PARTITION western_partition VALUES IN (3) COMMENT = 'server "western_server", table "invoices"'
+);
+Copy
+CREATE TABLE spider_sharded_sales.invoices (
+branch_id INT NOT NULL,
+invoice_id INT NOT NULL,
+customer_id INT,
+invoice_date DATETIME(6),
+invoice_total DECIMAL(13, 2),
+payment_method ENUM('NONE', 'CASH', 'WIRE_TRANSFER', 'CREDIT_CARD', 'GIFT_CARD'),
+PRIMARY KEY(branch_id, invoice_id)
+) ENGINE=Spider
+PARTITION BY LIST(branch_id) (
+PARTITION hq_partition VALUES IN (1) COMMENT = 'table "invoices", host "192.0.2.2", port 5801, user "spider_user", password "password", database "hq_sales"',
+PARTITION eastern_partition VALUES IN (2) COMMENT = 'table "invoices", host "192.0.2.3", port 5801, user "spider_user", password "password", database "eastern_sales"',
+PARTITION western_partition VALUES IN (3) COMMENT = 'table "invoices", host "192.0.2.4", port 5801, user "spider_user", password "password", database "western_sales"'
+);

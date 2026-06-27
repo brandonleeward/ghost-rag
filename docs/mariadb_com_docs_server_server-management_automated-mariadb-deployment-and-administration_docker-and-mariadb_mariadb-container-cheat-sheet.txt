@@ -1,0 +1,184 @@
+Source: https://mariadb.com/docs/server/server-management/automated-mariadb-deployment-and-administration/docker-and-mariadb/mariadb-container-cheat-sheet
+
+MariaDB Container Cheat Sheet | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+Starting & Stopping
+Automated Deployment & Administration
+Why to Automate MariaDB Deployments and Management
+Comparison Between Automation Systems
+Automating MariaDB Tasks with Events
+Automating Upgrades with MariaDB.Org Downloads REST API
+HashiCorp Vault and MariaDB
+Orchestrator Overview
+Ansible and MariaDB
+Puppet and MariaDB
+MariaDB Containers
+Adding Plugins to the MariaDB Docker Official Image
+Benefits of Managing MariaDB Containers with Orchestration Software
+Container Backup and Restoration
+Container Security
+Creating a Custom Container Image
+Deploy MariaDB Enterprise Server with Docker
+MariaDB Enterprise Docker Registry for MariaDB Enterprise Server
+Docker and AWS EC2
+Docker and Google Cloud
+Docker and Microsoft Azure
+Docker Official Image Frequently Asked Questions
+Installing and Using MariaDB via Docker
+MariaDB Container Cheat Sheet
+MariaDB Enterprise Server Docker Official Image Environment Variables
+Setting Up a LAMP Stack with Docker Compose
+Using Healthcheck
+MariaDB Enterprise Container Image Configuration Reference
+Kubernetes and MariaDB
+Vagrant and MariaDB
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+MariaDB Container Cheat Sheet
+A concise reference of common Docker commands and environment variables used with MariaDB containers.
+Get the images
+Images can be found on
+MariaDB Docker Hub
+. To get the list of images, run this command:
+Copy
+$
+docker
+images
+-a
+Create the network
+Copy
+$
+docker
+network
+create
+mynetwork
+It is good practice to create the container network and attach the container to the network.
+Start The Container With Server Options
+To start the container in the background with the MariaDB server image, run:
+Copy
+$
+docker
+run
+--rm
+--detach
+\
+--env
+MARIADB_ROOT_PASSWORD=sosecret
+\
+--network
+mynetwork
+\
+--name
+mariadb-server
+\
+mariadb:latest
+Additionally,
+environment variables
+are also provided.
+Get the list of running containers
+Note: Specify the flag
+-a
+in case you want to see all containers
+Start the client from the container
+To start the
+mariadb
+client inside the created container and run specific commands, run the following:
+Inspect logs of a container
+In the logs you can find status information about the server, plugins, generated passwords, errors and so on.
+Restart the container
+Run commands within the container
+Use a volume to specify configuration options
+One can specify custom
+configuration files
+through the
+/etc/mysql/conf.d
+volume during container startup.
+Use a volume to specify grants during container start
+User created with the environment variables has full grants only to the
+MARIADB_DATABASE
+. In order to override those grants, one can specify grants to a user, or execute any SQL statements from host file to
+docker-entrypoint-initdb.d
+. In the
+local_init_dir
+directory we can find the file, created like this:
+See Also
+Installing and using MariaDB via Docker
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Installing and Using MariaDB via Docker
+Next
+MariaDB Enterprise Server Docker Official Image Environment Variables
+Last updated
+5 months ago
+Was this helpful?
+Get the images
+Create the network
+Start The Container With Server Options
+Get the list of running containers
+Start the client from the container
+Inspect logs of a container
+Restart the container
+Run commands within the container
+Use a volume to specify configuration options
+Use a volume to specify grants during container start
+See Also
+Was this helpful?
+Copy
+$ docker ps
+CONTAINER ID   IMAGE            COMMAND                  CREATED          STATUS          PORTS      NAMES
+ad374ec8a272   mariadb:latest   "docker-entrypoint.s…"   3 seconds ago    Up 1 second     3306/tcp   mariadb-server
+Copy
+$ docker exec -it mariadb-server mariadb -psosecret -e "SHOW PLUGINS"
+Copy
+$ docker logs mariadb-server
+Copy
+$ docker restart mariadb-server
+Copy
+$ docker exec -it mariadb-server bash
+Copy
+$ docker run --detach --env MARIADB_USER=anel \
+--env MARIADB_PASSWORD=anel \
+--env MARIADB_DATABASE=my_db \
+--env MARIADB_RANDOM_ROOT_PASSWORD=1 \
+--volume $PWD/my_container_config:/etc/mysql/conf.d:z \
+--network mynetwork \
+--name mariadb-server1 \
+mariadb:latest
+Copy
+$ docker run --detach --env MARIADB_USER=anel\
+--env MARIADB_PASSWORD=anel \
+--env MARIADB_DATABASE=my_db \
+--env MARIADB_RANDOM_ROOT_PASSWORD=1 \
+--volume $PWD/my_init_db:/docker-entrypoint-initdb.d \
+--network mynetwork \
+--name mariadb-server1 \
+mariadb:latest
+Copy
+$ echo "GRANT ALL PRIVILEGES ON *.* TO anel;" > my_init_db/my_grants.sql

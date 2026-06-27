@@ -1,0 +1,148 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions-troubleshooting/date-and-time
+
+Date and time functions troubleshooting · Tinybird Docs
+Sign In
+Sign Up
+Date and time functions troubleshooting
+¶
+Copy as MD
+Common issues and solutions when working with date and time functions in ClickHouse and Tinybird.
+Common errors
+¶
+ILLEGAL_TYPE_OF_ARGUMENT
+¶
+Error
+:
+ILLEGAL_TYPE_OF_ARGUMENT: Argument 1 for function toDate must be String, Date, Date32, DateTime, DateTime64, or UInt16, UInt32, UInt64, Int16, Int32, Int64, but got UInt8
+Cause
+: Passing wrong data type to date functions
+Solution
+: Cast the value to the expected type
+-- Wrong
+SELECT toDate(column_with_uint8)
+
+-- Correct
+SELECT toDate(toString(column_with_uint8))
+CANNOT_PARSE_DATETIME
+¶
+Error
+:
+CANNOT_PARSE_DATETIME: Cannot parse DateTime from string "invalid_date"
+Cause
+: Invalid date format or string
+Solution
+: Use proper date format or handle invalid dates
+-- Handle invalid dates
+SELECT toDateOrNull(date_string) as safe_date
+Type edge cases
+¶
+Working with timestamps
+¶
+Issue
+: Mixing DateTime and DateTime64 types
+Solution
+: Use consistent types
+-- Convert to same precision
+SELECT toDateTime64(timestamp_column, 3) as consistent_timestamp
+Timezone handling
+¶
+Issue
+: Unexpected timezone conversions
+Solution
+: Be explicit about timezones
+-- Specify timezone explicitly
+SELECT toDateTime('2023-01-01 12:00:00', 'UTC') as utc_time
+Usage patterns that break Pipes
+¶
+Date arithmetic in aggregations
+¶
+Issue
+: Date arithmetic can cause performance issues in Pipes
+Solution
+: Pre-calculate date parts when possible
+-- Instead of calculating in aggregation
+SELECT dateAdd(day, -7, toDate(timestamp)) as week_ago
+
+-- Pre-calculate in data source
+SELECT timestamp, toDate(timestamp) as date, dateAdd(day, -7, toDate(timestamp)) as week_ago
+Complex date formatting
+¶
+Issue
+: Multiple date function calls in single query
+Solution
+: Use intermediate columns
+-- Break down complex date operations
+WITH date_parts AS (
+  SELECT
+    timestamp,
+    toDate(timestamp) as date,
+    toYear(timestamp) as year,
+    toMonth(timestamp) as month
+  FROM events
+)
+SELECT * FROM date_parts
+Sample fixes
+¶
+Fixing date parsing issues
+¶
+-- Problem: Inconsistent date formats
+SELECT toDate(date_string) FROM events
+
+-- Solution: Handle multiple formats
+SELECT
+  CASE
+    WHEN toDateOrNull(date_string) IS NOT NULL THEN toDate(date_string)
+    WHEN toDateOrNull(parseDateTimeBestEffort(date_string)) IS NOT NULL
+      THEN toDate(parseDateTimeBestEffort(date_string))
+    ELSE NULL
+  END as parsed_date
+FROM events
+Working with Unix timestamps
+¶
+-- Problem: Unix timestamp as integer
+SELECT toDateTime(timestamp_int) FROM events
+
+-- Solution: Convert properly
+SELECT fromUnixTimestamp(timestamp_int) as datetime
+FROM events
+Best practices
+¶
+Always validate date inputs
+- Use
+toDateOrNull()
+instead of
+toDate()
+Be explicit about timezones
+- Specify timezone in date functions
+Use consistent date types
+- Avoid mixing DateTime and DateTime64
+Pre-calculate date parts
+- Calculate date components in data sources when possible
+Handle edge cases
+- Account for invalid dates and timezone conversions
+Related documentation
+¶
+Date and time functions
+Data types
+Common error patterns
+Updated
+7 months ago
+On this page
+Date and time functions troubleshooting
+Common errors
+ILLEGAL_TYPE_OF_ARGUMENT
+CANNOT_PARSE_DATETIME
+Type edge cases
+Working with timestamps
+Timezone handling
+Usage patterns that break Pipes
+Date arithmetic in aggregations
+Complex date formatting
+Sample fixes
+Fixing date parsing issues
+Working with Unix timestamps
+Best practices
+Related documentation
+forward
+classic
+Ask AI

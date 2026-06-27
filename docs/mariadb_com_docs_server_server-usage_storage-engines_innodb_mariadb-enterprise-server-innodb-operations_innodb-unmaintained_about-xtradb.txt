@@ -1,0 +1,515 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/innodb/mariadb-enterprise-server-innodb-operations/innodb-unmaintained/about-xtradb
+
+About XtraDB | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+InnoDB Introduction
+InnoDB File Format
+InnoDB Limitations
+AUTO_INCREMENT Handling in InnoDB
+Binary Log Group Commit and InnoDB Flushing Performance
+InnoDB Asynchronous I/O
+InnoDB Buffer Pool
+InnoDB Change Buffering
+InnoDB Data Scrubbing
+InnoDB Doublewrite Buffer
+InnoDB Flush Method
+InnoDB Lock Modes
+InnoDB Log Archiving
+InnoDB Monitors
+InnoDB Page Compression
+InnoDB Page Flushing
+InnoDB Purge
+InnoDB Undo Log
+InnoDB Redo Log
+InnoDB Strict Mode
+InnoDB System Variables
+InnoDB Versions
+InnoDB Architecture for MariaDB Enterprise Server
+InnoDB Online DDL
+InnoDB Row Formats
+InnoDB Tablespaces
+InnoDB Troubleshooting
+MariaDB Enterprise Server InnoDB Operations
+Configure the InnoDB Buffer Pool
+Configure the InnoDB I/O Threads
+Configure the InnoDB Purge Threads
+Configure the InnoDB Redo Log
+Configure the InnoDB Undo Log
+Schema Changes
+InnoDB - Unmaintained
+About XtraDB
+Using InnoDB Instead of XtraDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+About XtraDB
+Information about the XtraDB storage engine that was used in old MariaDB versions.
+Percona XtraDB was an enhanced version of the InnoDB storage engine
+used in MariaDB before MariaDB 10.2
+, designed to better scale on modern hardware, and it includes a variety of other features useful in high-performance environments.
+It is fully backwards compatible, and it identifies itself to MariaDB as
+"
+ENGINE=InnoDB
+" (just like InnoDB), and so can be used as a drop-in replacement
+for standard InnoDB.
+Percona XtraDB includes all of InnoDB's robust, reliable
+ACID
+-compliant design
+and advanced MVCC architecture, and builds on that solid foundation with more
+features, more tunability, more metrics, and more scalability. In particular,
+it is designed to scale better on many cores, to use memory more efficiently,
+and to be more convenient and useful. The new features are especially designed
+to alleviate some of InnoDB's limitations. We choose features and fixes based
+on customer requests and on our best judgment of real-world needs as a
+high-performance consulting company.
+XtraDB was also available in MariaDB for Windows.
+Percona XtraDB versions in MariaDB
+MariaDB 10.1
+XtraDB from
+Percona Server 5.6.49-89.0
+in
+MariaDB 10.1.46
+XtraDB from
+Percona Server 5.6.46-86.2
+in
+MariaDB 10.1.44
+XtraDB from
+Percona Server 5.6.43-84.3
+in
+MariaDB 10.1.39
+XtraDB from
+Percona Server 5.6.41-84.1
+in
+MariaDB 10.1.36
+XtraDB from
+Percona Server 5.6.38-83.0
+[
+1
+] in
+MariaDB 10.1.31
+XtraDB from
+Percona Server 5.6.37-82.2
+[
+2
+]in
+MariaDB 10.1.27
+XtraDB from
+Percona Server 5.6.36-82.1
+in
+MariaDB 10.1.26
+XtraDB from
+Percona Server 5.6.36-82.0
+in
+MariaDB 10.1.24
+XtraDB from
+Percona Server 5.6.35-80.0
+in
+MariaDB 10.1.22
+XtraDB from
+Percona Server 5.6.34-79.1
+in
+MariaDB 10.1.20
+XtraDB from
+Percona Server 5.6.33-79.0
+[
+3
+] in
+MariaDB 10.1.19
+XtraDB from
+Percona Server 5.6.32-78.1
+in
+MariaDB 10.1.18
+XtraDB from
+Percona Server 5.6.31-77.0
+in
+MariaDB 10.1.17
+XtraDB from
+Percona Server 5.6.30-76.3
+in
+MariaDB 10.1.15
+XtraDB from
+Percona Server 5.6.29-76.2
+in
+MariaDB 10.1.14
+XtraDB from
+Percona Server 5.6.28-76.1
+in
+MariaDB 10.1.12
+XtraDB from
+Percona Server 5.6.26-76.0
+in
+MariaDB 10.1.10
+XtraDB from
+Percona Server 5.6.26-74.0
+in
+MariaDB 10.1.8
+XtraDB from
+Percona Server 5.6.25-73.1
+in
+MariaDB 10.1.7
+XtraDB from
+Percona Server 5.6.24-72.2
+in
+MariaDB 10.1.6
+XtraDB from
+Percona Server 5.6.23-72.1
+in
+MariaDB 10.1.5
+XtraDB from
+Percona Server 5.6.22-72.0
+in
+MariaDB 10.1.4
+XtraDB from
+Percona Server 5.6.21-70.0
+in
+MariaDB 10.1.2
+XtraDB from
+Percona Server 5.6.17-65.0
+in
+MariaDB 10.1.1
+MariaDB 10.0
+XtraDB from
+Percona Server 5.6.42-84.2
+in
+MariaDB 10.0.38
+XtraDB from
+Percona Server 5.6.41-84.1
+in
+MariaDB 10.0.37
+XtraDB from
+Percona Server 5.6.39-83.1
+in
+MariaDB 10.0.35
+XtraDB from
+Percona Server 5.6.38-83.0
+[
+4
+]in
+MariaDB 10.0.34
+XtraDB from
+Percona Server 5.6.37-82.2
+[
+5
+]in
+MariaDB 10.0.33
+XtraDB from
+Percona Server 5.6.36-82.1
+in
+MariaDB 10.0.32
+XtraDB from
+Percona Server 5.6.36-82.0
+in
+MariaDB 10.0.31
+XtraDB from
+Percona Server 5.6.35-80.0
+in
+MariaDB 10.0.30
+XtraDB from
+Percona Server 5.6.34-79.1
+in
+MariaDB 10.0.29
+XtraDB from
+Percona Server 5.6.33-79.0
+[
+6
+] in
+MariaDB 10.0.28
+XtraDB from
+Percona Server 5.6.31-77.0
+in
+MariaDB 10.0.27
+XtraDB from
+Percona Server 5.6.30-76.3
+in
+MariaDB 10.0.26
+XtraDB from
+Percona Server 5.6.29-76.2
+in
+MariaDB 10.0.25
+XtraDB from
+Percona Server 5.6.28-76.1
+in
+MariaDB 10.0.24
+XtraDB from
+Percona Server 5.6.27-76.0
+in
+MariaDB 10.0.23
+XtraDB from
+Percona Server 5.6.26-74.0
+in
+MariaDB 10.0.22
+XtraDB from
+Percona Server 5.6.25-73.1
+in
+MariaDB 10.0.21
+XtraDB from
+Percona Server 5.6.24-72.2
+in
+MariaDB 10.0.20
+XtraDB from
+Percona Server 5.6.23-72.1
+in
+MariaDB 10.0.18
+XtraDB from
+Percona Server 5.6.22-72.0
+in
+MariaDB 10.0.17
+XtraDB from
+Percona Server 5.6.22-71.0
+in
+MariaDB 10.0.16
+XtraDB from
+Percona Server 5.6.21-70.0
+in
+MariaDB 10.0.15
+XtraDB from
+Percona Server 5.6.20-68.0
+in
+MariaDB 10.0.14
+XtraDB from
+Percona Server 5.6.19-67.0
+in
+MariaDB 10.0.13
+XtraDB from
+Percona Server 5.6.17-65.0
+in
+MariaDB 10.0.11
+XtraDB from
+Percona Server 5.6.14-rel62.0
+in
+MariaDB 10.0.7
+MariaDB 5.5
+XtraDB from
+Percona Server 5.5.61-38.13
+in
+MariaDB 5.5.62
+XtraDB from
+Percona Server 5.5.59-38.11
+in
+MariaDB 5.5.60
+XtraDB from
+Percona Server 5.5.58-38.10
+in
+MariaDB 5.5.59
+XtraDB from
+Percona Server 5.5.55-38.9
+in
+MariaDB 5.5.58
+XtraDB from
+Percona Server 5.5.55-38.8
+in
+MariaDB 5.5.57
+XtraDB from
+Percona Server 5.5.52-38.3
+in
+MariaDB 5.5.53
+XtraDB from
+Percona Server 5.5.50-38.0
+in
+MariaDB 5.5.51
+XtraDB from
+Percona Server 5.5.49-37.9
+in
+MariaDB 5.5.50
+XtraDB from
+Percona Server 5.5.48-37.8
+in
+MariaDB 5.5.49
+XtraDB from
+Percona Server 5.5.46-37.7
+in
+MariaDB 5.5.48
+XtraDB from
+Percona Server 5.5.46-37.6
+in
+MariaDB 5.5.47
+XtraDB from
+Percona Server 5.5.45-37.4
+in
+MariaDB 5.5.46
+XtraDB from
+Percona Server 5.5.44-37.3
+in
+MariaDB 5.5.45
+XtraDB from
+Percona Server 5.5.42-37.2
+in
+MariaDB 5.5.44
+XtraDB from
+Percona Server 5.5.42-37.1
+in
+MariaDB 5.5.43
+XtraDB from
+Percona Server 5.5.40-36.1
+in
+MariaDB 5.5.40
+XtraDB from
+Percona Server 5.5.38-35.2
+in
+MariaDB 5.5.39
+XtraDB from
+Percona Server 5.5.37-35.0
+in
+MariaDB 5.5.38
+XtraDB from
+Percona Server 5.5.36-34.0
+in
+MariaDB 5.5.37
+XtraDB from
+Percona Server 5.5.35-33.0
+in
+MariaDB 5.5.35
+XtraDB from
+Percona Server 5.5.34-32.0
+in
+MariaDB 5.5.34
+XtraDB from
+Percona Server 5.5.33-31.1
+in
+MariaDB 5.5.33
+XtraDB from
+Percona Server-5.5.32-31.0
+in
+MariaDB 5.5.32
+MariaDB 5.2
+and
+MariaDB 5.3
+MariaDB 5.2
+and 5.3 include the latest XtraDB version from
+MariaDB 5.1
+at the time they were released.
+MariaDB 5.1
+version
+5.1.59-13
+in
+MariaDB 5.1.60
+version 5.1.54-12.5 in
+MariaDB 5.1.55
+version 5.1.52-11.6 in
+MariaDB 5.2.4
+and
+5.1.53
+version 5.1.49-12 in
+MariaDB 5.1.50
+version
+5.1.47-11.2
+in
+MariaDB 5.1.49
+version 1.0.6-10 in
+MariaDB 5.1.47
+version 1.0.6-9 in
+MariaDB 5.1.42
+,
+5.1.44
+, and
+5.1.44b
+.
+version 1.0.4-8 in
+MariaDB 5.1.41 RC
+version 1.0.3-8 in
+MariaDB 5.1.39 Beta
+version 1.0.3-6 in
+MariaDB 5.1.38 Beta
+Notes
+↑
+Misidentifies itself as 5.6.36-83.0 in
+MariaDB 10.1.31
+↑
+Misidentifies itself as 5.6.36-82.2 from
+MariaDB 10.1.27
+to
+MariaDB 10.1.30
+↑
+Misidentifies itself as 5.6.32-79.0 in
+MariaDB 10.1.19
+↑
+Misidentifies itself as 5.6.36-83.0 in
+MariaDB 10.0.34
+↑
+Misidentifies itself as 5.6.36-82.2 in
+MariaDB 10.0.33
+↑
+Misidentifies itself as 5.6.32-79.0 in
+MariaDB 10.0.28
+See Also
+More information can be found in the
+Percona documentation
+.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+InnoDB - Unmaintained
+Next
+Using InnoDB Instead of XtraDB
+Last updated
+7 months ago
+Was this helpful?
+Percona XtraDB versions in MariaDB
+MariaDB 10.1
+MariaDB 10.0
+MariaDB 5.5
+MariaDB 5.2
+and
+MariaDB 5.3
+MariaDB 5.1
+Notes
+See Also
+Was this helpful?

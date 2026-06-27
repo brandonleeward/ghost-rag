@@ -1,0 +1,99 @@
+Source: https://mariadb.com/docs/server/server-management/starting-and-stopping-mariadb/launchd
+
+launchd (macOS) | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+Starting & Stopping
+Starting and Stopping Overview
+launchd (macOS)
+systemd (Linux)
+sysVinit
+mariadbd-safe
+mariadbd-multi
+mariadbd Options
+mariadbd
+mysql.server
+Running MariaDB From the Build Directory
+Running Multiple MariaDB Server Processes
+Specifying Permissions for Schema (Data) Directories and Tables
+Switching Between Different Installed MariaDB Versions
+What to Do if MariaDB Doesn't Start
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+launchd (macOS)
+Instructions for configuring MariaDB to start automatically on macOS using a launchd plist file in /Library/LaunchDaemons.
+If you install MariaDB on macOS using Homebrew – which is the only option – starting and stopping
+mariadbd
+(MariaDB server) is done as
+described on this page
+. The below instructions don't need to be performed.
+On macOS, create a file called
+/Library/LaunchDaemons/com.mariadb.server.plist
+with the following contents (edit to suit):
+Copy
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>Label</key> <string>com.mariadb.server</string>
+<key>KeepAlive</key><true/>
+<key>RunAtLoad</key><true/>
+<key>LaunchOnlyOnce</key><false/>
+<key>ExitTimeOut</key><integer>600</integer>
+<key>WorkingDirectory</key><string>/usr/local/var</string>
+<key>Program</key><string>/usr/local/bin/mysqld</string>
+<key>ProgramArguments</key>
+<array>
+<string>/usr/local/bin/mysqld</string>
+<string>--user=_mysql</string>
+<string>--basedir=/usr/local/opt/mariadb</string>
+<string>--plugin-dir=/usr/local/opt/mariadb/lib/plugin</string>
+<string>--datadir=/usr/local/var/mysql</string>
+<string>--log-error=/usr/local/var/mysql/Data-Server.local.err</string>
+<string>--pid-file=/usr/local/var/mysql/Data-Server.local.pid</string>
+<string>--sql-mode=ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION</string>
+</array>
+</dict>
+</plist>
+Then from a shell, run
+launchctl load /Library/LaunchDaemons/com.mariadb.server.plist
+and MariaDB will run immediately, and also upon reboot.
+See Also
+Creating Launch Daemons and Agents
+A launchd Tutorial
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Starting and Stopping Overview
+Next
+systemd (Linux)
+Last updated
+6 months ago
+Was this helpful?
+Was this helpful?

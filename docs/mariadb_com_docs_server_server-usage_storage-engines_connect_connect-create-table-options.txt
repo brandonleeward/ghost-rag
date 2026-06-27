@@ -1,0 +1,461 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/connect/connect-create-table-options
+
+CONNECT Create Table Options | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+Introduction to the CONNECT Engine
+Using CONNECT
+Installing CONNECT
+CONNECT Create Table Options
+CONNECT Data Types
+CONNECT Table Types
+CONNECT Security
+CONNECT System Variables
+Adding the REST Feature as a Library Called by an OEM Table
+Compiling JSON UDFs in a Separate Library
+Making the GetRest Library
+OEM Table Example
+Current Status of the CONNECT Handler
+JSON Sample Files
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+CONNECT Create Table Options
+The CONNECT storage engine.
+Create Table statements for “CONNECT” tables are standard MariaDB create statements specifying
+engine=CONNECT
+. There are a few additional table and column options specific to CONNECT.
+Table Options
+Table Option
+Type
+Description
+AVG_ROW_LENGTH
+Integer
+Can be specified to help CONNECT estimate the size of a variable record table length.
+BLOCK_SIZE
+Integer
+The number of rows each block of a
+FIX
+,
+BIN
+,
+DBF
+, or
+VEC
+table contains. For an
+ODBC
+table this is the RowSet size option. For a
+JDBC
+table this is the fetch size.
+CATFUNC
+String
+The catalog function used by a
+catalog table
+.
+COLIST
+String
+The column list of
+OCCUR
+tables or $project of
+MONGO
+tables.
+COMPRESS
+Number
+1 or 2 if the data file is g-zip compressed. Defaults to 0. Before CONNECT 1.05.0001, this was boolean, and true if the data file is compressed.
+CONNECTION
+String
+Specifies the connection of an
+ODBC
+,
+JDBC
+or
+MYSQL
+table.
+DATA_CHARSET
+String
+The character set used in the external file or data source.
+DBNAME
+String
+The target database for
+ODBC
+,
+JDBC
+,
+MYSQL
+,
+catalog
+, and
+PROXY
+based tables. The database concept is sometimes known as a schema.
+ENGINE
+String
+Must be specified as CONNECT.
+ENDING
+Integer
+End of line length. Defaults to 1 for Unix/Linux and 2 for Windows.
+FILE_NAME
+String
+The file (path) name for all table types based on files. Can be absolute or relative to the current data directory. If not specified, this is an
+Inward table
+and a default value is used.
+FILTER
+String
+To filter an external table. Currently MONGO tables only.
+HEADER
+Integer
+Applies to
+CSV
+,
+VEC
+, and HTML files. Its meaning depends on the table type.
+HTTP
+String
+The HTTP of the client of REST queries. From
+Connect 1.06.0010
+.
+HUGE
+Boolean
+To specify that a table file can be larger than 2GB. For a
+MYSQL
+table, prevents the result set from being stored in memory.
+LRECL
+Integer
+The file record size (often calculated by default).
+MAPPED
+Boolean
+Specifies whether file mapping is used to handle the table file.
+MODULE
+String
+The (path) name of the DLL or shared lib implementing the access of a non-standard (
+OEM
+) table type.
+MULTIPLE
+Integer
+Used to specify multiple file tables.
+OPTION_LIST
+String
+Used to specify all other options not yet directly defined.
+QCHAR
+String
+Specifies the character used for quoting some fields of a
+CSV
+table or the identifiers of an
+ODBC
+/
+JDBC
+tables.
+QUOTED
+Integer
+The level of quoting used in
+CSV
+table files.
+READONLY
+Boolean
+True if the data file must not be modified or erased.
+SEP_CHAR
+String
+Specifies the field separator character of a
+CSV
+or
+XCOL
+table. Also, used to specify the Jpath separator for
+JSON tables
+.
+SEPINDEX
+Boolean
+When true, indexes are saved in separate files.
+SPLIT
+Boolean
+True for a
+VEC
+table when all columns are in separate files.
+SRCDEF
+String
+The source definition of a table retrieved via
+ODBC
+,
+JDBC
+or the MySQL API or used by a
+PIVOT
+table.
+SUBTYPE
+String
+The subtype of an
+OEM
+table type.
+TABLE_LIST
+String
+The comma separated list of TBL table sub-tables.
+TABLE_TYPE
+String
+The external table
+type
+:
+DOS
+,
+FIX
+,
+BIN
+,
+CSV
+,
+FMT
+,
+XML
+,
+JSON
+,
+INI
+,
+DBF
+,
+VEC
+,
+ODBC
+,
+JDBC
+,
+MYSQL
+,
+TBL
+,
+PROXY
+,
+XCOL
+,
+OCCUR
+,
+PIVOT
+,
+ZIP
+,
+VIR
+,
+DIR
+,
+WMI
+,
+MAC
+, and
+OEM
+. Defaults to
+DOS
+,
+MYSQL
+, or
+PROXY
+depending on what options are used.
+TABNAME
+String
+The target table or node for
+ODBC
+,
+JDBC
+,
+MYSQL
+,
+PROXY
+, or
+catalog tables
+; or the top node name for
+XML
+tables.
+URI
+String
+The URI of a REST request.. From
+Connect 1.06.0010
+.
+XFILE_NAME
+String
+The file (path) base name for table index files. Can be absolute or relative to the data directory. Defaults to the file name.
+ZIPPED
+Boolean
+True if the table file(s) is/are zipped in one or several zip files.
+All integers in the above table are unsigned big integers.
+Because CONNECT handles many table types; many table type specific options are not in the above list and must be entered using the
+OPTION_LIST
+option. The syntax to use is:
+Be aware that until Connect 1.5.5, no blanks should be inserted before or after the '
+=
+' and '
+,
+' characters. The option name is all that is between the start of the string or the last '
+,
+' character and the next '
+=
+' character, and the option value is all that is between this '
+=
+' character and the next '
+,
+'
+or end of string. For instance:
+This defines four options, '
+name
+', '
+coltype
+', '
+attribute
+', and '
+headattr
+'; with values '
+TABLE
+', '
+HTML
+',
+'
+border=1;cellpadding=5
+', and '
+bgcolor=yellow
+', respectively. The only restriction is that values cannot contain commas, but they can contain equal signs.
+Column Options
+Column Option
+Type
+Description
+DATE_FORMAT
+String
+The format indicating how a date is stored in the file.
+DISTRIB
+Enum
+“scattered”, “clustered”, “sorted” (ascending).
+FIELD_FORMAT
+String
+The column format for some table types.
+FIELD_LENGTH
+Integer
+Set the internal field length for DATE columns.
+FLAG
+Integer
+An integer value whose meaning depends on the table type.
+JPATH
+String
+The Json path of JSON table columns.
+MAX_DIST
+Integer
+Maximum number of distinct values in this column.
+SPECIAL
+String
+The name of the SPECIAL column that set this column value.
+XPATH
+String
+The XML path of XML table columns.
+The
+MAX_DIST
+and
+DISTRIB
+column options are used for block indexing.
+All integers in the above table are unsigned big integers.
+JPATH and XPATH were added to make CREATE TABLE statements more readable, but they do the same thing as FIELD_FORMAT and any of them can be used with the same result.
+Index Options
+Index Option
+Type
+Description
+DYNAM
+Boolean
+Set the index as “dynamic”.
+MAPPED
+Boolean
+Use index file mapping.
+Note 1:
+Creating a CONNECT table based on file does not erase or create the file if the file name is specified in the
+CREATE TABLE
+statement (
+“outward”
+table). If the file does not exist, it are populated by subsequent
+INSERT
+or
+LOAD
+statements or by the “AS select statement” of the
+CREATE TABLE
+statement. Unlike the CSV engine, CONNECT easily permits the creation of tables based on already existing files, for instance files made by other applications. However, if the file name is not specified, a file with a name defaulting to
+tablename.tabletype
+are created in the data directory (
+“inward”
+table).
+Note 2:
+Dropping a CONNECT table is done with a standard
+DROP
+statement. For
+outward tables
+, this drops only the CONNECT table definition but does not erase the corresponding data file and index files. Use
+DELETE
+or
+TRUNCATE
+to do so. This is contrary to data and index files of
+inward tables
+are erased on
+DROP
+like for other MariaDB engines.
+This page is licensed: GPLv2
+spinner
+Previous
+Installing CONNECT
+Next
+CONNECT Data Types
+Last updated
+28 days ago
+Was this helpful?
+Table Options
+Column Options
+Index Options
+Was this helpful?
+Copy
+... option_list='opname1=opvalue1,opname2=opvalue2...'
+Copy
+option_list='name=TABLE,coltype=HTML,attribute=border=1;cellpadding=5,headattr=bgcolor=yellow';

@@ -1,0 +1,2244 @@
+Source: https://mariadb.com/docs/server/server-management/starting-and-stopping-mariadb/mariadbd-options
+
+mariadbd Options | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+Starting & Stopping
+Starting and Stopping Overview
+launchd (macOS)
+systemd (Linux)
+sysVinit
+mariadbd-safe
+mariadbd-multi
+mariadbd Options
+mariadbd
+mysql.server
+Running MariaDB From the Build Directory
+Running Multiple MariaDB Server Processes
+Specifying Permissions for Schema (Data) Directories and Tables
+Switching Between Different Installed MariaDB Versions
+What to Do if MariaDB Doesn't Start
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+mariadbd Options
+A reference list of command-line options available for the `mariadbd` server binary, covering configuration, replication, and service installation.
+This page lists all of the options for
+mariadbd
+(called mysqld before
+MariaDB 10.5
+), ordered by topic. For a full alphabetical list of all mariadbd options, as well as server and status variables, see
+Full list of MariaDB options, system and status variables
+.
+In many cases, the entry here is a summary, and links to the full description.
+By convention,
+server variables
+have usually been specified with an underscore in the configuration files, and a dash on the command line. You can however specify underscores as dashes - they are interchangeable.
+See
+Configuring MariaDB with Option Files
+for which files and groups mariadbd reads for it's default options.
+Previously, the client used to be called
+mysqld
+, and can still be accessed under this name, via a symlink in Linux, or an alternate binary in Windows.
+Option Prefixes
+--autoset-*
+Description: Sets the option value automatically. Only supported for certain options.
+--disable-*
+Description: For all boolean options, disables the setting (equivalent to setting it to
+0
+). Same as
+--skip
+.
+--enable-*
+Description: For all boolean options, enables the setting (equivalent to setting it to
+1
+).
+--loose-*
+Description: Don't produce an error if the option doesn't exist.
+--maximum-*
+Description: Sets the maximum value for the option.
+--skip-*
+Description: For all boolean options, disables the setting (equivalent to setting it to
+0
+). Same as
+--disable
+.
+Option File Options
+--defaults-extra-file
+Command line:
+--defaults-extra-file=name
+Description: Read this extra option file after all other option files are read.
+See
+Configuring MariaDB with Option Files
+.
+--defaults-file
+Command line:
+--defaults-file=name
+Description: Only read options from the given option file.
+See
+Configuring MariaDB with Option Files
+.
+--defaults-group-suffix
+Command line:
+--defaults-group-suffix=name
+Description: In addition to the default option groups, also read option groups with the given suffix.
+See
+Configuring MariaDB with Option Files
+.
+--no-defaults
+Command line:
+--no-defaults
+Description: Don't read options from any option file.
+See
+Configuring MariaDB with Option Files
+.
+--print-defaults
+Command line:
+--print-defaults
+Description: Read options from option files, print all option values, and then exit the program.
+See
+Configuring MariaDB with Option Files
+.
+Compatibility Options
+The following options have been added to MariaDB to make it more compliant with
+other MariaDB and MySQL versions. Options that are also system variables are listed after:
+-a, --ansi
+Description: Use ANSI SQL syntax instead of MariaDB syntax. This mode will also set
+transaction isolation level
+serializable
+.
+--new
+Description: Use new functionality that will exist in next version of MariaDB. This function exists to make it easier to prepare for an upgrade.
+--old-style-user-limits
+Description: Enable old-style user limits (before MySQL 5.0.3, user resources were counted per each user+host vs. per account).
+--safe-mode
+Description: Disable some potential unsafe optimizations. For 5.2,
+INSERT DELAYED
+is disabled,
+myisam_recover_options
+is set to DEFAULT (automatically recover crashed MyISAM files) and the
+query cache
+is disabled. For
+Aria
+tables, disable bulk insert optimization to enable one to use
+aria_read_log
+to recover tables even if tables are deleted (good for testing recovery).
+--skip-new
+Description: Disables
+--new
+.
+Compatibility Options and System Variables
+--new-mode
+--old
+--old-alter-table
+--old-mode
+--old-passwords
+--show-old-temporals
+Locale Options
+Options that are also system variables are listed after:
+--character-set-client-handshake
+Command line:
+--character-set-client-handshake
+Description: Don't ignore client side character set value sent during handshake.
+--skip-character-set-client-handshake
+will ignore the client value and use the default server value.
+--default-character-set
+Command line:
+--default-character-set=name
+Description: Still available as an option for setting the default character set for clients and their connections, it was deprecated and removed in
+MariaDB 10.2
+as a server option. Use
+character-set-server
+instead.
+--language
+Description: This option can be used to set the server's language for error messages. This option can be specified either as a language name or as the path to the directory storing the language's
+error message file
+. See
+Server Locales
+for a list of supported locales and their associated languages.
+This option is deprecated. Use the
+lc_messages
+and
+lc_messages_dir
+system variables instead.
+See
+Setting the Language for Error Messages
+for more information.
+Locale Options and System Variables
+character-set-filesystem
+character-set-client
+character-set-connection
+character-set-database
+character-set-filesystem
+character-set-results
+character-set-server
+character-set-system
+character-sets-dir
+collation-connection
+collation-database
+collation-server
+default-week-format
+default-time-zone
+lc-messages
+lc-messages-dir
+lc-time-names
+Windows Options
+Options that are also system variables are listed after:
+--console
+Description: Windows-only option that keeps the console window open and for writing log messages to stderr and stdout. If specified together with
+--log-error
+, the last option will take precedence.
+--install
+Description: Windows-only option that installs the
+mariadbd
+process as a Windows service.
+The Windows service created with this option
+auto-starts
+. If you want a service that is started on demand, then use the
+--install-manual
+option.
+This option takes a service name as an argument. If this option is provided without a service name, then the service name defaults to "MARIADB".
+This option is deprecated and may be removed in a future version. See
+MDEV-19358
+for more information.
+--install-manual
+Description: Windows-only option that installs the
+mariadbd
+process as a Windows service.
+The Windows service created with this option is started on demand. If you want a service that
+auto-starts
+, use the
+--install
+option.
+This option takes a service name as an argument. If this option is provided without a service name, then the service name defaults to "MARIADB".
+This option is deprecated and may be removed in a future version. See
+MDEV-19358
+for more information.
+--remove
+Description: Windows-only option that removes the Windows service created by the
+--install
+or
+--install-manual
+options.
+This option takes a service name as an argument. If this option is provided without a service name, then the service name defaults to "MARIADB".
+This option is deprecated and may be removed in a future version. See
+MDEV-19358
+for more information.
+--slow-start-timeout
+Description: Windows-only option that defines the maximum number of milliseconds that the service control manager should wait before trying to kill the Windows service during startup. Defaults to
+15000
+.
+--standalone
+Description: Windows-only option that has no effect. Kept for compatibility reasons.
+Windows Options and System Variables
+The following options and system variables are related to using MariaDB on Windows:
+--named-pipe
+Replication and Binary Logging Options
+The following options are related to
+replication
+and the
+binary log
+. Options that are also system variables are listed after:
+--abort-slave-event-count
+Command line:
+--abort-slave-event-count=#
+Description: Option used by mysql-test for debugging and testing of replication.
+--binlog-do-db
+Command line:
+--binlog-do-db=name
+Description: This option allows you to configure a
+replication master
+to write statements and transactions affecting databases that match a specified name into its
+binary log
+. Since the filtered statements or transactions will not be present in the
+binary log
+, its replicas will not be able to replicate them.
+This option will not work with cross-database updates with
+statement-based logging
+. See the
+Statement-Based Logging
+section for more information.
+This option can not be set dynamically. Available as a
+system variable
+from
+MariaDB 11.2.0
+.
+When setting it on the command-line or in a server
+option group
+in an
+option file
+, the option does not accept a comma-separated list. If you would like to specify multiple filters, then you need to specify the option multiple times.
+See
+Replication Filters
+for more information.
+--binlog-ignore-db
+Command line:
+--binlog-ignore-db=name
+Description: This option allows you to configure a
+replication master
+to not write statements and transactions affecting databases that match a specified name into its
+binary log
+. Since the filtered statements or transactions will not be present in the
+binary log
+, its replicas will not be able to replicate them.
+This option will not work with cross-database updates with
+statement-based logging
+. See the
+Statement-Based Logging
+section for more information.
+This option can not be set dynamically. Available as a
+system variable
+from
+MariaDB 11.2.0
+.
+When setting it on the command-line or in a server
+option group
+in an
+option file
+, the option does not accept a comma-separated list. If you would like to specify multiple filters, then you need to specify the option multiple times.
+See
+Replication Filters
+for more information.
+--binlog-row-event-max-size
+Command line:
+--binlog-row-event-max-size=#
+Description: The maximum size of a row-based
+binary log
+event in bytes. Rows will be grouped into events smaller than this size if possible. The value has to be a multiple of 256. Available as a
+system variable
+from
+MariaDB 11.2.0
+.
+Default value
+8192
+--disconnect-slave-event-count
+Command line:
+--disconnect-slave-event-count=#
+Description: Option used by mysql-test for debugging and testing of replication.
+--flashback
+Command line:
+--flashback
+Description: Setup the server to use flashback. This enables the
+binary log
+and sets
+binlog_format=ROW
+.
+--log-basename
+Command line:
+--log-basename=name
+Description: Basename for all log files and the .pid file. This sets all log file names at once (in 'datadir') and is normally the only option you need for specifying log files. This is especially recommended to be set if you are using
+replication
+as it ensures that your log file names are not dependent on your host name. Sets names for the
+binary log
+,
+relay log
+,
+general query log
+,
+slow query log
+and
+error log
+. Note that if you explicitly set log file names with any of these other options;
+log-bin-index
+,
+relay-log
+,
+relay-log-index
+,
+general-log-file
+,
+log_slow_query_file
+(
+slow_query_log_file
+),
+log_error
+, and
+pid-file
+, these should be placed after
+--log-basename
+in the config files. Later settings override earlier settings, so
+log-basename
+will override any earlier log file name settings.
+--log-bin-trust-routine-creators
+Command line:
+--log-bin-trust-routine-creators
+Description: Deprecated, use
+log-bin-trust-function-creators
+.
+--master-host
+Command line:
+--master-host=name
+Description: Primary hostname or IP address for replication. If not set, the replica thread will not be started. Note that the setting of master-host will be ignored if there exists a valid master.info file.
+--master-info-file
+Command line:
+--master-info-file=name
+Description: Name and location of the file on the replica where the
+MASTER_LOG_FILE
+and
+MASTER_LOG_POS
+options (i.e. the
+binary log
+position on the primary) and most other
+CHANGE MASTER
+options are written. The
+replica's I/O thread
+keeps this
+binary log
+position updated as it downloads events.
+See
+CHANGE MASTER TO: Option Persistence
+for more information.
+--master-password
+Command line:
+--master-password=name
+Description: The password the replica thread will authenticate with when connecting to the primary. If not set, an empty password is assumed. The value in master.info will take precedence if it can be read.
+--master-port
+Command line:
+--master-port=#
+Description: The port the master is listening on. If not set, the compiled setting of MYSQL_PORT is assumed. If you have not tinkered with configure options, this should be 3306. The value in master.info will take precedence if it can be read.
+--master-retry-count
+Command line:
+--master-retry-count=#
+Description: Number of times a replica will attempt to connect to a primary before giving up. The retry interval is determined by the MASTER_CONNECT_RETRY option for the CHANGE MASTER statement. A value of 0 means the replica will not stop attempting to reconnect. Reconnects are triggered when a replica has timed out. See
+slave_net_timeout
+.
+Default Value:
+86400
+through 10.5,
+100000
+as of 10.6
+Range - 32 bit:
+0 to 4294967295
+Range - 64 bit:
+0 to 18446744073709551615
+--master-ssl
+Command line:
+--master-ssl
+Description: Enable the replica to
+connect to the master using TLS
+.
+--master-ssl-ca
+Command line:
+--master-ssl-ca[=name]
+Description: Master TLS CA file. Only applies if you have enabled
+master-ssl
+.
+--master-ssl-capath
+Command line:
+--master-ssl-capath[=name]
+Description: Master TLS CA path. Only applies if you have enabled
+master-ssl
+.
+--master-ssl-cert
+Command line:
+--master-ssl-cert[=name]
+Description: Master TLS certificate file name. Only applies if you have enabled
+master-ssl
+.
+--master-ssl-cipher
+Command line:
+--master-ssl-cipher[=name]
+Description: Master TLS cipher. Only applies if you have enabled
+master-ssl
+.
+--master-ssl-key
+Command line:
+--master-ssl-key[=name]
+Description: Master TLS keyfile name. Only applies if you have enabled
+master-ssl
+.
+--master-user
+Command line:
+--master-user=name
+Description: The username the replica thread will use for authentication when connecting to the primary. The user must have FILE privilege. If the primary user is not set, user test is assumed. The value in master.info will take precedence if it can be read.
+--max-binlog-dump-events
+Command line:
+--max-binlog-dump-events=#
+Description: Option used by mysql-test for debugging and testing of replication.
+--replicate-same-server-id
+Command line:
+--replicate-same-server-id
+Description: In replication, if set to 1, do not skip events having our server id. Default value is 0 (to break infinite loops in circular replication). Can't be set to 1 if
+log-slave-updates
+is used. Added as a
+system variable
+in
+MariaDB 12.0
+.
+--sporadic-binlog-dump-fail
+Command line:
+--sporadic-binlog-dump-fail
+Description: Option used by mysql-test for debugging and testing of replication.
+--sysdate-is-now
+Command line:
+--sysdate-is-now
+Description: Non-default option to alias
+SYSDATE()
+to
+NOW()
+to make it safe for
+replication
+. Since 5.0, SYSDATE() has returned a `dynamic' value different for different invocations, even within the same statement.
+Replication and Binary Logging Options and System Variables
+The options and system variables related to
+Replication
+and
+Binary Logging
+are described on
+Replication and Binary Logging System Variables
+.
+Semisynchronous Replication Options and System Variables
+The options and system variables related to
+Semisynchronous Replication
+are described
+here
+.
+Optimizer Options
+Options that are also system variables are listed after:
+--record-buffer
+Command line:
+--record-buffer=#
+Description: Old alias for
+read_buffer_size
+.
+Removed:
+MariaDB 5.5
+--table-cache
+Command line:
+--table-open-cache=#
+Description: Removed; use
+--table-open-cache
+instead.
+Removed:
+MariaDB 5.3.1
+Optimizer Options and System Variables
+alter-algorithm
+analyze-max-length
+analyze-sample-percentage
+big-tables
+bulk-insert-buffer-size
+expensive-subquery-limit
+join-buffer-size
+join-buffer-space-limit
+join-cache-level
+max-heap-table-size
+max-join-size
+max-seeks-for-key
+max-sort-length
+mrr-buffer-size
+optimizer-adjust-secondary-key-costs
+optimizer-extra-pruning-depth
+optimizer-join-limit-pref-ratio
+optimizer-max-sel-arg-weight
+optimizer-max-sel-args
+optimizer-prune-level
+optimizer-record-context
+optimizer-search-depth
+optimizer-selectivity-sampling-limit
+optimizer-switch
+optimizer-trace
+optimizer-trace-max-mem-size
+optimizer-use-condition-selectivity
+query-alloc-block-size
+query-prealloc-size
+range-alloc-block-size
+read-buffer-size
+rowid-merge-buff-size
+table-definition-cache
+table-open-cache
+table-open-cache-instances
+tmp-disk-table-size
+tmp-memory-table-size
+tmp-table-size
+use-stat-tables
+Storage Engine Options
+--skip-bdb
+Command line:
+----skip-bdb
+Description: Deprecated option; Exists only for compatibility with very old my.cnf files.
+Removed:
+MariaDB 10.5.1
+--external-locking
+Command line:
+--external-locking
+Description: Use system (external) locking (disabled by default). With this option enabled you can run
+myisamchk
+to test (not repair) tables while the server is running. Disable with
+--skip-external-locking
+. From
+MariaDB 10.2.40
+,
+MariaDB 10.3.31
+,
+MariaDB 10.4.21
+,
+MariaDB 10.5.12
+,
+MariaDB 10.6.4
+and all later version, this effects InnoDB and can be used to prevent multiple instances running on the same data.
+MyISAM Storage Engine Options
+The options related to the
+MyISAM
+storage engine are described below. Options that are also system variables are listed after:
+--log-isam
+Command line:
+--log-isam[=file_name]
+Description: Enable the
+MyISAM log
+, which logs all MyISAM changes to file. If no filename is provided, the default, myisam.log is used.
+MyISAM Storage Engine Options and System Variables
+Some options and system variables related to the
+MyISAM
+storage engine can be found
+here
+. Direct links to many of them can be found below.
+concurrent-insert
+delayed-insert-limit
+delayed-insert-timeout
+delayed-queue-size
+keep-files-on-create
+key-buffer-size
+key-cache-age-threshold
+key-cache-block-size
+key-cache-division-limit
+key-cache-file-hash-size
+key-cache-segments
+myisam-block-size
+myisam-data-pointer-size
+myisam-max-sort-file-size
+myisam-mmap-size
+myisam-recover-options
+myisam-repair-threads
+myisam-sort-buffer-size
+myisam-stats-method
+myisam-use-mmap
+InnoDB Storage Engine Options
+The options related to the
+InnoDB
+storage engine are described below. Options that are also system variables are listed after:
+--innodb
+Command line:
+--innodb=value
+,
+--skip-innodb
+Description: This variable controls whether or not to load the InnoDB storage engine. Possible values are
+ON
+,
+OFF
+,
+FORCE
+or
+FORCE_PLUS_PERMANENT
+(from
+MariaDB 5.5
+). If set to
+OFF
+(the same as --skip-innodb), since InnoDB is the default storage engine, the server will not start unless another storage engine has been chosen with
+--default-storage-engine
+.
+FORCE
+means that the storage engine must be successfully loaded, or else the server won't start.
+FORCE_PLUS_PERMANENT
+enables the plugin, but if plugin cannot initialize, the server will not start. In addition, the plugin cannot be uninstalled while the server is running.
+--innodb-cmp
+Command line:
+--innodb-cmp
+Description:
+Default:
+ON
+--innodb-cmp-reset
+Command line:
+--innodb-cmp-reset
+Description:
+Default:
+ON
+--innodb-cmpmem
+Command line:
+--innodb-cmpmem
+Description:
+Default:
+ON
+--innodb-cmpmem-reset
+Command line:
+--innodb-cmpmem-reset
+Description:
+Default:
+ON
+--innodb-file-io-threads
+Command line:
+--innodb-file-io-threads
+Description:
+Default:
+4
+Removed:
+MariaDB 10.3.0
+--innodb-index-stats
+Command line:
+--innodb-index-stats
+Description:
+Default:
+ON
+Removed:
+MariaDB 10.0.0
+--innodb-lock-waits
+Command line:
+--innodb-lock-waits
+Description:
+Default:
+ON
+--innodb-locks
+Command line:
+--innodb-locks
+Description:
+Default:
+ON
+--innodb-rseg
+Command line:
+--innodb-rseg
+Description:
+Default:
+ON
+Removed:
+MariaDB 10.0.0
+--innodb-status-file
+Command line:
+--innodb-status-file
+Description:
+Default:
+FALSE
+--innodb-sys-indexes
+Command line:
+--innodb-sys-indexes
+Description:
+Default:
+ON
+--innodb-sys-stats
+Command line:
+--innodb-sys-stats
+Description:
+Default:
+ON
+Removed:
+MariaDB 10.0.0
+--innodb-sys-tables
+Command line:
+--innodb-sys-tables
+Description:
+Default:
+ON
+--innodb-table-stats
+Command line:
+--innodb-table-stats
+Description:
+Default:
+ON
+Removed:
+MariaDB 10.0.0
+--innodb-trx
+Command line:
+--innodb-trx
+Description:
+Default:
+ON
+InnoDB Storage Engine Options and System Variables
+Some options and system variables related to the
+InnoDB
+storage engine can be found
+here
+. Direct links to many of them can be found below.
+ignore-builtin-innodb
+innodb-adaptive-checkpoint
+innodb-adaptive-flushing
+innodb-adaptive-flushing-lwm
+innodb-adaptive-flushing-method
+innodb-adaptive-hash-index
+innodb-adaptive-hash-index-partitions
+innodb-adaptive-hash-index-parts
+innodb-adaptive-max-sleep-delay
+innodb-additional-mem-pool-size
+innodb-alter-copy-bulk
+innodb-api-bk-commit-interval
+innodb-api-disable-rowlock
+innodb-api-enable-binlog
+innodb-api-enable-mdl
+innodb-api-trx-level
+innodb-auto-lru-dump
+innodb-autoextend-increment
+innodb-autoinc-lock-mode
+innodb-background-scrub-data-check-interval
+innodb-background-scrub-data-compressed
+innodb-background-scrub-data-interval
+innodb-background-scrub-data-uncompressed
+innodb-blocking-buffer-pool-restore
+innodb-buf-dump-status-frequency
+innodb-buffer-pool-chunk-size
+innodb-buffer-pool-dump-at-shutdown
+innodb-buffer-pool-dump-now
+innodb-buffer-pool-dump-pct
+innodb-buffer-pool-evict
+innodb-buffer-pool-filename
+innodb-buffer-pool-instances
+innodb-buffer-pool-load-abort
+innodb-buffer-pool-load-at-startup
+innodb-buffer-pool-load-now
+innodb-buffer-pool-load-pages-abort
+innodb-buffer-pool-populate
+innodb-buffer-pool-restore-at-startup
+innodb-buffer-pool-shm-checksum
+innodb-buffer-pool-shm-key
+innodb-buffer-pool-size
+innodb-buffer-pool-size-auto-min
+innodb-buffer-pool-size-max
+innodb-change-buffer-max-size
+innodb-change-buffering
+innodb-change-buffering-debug
+innodb-checkpoint-age-target
+innodb-checksum-algorithm
+innodb-checksums
+innodb-cleaner-lsn-age-factor
+innodb-cmp-per-index-enabled
+innodb-commit-concurrency
+innodb-compression-algorithm
+innodb-compression-failure-threshold-pct
+innodb-compression-level
+innodb-compression-pad-pct-max
+innodb-concurrency-tickets
+innodb-corrupt-table-action
+innodb-data-file-buffering
+innodb-data-file-path
+innodb-data-file-write-through
+innodb-data-home-dir
+innodb-deadlock-detect
+innodb-deadlock-report
+innodb-default-encryption-key-id
+innodb-default-page-encryption-key
+innodb-default-row-format
+innodb-defragment
+innodb-defragment-fill-factor
+innodb-defragment-fill-factor-n-recs
+innodb-defragment-frequency
+innodb-defragment-n-pages
+innodb-defragment-stats-accuracy
+innodb-dict-size-limit
+innodb_disable_sort_file_cache
+innodb-doublewrite
+innodb-doublewrite-file
+innodb-empty-free-list-algorithm
+innodb-enable-unsafe-group-commit
+innodb-encrypt-log
+innodb-encrypt-tables
+innodb-encrypt-temporary-tables
+innodb-encryption-rotate-key-age
+innodb-encryption-rotation_iops
+innodb-encryption-threads
+innodb-extra-rsegments
+innodb-extra-undoslots
+innodb-fake-changes
+innodb-fast-checksum
+innodb-fast-shutdown
+innodb-fatal-semaphore-wait-threshold
+innodb-file-format
+innodb-file-format-check
+innodb-file-format-max
+innodb-file-per-table
+innodb-fill-factor
+innodb-flush-log-at-trx-commit
+innodb-flush-method
+innodb-flush-neighbor-pages
+innodb-flush-neighbors
+innodb-flush-sync
+innodb-flushing-avg-loops
+innodb-force-load-corrupted
+innodb-force-primary-key
+innodb-force-recovery
+innodb-foreground-preflush
+innodb-ft-aux-table
+innodb-ft-cache-size
+innodb-ft-enable-diag-print
+innodb-ft-enable-stopword
+innodb-ft-max-token-size
+innodb-ft-min-token-size
+innodb-ft-num-word-optimize
+innodb-ft-result-cache-limit
+innodb-ft-server-stopword-table
+innodb-ft-sort-pll-degree
+innodb-ft-total-cache-size
+innodb-ft-user-stopword-table
+innodb-ibuf-accel-rate
+innodb-ibuf-active-contract
+innodb-ibuf-max-size
+innodb-idle-flush-pct
+innodb-immediate-scrub-data-uncompressed
+innodb-import-table-from-xtrabackup
+innodb-instant-alter-column-allowed
+innodb-instrument-semaphores
+innodb-io-capacity
+innodb-io-capacity-max
+innodb-large-prefix
+innodb-lazy-drop-table
+innodb-lock-schedule-algorithm
+innodb-locking-fake-changes
+innodb-locks-unsafe-for-binlog
+innodb-log-arch-dir
+innodb-log-arch-expire-sec
+innodb-log-archive
+innodb-log-block-size
+innodb-log-buffer-size
+innodb-log-checkpoint-now
+innodb-log-checksum-algorithm
+innodb-log-checksums
+innodb-log-compressed-pages
+innodb-log-file-buffering
+innodb-log-file-mmap
+innodb-log-file-size
+innodb-log-file-write-through
+innodb-log-files-in-group
+innodb-log-group-home-dir
+innodb-log-optimize-ddl
+innodb-log-spin-wait-delay
+innodb-log-write-ahead-size
+innodb-lru-flush-size
+innodb-lru-scan-depth
+innodb-max-bitmap-file-size
+innodb-max-changed-pages
+innodb-max-dirty-pages-pct
+innodb-max-dirty-pages-pct-lwm
+innodb-max-purge-lag
+innodb-max-purge-lag-delay
+innodb-max-purge-lag-wait
+innodb-max-undo-log-size
+innodb-merge-sort-block-size
+innodb-mirrored-log-groups
+innodb-monitor-disable
+innodb-monitor-enable
+innodb-monitor-reset
+innodb-monitor-reset-all
+innodb-mtflush-threads
+innodb-numa-interleave
+innodb-old-blocks-pct
+innodb-old-blocks-time
+innodb-online-alter-log-max-size
+innodb-open-files
+innodb-optimize-fulltext-only
+innodb-page-cleaners
+innodb-page-size
+innodb-pass-corrupt-table
+innodb-prefix-index-cluster-optimization
+innodb-print-all-deadlocks
+innodb-purge-batch-size
+innodb-purge-rseg-truncate-frequency
+innodb-purge-threads
+innodb-random-read-ahead
+innodb-read-ahead
+innodb-read-ahead-threshold
+innodb-read-io-threads
+innodb-read-only
+innodb-recovery-update-relay-log
+innodb-replication-delay
+innodb-rollback-on-timeout
+innodb-rollback-segments
+innodb-safe-truncate
+innodb-sched-priority-cleaner
+innodb-scrub-log
+innodb-scrub-log-interval
+innodb-scrub-log-speed
+innodb-show-locks-held
+innodb-show-verbose-locks
+innodb-snapshot-isolation
+innodb-sort-buffer-size
+innodb-spin-wait-delay
+innodb-stats-auto-recalc
+innodb-stats-auto-update
+innodb-stats-include-delete-marked
+innodb-stats-method
+innodb-stats-modified-counter
+innodb-stats-on-metadata
+innodb-stats-persistent
+innodb-stats-persistent-sample-pages
+innodb-stats-sample-pages
+innodb-stats-transient-sample-pages
+innodb-stats-traditional
+innodb-stats-update-need-lock
+innodb-status-output
+innodb-status-output-locks
+innodb-strict-mode
+innodb-support-xa
+innodb-sync-array-size
+innodb-sync-spin-loops
+innodb-table-locks
+innodb-temp-data-file-path
+innodb-thread-concurrency
+innodb-thread-concurrency-timer-based
+innodb-thread-sleep-delay
+innodb-tmpdir
+innodb-track-changed-pages
+innodb-track-redo-log-now
+innodb-truncate-temporary-tablespace-now
+innodb-undo-directory
+innodb-undo-log-truncate
+innodb-undo-logs
+innodb-undo-tablespaces
+innodb-use-atomic-writes
+innodb-use-fallocate
+innodb-use-global-flush-log-at-trx-commit
+innodb-use-mtflush
+innodb-use-native_aio
+innodb-use-purge-thread
+innodb-use-stacktrace
+innodb-use-sys-malloc
+innodb-use-sys-stats-table
+innodb-use-trim
+innodb-write-io-threads
+skip-innodb
+skip-innodb-checksums
+skip-innodb-doublewrite
+Aria Storage Engine Options
+Options related to the
+Aria
+storage engine are listed below:
+Aria Storage Engine Options and System Variables
+Some options and system variables related to the
+Aria
+storage engine can be found
+here
+. Direct links to many of them can be found below.
+aria-block-size
+aria-checkpoint-interval
+aria-checkpoint-log-activity
+aria-encrypt-tables
+aria-force-start-after-recovery-failures
+aria-group-commit
+aria-group-commit-interval
+aria-log-dir-path
+aria-log-file-size
+aria-log-purge-type
+aria-max-sort-file-size
+aria-page-checksum
+aria-pagecache-age-threshold
+aria-pagecache-buffer-size
+aria-pagecache-division-limit
+aria-pagecache-file-hash-size
+aria-pagecache-segments
+aria-recover
+aria-recover-options
+aria-repair-threads
+aria-sort-buffer-size
+aria-stats-method
+aria-sync-log-dir
+aria-used-for-temp-tables
+deadlock-search-depth-long
+deadlock-search-depth-short
+deadlock-timeout-long
+deadlock-timeout-short
+MyRocks Storage Engine Options
+The options and system variables related to the
+MyRocks
+storage engine can be found
+here
+.
+S3 Storage Engine Options
+The options and system variables related to the
+S3
+storage engine can be found
+here
+.
+CONNECT Storage Engine Options
+The options related to the
+CONNECT
+storage engine are described below.
+CONNECT Storage Engine Options and System Variables
+Some options and system variables related to the
+CONNECT
+storage engine can be found
+here
+. Direct links to many of them can be found below.
+connect-class-path
+connect-cond-push
+connect-conv-size
+connect-default-depth
+connect-default-prec
+connect-enable-mongo
+connect-exact-info
+connect-force_bson
+connect-indx-map
+connect-java-wrapper
+connect-json-all-path
+connect-json-grp-size
+connect-json-null
+connect-jvm-path
+connect-type-conv
+connect-use-tempfile
+connect-work-size
+connect-xtrace
+Spider Storage Engine Options
+The options and system variables related to the
+Spider
+storage engine can be found
+here
+.
+Mroonga Storage Engine Options
+The options and system variables related to the
+Mroonga
+storage engine can be found
+here
+.
+TokuDB Storage Engine Options
+The options and system variables related to the
+TokuDB
+storage engine can be found
+here
+.
+Vector Options
+The options and system variables related to
+Vectors
+storage engine (beginning with
+mhnsw
+) can be found
+here
+.
+Performance Schema Options
+The options related to the
+Performance Schema
+are described below. Options that are also system variables are listed after:
+--performance-schema-consumer-events-stages-current
+Command line:
+--performance-schema-consumer-events-stages-current
+Description: Enable the
+events-stages-current
+consumer.
+Default:
+OFF
+--performance-schema-consumer-events-stages-history
+Command line:
+--performance-schema-consumer-events-stages-history
+Description: Enable the
+events-stages-history
+consumer.
+Default:
+OFF
+--performance-schema-consumer-events-stages-history-long
+Command line:
+--performance-schema-consumer-events-stages-history-long
+Description: Enable the
+events-stages-history-long
+consumer.
+Default:
+OFF
+--performance-schema-consumer-events-statements-current
+Command line:
+--performance-schema-consumer-events-statements-current
+Description: Enable the
+events-statements-current
+consumer. Use
+--skip-performance-schema-consumer-events-statements-current
+to disable.
+Default:
+ON
+--performance-schema-consumer-events-statements-history
+Command line:
+--performance-schema-consumer-events-statements-history
+Description: Enable the
+events-statements-history
+consumer.
+Default:
+OFF
+--performance-schema-consumer-events-statements-history-long
+Command line:
+--performance-schema-consumer-events-statements-history-long
+Description: Enable the
+events-statements-history-long
+consumer.
+Default:
+OFF
+--performance-schema-consumer-events-waits-current
+Command line:
+--performance-schema-consumer-events-waits-current
+Description: Enable the
+events-waits-current
+consumer.
+Default:
+OFF
+--performance-schema-consumer-events-waits-history
+Command line:
+--performance-schema-consumer-events-waits-history
+Description: Enable the
+events-waits-history
+consumer.
+Default:
+OFF
+--performance-schema-consumer-events-waits-history-long
+Command line:
+--performance-schema-consumer-events-waits-history-long
+Description: Enable the
+events-waits-history-long
+consumer.
+Default:
+OFF
+--performance-schema-consumer-global-instrumentation
+Command line:
+--performance-schema-consumer-global-instrumentation
+Description: Enable the global-instrumentation consumer. Use
+--skip-performance-schema-consumer-global-instrumentation
+to disable.
+Default:
+ON
+--performance-schema-consumer-statements-digest
+Command line:
+--performance-schema-consumer-statements-digest
+Description: Enable the statements-digest consumer. Use
+--skip-performance-schema-consumer-statements-digest
+to disable.
+Default:
+ON
+--performance-schema-consumer-thread-instrumentation
+Command line:
+--performance-schema-consumer-thread-instrumentation
+Description: Enable the statements-thread-instrumentation. Use
+--skip-performance-schema-thread-instrumentation
+to disable.
+Default:
+ON
+Performance Schema Options and System Variables
+Some options and system variables related to the
+Performance Schema
+can be found
+here
+. Direct links to many of them can be found below.
+performance-schema
+performance-schema-accounts-size
+performance-schema-digests-size
+performance-schema-events-stages-history-long-size
+performance-schema-events-stages-history-size
+performance-schema-events-statements-history-long-size
+performance-schema-events-statements-history-size
+performance-schema-events-waits-history-long-size
+performance-schema-events-waits-history-size
+performance-schema-hosts-size
+performance-schema-max-cond-classes
+performance-schema-max-cond-instances
+performance-schema-max-digest-length
+performance-schema-max-file-classes
+performance-schema-max-file-handles
+performance-schema-max-file-instances
+performance-schema-max-mutex-classes
+performance-schema-max-mutex-instances
+performance-schema-max-rwlock-classes
+performance-schema-max-rwlock-instances
+performance-schema-max-socket-classes
+performance-schema-max-socket-instances
+performance-schema-max-stage-classes
+performance-schema-max-statement-classes
+performance-schema-max-table-handles
+performance-schema-max-table-instances
+performance-schema-max-thread-classes
+performance-schema-max-thread-instances
+performance-schema-session-connect-attrs-size
+performance-schema-setup-actors-size
+performance-schema-setup-objects-size
+performance-schema-users-size
+Galera Cluster Options
+The options related to
+Galera Cluster
+are described below. Options that are also system variables are listed after:
+--wsrep-new-cluster
+Command line:
+--wsrep-new-cluster
+Description: Bootstrap a cluster. It works by overriding the current value of wsrep_cluster_address. It is recommended not to add this option to the config file as this will trigger bootstrap on every server start.
+Galera Cluster Options and System Variables
+Some options and system variables related to
+Galera Cluster
+can be found
+here
+. Direct links to many of them can be found below.
+wsrep-allowlist
+wsrep_applier_retry_count
+wsrep-auto-increment-control
+wsrep-causal-reads
+wsrep-certify-nonPK
+wsrep-cluster-address
+wsrep-cluster-name
+wsrep-convert-LOCK-to-trx
+wsrep-data-home-dir
+wsrep-dbug-option
+wsrep-debug
+wsrep-desync
+wsrep-dirty-reads
+wsrep-drupal-282555-workaround
+wsrep-forced-binlog-format
+wsrep-gtid-domain-id
+wsrep-gtid-mode
+wsrep-ignore-apply-errors
+wsrep-load-data-splitting
+wsrep-log-conflicts
+wsrep-max-ws-rows
+wsrep-max-ws-size
+wsrep-mode
+wsrep-mysql-replication-bundle
+wsrep-node-address
+wsrep-node-incoming-address
+wsrep-node-name
+wsrep-notify-cmd
+wsrep-on
+wsrep-OSU-method
+wsrep-provider
+wsrep-provider-options
+wsrep-recover
+wsrep-reject_queries
+wsrep-retry-autocommit
+wsrep-slave-FK-checks
+wsrep-slave-threads
+wsrep-slave-UK-checks
+wsrep-sr-store
+wsrep-sst-auth
+wsrep-sst-donor
+wsrep-sst-donor-rejects-queries
+wsrep-sst-method
+wsrep-sst-receive-address
+wsrep-start-position
+wsrep-status-file
+wsrep-strict-ddl
+wsrep-sync-wait
+wsrep-trx_fragment_size
+wsrep-trx_fragment_unit
+Options When Debugging mariadbd
+--debug-assert-if-crashed-table
+Description: Do an assert in handler::print_error() if we get a crashed table.
+--debug-binlog-fsync-sleep
+Description:
+--debug-binlog-fsync-sleep=#
+If not set to zero, sets the number of micro-seconds to sleep after running fsync() on the
+binary log
+to flush transactions to disk. This can thus be used to artificially increase the perceived cost of such an fsync().
+--debug-crc-break
+Description:
+--debug-crc-break=#
+Call my_debug_put_break_here() if crc matches this number (for debug).
+--debug-flush
+Description: Default debug log with flush after write.
+--debug-no-sync
+Description:
+debug-no-sync[=#]
+Disables system sync calls. Only for running tests or debugging!
+--debug-sync-timeout
+Description:
+debug-sync-timeout[=#]
+Enable the debug sync facility and optionally specify a default wait timeout in seconds. A zero value keeps the facility disabled.
+--gdb
+Description: Set up signals usable for debugging.
+--silent-startup
+Description: Don't print Notes to the
+error log
+during startup.
+--sync-sys
+Description: Enable/disable system sync calls. Syncs should only be turned off (
+--disable-sync-sys
+) when running tests or debugging! Replaced by
+debug-no-sync
+from
+MariaDB 5.5
+.
+Removed:
+MariaDB 5.5
+--thread-alarm
+Description: Enable/disable system thread alarm calls. Should only be turned off (
+--disable-thread-alarm
+) when running tests or debugging!
+Debugging Options and System Variables
+core-file
+debug
+debug-no-thread-alarm
+Other Options
+Options that are also system variables are listed after:
+--allow-suspicious-udfs
+Command line:
+--allow-suspicious-udfs
+Description: Allows use of
+user-defined functions
+consisting of only one symbol
+x()
+without corresponding
+x_init()
+or
+x_deinit()
+. That also means that one can load any function from any library, for example
+exit()
+from
+libc.so
+. Not recommended unless you require old UDFs with one symbol that cannot be recompiled. From
+MariaDB 10.10
+, available as a
+system variable
+as well.
+--bootstrap
+Command line:
+--bootstrap
+Description: Used by mariadb installation scripts, such as
+mariadb-install-db
+to execute SQL scripts before any privilege or system tables exist. Do no use while an existing MariaDB instance is running.
+--chroot
+Command line:
+--chroot=name
+Description: Chroot mariadbd daemon during startup.
+--des-key-file
+Command line:
+--des-key-file=name
+Description: Load keys for
+des_encrypt()
+and des_encrypt from given file.
+--exit-info
+Command line:
+--exit-info[=#]
+Description: Used for debugging. Use at your own risk.
+--getopt-prefix-matching
+Command line:
+--getopt-prefix-matching={0|1}
+Description: Makes it possible to disable historical "unambiguous prefix" matching in the command-line option parsing.
+Default: TRUE
+Introduced:
+MariaDB 10.1.3
+--help
+Command line:
+--help
+Description: Displays help with many commandline options described, and exits. From
+MariaDB 11.5
+, includes deprecation information.
+--log-ddl-recovery
+Command line:
+--log-ddl-recovery=name
+Description: Path to file used for recovery of DDL statements after a crash.
+Default Value:
+ddl-recover.log
+Introduced:
+MariaDB 10.6.1
+--log-short-format
+Command line:
+--log-short-format
+Description: Don't log extra information to update and
+slow-query
+logs.
+--log-slow-file
+Command line:
+--log-slow-file=name
+Description: Log
+slow queries
+to given log file. Defaults logging to hostname-slow.log
+--log-slow-time
+Command line:
+--log-slow-time=#
+Description: Log all queries that have taken more than
+long-query-time
+seconds to execute to the slow query log, if active. The argument will be treated as a decimal value with microsecond precision.
+--log-tc
+Command line:
+--log-tc=name
+Description: Defines the path to the memory-mapped file-based transaction coordinator log, which is only used if the
+binary log
+is disabled. If you have two or more XA-capable storage engines enabled, then a transaction coordinator log must be available. See
+Transaction Coordinator Log
+for more information. Also see the
+log_tc_size
+system variable and the
+--tc-heuristic-recover
+option.
+Default Value:
+tc.log
+--master-connect-retry
+Command line:
+--master-connect-retry=#
+Description: Deprecated in 5.1.17 and removed in 5.5. The number of seconds the replica thread will sleep before retrying to connect to the master, in case the master goes down or the connection is lost.
+--memlock
+Command line:
+--memlock
+Description: Lock mariadbd in memory.
+--ndb-use-copying-alter-table
+Command line:
+--ndb-use-copying-alter-table
+Description: Force ndbcluster to always copy tables at alter table (should only be used if on-line alter table fails).
+--one-thread
+Command line:
+--one-thread
+Description: (Deprecated): Only use one thread (for debugging under Linux). Use
+thread-handling=no-threads
+instead.
+Removed:
+MariaDB 10.0.4
+--plugin-load
+Command line:
+--plugin-load=name
+Description: This option can be used to configure the server to load specific
+plugins
+. This option uses the following format:
+Plugins can be specified in the format
+name=library
+, where
+name
+is the plugin name and
+library
+is the plugin library. This format installs a single plugin from the given plugin library.
+Plugins can also be specified in the format
+library
+, where
+library
+is the plugin library. This format installs all plugins from the given plugin library.
+Multiple plugins can be specified by separating them with semicolons.
+Special care must be taken when specifying the
+--plugin-load
+option multiple times, or when specifying both the
+--plugin-load
+option and the
+--plugin-load-add
+option together. The
+--plugin-load
+option resets the plugin load list, and this can cause unexpected problems if you are not aware. The
+--plugin-load-add
+option does not reset the plugin load list, so it is much safer to use. See
+Plugin Overview: Specifying Multiple Plugin Load Options
+for more information.
+See
+Plugin Overview: Installing a Plugin with Plugin Load Options
+for more information.
+--plugin-load-add
+Command line:
+--plugin-load-add=name
+Description: This option can be used to configure the server to load specific
+plugins
+. This option uses the following format:
+Plugins can be specified in the format
+name=library
+, where
+name
+is the plugin name and
+library
+is the plugin library. This format installs a single plugin from the given plugin library.
+Plugins can also be specified in the format
+library
+, where
+library
+is the plugin library. This format installs all plugins from the given plugin library.
+Multiple plugins can be specified by separating them with semicolons.
+Special care must be taken when specifying both the
+--plugin-load
+option and the
+--plugin-load-add
+option together. The
+--plugin-load
+option resets the plugin load list, and this can cause unexpected problems if you are not aware. The
+--plugin-load-add
+option does not reset the plugin load list, so it is much safer to use. See
+Plugin Overview: Specifying Multiple Plugin Load Options
+for more information.
+See
+Plugin Overview: Installing a Plugin with Plugin Load Options
+for more information.
+--port-open-timeout
+Command line:
+--port-open-timeout=#
+Description: Maximum time in seconds to wait for the port to become free. (Default: No wait).
+--safe-user-create
+Command line:
+--safe-user-create
+Description: Don't allow new user creation by the user who has no write privileges to the
+mysql.user
+table.
+--safemalloc-mem-limit
+Command line:
+--safemalloc-mem-limit=#
+Description: Simulate memory shortage when compiled with the
+--with-debug=full
+option.
+--show-slave-auth-info
+Command line:
+--show-slave-auth-info
+Description: Show user and password in
+SHOW REPLICA HOSTS
+(SHOW SLAVE HOSTS) on this primary. Also added as a
+system variable
+in
+MariaDB 12.0
+.
+--skip-grant-tables
+Command line:
+--skip-grant-tables
+Description: Start without grant tables. This gives all users FULL ACCESS to all tables, which is useful in case of a lost root password. Use
+mariadb-admin flush-privileges
+,
+mariadb-admin reload
+or
+FLUSH PRIVILEGES
+to resume using the grant tables. From
+MariaDB 10.10
+, available as a
+system variable
+as well.
+Because the
+Event Scheduler
+also depends on the grant tables for its functionality, it is automatically disabled when running with
+--skip-grant-tables
+.
+--skip-host-cache
+Command line:
+--skip-host-cache
+Description: Don't cache host names.
+--skip-partition
+Command line:
+--skip-partition
+,
+--disable-partition
+Description: Disables user-defined
+partitioning
+. Previously partitioned tables cannot be accessed or modified. Tables can still be seen with
+SHOW TABLES
+or by viewing the
+INFORMATION_SCHEMA.TABLES table
+. Tables can be dropped with
+DROP TABLE
+, but this only removes .frm files, not the associated .par files, which will need to be removed manually.
+--skip-slave-start
+Command line:
+--skip-slave-start
+Description: If set, replica is not autostarted. From
+MariaDB 12.0
+, server will display in the log if this option is set.
+--skip-ssl
+Command line:
+--skip-ssl
+Description: Disable
+TLS connections
+.
+--skip-symlink
+Command line:
+--skip-symlink
+Description: Don't allow symlinking of tables. Deprecated and removed in
+MariaDB 5.5
+. Use
+symbolic-links
+with the
+skip
+option prefix
+instead.
+Removed:
+MariaDB 5.5
+--skip-thread-priority
+Command line:
+--skip-thread-priority
+Description: Don't give threads different priorities. Deprecated and removed in
+MariaDB 10.0
+.
+Removed:
+MariaDB 10.0
+--sql-bin-update-same
+Command line:
+--sql-bin-update-same=#
+Description: The update log was deprecated in version 5.0 and replaced by the
+binary log
+, so this option did nothing since then. Deprecated and removed in
+MariaDB 5.5
+.
+Removed:
+MariaDB 5.5
+--ssl
+Command line:
+--ssl
+Description: Enable
+TLS for connection
+(automatically enabled with other flags). Disable with '
+--skip-ssl
+'.
+--stack-trace
+Command line:
+--stack-trace
+,
+--skip-stack-trace
+Description: Print a stack trace on failure. Enabled by default, disable with
+-skip-stack-trace
+.
+--symbolic-links
+Command line:
+--symbolic-links
+Description: Enables symbolic link support. When set, the
+have_symlink
+system variable shows as
+YES
+. Silently ignored in Windows. Use
+--skip-symbolic-links
+to disable.
+--tc-heuristic-recover
+Command line:
+--tc-heuristic-recover=name
+Description: If
+manual heuristic recovery
+is needed, this option defines the decision to use in the heuristic recovery process. Manual heuristic recovery may be needed if the
+transaction coordination log
+is missing or if it doesn't contain all prepared transactions. This option can be set to
+OFF
+,
+COMMIT
+, or
+ROLLBACK
+. The default is
+OFF
+. See also the
+--log-tc
+server option and the
+log_tc_size
+system variable.
+--temp-pool
+Command line:
+--temp-pool
+Description: Using this option will cause most temporary files created to use a small set of names, rather than a unique name for each new file. This behavior works around a bug in old Linux kernels where the kernel appeared to "leak" memory. In a Docker environment it might look like an unbounded working-set memory growth.
+Defaults to
+1
+until
+MariaDB 10.5.6
+, use
+--skip-temp-pool
+to disable. Defaults to
+0
+from
+MariaDB 10.5.7
+, as benchmarking shows it causes a heavy mutex contention.
+--test-expect-abort
+Command line:
+--test-expect-abort
+Description: Expect that server aborts with 'abort'; Don't write out server variables on 'abort'. Useful only for test scripts.
+--test-ignore-wrong-options
+Command line:
+--test-ignore-wrong-options
+Description: Ignore wrong enums values in command line arguments. Useful only for test scripts.
+--user
+Command line:
+--user=name
+Description: Run mariadbd daemon as user.
+--verbose
+Command line:
+-v
+,
+--verbose
+Description: Used with
+help
+option for detailed help.
+Other Options and System Variables
+allow-suspicious-udfs
+automatic-sp-privileges
+back-log
+basedir
+check-constraint-checks
+column-compression-threshold
+column-compression-zlib-level
+column-compression-zlib-strategy
+column-compression-zlib-wrap
+completion-type
+connect-timeout
+datadir
+date-format
+datetime-format
+deadlock-search-depth-long
+deadlock-search-depth-short
+deadlock-timeout-long
+deadlock-timeout-short
+default-password-lifetime
+default-regex-flags
+default-storage-engine
+default-table-type
+delay-key-write
+disconnect-on-expired-password
+div-precision-increment
+enable-named-pipe
+encrypt-binlog
+encrypt-tmp-disk-tables
+encrypt-tmp-files
+encryption-algorithm
+engine-condition-pushdown
+eq-range-index-dive-limit
+event-scheduler
+expire-logs-days
+explicit-defaults-for-timestamp
+extra-max-connections
+extra-port
+flush
+flush-time
+ft-boolean-syntax
+ft-max-word-len
+ft-min-word-len
+ft-query-expansion-limit
+ft-stopword-file
+general-log
+general-log-file
+group-concat-max-len
+histogram-size
+histogram-type
+host-cache-size
+idle-readonly-transaction-timeout
+idle-transaction-timeout
+idle-write-transaction-timeout
+ignore-db-dirs
+in-predicate-conversion-threshold
+init-connect
+init-file
+interactive-timeout
+large-pages
+local-infile
+lock-wait-timeout
+log
+log-disabled-statements
+log-error
+log-output
+log-queries-not-using-indexes
+log-slow-admin-statements
+log-slow-always-query-time
+log-slow-disabled-statements
+log-slow-filter
+log-slow-min-examined-row-limit
+log-slow-queries
+log-slow-query
+log-slow-query-file
+log-slow-query-time
+log-slow-rate-limit
+log-slow-slave-statements
+log-slow-verbosity
+log-tc-size
+log-warnings
+long-query-time
+low-priority-updates
+lower-case-table-names
+max-allowed-packet
+max-connections
+max-connect-errors
+max-delayed-threads
+max-digest-length
+max-error-count
+max-length-for-sort-data
+max-long-data-size
+max_open_cursors
+max-password-errors
+max-prepared-stmt-count
+max-recursive-iterations
+max-rowid-filter-size
+max-session-mem-used
+max-sp-recursion-depth
+max-statement-time
+max-tmp-session-space-usage
+max-tmp-tables
+max-tmp-total-space-usage
+max-user-connections
+max-write-lock-count
+metadata-locks-cache-size
+metadata-locks-hash-instances
+metadata-locks-instances
+min-examined-row-limit
+mrr-buffer-size
+multi-range-count
+--mysql56-temporal-format
+net-buffer-length
+net-read-timeout
+net-retry-count
+net-write-timeout
+open-files-limit
+pid-file
+plugin-dir
+plugin-maturity
+port
+preload-buffer-size
+profiling-history-size
+progress-report-time
+proxy-protocol-networks
+query-cache-limit
+query-cache-min-res-unit
+query-cache-strip-comments
+query-cache-wlock-invalidate
+read-rnd-buffer-size
+read-only
+redirect-url
+require-secure-transport
+safe-show-database
+secure-auth
+secure-file-priv
+secure-timestamp
+session-track-schema
+session-track-state-change
+session-track-system-variables
+session-track-transaction-info
+skip-automatic-sp-privileges
+skip-external-locking
+skip-large-pages
+skip-log-error
+skip-name-resolve
+skip-networking
+skip-show-database
+slow-launch-time
+slow-query-log
+slow-query-log-file
+socket
+sort-buffer-size
+sql-if-exists
+sql-mode
+ssl-ca
+ssl-capath
+ssl-cert
+ssl-cipher
+ssl-crl
+ssl-crlpath
+ssl-key
+ssl-passphrase
+standards_compliant_cte
+stored-program-cache
+strict_password_validation
+sync-frm
+system-versioning-alter-history
+system-versioning-asof
+system-versioning-innodb-algorithm-simple
+system-versioning-insert-history
+table-lock-wait-timeout
+tcp-keepalive-interval
+tcp-keepalive-probes
+tcp-keepalive-time
+tcp-nodelay
+thread-cache-size
+thread-concurrency
+thread-handling
+thread-pool-dedicated-listener
+thread-pool-exact-stats
+thread-pool-idle-timeout
+thread-pool-max-threads
+thread-pool-min-threads
+thread-pool-oversubscribe
+thread-pool-prio-kickup-timer
+thread-pool-priority
+thread-pool-size
+thread-pool-stall-limit
+thread-stack
+timed-mutexes
+time-format
+tls-version
+tmpdir
+transaction-isolation
+transaction-alloc-block-size
+transaction-prealloc-size
+transaction-read-only
+updatable-views-with-limit
+userstat
+version
+wait-timeout
+Authentication Plugins - Options and System Variables
+Authentication Plugin -
+ed25519
+The options related to the
+ed25519
+authentication plugin can be found
+here
+.
+Authentication Plugin -
+gssapi
+The system variables related to the
+gssapi
+authentication plugin can be found
+here
+.
+The options related to the
+gssapi
+authentication plugin can be found
+here
+.
+Authentication Plugin -
+named_pipe
+The options related to the
+named_pipe
+authentication plugin can be found
+here
+.
+Authentication Plugin -
+pam
+The system variables related to the
+pam
+authentication plugin can be found
+here
+.
+The options related to the
+pam
+authentication plugin can be found
+here
+.
+Authentication Plugin -
+unix_socket
+The options related to the
+unix_socket
+authentication plugin can be found
+here
+.
+Encryption Plugins - Options and System Variables
+Encryption Plugin -
+aws_key_management
+The system variables related to the
+aws_key_management
+encryption plugin can be found
+here
+.
+The options elated to the
+aws_key_management
+encryption plugin can be found
+here
+.
+Encryption Plugin -
+file_key_management
+The system variables related to the
+file_key_management
+encryption plugin can be found
+here
+.
+The options related to the
+file_key_management
+encryption plugin can be found
+here
+.
+Password Validation Plugins - Options and System Variables
+Password Validation Plugin -
+simple_password_check
+The system variables related to the c password validation plugin can be found
+here
+.
+The options related to the
+simple_password_check
+password validation plugin can be found
+here
+.
+Password Validation Plugin -
+cracklib_password_check
+The system variables related to the
+cracklib_password_check
+password validation plugin can be found
+here
+.
+The options related to the
+cracklib_password_check
+password validation plugin can be found
+here
+.
+Audit Plugins - Options and System Variables
+Audit Plugin -
+server_audit
+Options and system variables related to the
+server_audit
+audit plugin can be found
+here
+.
+Audit Plugin -
+SQL_ERROR_LOG
+The options and system variables related to the
+SQL_ERROR_LOG
+audit plugin can be found
+here
+.
+Audit Plugin - QUERY_RESPONSE_TIME_AUDIT
+The options related to the
+QUERY_RESPONSE_TIME_AUDIT
+audit plugin can be found
+here
+.
+Daemon Plugins - Options and System Variables
+Daemon Plugin -
+handlersocket
+The options for the HandlerSocket plugin are all described on the
+HandlerSocket Configuration Option
+page.
+Information Schema Plugins - Options and System Variables
+Information Schema Plugin -
+DISKS
+The options related to the
+DISKS
+information schema plugin can be found
+here
+.
+Information Schema Plugin -
+feedback
+The system variables related to the
+feedback
+plugin can be found
+here
+.
+The options related to the
+feedback
+plugin can be found
+here
+.
+Information Schema Plugin -
+LOCALES
+The options related to the
+LOCALES
+information schema plugin can be found
+here
+.
+Information Schema Plugin -
+METADATA_LOCK_INFO
+The options related to the
+METADATA_LOCK_INFO
+information schema plugin can be found
+here
+.
+Information Schema Plugin -
+QUERY_CACHE_INFO
+The options related to the
+QUERY_CACHE_INFO
+information schema plugin can be found
+here
+.
+Information Schema Plugin -
+QUERY_RESPONSE_TIME
+The system variables related to the
+QUERY_RESPONSE_TIME
+information schema plugin can be found
+here
+.
+The options related to the
+QUERY_RESPONSE_TIME
+information schema plugin can be found
+here
+.
+Information Schema Plugin -
+user_variables
+The options related to the
+user_variables
+information schema plugin can be found
+here
+.
+Information Schema Plugin -
+WSREP_MEMBERSHIP
+The options related to the
+WSREP_MEMBERSHIP
+information schema plugin can be found
+here
+.
+Information Schema Plugin -
+WSREP_STATUS
+The options related to the
+WSREP_STATUS
+information schema plugin can be found
+here
+.
+Replication Plugins - Options and System Variables
+Replication Plugin -
+rpl_semi_sync_master
+The system variables related to the
+rpl_semi_sync_master
+replication plugin can be found
+here
+.
+The options related to the
+rpl_semi_sync_master
+replication plugin can be found
+here
+.
+Replication Plugin -
+rpl_semi_sync_slave
+The system variables related to the
+rpl_semi_sync_slave
+replication plugin can be found
+here
+.
+The options related to the
+rpl_semi_sync_slave
+replication plugin can be found
+here
+.
+Default Values
+You can verify the default values for an option by doing:
+This page is licensed: GPLv2
+spinner
+Previous
+mariadbd-multi
+Next
+mariadbd
+Last updated
+28 days ago
+Was this helpful?
+Option Prefixes
+Option File Options
+Compatibility Options
+Compatibility Options and System Variables
+Locale Options
+Locale Options and System Variables
+Windows Options
+Windows Options and System Variables
+Replication and Binary Logging Options
+Replication and Binary Logging Options and System Variables
+Semisynchronous Replication Options and System Variables
+Optimizer Options
+Optimizer Options and System Variables
+Storage Engine Options
+MyISAM Storage Engine Options
+InnoDB Storage Engine Options
+Aria Storage Engine Options
+MyRocks Storage Engine Options
+S3 Storage Engine Options
+CONNECT Storage Engine Options
+Spider Storage Engine Options
+Mroonga Storage Engine Options
+TokuDB Storage Engine Options
+Vector Options
+Performance Schema Options
+Performance Schema Options and System Variables
+Galera Cluster Options
+Galera Cluster Options and System Variables
+Options When Debugging mariadbd
+Debugging Options and System Variables
+Other Options
+Other Options and System Variables
+Authentication Plugins - Options and System Variables
+Authentication Plugin - ed25519
+Authentication Plugin - gssapi
+Authentication Plugin - named_pipe
+Authentication Plugin - pam
+Authentication Plugin - unix_socket
+Encryption Plugins - Options and System Variables
+Encryption Plugin - aws_key_management
+Encryption Plugin - file_key_management
+Password Validation Plugins - Options and System Variables
+Password Validation Plugin - simple_password_check
+Password Validation Plugin - cracklib_password_check
+Audit Plugins - Options and System Variables
+Audit Plugin - server_audit
+Audit Plugin - SQL_ERROR_LOG
+Audit Plugin - QUERY_RESPONSE_TIME_AUDIT
+Daemon Plugins - Options and System Variables
+Daemon Plugin - handlersocket
+Information Schema Plugins - Options and System Variables
+Information Schema Plugin - DISKS
+Information Schema Plugin - feedback
+Information Schema Plugin - LOCALES
+Information Schema Plugin - METADATA_LOCK_INFO
+Information Schema Plugin - QUERY_CACHE_INFO
+Information Schema Plugin - QUERY_RESPONSE_TIME
+Information Schema Plugin - user_variables
+Information Schema Plugin - WSREP_MEMBERSHIP
+Information Schema Plugin - WSREP_STATUS
+Replication Plugins - Options and System Variables
+Replication Plugin - rpl_semi_sync_master
+Replication Plugin - rpl_semi_sync_slave
+Default Values
+Was this helpful?
+Copy
+mariadbd --no-defaults --help --verbose

@@ -1,0 +1,120 @@
+Source: https://www.tinybird.com/docs/classic/get-data-in/table-functions/mysql
+
+Classic: MySQL table function · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+MySQL table function
+BETA
+¶
+Copy as MD
+The Tinybird
+mysql()
+table function is currently in private beta. If you're interested in early access, reach out to support.
+The Tinybird
+mysql()
+table function allows you to read data from your existing MySQL database into Tinybird, then schedule a regular copy pipe to orchestrate synchronization. You can load full tables, and every run performs a full replace on the data source.
+To use it, define a node using standard SQL and the
+mysql
+function keyword, then publish the node as a copy pipe that does a sync on every run. See
+Table functions
+for general information and tips.
+Setting secrets
+¶
+Table functions require authentication credentials (such as AWS keys) that must be stored securely. Tinybird provides different methods for managing secrets depending on the version you're using.
+Using the Variables API (Classic)
+¶
+In Tinybird Classic, you must set your credentials using the Environment Variables API:
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  --data-urlencode "name=my_username" \
+  --data-urlencode "value=mysql_user" \
+  https://<TB_HOST_URL>/v0/variables/
+For more details, see the
+Environment Variables API
+documentation.
+Using the CLI (Forward)
+¶
+In Tinybird Forward, you manage secrets using the
+tb secret
+command:
+tb secret set my_username mysql_user
+tb secret set my_password your_password
+For more details, see the
+tb secret
+command documentation.
+Once you've set up your secrets, you can reference them in your SQL with the
+tb_secret
+function as shown in the Syntax section below.
+Syntax
+¶
+Create a new pipe node. Call the
+mysql
+table function and pass the hostname and port, database, table, user, and password:
+Example query logic
+SELECT *
+FROM mysql(
+  'aws-0-eu-central-1.TODO.com:3866',
+  'mysql',
+  'orders',
+  {{tb_secret('my_username')}},
+  {{tb_secret('my_password')}}
+)
+Publish this node as a copy pipe. You can choose to append only new data or replace all data.
+Type support and inference
+¶
+Here's a detailed conversion table:
+MySQL data type
+Tinybird data type
+UNSIGNED TINYINT
+UInt8
+TINYINT
+Int8
+UNSIGNED SMALLINT
+UInt16
+SMALLINT
+Int16
+UNSIGNED INT, UNSIGNED MEDIUMINT
+UInt32
+INT, MEDIUMINT
+Int32
+UNSIGNED BIGINT
+UInt64
+BIGINT
+Int64
+FLOAT
+Float32
+DOUBLE
+Float64
+DATE
+Date
+DATETIME, TIMESTAMP
+DateTime
+BINARY
+FixedString
+Considerations
+¶
+The following considerations apply to the
+mysql()
+table function:
+Tinybird doesn't support all MySQL types directly, so some types are mapped to String, which is the most flexible type for arbitrary data.
+Time zone support in Tinybird's
+DateTime
+can be managed via additional functions or by ensuring consistent storage and retrieval time zones.
+See also
+¶
+Table functions
+Updated
+3 weeks ago
+On this page
+MySQL table function
+BETA
+Setting secrets
+Using the Variables API (Classic)
+Using the CLI (Forward)
+Syntax
+Type support and inference
+Considerations
+See also
+classic
+Ask AI

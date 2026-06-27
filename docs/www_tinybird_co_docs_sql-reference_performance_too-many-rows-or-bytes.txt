@@ -1,0 +1,161 @@
+Source: https://www.tinybird.com/docs/sql-reference/performance/too-many-rows-or-bytes
+
+Too many rows or bytes troubleshooting · Tinybird Docs
+Sign In
+Sign Up
+Too many rows or bytes troubleshooting
+¶
+Copy as MD
+Common issues and solutions for TOO_MANY_ROWS_OR_BYTES errors in ClickHouse and Tinybird.
+ClickHouse SQL Reference
+: The examples in this page use standard ClickHouse SQL syntax and settings. Some statements like
+CREATE TABLE
+,
+CREATE MATERIALIZED VIEW
+,
+INSERT
+,
+SET
+, and
+SETTINGS
+clauses are not supported in Tinybird. For Tinybird-specific guidance, see the
+Tinybird optimization guides
+.
+Found an issue with this documentation? Report it via the chat widget in the bottom right corner.
+Common causes
+¶
+Large result sets
+¶
+Issue
+: Queries returning more data than allowed
+Solution
+: Use LIMIT and proper filtering
+-- Add limits to prevent large results
+SELECT * FROM events
+WHERE date >= today() - 7
+LIMIT 10000
+Missing WHERE clauses
+¶
+Issue
+: Queries without proper filters, causing full table scans
+Solution
+: Add selective filters using sorting key columns
+-- Add specific filters using sorting key columns
+SELECT * FROM events
+WHERE user_id = 123 AND date >= '2023-01-01'
+Ensure your filters use columns from the sorting key (
+ENGINE_SORTING_KEY
+) to enable efficient index usage and reduce data scanned.
+Memory management
+¶
+Streaming queries
+¶
+Issue
+: Large datasets consuming too much memory
+Solution
+: Filter data and use LIMIT to reduce memory usage
+-- Filter data and limit results to reduce memory usage
+SELECT * FROM events
+WHERE date >= today() - 30
+LIMIT 10000
+Chunked processing
+¶
+Issue
+: Processing entire datasets at once
+Solution
+: Process data in chunks
+-- Process by date ranges
+SELECT * FROM events
+WHERE date BETWEEN '2023-01-01' AND '2023-01-07'
+Query optimization
+¶
+Using aggregations
+¶
+Issue
+: Returning raw data instead of summaries
+Solution
+: Use aggregations to reduce result size, or pre-aggregate with Materialized Views
+-- Aggregate at query time
+SELECT
+  user_id,
+  count() as event_count,
+  sum(value) as total_value
+FROM events
+WHERE date >= today() - 7
+GROUP BY user_id
+For better performance, consider pre-aggregating using Materialized Views to shift computation to ingestion time.
+Column selection
+¶
+Issue
+: Selecting unnecessary columns
+Solution
+: Select only needed columns
+-- Select specific columns only
+SELECT user_id, event_type, timestamp
+FROM events
+WHERE date = today()
+Configuration solutions
+¶
+Adjusting limits
+¶
+Issue
+: Default limits too restrictive
+Solution
+: Use LIMIT in queries to control result size
+-- Use LIMIT to control result size
+SELECT * FROM events
+WHERE date >= today() - 7
+LIMIT 1000000
+Using sampling
+¶
+Issue
+: Need to analyze large datasets
+Solution
+: Use sampling for analysis
+-- Use sampling for large datasets
+SELECT * FROM events SAMPLE 0.1
+WHERE date >= today() - 30
+Best practices
+¶
+Always use LIMIT
+- Prevent unexpectedly large results
+Add selective filters
+- Filter data early using sorting key columns
+Use aggregations
+- Summarize data instead of returning raw rows, or use Materialized Views
+Select specific columns
+- Avoid SELECT * on large tables
+Use LIMIT
+- Always use LIMIT to control result size and prevent memory issues
+Filter by sorting key
+- Ensure filters use columns from ENGINE_SORTING_KEY
+Related documentation
+¶
+SQL best practices
+- Source of truth for query optimization
+Fix common mistakes
+- Common optimization patterns
+Query optimization
+Performance monitoring
+Common error patterns
+Updated
+4 weeks ago
+On this page
+Too many rows or bytes troubleshooting
+Common causes
+Large result sets
+Missing WHERE clauses
+Memory management
+Streaming queries
+Chunked processing
+Query optimization
+Using aggregations
+Column selection
+Configuration solutions
+Adjusting limits
+Using sampling
+Best practices
+Related documentation
+forward
+classic
+Ask AI

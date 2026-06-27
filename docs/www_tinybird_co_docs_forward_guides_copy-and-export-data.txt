@@ -1,0 +1,32 @@
+Source: https://www.tinybird.com/docs/forward/guides/copy-and-export-data
+
+Copy and export data · Tinybird Docs
+Sign In
+Sign Up
+Copy and export data
+¶
+Copy as MD
+Use this guide to choose between moving data inside Tinybird and exporting query results to external systems.
+To move data between Tinybird Data Sources, use
+Copy Pipes
+.
+To export query results to external systems, use
+Sinks
+.
+For destination-specific setup, see
+Kafka Sink
+,
+S3 Sink
+, and
+GCS Sink
+.
+See
+Copy and export data
+for the full workflow.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Copy and export data
+forward
+Ask AI

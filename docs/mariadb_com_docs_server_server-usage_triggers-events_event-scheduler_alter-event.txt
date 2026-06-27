@@ -1,0 +1,134 @@
+Source: https://mariadb.com/docs/server/server-usage/triggers-events/event-scheduler/alter-event
+
+ALTER EVENT | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Triggers & Events
+Event Scheduler
+Events Overview
+ALTER EVENT
+Event Limitations
+Triggers
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+ALTER EVENT
+Learn how to modify the characteristics of an existing event, such as its schedule, body, or enabled status, without dropping and recreating it.
+Modifies one or more characteristics of an existing event.
+Syntax
+Copy
+ALTER
+[DEFINER = { user | CURRENT_USER }]
+EVENT event_name
+[ON SCHEDULE schedule]
+[ON COMPLETION [NOT] PRESERVE]
+[RENAME TO new_event_name]
+[ENABLE | DISABLE | DISABLE ON SLAVE]
+[COMMENT 'comment']
+[DO sql_statement]
+Description
+The
+ALTER EVENT
+statement is used to change one or more of the characteristics of an existing
+event
+without the need to drop and recreate it. The syntax for each of the
+DEFINER
+,
+ON SCHEDULE
+,
+ON COMPLETION
+,
+COMMENT
+,
+ENABLE
+/
+DISABLE
+, and
+DO
+clauses is exactly the same as when used with
+CREATE EVENT
+.
+This statement requires the
+EVENT
+privilege. When a user executes a successful
+ALTER EVENT
+statement, that user becomes the definer for the affected event.
+(In MySQL 5.1.11 and earlier, an event could be altered only by its definer, or by a user having the
+SUPER
+privilege.)
+ALTER EVENT
+works only with an existing event:
+Copy
+ALTER
+EVENT
+no_such_event
+ON
+SCHEDULE EVERY
+'
+2:3
+'
+DAY_HOUR;
+ERROR
+1539
+(HY000): Unknown
+event
+'
+no_such_event
+'
+Examples
+See Also
+Events Overview
+CREATE EVENT
+SHOW CREATE EVENT
+DROP EVENT
+This page is licensed: GPLv2, originally from
+fill_help_tables.sql
+spinner
+Previous
+Events Overview
+Next
+Event Limitations
+Last updated
+22 days ago
+Was this helpful?
+Syntax
+Description
+Examples
+See Also
+Was this helpful?
+Copy
+ALTER EVENT myevent
+ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 2 HOUR
+DO
+UPDATE myschema.mytable SET mycol = mycol + 1;

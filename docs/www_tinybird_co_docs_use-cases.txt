@@ -1,0 +1,62 @@
+Source: https://www.tinybird.com/docs/use-cases
+
+Use Cases · Tinybird Docs
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+Use Case Hub
+¶
+Copy as MD
+Tinybird is the data platform for building real-time, user-facing analytics.
+This Use Case Hub provides centralized resources to help you understand and build specific solutions for your project.
+Examples
+¶
+The top 5 most popular ways people are using Tinybird to build user-facing analytics features:
+Want to provide a real-time, beautiful dashboard for your users? -->
+User-facing dashboards
+.
+Need to build a change data capture (CDC) system for your database? -->
+Real-time Change Data Capture (CDC)
+.
+Looking to level up your game with leaderboards, match-making, and personalized in-game ads? -->
+Gaming analytics
+.
+Want to build a way to monitor and analyze your web traffic? -->
+Web analytics
+.
+Already know that the secret to amazing UX in your app is personalization? -->
+Real-time personalization
+.
+Need a way for your content creators to analyze their content performance? -->
+User-generated content (UGC) analytics
+.
+Need to build a content recommendation system? -->
+Content recommendation systems
+.
+Want to learn how to build a vector search system using real-time data? -->
+Vector search
+.
+Explore the nav for more.
+Not sure where to start?
+¶
+Read the
+Tinybird "Definitive Guide To Real-Time User-Facing Analytics" blog post
+.
+Customer stories
+¶
+Learn how Tinybird customers have built user-facing analytics.
+Audiense evolves its social media timeline with Tinybird
+Canva designs brilliant user experiences with Tinybird
+Dub shortens time to market for user-facing analytics with Tinybird
+Factorial builds real-time data products with Tinybird
+FanDuel harnesses the power of real-time data using Tinybird
+Genially uses Tinybird to display real-time content interaction metrics for their customers
+Smartme Analytics builds complete consumer insights with Tinybird
+Vercel uses Tinybird to help developers ship code faster
+Updated
+2 years ago
+forward
+classic
+Ask AI

@@ -1,0 +1,120 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/installing-mariadb/binary-packages/rpm/mariadb-for-directadmin-using-rpms
+
+MariaDB for DirectAdmin Using RPMs | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+MariaDB ID Sign Up
+MariaDB Binary Packages
+GPG
+Installing MariaDB .deb Files
+Installing MariaDB RPM Files
+About the MariaDB RPM Files
+Installing MariaDB with yum/dnf
+Installing MariaDB with zypper
+Checking MariaDB RPM Package Signatures
+Installing MariaDB With the rpm Tool
+MariaDB for DirectAdmin Using RPMs
+MariaDB Installation via RPMs on CentOS 7
+Troubleshooting MariaDB Installs on RHEL / CentOS
+Why Source RPMs (SRPMs) Aren't Packaged For Some Platforms
+Installing MariaDB Alongside MySQL
+Installing MariaDB Binary Tarballs
+Installing MariaDB MSI Packages on Windows
+Installing MariaDB on macOS
+Installing MariaDB on macOS (PKG)
+Installing MariaDB Windows ZIP Packages
+Deploy with Package Tarballs
+Deploy with Local Package Repository Mirrors
+Installing System Tables
+Troubleshooting Installation Issues
+Installing MariaDB on IBM Cloud
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+MariaDB for DirectAdmin Using RPMs
+Specific instructions for installing MariaDB RPMs on servers running the DirectAdmin control panel, including necessary configuration edits to prevent conflicts.
+If you are using DirectAdmin and you encounter any issues with
+Installing MariaDB with YUM
+, then the directions below may help. The process is very straightforward.
+Installing with YUM is preferable to installing the MariaDB RPM packages manually, so only do this if you are having issues such as:
+Starting httpd:
+Copy
+httpd:
+Syntax error on line 18 of /etc/httpd/conf/httpd.conf:
+Syntax error on line 1 of /etc/httpd/conf/extra/httpd-phpmodules.conf:
+Cannot load /usr/lib/apache/libphp5.so into server:
+libmysqlclient.so.18: cannot open shared object file: No such file or directory
+Or:
+Copy
+Starting httpd:
+httpd:
+Syntax error on line 18 of /etc/httpd/conf/httpd.conf:
+Syntax error on line 1 of /etc/httpd/conf/extra/httpd-phpmodules.conf:
+Cannot load /usr/lib/apache/libphp5.so into server:
+/usr/lib/apache/libphp5.so: undefined symbol: client_errors
+RPM Installation
+To install the RPMs, there is a quick and easy guide to
+Installing MariaDB with the RPM Tool
+. Follow the instructions there.
+Necessary Edits
+We do not want DirectAdmin's custombuild to remove/overwrite our MariaDB
+installation whenever an update is performed. To rectify this, disable automatic MySQL installation.
+Edit
+/usr/local/directadmin/custombuild/options.conf
+and replace
+mysql_inst=yes
+with
+mysql_inst=no
+When MariaDB is installed manually (i.e. not using YUM), updates are not
+automatic. You will need to update the RPMs yourself.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Installing MariaDB With the rpm Tool
+Next
+MariaDB Installation via RPMs on CentOS 7
+Last updated
+6 months ago
+Was this helpful?
+RPM Installation
+Necessary Edits
+Was this helpful?
+Copy
+sudo sed -i 's/^mysql_inst=yes/mysql_inst=no/' /usr/local/directadmin/custombuild/options.conf

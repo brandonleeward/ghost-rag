@@ -1,0 +1,76 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-endpoint
+
+tb endpoint · Tinybird Docs
+Sign In
+Sign Up
+tb endpoint
+¶
+Copy as MD
+Manage endpoints. Global options apply to this command. See
+Global options
+.
+The following subcommands are available:
+Subcommand
+Description
+data PIPE
+Prints data returned by the endpoint.
+ls [OPTIONS]
+Lists all the endpoints.
+stats [OPTIONS] PIPE
+Prints stats of the last 7 days for an endpoint.
+token PIPE
+Retrieves a token to call an endpoint.
+url PIPE
+Prints the URL of an endpoint.
+tb endpoint data
+¶
+Prints data returned by the endpoint.
+Option
+Description
+--query TEXT
+Runs a query over endpoint results.
+--format [json|csv]
+Returns the results in the specified format.
+tb endpoint ls
+¶
+Lists all the endpoints.
+Option
+Description
+--match TEXT
+Retrieves any resource matching the pattern. For example,
+--match _test
+.
+--format [json]
+Returns the results in the specified format.
+tb endpoint stats
+¶
+Prints stats of the last 7 days for an endpoint.
+Option
+Description
+--format [json]
+Returns the results in the specified format.
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✓ Yes (default)
+Manages endpoints locally.
+--cloud
+✓ Yes
+Manages endpoints in Tinybird Cloud.
+--branch=BRANCH_NAME
+✓ Yes
+Manages endpoints in a branch.
+Updated
+6 months ago
+Looking for Classic docs?
+On this page
+tb endpoint
+tb endpoint data
+tb endpoint ls
+tb endpoint stats
+Environment support
+forward
+Ask AI

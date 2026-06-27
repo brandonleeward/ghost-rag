@@ -1,0 +1,140 @@
+Source: https://www.tinybird.com/docs/forward/ingest-data/connectors/kafka/guides/cicd-version-control
+
+Kafka connector CI/CD and version control · Tinybird Docs
+Sign In
+Sign Up
+CI/CD and version control
+¶
+Copy as MD
+This guide covers managing Kafka connector configurations across different environments (local, staging, production) using secrets.
+Managing secrets across environments
+¶
+Local development
+¶
+Use default values in
+tb_secret()
+for local development:
+KAFKA_BOOTSTRAP_SERVERS {{ tb_secret("KAFKA_BOOTSTRAP_SERVERS", "kafka:29092") }}
+KAFKA_SECURITY_PROTOCOL {{ tb_secret("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT") }}
+KAFKA_KEY {{ tb_secret("KAFKA_KEY", "key") }}
+KAFKA_SECRET {{ tb_secret("KAFKA_SECRET", "secret") }}
+Local
+: Uses the default values (for example,
+kafka:29092
+for local Docker Kafka)
+Cloud
+: Uses the secret values set in each Tinybird workspace
+Staging and production
+¶
+Set secrets in each workspace using the
+--token
+flag:
+# Staging workspace
+tb --cloud --host <STAGING_HOST> --token <STAGING_TOKEN> secret set KAFKA_BOOTSTRAP_SERVERS "staging-kafka:9092"
+tb --cloud --host <STAGING_HOST> --token <STAGING_TOKEN> secret set KAFKA_KEY "staging-key"
+tb --cloud --host <STAGING_HOST> --token <STAGING_TOKEN> secret set KAFKA_SECRET "staging-secret"
+
+# Production workspace
+tb --cloud --host <PROD_HOST> --token <PROD_TOKEN> secret set KAFKA_BOOTSTRAP_SERVERS "prod-kafka:9092"
+tb --cloud --host <PROD_HOST> --token <PROD_TOKEN> secret set KAFKA_KEY "prod-key"
+tb --cloud --host <PROD_HOST> --token <PROD_TOKEN> secret set KAFKA_SECRET "prod-secret"
+The same Connection and Data Source files work across all environments - secrets handle the differences.
+CI/CD integration
+¶
+GitHub Actions example
+¶
+name: Deploy to Tinybird
+
+on:
+  push:
+    branches: [main]
+
+env:
+  TINYBIRD_HOST: ${{ secrets.TINYBIRD_HOST }}
+  TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Tinybird CLI
+        run: |
+          curl https://tinybird.co | sh
+
+      - name: Test connection
+        run: |
+          tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} connection data <connection_name>
+
+      - name: Deploy
+        run: |
+          tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deploy
+Secrets setup
+: Set secrets in your Tinybird workspace before running the pipeline. Secrets are configured once per workspace, not on every deployment. See
+Managing secrets across environments
+for instructions.
+GitLab CI example
+¶
+deploy:
+  image: ubuntu:latest
+  before_script:
+    - apt update && apt install -y curl
+    - curl https://tinybird.co | sh
+    - export PATH="$HOME/.local/bin:$PATH"
+  script:
+    - tb --cloud --host $TINYBIRD_HOST --token $TINYBIRD_TOKEN connection data <connection_name>
+    - tb --cloud --host $TINYBIRD_HOST --token $TINYBIRD_TOKEN deploy
+  only:
+    - main
+Consumer group ID management
+¶
+Always use different consumer group IDs for each environment to avoid conflicts:
+KAFKA_GROUP_ID {{ tb_secret("KAFKA_GROUP_ID", "dev-events-group") }}
+Set different group IDs in each workspace:
+Local: Uses default
+"dev-events-group"
+Staging: Set
+tb --cloud --host <STAGING_HOST> --token <STAGING_TOKEN> secret set KAFKA_GROUP_ID "staging-events-group"
+Production: Set
+tb --cloud --host <PROD_HOST> --token <PROD_TOKEN> secret set KAFKA_GROUP_ID "prod-events-group"
+Version control best practices
+¶
+What to commit
+¶
+Commit:
+Connection file structure (with
+tb_secret()
+references, not actual secret values)
+Data Source schemas
+Pipe definitions
+Don't commit:
+Secret values
+API keys
+Passwords
+Production credentials
+Related documentation
+¶
+Kafka connector documentation
+- Main setup and configuration guide
+Development workflow
+- General development and deployment guide
+Troubleshooting guide
+- Resolving deployment issues
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+CI/CD and version control
+Managing secrets across environments
+Local development
+Staging and production
+CI/CD integration
+GitHub Actions example
+GitLab CI example
+Consumer group ID management
+Version control best practices
+What to commit
+Related documentation
+forward
+Ask AI

@@ -1,0 +1,272 @@
+Source: https://www.tinybird.com/docs/forward/development-workflow/examples
+
+Development workflow examples · Tinybird Docs
+Sign In
+Sign Up
+Development workflow examples
+¶
+Copy as MD
+These examples follow the order you usually use in a project: build first, test locally or in a branch, validate in CI, then deploy.
+Use the command set that matches your project format.
+Task
+Tinybird CLI
+TypeScript SDK
+Python SDK
+Build or validate
+tb build
+npx tinybird build
+uv run tinybird build
+Preview a pull request
+git checkout -b ... && tb build
+npx tinybird preview --check
+uv run tinybird preview --check
+Check production deployment
+tb --cloud deploy --check
+npx tinybird deploy --check
+uv run tinybird deploy --check
+Deploy to production
+tb --cloud deploy
+npx tinybird deploy
+uv run tinybird deploy
+Local workflow
+¶
+Use Local for fast checks with fixture data. See
+Tinybird Local
+for installation, Docker settings, persistence, local APIs, and local Tokens. Use a
+Cloud Branch
+when you need production-like data or connector behavior.
+Build the project
+¶
+Run a build before testing changes. It catches invalid resource definitions and dependency issues.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb build
+For Tinybird CLI projects,
+tb build
+loads matching fixtures automatically. For example,
+fixtures/events.ndjson
+is loaded into
+datasources/events.datasource
+. See
+Test your project
+.
+Change an Endpoint and rebuild
+¶
+Edit the resource, then rebuild the project.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb local start --daemon
+tb build
+datasources/events.datasource
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `user_id` String `json:$.user_id`,
+    `event` LowCardinality(String) `json:$.event`,
+    `plan` Nullable(String) `json:$.plan`
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "timestamp"
+endpoints/events_by_plan.pipe
+NODE endpoint
+SQL >
+    SELECT
+        plan,
+        count() AS events
+    FROM events
+    WHERE timestamp >= now() - INTERVAL 7 DAY
+    GROUP BY plan
+    ORDER BY events DESC
+
+TYPE ENDPOINT
+Call the local Endpoint after the build finishes:
+curl -H "Authorization: Bearer <local-token>" \
+  "http://localhost:7181/v0/pipes/events_by_plan.json"
+Branch workflow
+¶
+Branches are short-lived Cloud environments. Use them to test changes without changing production.
+Develop in a Cloud Branch
+¶
+For everyday branch development, create a Git branch and build. Tinybird creates or reuses a Cloud Branch with the same name as the Git branch.
+git checkout -b add-plan-to-events
+tb build
+Rebuild after editing resources:
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb build
+Query the branch after the build finishes:
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb --branch=add-plan-to-events sql "SELECT plan, count() FROM events GROUP BY plan"
+When you need production-like data,
+tb build
+attaches the latest production partition automatically when
+dev_mode=branch
+. You can also create the branch explicitly with
+--last-partition
+before building:
+tb branch create add-plan-to-events --last-partition
+tb --branch=add-plan-to-events build
+For connector Data Sources, create the branch with
+--with-connections
+and start or sample the connector when you are ready to test. See
+Cloud Branches
+.
+Pull requests and CI
+¶
+Run the same checks in CI that you run locally. For pull requests, create a preview branch so reviewers and preview apps can query the changed Tinybird project.
+Preview a pull request
+¶
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb branch create tmp_ci_my_feature --last-partition
+tb --branch=tmp_ci_my_feature build
+Use
+preview
+in GitHub Actions, GitLab CI, Vercel, or another CI system to create an ephemeral branch for each pull request. See
+Preview deployments
+.
+Validate before deploying
+¶
+Use deployment checks for changes that affect Data Source schemas, Materialized Views, engine settings, or connector configuration.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb build
+tb test run
+tb --cloud deploy --check
+Data Source evolution
+¶
+For the migration rules behind Data Source changes, read
+Evolve Data Sources
+. The examples below show the most common cases.
+Rename a column with FORWARD_QUERY
+¶
+Column renames need an explicit mapping. Tinybird sees a removed column and a new column. Without a mapping, the new column gets a default value.
+Update the Data Source definition and run a deployment check before merging. With the Tinybird CLI, add
+FORWARD_QUERY
+to the
+.datasource
+file. In SDK projects, update the schema in code and review the generated deployment plan. If the plan requires a forward query, use the expression from the Data Source evolution guide as the source of truth.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+datasources/events.datasource
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `account_id` String `json:$.account_id`,
+    `event` LowCardinality(String) `json:$.event`
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "timestamp"
+
+FORWARD_QUERY >
+    SELECT timestamp, user_id AS account_id, event
+The
+FORWARD_QUERY
+runs against the live Data Source during deployment. It must include the
+SELECT
+list only. Do not include
+FROM
+or
+WHERE
+.
+Add a nullable column with ALTER
+¶
+Adding a nullable column is usually an automatic
+ALTER
+during deployment. The change is applied when the deployment is promoted to live, not while it is in staging. See
+Automatic ALTER operations
+.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+datasources/events.datasource
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `user_id` String `json:$.user_id`,
+    `event` LowCardinality(String) `json:$.event`,
+    `plan` Nullable(String) `json:$.plan`
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "timestamp"
+Run a deployment check before merging the change:
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb --cloud deploy --check
+Change a type with safe conversion
+¶
+If existing values might not cast cleanly, make the conversion explicit. This example changes
+session_id
+from
+String
+to
+UUID
+and uses a default UUID when the old value is invalid.
+Tinybird CLI
+TypeScript SDK
+Python SDK
+datasources/sessions.datasource
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `session_id` UUID `json:$.session_id`,
+    `user_id` String `json:$.user_id`
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "timestamp"
+
+FORWARD_QUERY >
+    SELECT
+        timestamp,
+        accurateCastOrDefault(session_id, 'UUID') AS session_id,
+        user_id
+After the deployment is live and you no longer need the migration expression, remove the
+FORWARD_QUERY
+in a follow-up change. Leaving an old
+FORWARD_QUERY
+can overwrite values in a later backfill.
+Deployments
+¶
+After the checks pass, deploy the project or create a staging deployment for manual promotion.
+Deploy to production
+¶
+Tinybird CLI
+TypeScript SDK
+Python SDK
+tb --cloud deploy
+Promote a staging deployment
+¶
+If you prefer explicit staging and promotion, create a staging deployment, inspect it, then promote it:
+tb --cloud deployment create --wait
+tb --staging --cloud endpoint ls
+tb --cloud deployment promote
+For regular production changes, put the same checks in CI/CD. See
+CI/CD
+.
+Updated
+3 weeks ago
+Looking for Classic docs?
+On this page
+Development workflow examples
+Local workflow
+Build the project
+Change an Endpoint and rebuild
+Branch workflow
+Develop in a Cloud Branch
+Pull requests and CI
+Preview a pull request
+Validate before deploying
+Data Source evolution
+Rename a column with FORWARD_QUERY
+Add a nullable column with ALTER
+Change a type with safe conversion
+Deployments
+Deploy to production
+Promote a staging deployment
+forward
+Ask AI

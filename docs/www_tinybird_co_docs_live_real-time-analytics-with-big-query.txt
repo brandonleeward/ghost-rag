@@ -1,0 +1,32 @@
+Source: https://www.tinybird.com/docs/live/real-time-analytics-with-big-query
+
+Real-time analytics with BigQuery · Tinybird
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+← Back to Live
+Real-time analytics with BigQuery
+Data Warehouses have come a long way, but they're not built for real-time analytics, and many data teams struggle to make it happen. Using Tinybird you can connect to Google BigQuery to join your data sets with real-time data streams, analyze & transform using SQL, and publish low-latency, high-concurrency HTTP APIs.
+In this live coding session, you'll learn how to.
+Sync tables from BigQuery into Tinybird using the Tinybird BigQuery Connector
+Ingest streaming data into Tinybird using the Events API
+Join & enrich data from your streams with data from your BigQuery tables
+Publish the results of your queries as low-latency HTTP APIs to power an application
+Have questions?
+Join us on Slack
+Start building
+Live coding session
+When:
+March 8, 2023 at 16:00 UTC
+Duration:
+1 hour
+Who:
+Alasdair Brown
+Developer Advocate
+David Margulies
+Sales Engineer
+Start building
+Ask AI
+Search...

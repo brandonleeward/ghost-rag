@@ -1,0 +1,157 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions-troubleshooting/join-keys-and-aliases
+
+Join keys and aliases troubleshooting · Tinybird Docs
+Sign In
+Sign Up
+Join keys and aliases troubleshooting
+¶
+Copy as MD
+Common issues and solutions when working with join keys and aliases in ClickHouse and Tinybird.
+Common errors
+¶
+INVALID_JOIN_ON_EXPRESSION
+¶
+Error
+:
+INVALID_JOIN_ON_EXPRESSION: Invalid JOIN ON expression
+Cause
+: Incorrect join condition syntax or incompatible join keys
+Solution
+: Use proper join syntax
+-- Wrong
+SELECT * FROM table1 JOIN table2 ON table1.id = table2.id
+
+-- Correct
+SELECT * FROM table1 JOIN table2 ON table1.id = table2.id
+AMBIGUOUS_COLUMN_NAME
+¶
+Error
+:
+AMBIGUOUS_COLUMN_NAME: Column 'id' is ambiguous
+Cause
+: Same column name in multiple joined tables
+Solution
+: Use table aliases or fully qualified names
+-- Wrong
+SELECT id, name FROM table1 JOIN table2 ON table1.id = table2.id
+
+-- Correct
+SELECT table1.id, table1.name, table2.name as table2_name
+FROM table1 JOIN table2 ON table1.id = table2.id
+Type edge cases
+¶
+Joining different data types
+¶
+Issue
+: Joining columns with different types
+Solution
+: Cast to common type
+-- Cast to same type for join
+SELECT * FROM table1
+JOIN table2 ON toString(table1.id) = table2.id_string
+Nullable join keys
+¶
+Issue
+: Joining on nullable columns
+Solution
+: Handle nulls explicitly
+-- Handle nullable join keys
+SELECT * FROM table1
+JOIN table2 ON table1.id = table2.id
+WHERE table1.id IS NOT NULL AND table2.id IS NOT NULL
+Usage patterns that break Pipes
+¶
+Complex join conditions
+¶
+Issue
+: Complex join conditions in Pipes
+Solution
+: Simplify join logic
+-- Instead of complex conditions
+SELECT * FROM table1
+JOIN table2 ON table1.id = table2.id AND table1.date = table2.date
+
+-- Use simple joins and filter after
+SELECT * FROM table1
+JOIN table2 ON table1.id = table2.id
+WHERE table1.date = table2.date
+Multiple table joins
+¶
+Issue
+: Joining many tables in single query
+Solution
+: Break into smaller joins
+-- Use CTEs for complex joins
+WITH joined_ab AS (
+  SELECT * FROM table_a JOIN table_b ON table_a.id = table_b.id
+)
+SELECT * FROM joined_ab JOIN table_c ON joined_ab.id = table_c.id
+Sample fixes
+¶
+Fixing ambiguous column names
+¶
+-- Problem: Ambiguous columns
+SELECT id, name, value FROM table1 JOIN table2 ON table1.id = table2.id
+
+-- Solution: Use aliases
+SELECT
+  table1.id as table1_id,
+  table1.name as table1_name,
+  table2.name as table2_name,
+  table2.value as table2_value
+FROM table1 JOIN table2 ON table1.id = table2.id
+Working with table aliases
+¶
+-- Problem: Long table names
+SELECT * FROM very_long_table_name_1 JOIN very_long_table_name_2 ON ...
+
+-- Solution: Use aliases
+SELECT * FROM very_long_table_name_1 t1
+JOIN very_long_table_name_2 t2 ON t1.id = t2.id
+Handling join key mismatches
+¶
+-- Problem: Different key types
+SELECT * FROM table1 JOIN table2 ON table1.id = table2.id
+
+-- Solution: Convert types
+SELECT * FROM table1
+JOIN table2 ON toString(table1.id) = table2.id_string
+Best practices
+¶
+Use table aliases
+- Make queries more readable
+Qualify column names
+- Avoid ambiguous column errors
+Check data types
+- Ensure join keys have compatible types
+Handle nulls
+- Be explicit about nullable join keys
+Simplify join conditions
+- Keep joins simple in Pipes
+Related documentation
+¶
+JOIN operations
+Data types
+Common error patterns
+Updated
+7 months ago
+On this page
+Join keys and aliases troubleshooting
+Common errors
+INVALID_JOIN_ON_EXPRESSION
+AMBIGUOUS_COLUMN_NAME
+Type edge cases
+Joining different data types
+Nullable join keys
+Usage patterns that break Pipes
+Complex join conditions
+Multiple table joins
+Sample fixes
+Fixing ambiguous column names
+Working with table aliases
+Handling join key mismatches
+Best practices
+Related documentation
+forward
+classic
+Ask AI

@@ -1,0 +1,407 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/QUERY_WAS_CANCELLED_BY_CLIENT
+
+QUERY_WAS_CANCELLED_BY_CLIENT ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+QUERY_WAS_CANCELLED_BY_CLIENT ClickHouse error
+¶
+Copy as MD
+This error occurs when a client application cancels a running query. It's common when clients implement timeout mechanisms, user cancellation, or connection management.
+The
+QUERY_WAS_CANCELLED_BY_CLIENT
+error in ClickHouse (and Tinybird) happens when a client application explicitly cancels a running query. This is different from system-initiated cancellations and typically occurs when clients implement timeout mechanisms, user cancellation requests, connection management, or when the client application terminates unexpectedly.
+What causes this error
+¶
+You'll typically see it when:
+Client application implements query timeout
+User manually cancels a query through the client
+Client connection is closed unexpectedly
+Application implements automatic cancellation for long-running queries
+Client-side resource constraints force cancellation
+Network issues cause client disconnection
+Application shutdown while queries are running
+Client implements retry logic that cancels previous attempts
+This error indicates client-side cancellation rather than server-side issues. Check your application's query management logic.
+Example errors
+¶
+Fails: client timeout implementation
+SELECT COUNT(DISTINCT user_id) FROM events
+WHERE timestamp >= '2020-01-01'
+-- Error: Query was cancelled by client (timeout)
+Fails: user cancellation
+-- User cancels query in client application
+SELECT * FROM large_table ORDER BY timestamp
+-- Error: Query was cancelled by client
+Fails: connection management
+-- Client closes connection while query is running
+SELECT
+    user_id,
+    COUNT(*) as event_count
+FROM events
+GROUP BY user_id
+-- Error: Query was cancelled by client
+Fails: application shutdown
+-- Application shuts down during query execution
+SELECT * FROM events WHERE timestamp > '2024-01-01'
+-- Error: Query was cancelled by client
+How to fix it
+¶
+Check client timeout settings
+¶
+Verify client-side timeout configurations:
+Check client settings
+-- In your client application, check timeout settings
+-- Example for Python clickhouse-driver:
+-- client = Client(host='host', port=9000, settings={'max_execution_time': 300})
+Review connection management
+¶
+Ensure proper connection handling:
+Connection management
+-- Implement proper connection handling in your application
+-- Example pseudo-code:
+--
+-- try:
+--     with get_connection() as conn:
+--         result = conn.execute(query)
+--         return result
+-- except ConnectionError:
+--     # Handle connection issues
+--     pass
+Implement proper error handling
+¶
+Add cancellation handling to your application:
+Error handling
+-- In your application, handle cancellation gracefully
+-- Example pseudo-code:
+--
+-- try:
+--     result = execute_query(query)
+--     return result
+-- except QueryWasCancelledByClient:
+--     # Handle client cancellation
+--     logger.warning("Query cancelled by client")
+--     return None
+Check client application logs
+¶
+Review client-side logs for cancellation reasons:
+Client logging
+-- Enable detailed logging in your client application
+-- Example for Python:
+-- import logging
+-- logging.basicConfig(level=logging.DEBUG)
+Common patterns and solutions
+¶
+Client timeout management
+¶
+Implement proper timeout handling:
+Timeout configuration
+-- Set appropriate timeouts in your client
+-- Example for Python clickhouse-driver:
+from clickhouse_driver import Client
+
+client = Client(
+    host='your-host',
+    port=9000,
+    database='your_database',
+    settings={
+        'max_execution_time': 600,  -- 10 minutes
+        'max_memory_usage': 10000000000,  -- 10GB
+        'max_bytes_before_external_group_by': 1000000000  -- 1GB
+    }
+)
+Connection pooling
+¶
+Use connection pooling to manage connections:
+Connection pooling
+-- Implement connection pooling in your application
+-- Example pseudo-code:
+--
+-- class ConnectionPool:
+--     def __init__(self, max_connections=10):
+--         self.max_connections = max_connections
+--         self.connections = []
+--
+--     def get_connection(self):
+--         if self.connections:
+--             return self.connections.pop()
+--         return create_new_connection()
+--
+--     def return_connection(self, conn):
+--         if len(self.connections) < self.max_connections:
+--             self.connections.append(conn)
+--         else:
+--             conn.close()
+Query retry logic
+¶
+Implement retry mechanisms for cancelled queries:
+Retry logic
+-- Add retry logic for client cancellations
+-- Example pseudo-code:
+--
+-- max_retries = 3
+-- base_delay = 1 second
+--
+-- for attempt in range(max_retries):
+--     try:
+--         result = execute_query(query)
+--         return result
+--     except QueryWasCancelledByClient:
+--         if attempt < max_retries - 1:
+--             delay = base_delay * (2 ** attempt)
+--             time.sleep(delay)
+--             continue
+--         else:
+--             raise
+Graceful shutdown
+¶
+Handle application shutdown properly:
+Graceful shutdown
+-- Implement graceful shutdown in your application
+-- Example pseudo-code:
+--
+-- import signal
+--
+-- def shutdown_handler(signum, frame):
+--     # Cancel all running queries
+--     cancel_all_queries()
+--     # Close connections gracefully
+--     close_all_connections()
+--     sys.exit(0)
+--
+-- signal.signal(signal.SIGINT, shutdown_handler)
+-- signal.signal(signal.SIGTERM, shutdown_handler)
+Tinybird-specific notes
+¶
+In Tinybird, QUERY_WAS_CANCELLED_BY_CLIENT errors often occur when:
+API clients implement timeout mechanisms
+User cancels queries in the UI
+External applications close connections
+Network issues cause client disconnection
+Rate limiting forces client cancellation
+To debug in Tinybird:
+Check client timeout settings
+Review network connectivity
+Monitor API usage patterns
+Check for rate limiting issues
+In Tinybird, ensure your API clients have appropriate timeout settings and retry logic.
+Best practices
+¶
+Client configuration
+¶
+Set appropriate timeout values for different query types
+Implement proper connection pooling
+Use connection health checks
+Monitor client-side performance metrics
+Error handling
+¶
+Implement graceful cancellation handling
+Add retry logic with exponential backoff
+Log cancellation reasons for debugging
+Provide user feedback for cancelled operations
+Connection management
+¶
+Use connection pooling to reuse connections
+Implement connection health monitoring
+Handle connection failures gracefully
+Implement proper cleanup on shutdown
+Configuration options
+¶
+Client timeout settings
+¶
+Client timeout configuration
+-- Set various timeout parameters in your client
+-- Example for Python clickhouse-driver:
+client = Client(
+    host='host',
+    port=9000,
+    settings={
+        'max_execution_time': 300,  -- 5 minutes
+        'max_query_size': 1000000000,  -- 1GB
+        'max_memory_usage': 8000000000,  -- 8GB
+        'max_bytes_before_external_group_by': 1000000000  -- 1GB
+    }
+)
+Connection settings
+¶
+Connection configuration
+-- Configure connection parameters
+-- Example for Python clickhouse-driver:
+client = Client(
+    host='host',
+    port=9000,
+    database='database',
+    user='user',
+    password='password',
+    settings={
+        'connect_timeout': 10,  -- 10 seconds
+        'send_receive_timeout': 300,  -- 5 minutes
+        'sync_request_timeout': 300  -- 5 minutes
+    }
+)
+Query settings
+¶
+Query-specific settings
+-- Use settings for specific queries
+-- Example for Python:
+result = client.execute(
+    "SELECT * FROM large_table SETTINGS max_execution_time = 600",
+    settings={'max_execution_time': 600}
+)
+Alternative solutions
+¶
+Asynchronous query execution
+¶
+Use async patterns to avoid blocking:
+Async execution
+-- Use async/await patterns in your application
+-- Example pseudo-code:
+--
+-- import asyncio
+--
+-- async def execute_query_async(query):
+--     loop = asyncio.get_event_loop()
+--     return await loop.run_in_executor(None, execute_query, query)
+--
+-- async def main():
+--     tasks = []
+--     for query in queries:
+--         task = asyncio.create_task(execute_query_async(query))
+--         tasks.append(task)
+--
+--     results = await asyncio.gather(*tasks, return_exceptions=True)
+--     return results
+Query queuing
+¶
+Implement query queuing for better control:
+Query queue
+-- Implement query queuing in your application
+-- Example pseudo-code:
+--
+-- from queue import Queue
+-- import threading
+--
+-- class QueryQueue:
+--     def __init__(self):
+--         self.queue = Queue()
+--         self.worker_thread = threading.Thread(target=self._worker)
+--         self.worker_thread.start()
+--
+--     def _worker(self):
+--         while True:
+--             query = self.queue.get()
+--             if query is None:
+--                 break
+--             try:
+--                 result = execute_query(query)
+--                 query.set_result(result)
+--             except Exception as e:
+--                 query.set_exception(e)
+--             finally:
+--                 self.queue.task_done()
+Health monitoring
+¶
+Implement health checks for connections:
+Health monitoring
+-- Add health checks to your connection management
+-- Example pseudo-code:
+--
+-- def check_connection_health(connection):
+--     try:
+--         # Simple health check query
+--         connection.execute("SELECT 1")
+--         return True
+--     except Exception:
+--         return False
+--
+-- def get_healthy_connection():
+--     for conn in connection_pool:
+--         if check_connection_health(conn):
+--             return conn
+--     return create_new_connection()
+Monitoring and prevention
+¶
+Client performance tracking
+¶
+Performance monitoring
+-- Track client-side performance metrics
+-- Example pseudo-code:
+--
+-- import time
+--
+-- def execute_query_with_monitoring(query):
+--     start_time = time.time()
+--     try:
+--         result = execute_query(query)
+--         duration = time.time() - start_time
+--         log_metric('query_success', duration)
+--         return result
+--     except QueryWasCancelledByClient:
+--         duration = time.time() - start_time
+--         log_metric('query_cancelled_by_client', duration)
+--         raise
+Cancellation analysis
+¶
+Cancellation tracking
+-- Track cancellation patterns in your application
+-- Example pseudo-code:
+--
+-- class QueryTracker:
+--     def __init__(self):
+--         self.cancellations = []
+--
+--     def track_cancellation(self, query, reason, duration):
+--         self.cancellations.append({
+--             'query': query,
+--             'reason': reason,
+--             'duration': duration,
+--             'timestamp': time.time()
+--         })
+--
+--     def get_cancellation_stats(self):
+--         return {
+--             'total_cancellations': len(self.cancellations),
+--             'avg_duration': sum(c['duration'] for c in self.cancellations) / len(self.cancellations),
+--             'reasons': {c['reason']: sum(1 for x in self.cancellations if x['reason'] == c['reason']) for c in self.cancellations}
+--         }
+See also
+¶
+Connection Management
+Client Configuration
+Error Handling
+Performance Monitoring
+Updated
+4 weeks ago
+On this page
+QUERY_WAS_CANCELLED_BY_CLIENT ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Check client timeout settings
+Review connection management
+Implement proper error handling
+Check client application logs
+Common patterns and solutions
+Client timeout management
+Connection pooling
+Query retry logic
+Graceful shutdown
+Tinybird-specific notes
+Best practices
+Client configuration
+Error handling
+Connection management
+Configuration options
+Client timeout settings
+Connection settings
+Query settings
+Alternative solutions
+Asynchronous query execution
+Query queuing
+Health monitoring
+Monitoring and prevention
+Client performance tracking
+Cancellation analysis
+See also
+forward
+classic
+Ask AI

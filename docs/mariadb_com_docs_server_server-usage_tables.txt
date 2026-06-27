@@ -1,0 +1,103 @@
+Source: https://mariadb.com/docs/server/server-usage/tables
+
+Tables | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Altering Tables in MariaDB
+Copying Tables Between Databases and Servers
+ALTER TABLE
+CREATE TABLE
+DROP TABLE
+Data Types
+Indexes
+Views
+Storage Engines
+Partitioning Tables
+Stored Routines
+Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Tables
+Manage tables in MariaDB Server. This section details creating, altering, and dropping tables, along with understanding data types and storage engines for optimal database design.
+Altering Tables in MariaDB
+Learn how to modify existing table structures using the
+ALTER TABLE
+statement, including adding, changing, and dropping columns and indexes.
+Copying Tables Between Databases and Servers
+This guide explains various methods for copying tables between MariaDB databases and servers, including using
+FLUSH TABLES FOR EXPORT
+and
+mysqldump
+.
+ALTER TABLE
+Complete
+ALTER TABLE
+guide for MariaDB. Complete syntax for modifying columns, indexes, constraints, and table properties with comprehensive examples.
+CREATE TABLE
+Complete guide to creating tables in MariaDB. Complete
+CREATE TABLE
+syntax for data types, constraints, indexes, and storage engines for production use.
+DROP TABLE
+Complete
+DROP TABLE
+syntax:
+TEMPORARY
+,
+IF EXISTS
+,
+WAIT/NOWAIT
+,
+RESTRICT
+/
+CASCADE
+options, metadata locks, atomic
+DROP
+, and replication behavior.
+Data Types
+Comprehensive MariaDB data types reference. Complete guide for numeric, string, date/time, spatial, and
+JSON
+types with storage specifications.
+Indexes
+Understand the different types of indexes in MariaDB, such as Primary Keys and Unique Indexes, and how to use them to optimize query performance.
+Views
+Discover how to create and manage views in MariaDB to simplify complex queries, restrict data access, and provide an abstraction layer over tables.
+Storage Engines
+Understand MariaDB Server's storage engines. Explore the features and use cases of InnoDB, Aria, MyISAM, and other engines to choose the best option for your specific data needs.
+Previous
+Backup and Restore via dbForge Studio
+Next
+Altering Tables in MariaDB
+Last updated
+4 months ago
+Was this helpful?
+Was this helpful?

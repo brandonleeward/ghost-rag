@@ -1,0 +1,67 @@
+Source: https://www.tinybird.com/docs/forward/query-data
+
+Query data · Tinybird Docs
+Sign In
+Sign Up
+Query data
+¶
+Copy as MD
+Tinybird gives you several ways to query data, depending on where the query runs and who consumes the result.
+Use
+API Endpoints
+when an application, dashboard, or agent needs a stable HTTP API. Use the Query API or ClickHouse interface when a tool needs to run ad hoc SQL. Use Playgrounds, Explorations, and Time Series when you are investigating data inside Tinybird Cloud.
+Query from outside Tinybird
+¶
+API Endpoints
+publish the result of a Pipe as a REST API. They are the production path for serving query results to applications, user interfaces, dashboards, and agents. Use Tinybird's
+templating language
+to add typed query parameters, filters, sorting, and limits.
+Query API
+runs SQL directly against Pipes and Data Sources in your Workspace through the
+/v0/sql
+endpoint. Use it for internal tools, automation, notebooks, scripts, and ad hoc queries that do not need a published Endpoint contract.
+ClickHouse® interface
+lets ClickHouse-compatible clients, BI tools, and SQL IDEs query Tinybird Data Sources over HTTPS.
+MCP
+lets AI agents query your Workspace and use published API Endpoints as tools through the
+Model Context Protocol
+.
+Query inside Tinybird
+¶
+Playgrounds
+let you write and test SQL interactively before moving finished logic into Pipes.
+Explorations
+is a conversational UI in Tinybird Cloud for asking questions about your data in natural language.
+Time Series
+visualizes time-based metrics from Data Sources, Service Data Sources, and Endpoints.
+Next steps
+¶
+Learn how to
+query API Endpoints
+.
+Learn about the
+Query API
+.
+Learn about the
+templating language
+.
+Learn about the
+ClickHouse interface
+.
+Learn about
+Explorations
+,
+Playgrounds
+, and
+Time Series
+.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Query data
+Query from outside Tinybird
+Query inside Tinybird
+Next steps
+forward
+Ask AI

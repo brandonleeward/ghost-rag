@@ -1,0 +1,31 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-pull
+
+tb pull · Tinybird Docs
+Sign In
+Sign Up
+tb pull
+¶
+Copy as MD
+Downloads the latest version of your datafiles from a Tinybird Workspace to your local project. If local files have been modified, you will be prompted to overwrite them.
+Example
+¶
+tb pull
+Options
+¶
+Option
+Description
+--only-vendored
+Only download and update vendored files.
+-f, --force
+Overwrite existing files without prompting for confirmation.
+--fmt
+Format files before saving.
+Updated
+6 months ago
+Looking for Classic docs?
+On this page
+tb pull
+Example
+Options
+forward
+Ask AI

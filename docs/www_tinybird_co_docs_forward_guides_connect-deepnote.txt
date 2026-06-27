@@ -1,0 +1,60 @@
+Source: https://www.tinybird.com/docs/forward/guides/connect-deepnote
+
+Connect Deepnote to Tinybird · Tinybird Docs
+Sign In
+Sign Up
+Connect Deepnote to Tinybird
+¶
+Copy as MD
+Deepnote can connect to Tinybird using the ClickHouse® Data Source, taking advantage of Tinybird's ClickHouse® HTTP protocol compatibility.
+The ClickHouse® connection to Tinybird is read-only. You can use it to query and analyze data from your Tinybird data sources, but you cannot modify data through this connection.
+Prerequisites
+¶
+A
+Deepnote
+account
+A Tinybird workspace with data sources
+A Tinybird Auth Token with scopes
+WORKSPACE:READ_ALL
+and optionally
+ORG_DATASOURCES:READ
+. See
+how to create it
+.
+Create a new connection
+¶
+Select
+Integrations > Add integration
+.
+In the
+Create new integration
+view, select
+ClickHouse®
+from the Data warehouses & lakes list.
+Fill in the ClickHouse database credentials.
+Connection settings
+¶
+Integration name: Tinybird
+Host name: clickhouse.tinybird.co
+Port: 443  # For HTTPS connections
+Database: <WORKSPACE_NAME>  # Your workspace name
+Username: <WORKSPACE_NAME>  # Your workspace name
+Password: <TOKEN>  # Your Tinybird auth token
+Enforce SSL encryption: yes
+See the list of
+ClickHouse hosts
+to find the correct one for your region.
+Learn more
+¶
+ClickHouse Interface overview
+Tinybird Auth Token management
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Connect Deepnote to Tinybird
+Prerequisites
+Create a new connection
+Learn more
+forward
+Ask AI

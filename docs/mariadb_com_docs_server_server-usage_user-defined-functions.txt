@@ -1,0 +1,62 @@
+Source: https://mariadb.com/docs/server/server-usage/user-defined-functions
+
+User-Defined Functions | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Triggers & Events
+User-Defined Functions
+User-Defined Functions Overview
+Creating User-Defined Functions
+CREATE FUNCTION UDF
+DROP FUNCTION UDF
+User-Defined Functions Calling Sequences
+User-Defined Functions Security
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+User-Defined Functions
+Extend MariaDB Server's capabilities with user-defined functions (UDFs). Learn how to create and implement custom functions to perform specialized operations directly within your SQL queries.
+User-Defined Functions Overview
+Creating User-Defined Functions
+CREATE FUNCTION UDF
+DROP FUNCTION UDF
+User-Defined Functions Calling Sequences
+User-Defined Functions Security
+Previous
+Triggers and Implicit Locks
+Next
+User-Defined Functions Overview
+Last updated
+1 year ago
+Was this helpful?
+Was this helpful?

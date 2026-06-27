@@ -1,0 +1,244 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/ZERO_ARRAY_OR_TUPLE_INDEX
+
+ZERO_ARRAY_OR_TUPLE_INDEX ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+ZERO_ARRAY_OR_TUPLE_INDEX ClickHouse error
+¶
+Copy as MD
+Common cause
+: You're trying to access a tuple element using zero-based indexing, but ClickHouse uses one-based indexing for tuples.
+The
+ZERO_ARRAY_OR_TUPLE_INDEX
+error occurs when you try to access tuple elements using zero-based indexing (starting from 0), but ClickHouse uses one-based indexing (starting from 1) for tuples. Note that arrays use 0-based indexing in ClickHouse.
+What causes this error
+¶
+This error typically happens when:
+Zero-based tuple indexing
+: Using index 0 to access the first tuple element
+Tuple access patterns
+: Following programming language conventions that use zero-based indexing
+Tuple element access
+: Trying to access tuple elements with zero-based indices
+JSON array access
+: Accessing JSON array elements with zero-based indexing (returns empty string)
+String array operations
+: Using zero-based indices with string arrays (returns empty string)
+Nested array access
+: Accessing nested array elements incorrectly
+Example errors
+¶
+-- Error: Zero-based tuple access
+SELECT tuple.0 FROM (SELECT (1, 2, 3) AS tuple);
+
+-- Error: JSON array with zero index (returns empty string)
+SELECT JSONExtractString('["a", "b", "c"]', 0);
+
+-- Error: String array with zero index (returns empty string)
+SELECT splitByChar(',', 'a,b,c')[0];
+
+-- Error: Nested array with zero index
+SELECT array[0][0] FROM (SELECT [[1, 2], [3, 4]] AS array);
+Array indexing with
+[0]
+actually works in ClickHouse (0-based indexing). Only tuple indexing with
+.0
+produces the error. JSON and string array indexing with
+0
+returns empty strings rather than errors.
+How to fix it
+¶
+1. Use one-based indexing
+¶
+Always use index 1 for the first element in ClickHouse:
+-- ❌ Wrong: Zero-based tuple indexing
+SELECT tuple.0 FROM (SELECT (1, 2, 3) AS tuple);
+
+-- ✅ Correct: One-based tuple indexing
+SELECT tuple.1 FROM (SELECT (1, 2, 3) AS tuple);
+
+-- ✅ Correct: Zero-based array indexing (arrays use 0-based indexing)
+SELECT array[0] FROM (SELECT [1, 2, 3] AS array);
+-- ❌ Wrong: Zero-based tuple access
+SELECT tuple.0 FROM (SELECT (1, 2, 3) AS tuple);
+-- ✅ Correct: One-based tuple access
+SELECT tuple.1 FROM (SELECT (1, 2, 3) AS tuple);
+### 2. Fix JSON array access
+
+Use proper JSON array indexing:
+-- ❌ Wrong: Zero-based JSON array access
+SELECT JSONExtractString('["a", "b", "c"]', 0);
+-- ✅ Correct: One-based JSON array access
+SELECT JSONExtractString('["a", "b", "c"]', 1);
+-- ❌ Wrong: Zero-based nested JSON access
+SELECT JSONExtractString('{"items": ["a", "b", "c"]}', 'items', 0);
+-- ✅ Correct: One-based nested JSON access
+SELECT JSONExtractString('{"items": ["a", "b", "c"]}', 'items', 1);
+### 3. Fix string array operations
+
+Use proper string array indexing:
+-- ❌ Wrong: Zero-based string array access
+SELECT splitByChar(',', 'a,b,c')[0];
+-- ✅ Correct: One-based string array access
+SELECT splitByChar(',', 'a,b,c')[1];
+-- ❌ Wrong: Zero-based array element access
+SELECT arrayElement(splitByChar(',', 'a,b,c'), 0);
+-- ✅ Correct: One-based array element access
+SELECT arrayElement(splitByChar(',', 'a,b,c'), 1);
+### 4. Handle nested arrays
+
+Use proper indexing for nested arrays:
+-- ❌ Wrong: Zero-based nested array access
+SELECT array[0][0] FROM (SELECT [[1, 2], [3, 4]] AS array);
+-- ✅ Correct: One-based nested array access
+SELECT array[1][1] FROM (SELECT [[1, 2], [3, 4]] AS array);
+-- ❌ Wrong: Zero-based array element
+SELECT arrayElement(arrayElement([[1, 2], [3, 4]], 0), 0);
+-- ✅ Correct: One-based array element
+SELECT arrayElement(arrayElement([[1, 2], [3, 4]], 1), 1);
+## Common patterns and solutions
+
+### Array indexing
+-- ❌ Wrong: Zero-based array access
+SELECT my_array[0] FROM my_table;
+-- ✅ Correct: One-based array access
+SELECT my_array[1] FROM my_table;
+-- ❌ Wrong: Zero-based array element function
+SELECT arrayElement(my_array, 0) FROM my_table;
+-- ✅ Correct: One-based array element function
+SELECT arrayElement(my_array, 1) FROM my_table;
+### Tuple access
+-- ❌ Wrong: Zero-based tuple access
+SELECT my_tuple.0 FROM my_table;
+-- ✅ Correct: One-based tuple access
+SELECT my_tuple.1 FROM my_table;
+-- ❌ Wrong: Zero-based tuple element
+SELECT tupleElement(my_tuple, 0) FROM my_table;
+-- ✅ Correct: One-based tuple element
+SELECT tupleElement(my_tuple, 1) FROM my_table;
+### JSON array access
+-- ❌ Wrong: Zero-based JSON array
+SELECT JSONExtractString(json_data, 0) FROM my_table;
+-- ✅ Correct: One-based JSON array
+SELECT JSONExtractString(json_data, 1) FROM my_table;
+-- ❌ Wrong: Zero-based nested JSON
+SELECT JSONExtractString(json_data, 'items', 0) FROM my_table;
+-- ✅ Correct: One-based nested JSON
+SELECT JSONExtractString(json_data, 'items', 1) FROM my_table;
+## Advanced solutions
+
+### Using array functions safely
+-- Safe array access with bounds checking
+SELECT
+CASE
+WHEN length(my_array) >= 1 THEN my_array[1]
+ELSE NULL
+END AS first_element
+FROM my_table;
+-- Safe tuple access with validation
+SELECT
+CASE
+WHEN tupleLength(my_tuple) >= 1 THEN tupleElement(my_tuple, 1)
+ELSE NULL
+END AS first_tuple_element
+FROM my_table;
+### Dynamic array access
+-- Access array elements dynamically
+SELECT
+array[1] AS first_element,
+array[2] AS second_element,
+array[3] AS third_element
+FROM (
+SELECT [1, 2, 3, 4, 5] AS array
+);
+### JSON array processing
+-- Process JSON arrays safely
+SELECT
+JSONExtractString(json_array, 1) AS first_item,
+JSONExtractString(json_array, 2) AS second_item,
+JSONExtractString(json_array, 3) AS third_item
+FROM my_table
+WHERE JSONHas(json_array, 1);
+## Tinybird-specific notes
+
+In Tinybird, this error commonly occurs when:
+
+- **Data source processing**: Accessing array columns with zero-based indexing
+- **Pipe transformations**: Using arrays in pipe SQL with wrong indexing
+- **JSON data processing**: Accessing JSON array elements incorrectly
+- **String processing**: Using string arrays with zero-based indexing
+
+### Debugging in Tinybird
+
+1. **Check array column access**: Verify array indexing in data source queries
+2. **Review pipe SQL**: Ensure array access uses one-based indexing
+3. **Test with tb sql**: Use CLI to test array access patterns
+4. **Validate JSON processing**: Check JSON array access in transformations
+5. **Use Query Builder**: Test array operations interactively
+
+### Common Tinybird scenarios
+-- In data source definitions, handle array columns properly
+SCHEMA >
+timestamp
+DateTime,
+user_id
+UInt32,
+tags
+Array(String),
+scores
+Array(Float64)
+-- ❌ Wrong: Zero-based array access in pipe
+NODE processed_data
+SQL >
+SELECT
+timestamp,
+user_id,
+tags[0] AS primary_tag
+FROM your_data_source;
+-- ✅ Correct: One-based array access in pipe
+NODE processed_data
+SQL >
+SELECT
+timestamp,
+user_id,
+tags[1] AS primary_tag
+FROM your_data_source;
+### Array data processing
+-- In pipe definitions, handle arrays safely
+NODE array_processing
+SQL >
+SELECT
+user_id,
+arrayElement(tags, 1) AS first_tag,
+arrayElement(scores, 1) AS first_score
+FROM your_data_source
+WHERE length(tags) > 0;
+## Best practices
+
+1. **Always use one-based indexing** for arrays and tuples in ClickHouse
+2. **Remember ClickHouse indexing** starts from 1, not 0
+3. **Use array functions** like `arrayElement()` for safe access
+4. **Check array bounds** before accessing elements
+5. **Test array operations** with simple examples first
+6. **Document array access patterns** for your team
+7. **Use Query Builder** to test array operations interactively
+8. **Handle empty arrays** gracefully in your queries
+
+## See also
+
+- [Array Functions](/sql-reference/functions/array-functions) - Array manipulation functions
+- [Tuple Functions](/sql-reference/functions/tuple-functions) - Tuple manipulation functions
+- [JSON Functions](/sql-reference/functions/json-functions) - JSON processing functions
+- [Data Types](/sql-reference/data-types) - Array and tuple data types
+- [Error Handling](/forward/dev-reference/common-error-patterns) - General error handling patterns
+Updated
+3 weeks ago
+On this page
+ZERO_ARRAY_OR_TUPLE_INDEX ClickHouse error
+What causes this error
+Example errors
+How to fix it
+1. Use one-based indexing
+forward
+classic
+Ask AI

@@ -1,0 +1,114 @@
+Source: https://mariadb.com/docs/server/mariadb-quickstart-guides/essentials-of-an-index-guide
+
+Essentials of an Index Guide | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Installing MariaDB Server Guide
+Adding & Changing Data Guide
+Essential Queries Guide
+Basics Guide
+Altering Tables Guide
+Connecting to MariaDB Guide
+Troubleshooting Connection Issues Guide
+Doing Time Guide
+Importing Data Guide
+Essentials of an Index Guide
+Getting Started with Indexes Guide
+Joining Tables with JOIN Clauses
+Advanced Joins
+Configuring MariaDB for Remote Client Access Guide
+Getting Data Guide
+Basic SQL Statements Guide
+Basic SQL Debugging Guide
+MariaDB String Functions Guide
+Restoring Data from Dump Files Guide
+Changing Times in MariaDB
+System & Status Variables Guide
+Making Backups with mariadb-dump Guide
+A MariaDB Primer Guide
+Creating & Using Views Guide
+Database Applications
+Server Usage
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Essentials of an Index Guide
+This guide provides a conceptual overview of database indexes, explaining their purpose, different types, and when to use them for optimization.
+An index on
+Last_Name
+organizes the records by surname, enhancing search efficiency without altering the original table order. Indices can be created for any column, such as ID or first name, to enable quick lookups based on different criteria.
+Imagine you've created a table with the following rows:
+Copy
++----+------------+-----------+-------------------------+---------------------------+--------------+
+| ID | First_Name | Last_Name | Position                | Home_Address              | Home_Phone   |
++----+------------+-----------+-------------------------+---------------------------+--------------+
+|  1 | Mustapha   | Mond      | Chief Executive Officer | 692 Promiscuous Plaza     | 326-555-3492 |
+|  2 | Henry      | Foster    | Store Manager           | 314 Savage Circle         | 326-555-3847 |
+|  3 | Bernard    | Marx      | Cashier                 | 1240 Ambient Avenue       | 326-555-8456 |
+|  4 | Lenina     | Crowne    | Cashier                 | 281 Bumblepuppy Boulevard | 328-555-2349 |
+|  5 | Fanny      | Crowne    | Restocker               | 1023 Bokanovsky Lane      | 326-555-6329 |
+|  6 | Helmholtz  | Watson    | Janitor                 | 944 Soma Court            | 329-555-2478 |
++----+------------+-----------+-------------------------+---------------------------+--------------+
+Now, imagine you've been asked to return the home phone of Fanny Crowne. Without indexes, the only way to do it is to go through every row until you find the matching first name and surname. Now imagine there are millions of records and you can see that, even for a speedy database server, this is highly inefficient.
+The answer is to sort the records. If they were stored in alphabetical order by surname, even a human could quickly find a record amongst a large number. But we can't sort the entire record by surname. What if we want to also look a record by ID, or by first name? The answer is to create separate indexes for each column we wish to sort by. An index simply contains the sorted data (such as surname), and a link to the original record.
+For example, an index on Last_Name:
+Copy
++-----------+----+
+| Last_Name | ID |
++-----------+----+
+| Crowne    |  4 |
+| Crowne    |  5 |
+| Foster    |  2 |
+| Marx      |  3 |
+| Mond      |  1 |
+| Watson    |  6 |
++-----------+----+
+and an index on Position
+would allow you to quickly find the phone numbers of all the cashiers, or the phone number of the employee with the surname Marx, very quickly.
+Where possible, you should create an index for each column that you search for records by, to avoid having the server read every row of a table.
+See
+CREATE INDEX
+and
+Getting Started with Indexes
+for more information.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Importing Data Guide
+Next
+Getting Started with Indexes Guide
+Last updated
+1 year ago
+Was this helpful?
+Was this helpful?
+Copy
++-------------------------+----+
+| Position                | ID |
++-------------------------+----+
+| Cashier                 |  3 |
+| Cashier                 |  4 |
+| Chief Executive Officer |  1 |
+| Janitor                 |  6 |
+| Restocker               |  5 |
+| Store Manager           |  2 |
++-------------------------+----+

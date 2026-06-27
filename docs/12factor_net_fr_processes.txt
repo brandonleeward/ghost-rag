@@ -1,0 +1,40 @@
+Source: https://12factor.net/fr/processes
+
+The Twelve-Factor App Ce texte est une traduction
+The Twelve-Factor App
+Blog
+Community
+GitHub
+VI. Processus
+Exécutez l’application comme un ou plusieurs processus sans état
+L’application est exécutée dans l’environnement d’exécution comme un ou plusieurs
+processus
+.
+Dans la situation la plus simple, le code est un script indépendant, l’environnement d’exécution est l’ordinateur portable du développeur sur lequel est installé de quoi exécuter le langage, et le processus est lancé depuis la ligne de commande. (par exemple,
+python mon_script.py
+). De l’autre côté du spectre, un déploiement de production d’une application sophistiquée peut utiliser plusieurs
+types de processus, instanciés dans zéro ou plus processus en fonctionnement
+.
+Les processus 12 facteurs sont sans état et ne partagent
+rien (en)
+.
+Toute donnée qui doit être persistée doit être stockée dans un
+service externe
+stateful, typiquement une base de données.
+L’espace mémoire ou le système de fichier du processus peut être utilisé comme cache momentané pour des transactions uniques. Par exemple, télécharger un gros fichier, effectuer une opération dessus, puis stocker le résultat de l’opération dans la base de données. Les applications 12 facteurs ne supposent jamais que quelque chose ayant été mis en cache en mémoire ou sur le disque sera disponible dans une future requête ou job — avec plusieurs processus de chaque type qui s’exécutent, il y a de grandes chances qu’une future requête soit effectuée par un processus différent. Même lorsque l’on fait tourner seulement un processus, un redémarrage (déclenché par le déploiement du code, un changement de configuration, ou l’environnement d’exécution qui déplace le processus vers un lieu physique différent) va généralement balayer toutes les modifications locales (c’est-à-dire en mémoire et sur le disque).
+Des outils de création de paquets de ressources (ou “asset packagers”) (tel que
+Jammit
+ou
+django-compressor
+) utilisent le système de fichier comme cache pour les ressources compilées. Une application 12 facteurs préfère faire cette compilation durant l’
+étape d’assemblage
+, comme avec le
+pipeline des ressources de Rails
+, plutôt que durant l’exécution.
+Certains systèmes web s’appuient sur des
+“sessions persistantes” (en)
+– c’est-à-dire, mettre en cache les données de session utilisateur dans le processus de l’application et attendre que les requêtes futures du même visiteur seront routées dans le même processus. Les sessions persistantes sont une violation des 12 facteurs, qu’il ne faudrait jamais utiliser. Les états de session sont de bons candidats pour un datastore qui offre des dates d’expiration, comme
+Memcached
+ou
+Redis
+.

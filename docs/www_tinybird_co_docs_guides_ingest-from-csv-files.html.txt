@@ -1,0 +1,79 @@
+Source: https://www.tinybird.co/docs/guides/ingest-from-csv-files.html
+
+Ingest CSV files · Tinybird Docs
+Sign In
+Sign Up
+Ingest CSV files
+¶
+Copy as MD
+CSV (comma-separated values) is one of the most widely used formats out there. However, it's used in different ways; some people don't use commas, and other people use escape values differently, or are unsure about using headers.
+The Tinybird platform is smart enough to handle many scenarios. If your data doesn't comply with format and syntax best practices, Tinybird will still aim to understand your file and ingest it, but following certain best practices can speed your CSV processing speed by up to 10x.
+Syntax best practices
+¶
+By default, Tinybird processes your CSV file assuming the file follows the most common standard (
+RFC4180
+). Key points:
+Separate values with commas.
+Each record is a line (with CRLF as the line break). The last line may or may not have a line break.
+First line as a header is optional (though not using one is faster in Tinybird.)
+Double quotes are optional but using them means you can escape values (for example, if your content has commas or line breaks).
+Example: Instead of using the backslash
+\
+as an escape character, like this:
+1234567890,0,0,0,0,2021-01-01 10:00:00,"{\"authorId\":\"123456\",\"handle\":\"aaa\"}"
+Use two double quotes:
+More performant
+1234567890,0,0,0,0,2021-01-01 10:00:00,"{""authorId"":""123456"",""handle"":""aaa""}"
+Fields containing line breaks, double quotes, and commas should be enclosed in double quotes.
+Double quotes can also be escaped by using another double quote (""aaa"",""b""""bb"",""ccc"")
+In addition to the previous points, it's also recommended to:
+Format
+DateTime
+columns as
+YYYY-MM-DD HH:MM:SS
+and
+Date
+columns as
+YYYY-MM-DD
+.
+Send the encoding in the
+charset
+part of the
+content-type
+header, if it's different to UTF-8. The expectation is UTF-8, so it should look like this
+Content-Type: text/html; charset=utf-8
+.
+You can set values as
+null
+in different ways, for example,
+""[]""
+,
+""""
+(empty space),
+N
+and
+"N"
+.
+If you use a delimiter other than a comma, explicitly define it with the API parameter
+``dialect_delimiter``.
+If you use an escape character other than a ", explicitly define it with the API parameter
+``dialect_escapechar``.
+If you have no option but to use a different line break character, explicitly define it with the API parameter
+dialect_new_line
+.
+For more information, check the
+Data Sources API docs
+.
+Append data
+¶
+Once the data source schema has been created, you can optimize your performance by not including the header. Just keep the data in the same order.
+However, if the header is included and it contains all the names present in the data source schema the ingestion will still work (even if the columns follow a different order to the initial creation).
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Ingest CSV files
+Syntax best practices
+Append data
+forward
+Ask AI

@@ -1,0 +1,35 @@
+Source: https://www.tinybird.com/docs/use-cases/gaming-analytics
+
+Gaming analytics · Tinybird Docs
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+Gaming analytics
+¶
+Copy as MD
+From leaderboards, to match-making, to serving personalized in-game ads, data is at the core of modern gaming.
+Tinybird can help you ship user-facing analytics features in your games, faster.
+Tutorials
+¶
+Demo
+¶
+Want to see it in action? Check out our Tiny Flappybird demo:
+Tiny Flappybird Demo
+Demo code
+Videos
+¶
+Watch screencasts and free training workshops that build user-facing analytics.
+Free Workshop: Build Real-Time Leaderboards
+User segmentation at 1M events per second
+Updated
+1 month ago
+On this page
+Gaming analytics
+Tutorials
+Demo
+Videos
+forward
+classic
+Ask AI

@@ -1,0 +1,58 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-deploy
+
+tb deploy · Tinybird Docs
+Sign In
+Sign Up
+tb deploy
+¶
+Copy as MD
+The
+tb deploy
+command is an alias of
+tb deployment create --wait --auto
+. Use
+tb deploy
+to create and promote a deployment to the Tinybird platform.
+For example:
+tb deploy    
+Running against Tinybird Local
+
+» Changes to be deployed...
+
+-----------------------------------------------------------------
+| status   | name         | path                                |
+-----------------------------------------------------------------
+| modified | user_actions | datasources/user_actions.datasource |
+-----------------------------------------------------------------
+
+✓ Deployment submitted successfully
+Deployment is ready
+Setting candidate deployment as live
+Removing old deployment
+Deployment promotion successfully started
+Deployment promoted successfully
+See
+tb deployment
+for more information.
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✓ Yes (default)
+Deploys to Tinybird Local.
+--cloud
+✓ Yes
+Deploys to Tinybird Cloud.
+--branch=BRANCH_NAME
+✓ Yes
+Deploys to a branch.
+Updated
+6 months ago
+Looking for Classic docs?
+On this page
+tb deploy
+Environment support
+forward
+Ask AI

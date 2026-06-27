@@ -1,0 +1,70 @@
+Source: https://www.tinybird.com/docs/sql-reference/data-types/ipv6
+
+IPv6 Data Type reference · Tinybird Docs
+Sign In
+Sign Up
+IPv6
+¶
+Copy as MD
+This data type isn't supported at ingest. It is only supported at query time and to create Copy Data Sources or Materialized View Data Sources.
+The
+IPv6
+data type stores IPv6 addresses. It represents these addresses as 16-byte values, internally stored as a
+UInt128
+in big-endian format.
+Basic Usage
+¶
+You can cast string literals representing IPv6 addresses to the
+IPv6
+data type.
+WITH (SELECT [('https://wikipedia.org', '::ffff:185.15.58.224'),('https://tinybird.co','::ffff:66.33.60.67'),('https://vercel.com','::ffff:64.239.109.193')]) AS ips
+SELECT arrayJoin(ips).1 as url, (arrayJoin(ips).2)::IPv6 as ipv6
+Result:
+-------------------------------------------------
+| url                   | ipv6                  |
+-------------------------------------------------
+| https://wikipedia.org | ::ffff:185.15.58.224  |
+| https://tinybird.co   | ::ffff:66.33.60.67    |
+| https://vercel.com    | ::ffff:64.239.109.193 |
+-------------------------------------------------
+Internal Representation
+¶
+IPv6
+values are stored in a compact binary form. You can inspect their internal type and hexadecimal representation.
+WITH (SELECT [('https://wikipedia.org', '::ffff:185.15.58.224'),('https://tinybird.co','::ffff:66.33.60.67'),('https://vercel.com','::ffff:64.239.109.193')]) AS ips
+SELECT (arrayJoin(ips).2)::IPv6 as ipv6, toTypeName(ipv6), hex(ipv6)
+Result:
+-------------------------------------------------------------------------------
+| ipv6                  | toTypeName(ipv6) | hex(ipv6)                        |
+-------------------------------------------------------------------------------
+| ::ffff:185.15.58.224  | IPv6             | 00000000000000000000FFFFB90F3AE0 |
+| ::ffff:66.33.60.67    | IPv6             | 00000000000000000000FFFF42213C43 |
+| ::ffff:64.239.109.193 | IPv6             | 00000000000000000000FFFF40EF6DC1 |
+-------------------------------------------------------------------------------
+Comparison with IPv4
+¶
+IPv6
+addresses can be directly compared with
+IPv4
+addresses, especially when an
+IPv4
+address is mapped to an
+IPv6
+format.
+SELECT toIPv4('127.0.0.1') = toIPv6('::ffff:127.0.0.1')
+Result:
+-----------------------------------------------------------
+| equals(toIPv4('127.0.0.1'), toIPv6('::ffff:127.0.0.1')) |
+-----------------------------------------------------------
+|                                                       1 |
+-----------------------------------------------------------
+See Also
+¶
+IP Address Functions
+Updated
+3 weeks ago
+On this page
+IPv6
+forward
+classic
+Ask AI

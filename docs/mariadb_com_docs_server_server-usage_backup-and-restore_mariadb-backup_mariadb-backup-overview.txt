@@ -1,0 +1,574 @@
+Source: https://mariadb.com/docs/server/server-usage/backup-and-restore/mariadb-backup/mariadb-backup-overview
+
+mariadb-backup Overview | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Backup and Restore Overview
+Forming a Backup Strategy
+Backup Optimization
+MariaDB Enterprise Backup
+mariadb-backup
+mariadb-backup Overview
+mariadb-backup Options
+Full Backup and Restore (mariadb-backup)
+Incremental Backup and Restore (mariadb-backup)
+Partial Backup and Restore (mariadb-backup)
+Point-In-Time Recovery (PITR, mariadb-backup)
+Restoring Individual Databases From a Full Backup (mariadb-backup)
+Restoring Individual Tables and Partitions (mariadb-backup)
+Setting up a Replica (mariadb-backup)
+Files Backed Up by mariadb-backup
+Files Created by mariadb-backup
+Using Encryption and Compression Tools With mariadb-backup
+Encrypted Files Backup (mariadb-backup)
+How mariadb-backup Works
+mariadb-backup and BACKUP STAGE
+mariadb-backup SST Method
+Manual SST of Galera Cluster Node With mariadb-backup
+Point-In-Time Recovery (InnoDB Log Archiving)
+Replication as a Backup Solution
+Backup and Restore via dbForge Studio
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+mariadb-backup Overview
+Complete MariaDB backup and recovery guide. Complete resource for backup methods, mariadb-backup usage, scheduling, and restoration for production use.
+mariadb-backup was previously called mariabackup.
+mariadb-backup
+is an open source tool provided by MariaDB for performing physical online backups of InnoDB, Aria and MyISAM tables. For InnoDB, “hot online” backups are possible. It was originally forked from Percona XtraBackup 2.3.8. It is available on Linux and Windows.
+This tool provides a production-quality, nearly non-blocking method for performing full backups on running systems. While partial backups with mariadb-backup are technically possible, they require many steps and cannot be restored directly onto existing servers containing other data.
+Supported Features
+mariadb-backup
+supports all of the main features of Percona XtraBackup 2.3.8, plus:
+Backup/Restore of tables using Data-at-Rest Encryption.
+Backup/Restore of tables using InnoDB Page Compression.
+mariadb-backup SST method
+with Galera Cluster.
+Microsoft Windows support.
+Backup/Restore of tables using the MyRocks storage engine. See
+Files Backed up by mariadb-backup: MyRocks Data Files
+for more information.
+Supported Features in MariaDB Enterprise Backup
+Current
+< 10.11.8
+MariaDB Backup supports some additional features, such as:
+Minimizes locks during the backup to permit more concurrency and to enable faster backups.
+This relies on the usage of
+BACKUP STAGE
+commands and DDL logging.
+This includes no locking during the copy phase of
+ALTER TABLE
+statements, which tends to be the longest phase of these statements.
+Provides optimal backup support for all storage engines that store things on local disk.
+MariaDB Backup does
+not
+support some additional features.
+Backup Types
+mariadb-backup supports various type of backups (and restores from those backups), documented on separate pages:
+Full backup and restore
+Incremental backup and restore
+Partial backup and restore
+Restoring
+individual databases
+,
+tables, and partitions
+Point-in-time recovery (PITR)
+Installing
+mariadb-backup
+Installing on Linux
+The
+mariadb-backup
+executable is included in binary tarballs on Linux.
+Installing with a Package Manager
+mariadb-backup can also be installed via a package manager on Linux. Many Linux distributions provide MariaDB software "out of the box", including
+mariadb-backup
+. If your Linux distribution doesn't, however, you can install using a MariaDB repository.
+In order to do so, your system needs to be configured to install from one of the MariaDB repositories.
+You can configure your package manager to install it from MariaDB Corporation's MariaDB Package Repository by using the MariaDB Package Repository setup script.
+You can also configure your package manager to install it from MariaDB Foundation's MariaDB Repository by using the
+MariaDB Repository Configuration Tool
+.
+Installing with yum/dnf
+On RHEL, CentOS, Fedora, and other similar Linux distributions, it is highly recommended to install the relevant RPM package from MariaDB's repository using yum or
+dnf
+. Starting with RHEL 8 and Fedora 22,
+yum
+has been replaced by
+dnf
+, which is the next major version of
+yum
+. However,
+yum
+commands still work on many systems that use
+dnf
+. For example:
+Installing with apt-get
+On Debian, Ubuntu, and other similar Linux distributions, it is highly recommended to install the relevant DEB package from MariaDB's repository using
+apt-get
+. For example:
+Installing with zypper
+On SLES, OpenSUSE, and other similar Linux distributions, it is highly recommended to install the relevant RPM package from MariaDB's repository using zypper. For example:
+Installing on Windows
+The
+mariadb-backup
+executable is included in MSI and ZIP packages on Windows.
+When using the
+Windows MSI installer
+,
+mariadb-backup
+can be installed by selecting
+Backup utilities
+:
+MariaDB MSI Installer showing the Backup utilities install option
+Usage
+The command to use
+mariadb-backup
+and the general syntax is:
+For in-depth explanations on how to use
+mariadb-backup
+, see:
+Full Backup and Restore with mariadb-backup
+Incremental Backup and Restore with mariadb-backup
+Partial Backup and Restore with mariadb-backup
+Restoring Individual Tables and Partitions with mariadb-backup
+Setting up a Replica with mariadb-backup
+Using Encryption and Compression Tools With mariadb-backup
+Options
+Options supported by mariadb-backup can be found on the
+mariadb-backup Options
+page.
+mariadb-backup
+will currently silently ignore unknown command-line options, so be extra careful about accidentally including typos in options or accidentally using options from later
+mariadb-backup
+versions. The reason for this is that
+mariadb-backup
+currently treats command-line options and options from
+option files
+equivalently. When it reads from these
+option files
+, it has to read a lot of options from the server option groups read by
+mariadbd
+. However,
+mariadb-backup
+does not know about many of the options that it normally reads in these option groups. If
+mariadb-backup
+raised an error or warning when it encountered an unknown option, then this process would generate a large amount of log messages under normal use. Therefore,
+mariadb-backup
+is designed to silently ignore the unknown options instead. See
+MDEV-18215
+about that.
+Option Files
+In addition to reading options from the command-line, mariadb-backup can also read options from option files.
+The following options relate to how MariaDB command-line tools handles option files. They must be given as the first argument on the command-line:
+Option
+Description
+--print-defaults
+Print the program argument list and exit.
+--no-defaults
+Don't read default options from any option file.
+--defaults-file=#
+Only read default options from the given option file.
+--defaults-extra-file=#
+Read this file after the global files are read.
+--defaults-group-suffix=#
+In addition to the default option groups, also read option groups with this suffix.
+Server Option Groups
+mariadb-backup reads server options from the following
+option groups
+from
+option files
+:
+Group
+Description
+[mariadb-backup]
+Options read by
+mariadb-backup
+.
+[mariadb-backup]
+Options read by
+mariadb-backup
+.
+[xtrabackup]
+Options read by
+mariadb-backup
+and Percona XtraBackup.
+[server]
+Options read by MariaDB Server.
+[mysqld]
+Options read by
+mariadbd
+, which includes both MariaDB Server and MySQL Server (where it is called
+mysqld
+).
+[mysqld-X.Y]
+Options read by a specific version of mysqld, which includes both MariaDB Server and MySQL Server. For example:
+[mysqld-10.6]
+.
+[mariadb]
+Options read by MariaDB Server.
+[mariadb-X.Y]
+Options read by a specific version of MariaDB Server. For example:
+[mariadb-10.6]
+.
+[mariadbd]
+Options read by MariaDB Server. Available from MariaDB 10.5.4.
+[mariadbd-X.Y]
+Options read by a specific version of MariaDB Server. For example:
+[mariadbd-10.6]
+. Available from MariaDB 10.5.4.
+[client-server]
+Options read by all MariaDB client programs and the MariaDB Server. This is useful for options like socket and port, which is common between the server and the clients.
+[galera]
+Options read by MariaDB Server, but only if it is compiled with Galera Cluster support. All builds on Linux are compiled with Galera Cluster support. When using one of these builds, options from this option group are read even if the Galera Cluster functionality is not enabled.
+Client Option Groups
+mariadb-backup reads client options from the following option groups from option files:
+Group
+Description
+[mariadb-backup]
+Options read by mariadb-backup. Available starting with
+MariaDB 10.1.31
+and
+MariaDB 10.2.13
+.
+[mariadb-backup]
+Options read by mariadb-backup. Available starting with
+MariaDB 10.4.14
+and
+MariaDB 10.5.4
+[xtrabackup]
+Options read by mariadb-backup and Percona XtraBackup.
+[client]
+Options read by all MariaDB and MySQL client programs, which includes both MariaDB and MySQL clients. For example, mysqldump.
+[client-server]
+Options read by all MariaDB client programs and the MariaDB Server. This is useful for options like socket and port, which is common between the server and the clients. Available starting with
+MariaDB 10.1.38
+,
+MariaDB 10.2.22
+, and
+MariaDB 10.3.13
+.
+[client-mariadb]
+Options read by all MariaDB client programs. Available starting with
+MariaDB 10.1.38
+,
+MariaDB 10.2.22
+, and
+MariaDB 10.3.13
+.
+Backup History Table
+mariadb-backup
+can optionally track your backup operations in a database table. This provides a centralized audit log and allows you to automate incremental backups by referencing the logical name of the previous backup instead of managing file paths.
+Table Location and Schema Changes (MariaDB 10.11):
+MariaDB 10.11 and later:
+The history table is
+mysql.mariadb_backup_history
+and uses the
+InnoDB
+storage engine (transactional).
+MariaDB 10.10 and earlier:
+The history table is
+PERCONA_SCHEMA.xtrabackup_history
+and uses the
+CSV
+storage engine.
+On the first run after upgrading to MariaDB 10.11,
+mariadb-backup
+will attempt to migrate the old CSV table to the new InnoDB table. This requires specific privileges (see below).
+Authentication and Privileges
+mariadb-backup
+needs to authenticate with the database server when it performs a backup operation (i.e. when the
+--backup
+option is specified). For most use cases, the user account that performs the backup needs to have the following global privileges on the database server.
+Current
+< 10.5
+The required privileges are:
+The required privileges are:
+If your database server is also using the
+MyRocks storage engine
+, then the user account that performs the backup will also need the
+SUPER
+global privilege
+. This is because
+mariadb-backup
+creates a checkpoint of this data by setting the
+rocksdb_create_checkpoint
+system variable, which requires this privilege. See
+MDEV-20577
+for more information.
+CONNECTION ADMIN
+is also required where
+--kill-long-queries-timeout
+is greater than
+0
+, and
+--no-lock
+isn't applied in order to
+KILL
+queries.
+REPLICA MONITOR
+(or alias
+SLAVE MONITOR
+) is also required where
+--galera-info
+or
+--slave-info
+is specified.
+To use the
+--history
+option(or the incremental history options), the backup user requires specific privileges on the history table.
+Current
+< MariaDB 10.10
+The user needs
+INSERT
+to create history records and
+SELECT
+to read them for incremental backups:
+The user needs privileges on the legacy
+PERCONA_SCHEMA
+:
+For Upgrading to 10.11 (One-Time Migration)
+If upgrading from an older version,
+mariadb-backup
+will attempt to migrate the old table to the new location on the first run. The backup user needs privileges to move and modify the old table:
+Alternatively, you can perform this migration manually before running the backup:
+The user account information can be specified with the
+--user
+and
+--password
+command-line options. For example:
+The user account information can also be specified in a supported
+client option group
+in an
+option file
+. For example:
+mariadb-backup
+does not need to authenticate with the database server when preparing or restoring a backup.
+File System Permissions
+mariadb-backup
+has to read MariaDB's files from the file system. Therefore, when you run
+mariadb-backup
+as a specific operating system user, you should ensure that user account has sufficient permissions to read those files.
+If you are using Linux and if you installed MariaDB with a package manager, then MariaDB's files will probably be owned by the
+mysql
+user and the
+mysql
+group.
+Using
+mariadb-backup
+with Data-at-Rest Encryption
+mariadb-backup
+supports
+Data-at-Rest Encryption
+.
+mariadb-backup will query the server to determine which
+key management and encryption plugin
+is being used, and then it will load that plugin itself, which means that
+mariadb-backup
+needs to be able to load the key management and encryption plugin's shared library.
+mariadb-backup will also query the server to determine which
+encryption keys
+it needs to use.
+In other words,
+mariadb-backup
+is able to figure out a lot of encryption-related information on its own, so normally one doesn't need to provide any extra options to backup or restore encrypted tables.
+mariadb-backup
+backs up encrypted and unencrypted tables as they are on the original server. If a table is encrypted, then the table will remain encrypted in the backup. Similarly, if a table is unencrypted, then the table will remain unencrypted in the backup.
+The primary reason that mariadb-backup needs to be able to encrypt and decrypt data is that it needs to apply
+InnoDB redo log
+records to make the data consistent when the backup is prepared. As a consequence, mariadb-backup does not perform many encryption or decryption operations when the backup is initially taken. MariaDB performs more encryption and decryption operations when the backup is prepared. This means that some encryption-related problems (such as using the wrong encryption keys) may not become apparent until the backup is prepared.
+Using
+mariadb-backup
+for Galera SSTs
+The
+mariadb-backup
+SST method uses the
+mariadb-backup
+utility for performing SSTs. See
+mariadb-backup SST method
+for more information.
+Files Backed up by
+mariadb-backup
+mariadb-backup
+backs up many different files in order to perform its backup operation. See
+Files Backed up by mariadb-backup
+for a list of these files.
+Files Created by
+mariadb-backup
+mariadb-backup
+creates several different types of files during the backup and prepare phases. See
+Files Created by mariadb-backup
+for a list of these files.
+Binary Logs
+mariadb-backup
+can store the binary log position in the backup. See
+--binlog-info
+. This can be used for point-in-time recovery and to use the backup to setup a slave with the correct binlog position.
+Known Issues
+No Default Data Directory
+mariadb-backup
+defaults to the server's default
+datadir
+value. See
+MDEV-12956
+for more information.
+Too Many Open Files
+If
+mariadb-backup
+uses more file descriptors than the system is configured to allow, then users can see errors like the following:
+mariadb-backup
+throws an error and aborts when this error is encountered. See
+MDEV-19060
+for more information.
+When this error is encountered, one solution is to explicitly specify a value for the
+--open-files-limit
+option either on the command line or in one of the supported
+server option group
+s in an
+option file
+. For example:
+An alternative solution is to set the soft and hard limits for the user account that runs
+mariadb-backup
+by adding new limits to
+/etc/security/limits.conf
+. For example, if
+mariadb-backup
+is run by the
+mysql
+user, then you could add lines like the following:
+After the system is rebooted, the above configuration should set new open file limits for the
+mysql
+user, and the user's
+ulimit
+output should look like the following:
+See Also
+mariadb-dump/mysqldump
+How to backup with MariaDB
+(video)
+MariaDB point-in-time recovery
+(video)
+mariadb-backup and Restic
+(video)
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+mariadb-backup
+Next
+mariadb-backup Options
+Last updated
+28 days ago
+Was this helpful?
+Supported Features
+Supported Features in MariaDB Enterprise Backup
+Backup Types
+Installing mariadb-backup
+Installing on Linux
+Installing with a Package Manager
+Installing on Windows
+Usage
+Options
+Option Files
+Backup History Table
+Authentication and Privileges
+File System Permissions
+Using mariadb-backup with Data-at-Rest Encryption
+Using mariadb-backup for Galera SSTs
+Files Backed up by mariadb-backup
+Files Created by mariadb-backup
+Binary Logs
+Known Issues
+No Default Data Directory
+Too Many Open Files
+See Also
+Was this helpful?
+Copy
+sudo yum install MariaDB-backup
+Copy
+sudo apt-get install mariadb-backup
+Copy
+sudo zypper install MariaDB-backup
+Copy
+mariadb-backup <options>
+Copy
+CREATE USER 'mariadb-backup'@'localhost' IDENTIFIED BY 'mypassword';
+GRANT RELOAD, PROCESS, LOCK TABLES, BINLOG MONITOR ON *.* TO 'mariadb-backup'@'localhost';
+Copy
+CREATE USER 'mariadb-backup'@'localhost' IDENTIFIED BY 'mypassword';
+GRANT RELOAD, PROCESS, LOCK TABLES, REPLICATION CLIENT ON *.* TO 'mariadb-backup'@'localhost';
+Copy
+GRANT SELECT, INSERT, CREATE, ALTER ON mysql.mariadb_backup_history TO 'mariadb-backup'@'localhost';
+Copy
+GRANT SELECT, INSERT, CREATE, ALTER ON PERCONA_SCHEMA.xtrabackup_history TO 'mariadb-backup'@'localhost';
+Copy
+GRANT DROP, ALTER, RENAME ON PERCONA_SCHEMA.xtrabackup_history TO 'mariadb-backup'@'localhost';
+GRANT CREATE ON PERCONA_SCHEMA TO 'mariadb-backup'@'localhost';
+Copy
+RENAME TABLE PERCONA_SCHEMA.xtrabackup_history TO mysql.mariadb_backup_history;
+ALTER TABLE mysql.mariadb_backup_history ENGINE=InnoDB;
+Copy
+mariadb-backup --backup \
+--target-dir=/var/mariadb/backup/ \
+--user=mariadb-backup --password=mypassword
+Copy
+[mariadb-backup]
+user=mariadb-backup
+password=mypassword
+Copy
+2019-02-12 09:48:38 7ffff7fdb820  InnoDB: Operating system error number 23 in a file operation.
+InnoDB: Error number 23 means 'Too many open files in system'.
+InnoDB: Some operating system error numbers are described at
+InnoDB: http://dev.mysql.com/doc/refman/5.6/en/operating-system-error-codes.html
+InnoDB: Error: could not open single-table tablespace file ./db1/tab1.ibd
+InnoDB: We do not continue the crash recovery, because the table may become
+InnoDB: corrupt if we cannot apply the log records in the InnoDB log to it.
+InnoDB: To fix the problem and start mysqld:
+InnoDB: 1) If there is a permission problem in the file and mysqld cannot
+InnoDB: open the file, you should modify the permissions.
+InnoDB: 2) If the table is not needed, or you can restore it from a backup,
+InnoDB: then you can remove the .ibd file, and InnoDB will do a normal
+InnoDB: crash recovery and ignore that table.
+InnoDB: 3) If the file system or the disk is broken, and you cannot remove
+InnoDB: the .ibd file, you can set innodb_force_recovery > 0 in my.cnf
+InnoDB: and force InnoDB to continue crash recovery here.
+Copy
+[mariadb-backup]
+open_files_limit=65535
+Copy
+mysql soft nofile 65535
+mysql hard nofile 65535
+Copy
+ulimit -Sn
+65535
+ulimit -Hn
+65535

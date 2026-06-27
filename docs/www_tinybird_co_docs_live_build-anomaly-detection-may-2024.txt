@@ -1,0 +1,31 @@
+Source: https://www.tinybird.com/docs/live/build-anomaly-detection-may-2024
+
+Free Workshop: Building Real-Time Anomaly Detection Systems · Tinybird
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+← Back to Live
+Free Workshop: Building Real-Time Anomaly Detection Systems
+In this live coding session, we'll build a real-time anomaly detection system. We'll explore five key methods to identify unusual patterns in your data streams as they occur. By the end, you'll be equipped to implement these techniques and gain valuable insights from your data.
+In this free technical training, we will build the following anomaly detection methods:
+Timeout thresholds
+Rate-of-change checks
+Out-of-range boundaries
+Generating Z-scores
+Calculating interquartile ranges (IQRs)
+Have questions?
+Join us on Slack
+Start building
+Live coding session
+When:
+May 21, 2024 at 15:00 UTC
+Duration:
+1 hr
+Who:
+Jim Moffitt
+Developer Advocate
+Start building
+Ask AI
+Search...

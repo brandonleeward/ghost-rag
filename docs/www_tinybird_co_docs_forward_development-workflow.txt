@@ -1,0 +1,81 @@
+Source: https://www.tinybird.com/docs/forward/development-workflow
+
+Development workflow · Tinybird Docs
+Sign In
+Sign Up
+Development workflow
+¶
+Copy as MD
+Tinybird follows a branch-based development workflow. You edit project files in your local repo that is connected to Git, test changes in Tinybird Local or a Cloud Branch, and deploy a new version to your Cloud Workspace.
+Use this workflow when you change Data Source schemas, iterate on Pipe logic, add Endpoints, or validate connector ingestion before it reaches production.
+Choose an environment
+¶
+Environment
+Use it for
+Example
+Tinybird Local
+Fast local iteration and CI checks with fixture data.
+Change a Pipe query, run
+tb build
+, and call the local Endpoint until it returns the expected result.
+Cloud Branches
+Testing with production-like data without changing production.
+Check out a Git branch, run
+tb build
+, change a Data Source schema, and query the branch before deploying.
+Staging deployments
+Validating the deployment that can become live.
+Run
+tb --cloud deployment create --wait
+, write compatible test events to staging, then promote.
+Local and branch environments are for development. Deployments are for moving a validated project version toward production.
+1
+Develop in a branch
+¶
+Choose the development loop that fits the data you need:
+Local development
+: Run Tinybird Local with fixture data and local APIs.
+Cloud Branches
+: Use a Cloud environment for production-like data, connector validation, preview apps, and pull request review.
+2
+Test your changes
+¶
+Test Tinybird changes as part of your application workflow, the same way you test the rest of your app. Test locally with fixtures, or test against a Cloud Branch when you need production-like data. You can also validate your data project independently with fixture files, data quality tests, and deployment checks. See
+Test your project
+.
+3
+Deploy to your Cloud Workspace
+¶
+Push your changes to Tinybird Cloud with automatic schema migrations. Run a deployment check first when the change affects Data Source schemas, Materialized Views, engine settings, or connector configuration.
+Examples
+: See concrete workflows for Data Source evolution, Pipe iteration, SDK projects, and deployments.
+Evolve Data Sources
+: Understand how schema, engine, and Materialized View changes are migrated during deployments.
+Manual deployment
+: Deploy directly from the CLI.
+CI/CD
+: Automate testing and deployment with GitHub Actions or GitLab CI.
+Examples
+¶
+See
+Development workflow examples
+for common loops with datafiles, the TypeScript SDK, and the Python SDK.
+Core concepts
+¶
+Tinybird Local
+explains the local runtime, services, installation, Docker usage, persistence, and local Tokens.
+Branches
+explains the Branch resource model and data isolation semantics.
+Updated
+4 weeks ago
+Looking for Classic docs?
+On this page
+Development workflow
+Choose an environment
+Develop in a branch
+Test your changes
+Deploy to your Cloud Workspace
+Examples
+Core concepts
+forward
+Ask AI

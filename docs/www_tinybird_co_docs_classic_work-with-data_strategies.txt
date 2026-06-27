@@ -1,0 +1,22 @@
+Source: https://www.tinybird.com/docs/classic/work-with-data/strategies
+
+Classic: Strategies · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Strategies
+¶
+Copy as MD
+When working with data in Tinybird, having clear strategies for testing, deployment, and data management is crucial for maintaining reliable and efficient data operations. This section covers key strategies for:
+Testing your data pipelines and API endpoints
+Deploying changes safely to production
+Managing data backfills and migrations
+Bringing external data into Tinybird
+These strategies help ensure data quality, maintain backward compatibility, and enable smooth transitions when making changes to your data infrastructure. They provide proven approaches developed from real-world experience working with high-volume, real-time data processing.
+Updated
+1 year ago
+On this page
+Strategies
+classic
+Ask AI

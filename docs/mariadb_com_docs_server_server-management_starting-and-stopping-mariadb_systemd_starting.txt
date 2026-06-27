@@ -1,0 +1,321 @@
+Source: https://mariadb.com/docs/server/server-management/starting-and-stopping-mariadb/systemd/starting
+
+Starting MariaDB on systemd | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+Starting & Stopping
+Starting and Stopping Overview
+launchd (macOS)
+systemd (Linux)
+Starting MariaDB on systemd
+Configuring MariaDB for systemd
+sysVinit
+mariadbd-safe
+mariadbd-multi
+mariadbd Options
+mariadbd
+mysql.server
+Running MariaDB From the Build Directory
+Running Multiple MariaDB Server Processes
+Specifying Permissions for Schema (Data) Directories and Tables
+Switching Between Different Installed MariaDB Versions
+What to Do if MariaDB Doesn't Start
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Starting MariaDB on systemd
+Starting, stopping, restarting, and inspecting the MariaDB systemd service, multi-instance setups, Galera Cluster integration, and the systemd journal.
+This page covers the operational side of running MariaDB under
+systemd
+. For drop-in configuration, limits, socket activation, and
+mariadbd-safe
+-to-systemd conversion, see
+Configuring MariaDB for systemd
+.
+Installing & Starting MariaDB
+When installing using the MariaDB server RPM or DEB package, it automatically runs the
+mariadb-install-db
+script which creates the initial databases and users.
+When MariaDB is started with the
+systemd
+unit file, it directly starts the
+mariadbd
+process as the
+mysql
+user. Unlike with
+sysVinit
+, the
+mariadbd
+process is not started with
+mariadbd-safe
+. As a consequence, options are not read from the
+[mariadbd-safe]
+option group
+from
+option files
+.
+Interacting with the MariaDB Server Process
+The service can be interacted with by using the
+systemctl
+command.
+Starting the MariaDB Server Process on Boot
+MariaDB's
+systemd
+service can be configured to start at boot by executing the following:
+Copy
+sudo
+systemctl
+enable
+mariadb.service
+Starting the MariaDB Server Process
+MariaDB's
+systemd
+service can be started by executing the following:
+Copy
+sudo
+systemctl
+start
+mariadb.service
+MariaDB's
+systemd
+unit file has a default startup timeout of about 90 seconds on most systems. If certain startup tasks, such as crash recovery, take longer than this default startup timeout, then
+systemd
+assumes that
+mariadbd
+has failed to startup, which causes
+systemd
+to kill the
+mariadbd
+process. To work around this, you can reconfigure the MariaDB
+systemd
+unit to have an
+infinite timeout
+.
+Note that
+systemd 236 added the EXTEND_TIMEOUT_USEC environment variable
+that allows services to extend the startup timeout during long-running processes. On systems with systemd versions that support it, MariaDB uses this feature to extend the startup timeout during certain startup processes that can run long. Therefore, if you are using
+systemd
+236 or later, then you should not need to manually override
+TimeoutStartSec
+, even if your startup tasks, such as crash recovery, run for longer than the configured value. See
+MDEV-14705
+for more information.
+Stopping the MariaDB Server Process
+MariaDB's
+systemd
+service can be stopped by executing the following:
+Restarting the MariaDB Server Process
+MariaDB's
+systemd
+service can be restarted by executing the following:
+Checking the Status of the MariaDB Server Process
+The status of MariaDB's
+systemd
+service can be obtained by executing the following:
+Interacting with Multiple MariaDB Server Processes
+On some operating systems, a
+systemd
+template unit file
+called
+mariadb@.service
+is installed in
+INSTALL_SYSTEMD_UNITDIR
+. See
+Contents of the MariaDB Service's Unit File
+for how to inspect the unit file on your system.
+This template unit file allows you to interact with multiple MariaDB instances on the same system using the same template unit file. When you interact with a MariaDB instance using this template unit file, you have to provide an instance name as a suffix. For example, the following command tries to start a MariaDB instance with the name
+node1
+:
+MariaDB's build system cannot include the
+mariadb@.service
+template unit file in
+RPM
+packages on platforms that have
+cmake
+versions older than 3.3.0, because these
+cmake
+versions have a
+bug
+that causes it to encounter errors when packaging a file in RPMs if the file name contains the
+@
+character. To use this functionality on a MariaDB version that does not have the file, you can copy the file from a package that contains the file.
+Default Configuration of Multiple Instances
+systemd
+also looks for an
+option file
+for a specific MariaDB instance based on the instance name.
+It uses the
+.%I
+as the
+custom option group suffix
+that is appended to any
+server option group
+, in any configuration file included by default.
+In all distributions, the
+%I
+is the MariaDB instance name. In the above
+node1
+case, it would use the
+option file
+at the path
+/etc/mynode1.cnf
+.
+When using multiple instances, each instance also needs their own
+datadir
+,
+socket
+, and
+port
+(unless
+skip_networking
+is specified). Because
+mariadb-install-db
+reads the same sections as the server, and
+ExecStartPre=run mariadb-install-db
+within the service, the instances are automatically created if there are sufficient privileges.
+Custom Configuration of Multiple Instances
+Because users may want to do many various things with their multiple instances, we've provided a way to let the user define how they wish their multiple instances to run. The systemd environment variable
+MYSQLD_MULTI_INSTANCE
+can be set to anything that
+mariadbd
+and
+mariadb-install-db
+recognize.
+A hosting environment where each user has their own instance looks like this
+(with
+sudo systemctl edit mariadb@.service
+):
+Here the instance name is the unix user of the service.
+Systemd and Galera Cluster
+Bootstrapping a New Cluster
+When using
+Galera Cluster
+with systemd, the first node in a cluster has to be started with
+galera_new_cluster
+. See
+Getting Started with MariaDB Galera Cluster: Bootstrapping a New Cluster
+for more information.
+Recovering a Node's Cluster Position
+When using Galera Cluster with systemd, a node's position in the cluster can be recovered with
+galera_recovery
+. See
+Getting Started with MariaDB Galera Cluster: Determining the Most Advanced Node
+for more information.
+SSTs and Systemd
+MariaDB's
+systemd
+unit file has a default startup timeout of about 90 seconds on most systems. If an SST takes longer than this default startup timeout on a joiner node, then
+systemd
+assumes that
+mariadbd
+has failed to startup, which causes
+systemd
+to kill the
+mariadbd
+process on the joiner node. To work around this, you can reconfigure the MariaDB
+systemd
+unit to have an
+infinite timeout
+. See
+Introduction to State Snapshot Transfers (SSTs): SSTs and Systemd
+for more information.
+Note that
+systemd 236 added the EXTEND_TIMEOUT_USEC environment variable
+that allows services to extend the startup timeout during long-running processes. On systems with
+systemd
+versions that support it, MariaDB uses this feature to extend the startup timeout during long SSTs. Therefore, if you are using
+systemd
+236 or later, you do not need to manually override
+TimeoutStartSec
+even if your SSTs run for longer than the configured value. See
+MDEV-15607
+for more information.
+Systemd Journal
+systemd
+has its own logging system called the
+systemd
+journal. The
+systemd
+journal contains information about the service startup process. It is a good place to look when a failure has occurred.
+The MariaDB
+systemd
+service's journal can be queried by using the
+journalctl
+command:
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+systemd (Linux)
+Next
+Configuring MariaDB for systemd
+Last updated
+1 month ago
+Was this helpful?
+Installing & Starting MariaDB
+Interacting with the MariaDB Server Process
+Starting the MariaDB Server Process on Boot
+Starting the MariaDB Server Process
+Stopping the MariaDB Server Process
+Restarting the MariaDB Server Process
+Checking the Status of the MariaDB Server Process
+Interacting with Multiple MariaDB Server Processes
+Systemd and Galera Cluster
+Bootstrapping a New Cluster
+Recovering a Node's Cluster Position
+SSTs and Systemd
+Systemd Journal
+Was this helpful?
+Copy
+sudo systemctl stop mariadb.service
+Copy
+sudo systemctl restart mariadb.service
+Copy
+sudo systemctl status mariadb.service
+Copy
+sudo systemctl start mariadb@node1.service
+Copy
+[Service]
+ProtectHome=false
+Environment='MYSQLD_MULTI_INSTANCE=--defaults-file=/home/%I/my.cnf \
+--user=%I \
+--socket=/home/%I.sock \
+--datadir=/home/%I/mariadb_data \
+--skip-networking'
+Copy
+$ sudo journalctl n 20 -u mariadb.service
+-- Logs begin at Fri 2019-01-25 13:49:04 EST, end at Fri 2019-01-25 18:07:02 EST. --
+Jan 25 13:49:15 ip-172-30-0-249.us-west-2.compute.internal systemd[1]: Starting MariaDB 10.1.37 database server...
+Jan 25 13:49:16 ip-172-30-0-249.us-west-2.compute.internal mysqld[2364]: 2019-01-25 13:49:16 140547528317120 [Note] /usr/sbin/mysqld (mysqld 10.1.37-MariaDB) starting as process 2364 ...
+Jan 25 13:49:17 ip-172-30-0-249.us-west-2.compute.internal systemd[1]: Started MariaDB 10.1.37 database server.
+Jan 25 18:06:42 ip-172-30-0-249.us-west-2.compute.internal systemd[1]: Stopping MariaDB 10.1.37 database server...
+Jan 25 18:06:44 ip-172-30-0-249.us-west-2.compute.internal systemd[1]: Stopped MariaDB 10.1.37 database server.
+Jan 25 18:06:57 ip-172-30-0-249.us-west-2.compute.internal systemd[1]: Starting MariaDB 10.1.37 database server...
+Jan 25 18:08:32 ip-172-30-0-249.us-west-2.compute.internal systemd[1]: mariadb.service start-pre operation timed out. Terminating.
+Jan 25 18:08:32 ip-172-30-0-249.us-west-2.compute.internal systemd[1]: Failed to start MariaDB 10.1.37 database server.
+Jan 25 18:08:32 ip-172-30-0-249.us-west-2.compute.internal systemd[1]: Unit mariadb.service entered failed state.
+Jan 25 18:08:32 ip-172-30-0-249.us-west-2.compute.internal systemd[1]: mariadb.service failed.

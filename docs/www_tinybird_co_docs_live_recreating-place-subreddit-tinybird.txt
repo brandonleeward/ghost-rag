@@ -1,0 +1,33 @@
+Source: https://www.tinybird.com/docs/live/recreating-place-subreddit-tinybird
+
+Recreating r/place with Tinybird · Tinybird
+Sign In
+Sign Up
+Docs
+API reference
+SQL reference
+← Back to Live
+Recreating r/place with Tinybird
+Remember r/place? In 2017, one million users combined to place 16 million pixels on a canvas, creating the internet’s most famous mosaic in a matter of 72 hours. Come join us as we recreate r/place using Tinybird as a backend, and contribute a pixel or two of your own!
+Recreate the original canvas with
+2022 the r/place dataset
+(20GB, 160M rows)
+Create our own canvas, demonstrating how to ingest pixel placement events into Tinybird and expose them via a parameterized API.
+Build a simple moderator script to keep things clean. :)
+Draw together in realtime!
+Have questions?
+Join us on Slack
+Start building
+Live coding session
+When:
+June 29, 2022 at 15:00 UTC
+Duration:
+1 hour
+Who:
+Alberto Romeu
+Software Engineer
+Raquel Yuste
+Software Developer
+Start building
+Ask AI
+Search...

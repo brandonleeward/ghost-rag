@@ -1,0 +1,57 @@
+Source: https://mariadb.com/docs/server/security/encryption/data-at-rest-encryption/aria-encryption
+
+Aria Encryption | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Security
+Securing MariaDB
+Encryption
+TLS and Cryptography Libraries
+Data-in-Transit Encryption
+Data-at-Rest Encryption
+Data-at-Rest Encryption (TDE) Fundamentals
+Managing Binary Log Encryption
+Aria Encryption
+Aria: Encryption Overview
+Aria: Enabling Encryption
+Aria: Encryption Keys
+Aria: Disabling Encryption
+InnoDB Encryption
+Key Management and Encryption Plugins
+User Account Management
+Authentication with Enterprise Server
+Limiting Size of Created Disk Temporary Files and Tables
+Security Vulnerabilities (CVE) Fixed in MariaDB
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Aria Encryption
+Learn about Aria encryption in MariaDB Server for data at rest. This section details how to encrypt Aria tablespaces, providing enhanced security for your stored data.
+Aria: Encryption Overview
+Aria: Enabling Encryption
+Aria: Encryption Keys
+Aria: Disabling Encryption
+Last updated
+1 year ago
+Was this helpful?
+Was this helpful?

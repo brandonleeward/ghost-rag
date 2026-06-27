@@ -1,0 +1,321 @@
+Source: https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/migrating-to-mariadb/migrating-to-mariadb-from-sql-server/moving-data-between-sql-server-and-mariadb
+
+Moving Data Between SQL Server and MariaDB | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Deployment
+MariaDB Package Repository Setup and Usage
+General Deployment Instructions
+Installing Enterprise Server
+Installing Community Server
+Compiling MariaDB From Source
+Configuring MariaDB
+Upgrading MariaDB
+Downgrading MariaDB
+Migrating to MariaDB
+Differences Between MariaDB and Other DBMSs
+DDL Export Guide
+Migrating to MariaDB from MySQL
+Migrating to MariaDB from PostgreSQL
+Migrating to MariaDB from Oracle
+Migrating to MariaDB from SQL Server
+MariaDB Backups Overview for SQL Server Users
+Understanding MariaDB Architecture
+MariaDB Features Not Available in SQL Server
+SQL Server Features Not Available in MariaDB
+SQL Server Features Implemented Differently in MariaDB
+SQL Server and MariaDB Types Comparison
+Syntax Differences between MariaDB and SQL Server
+MariaDB Authorization and Permissions for SQL Server Users
+MariaDB Replication Overview for SQL Server Users
+MariaDB Transactions and Isolation Levels for SQL Server Users
+Moving Data Between SQL Server and MariaDB
+Repairing MariaDB Tables for SQL Server Users
+Setting Up MariaDB for Testing for SQL Server Users
+MariaDB on Amazon RDS
+Automated Deployment & Administration
+Starting & Stopping
+Automated Deployment & Administration
+Server Monitoring & Logs
+Variables and Modes
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Moving Data Between SQL Server and MariaDB
+Provides methods for transferring data from SQL Server to MariaDB, including generating CSV files, using `mariadb-dump`, or leveraging the CONNECT storage engine with ODBC.
+Migrating from SQL Server?
+Contact our Migration Experts
+There are several ways to move data between SQL Server and MariaDB. Here we will discuss them and we will highlight some caveats.
+Moving Data Definition from SQL Server to MariaDB
+To copy SQL Server data structures to MariaDB, one has to:
+Generate a CSV file from SQL Server data.
+Modify the syntax so that it works in MariaDB.
+Run the file in MariaDB.
+Variables That Affect DDL Statements
+DDL statements are affected by some server system variables.
+sql_mode
+determines the behavior of some SQL statements and expressions, including how strict error checking is, and some details regarding the syntax. Objects like
+stored procedures
+,
+stored functions
+triggers
+and
+views
+, are always executed with the sql_mode that was in effect during their creation.
+sql_mode='MSSQL'
+can be used to have MariaDB behaving as close to SQL Server as possible.
+innodb_strict_mode
+enables the so-called InnoDB strict mode. Normally some errors in the
+CREATE TABLE
+options are ignored. When InnoDB strict mode is enabled, the creation of InnoDB tables will fail with an error when certain mistakes are made.
+updatable_views_with_limit
+determines whether view updates can be made with an
+UPDATE
+or
+DELETE
+statement with a
+LIMIT
+clause if the view does not contain all primary or not null unique key columns from the underlying table.
+Dumps and sys.sql_modules
+SQL Server Management Studio allows one to create a working SQL script to recreate a database - something that MariaDB users refer to as a
+dump
+. Several options allow fine-tuning the generated syntax. It could be necessary to adjust some of these options to make the output compatible with MariaDB. It is possible to export schemas, data or both. One can create a single global file, or one file for each exported object. Normally, producing a single file is more practical.
+Alternatively, the
+sp_helptext()
+procedure returns information about how to recreate a certain object. Similar information is also present in the
+sql_modules
+table (
+definition
+column), in the
+sys
+schema. Such information, however, is not a ready-to-use set of SQL statements.
+Remember however that
+MariaDB does not support schemas
+. An SQL Server schema is approximately a MariaDB database.
+To execute a dump, we can pass the file to
+mariadb
+, the MariaDB command-line client.
+Provided that a dump file contains syntax that is valid in MariaDB, it can be executed in this way:
+--show-warnings
+tells MariaDB to output any warnings produced by the statements contained in the dump. Without this option, warnings will not appear on screen. Warnings don't stop the dump execution.
+Errors will appear on screen. Errors will stop the dump execution, unless the
+--force
+option (or just
+-f
+) is specified.
+For other
+mariadb
+options, see
+mariadb Command-line Client Options
+.
+Another way to achieve the same purpose is to start the
+mariadb
+client in interactive mode first, and then run the
+source
+command. For example:
+In this case, to show warnings we used the
+\W
+command, where "w" is uppercase. To hide warnings (which is the default), we can use
+\w
+(lowercase).
+For other
+mariadb
+commands, see
+mariadb Commands
+.
+CSV Data
+If the table structures are already in MariaDB, we need only to import table data. While this can still be done as explained above, it may be more practical to export CSV files from SQL Server and import them into MariaDB.
+SQL Server Management Studio and several other Microsoft tools allow one to export CSV files.
+MariaDB allows importing CSV files with the
+LOAD DATA INFILE
+statement, which is essentially the MariaDB equivalent of
+BULK INSERT
+.
+It can happen that we don't want to import the whole data, but some filtered or transformed version of it. In that case, we may prefer to use the
+CONNECT
+storage engine to access CSV files and query them. The results of a query can be inserted into a table using
+INSERT SELECT
+.
+Moving Data from MariaDB to SQL Server
+There are several ways to move data from MariaDB to SQL Server:
+If the tables don't exist at all in SQL Server, we need to generate a dump first. The dump can include data or not.
+If the tables are already in SQL Server, we can use CSV files instead of dumps to move the rows. CSV files are the most concise format to move data between different technologies.
+With the tables already in SQL Server, another way to move data is to insert the rows into
+CONNECT
+tables that "point" to remote SQL Server tables.
+Using a Dump (Structure)
+mariadb-dump
+can be used to generate dumps of all databases, a specified database, or a set of tables. It is even possible to only dump a set of rows by specifying the
+WHERE
+clause.
+By specifying the
+--no-data
+option we can dump the table structures without data.
+--compatible=mssql
+will produce an output that should be usable in SQL Server.
+Using a Dump (Data)
+mariadb-dump by default produces an output with both data and structure.
+--no-create-info
+can be used to skip the
+CREATE TABLE
+statements.
+--compatible=mssql
+will produce an output that should be usable in SQL Server.
+--single-transaction
+should be specified to select the source data in a single transaction, so that a consistent dump is produced.
+--quick
+speeds up the dump process when dumping big tables.
+Using a CSV File
+CSV files can also be used to export data to SQL Server. There are several ways to produce CSV files from MariaDB:
+The
+SELECT INTO OUTFILE
+statement.
+The
+CONNECT
+storage engine, with the
+CSV table type
+.
+The
+CSV
+storage engine (note that it doesn't support
+NULL
+and indexes).
+Using CONNECT Tables
+The
+CONNECT
+storage engine allows one to access external data, in many forms:
+Data files
+(
+CSV
+,
+JSON
+,
+XML
+, HTML and more).
+Remote databases, using the
+ODBC
+or
+JDBC
+standards, or
+MariaDB/MySQL native protocol
+.
+Some
+special data sources
+.
+CONNECT
+was mentioned previously because it could allow one to read a CSV file and query it in SQL, filtering and transforming the data that we want to move into regular MariaDB tables.
+However,
+CONNECT
+can also access remote SQL Server tables. We can read data from it, or even write data.
+To enable
+CONNECT
+to work with SQL Server, we need to fulfill these requirements:
+Install the ODBC driver, downloadable form
+Microsoft
+website. The driver is also available for Linux and MacOS.
+Install
+unixODBC
+.
+Install CONNECT
+(unless it is already installed).
+Here is an example of a
+CONNECT
+table that points to a SQL Server table:
+The key points here are:
+ENGINE=CONNECT
+tells MariaDB that we want to create a
+CONNECT
+table.
+TABLE_TYPE
+must be 'ODBC', so
+CONNECT
+knows what type of data source it has to use.
+CONNECTION
+is the connection string to use, including server address, username and password.
+TABNAME
+tells
+CONNECT
+what the remote table is called. The local name could be different.
+CONNECT
+is able to query SQL Server to find out the remote table structure. We can use this feature to avoid specifying the column names and types:
+However, we may prefer to manually specify the MariaDB types, sizes and character sets to use.
+Linked Server
+Instead of using MariaDB
+CONNECT
+, it is possible to use SQL Server Linked Server functionality. This will allow one to read data from a remote MariaDB database and copy it into local SQL Server tables. However, note that
+CONNECT
+allows more control on
+types and character sets
+mapping.
+Refer to
+Linked Servers
+section in Microsoft documentation.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+MariaDB Transactions and Isolation Levels for SQL Server Users
+Next
+Repairing MariaDB Tables for SQL Server Users
+Last updated
+3 months ago
+Was this helpful?
+Moving Data Definition from SQL Server to MariaDB
+Variables That Affect DDL Statements
+Dumps and sys.sql_modules
+CSV Data
+Moving Data from MariaDB to SQL Server
+Using a Dump (Structure)
+Using a Dump (Data)
+Using a CSV File
+Using CONNECT Tables
+Linked Server
+Was this helpful?
+Copy
+mariadb --show-warnings < dump.sql
+Copy
+root@d5a54a082d1b:/# mariadb -uroot -psecret
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 22
+Server version: 10.4.7-MariaDB-1:10.4.7+maria~bionic mariadb.org binary distribution
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+MariaDB [(none)]> \W
+Show warnings enabled.
+MariaDB [(none)]> source dump.sql
+Copy
+CREATE TABLE city (
+id INT PRIMARY KEY,
+city_name VARCHAR(100),
+province_id INT NOT NULL
+)
+ENGINE=CONNECT,
+TABLE_TYPE=ODBC,
+TABNAME='city'
+CONNECTION='Driver=SQL Server Native Client 13.0;Server=sql-server-hostname;Database=world;UID=mariadb_connect;PWD=secret';
+Copy
+CREATE TABLE city
+ENGINE=CONNECT,
+TABLE_TYPE=ODBC,
+TABNAME='city'
+CONNECTION='Driver=SQL Server Native Client 13.0;Server=sql-server-hostname;Database=world;UID=mariadb_connect;PWD=secret';

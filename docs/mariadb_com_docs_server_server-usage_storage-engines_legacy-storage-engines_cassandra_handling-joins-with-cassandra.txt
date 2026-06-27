@@ -1,0 +1,122 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/legacy-storage-engines/cassandra/handling-joins-with-cassandra
+
+Handling Joins With Cassandra | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+FEDERATED Storage Engine
+Cassandra Storage Engine
+Building Cassandra Storage Engine for Packaging
+Building Cassandra Storage Engine
+Cassandra Status Variables
+Cassandra Storage Engine Future Plans
+Cassandra Storage Engine Issues
+Cassandra Storage Engine Overview
+Cassandra Storage Engine Use Example
+Cassandra System Variables
+Handling Joins With Cassandra
+Virtual Machine to Test the Cassandra Storage Engine
+TokuDB
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Handling Joins With Cassandra
+Legacy Cassandra storage engine description. Cassandra was removed from MariaDB in MariaDB 10.6.
+The Cassandra storage engine was removed in MariaDB 10.6.
+Joins with data stored in a Cassandra database are only possible on the MariaDB side. That is, if we want to compute a join between two tables, we will:
+Read the relevant data for the first table.
+Based on data we got in #1, read the matching records from the second table.
+Either of the tables can be an InnoDB table, or a Cassandra table. In case the second table is a Cassandra table, the Cassandra Storage Engine allows to read matching records in an efficient way.
+Some general info
+All this is targeted at running joins which touch small fraction of the tables. The expected typical use-case looks like this:
+The primary data is stored in MariaDB (ie. in InnoDB)
+There is also some extra data stored in Cassandra (e.g. hit counters)
+The user accesses data in MariaDB (think of a website and a query like:
+Copy
+SELECT * FROM user_accounts WHERE username='joe')
+Cassandra SE allows to grab some Cassandra data, as well. One can write things like this:
+Copy
+SELECT
+user_accounts.*,
+cassandra_table.some_more_fields
+FROM
+user_accounts, cassandra_data
+WHERE
+user_accounts.username='joe' AND
+user_accounts.user_id= cassandra_table.user_id
+which is much easier to do than to use Thrift API.
+If the user wants to run huge joins that touch a big fraction of table's data, for example:
+"What are top 10 countries that my website had visitors from in the last month"?
+or
+"Go through last month's orders and give me top 10 selling items"
+then Cassandra Storage engine is not a good answer. Queries like this are answered in two ways:
+Design their schema in Cassandra in such a way that allows to get this data in one small select. No kidding. This is what Cassandra is targeted at, they explicitly recommend that Cassandra schema design starts with the queries.
+If the query doesn't match Cassandra's schema, they need to run Hive (or Pig), which have some kind of distributed join support. Hive/Pig compile queries to Map/reduce job which are ran across the whole cluster, so they will certainly beat Cassandra Storage Engine which runs on one mysqld node (you can have multiple mysqld nodes of course, but they will not cooperate with one
+another).
+It is possible to run Hive/Pig on Cassandra.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Cassandra System Variables
+Next
+Virtual Machine to Test the Cassandra Storage Engine
+Last updated
+6 months ago
+Was this helpful?
+Was this helpful?

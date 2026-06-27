@@ -1,0 +1,1307 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/math-functions
+
+Math Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Mathematical functions
+¶
+Copy as MD
+The following functions perform mathematical operations.
+e
+¶
+Returns the mathematical constant
+e
+, also known as Euler's number.
+Syntax
+¶
+e()
+Returns
+¶
+The value of
+e
+. Type:
+Float64
+.
+Example
+¶
+SELECT e()
+Result:
+┌─e()────────────────┐
+│ 2.718281828459045  │
+└────────────────────┘
+pi
+¶
+Returns the mathematical constant
+π
+(Pi).
+Syntax
+¶
+pi()
+Returns
+¶
+The value of
+π
+. Type:
+Float64
+.
+Example
+¶
+SELECT pi()
+Result:
+┌─pi()───────────────┐
+│ 3.141592653589793  │
+└────────────────────┘
+exp
+¶
+Calculates the exponential function, raising
+e
+to the power of the given argument.
+Syntax
+¶
+exp(x)
+Arguments
+¶
+x
+: The exponent. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The result of
+e^x
+. Type:
+Float*
+.
+Example
+¶
+SELECT round(exp(-1), 4)
+Result:
+┌─round(exp(-1), 4)─┐
+│            0.3679 │
+└───────────────────┘
+log
+¶
+Computes the natural logarithm (base
+e
+) of a number.
+Syntax
+¶
+log(x)
+Alias:
+ln(x)
+Arguments
+¶
+x
+: The number for which to calculate the natural logarithm. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The natural logarithm of
+x
+. Type:
+Float*
+.
+Example
+¶
+SELECT log(10)
+Result:
+┌─log(10)────────────┐
+│ 2.302585092994046  │
+└────────────────────┘
+exp2
+¶
+Calculates 2 raised to the power of the given argument.
+Syntax
+¶
+exp2(x)
+Arguments
+¶
+x
+: The exponent. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The result of
+2^x
+. Type:
+Float*
+.
+Example
+¶
+SELECT exp2(3)
+Result:
+┌─exp2(3)─┐
+│       8 │
+└─────────┘
+intExp2
+¶
+Calculates 2 raised to the power of the given argument, returning the result as an unsigned 64-bit integer.
+Syntax
+¶
+intExp2(x)
+Arguments
+¶
+x
+: The exponent. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The result of
+2^x
+. Type:
+UInt64
+.
+Example
+¶
+SELECT intExp2(5)
+Result:
+┌─intExp2(5)─┐
+│         32 │
+└────────────┘
+log2
+¶
+Computes the binary logarithm (base 2) of a number.
+Syntax
+¶
+log2(x)
+Arguments
+¶
+x
+: The number for which to calculate the binary logarithm. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The base 2 logarithm of
+x
+. Type:
+Float*
+.
+Example
+¶
+SELECT log2(8)
+Result:
+┌─log2(8)─┐
+│       3 │
+└─────────┘
+exp10
+¶
+Calculates 10 raised to the power of the given argument.
+Syntax
+¶
+exp10(x)
+Arguments
+¶
+x
+: The exponent. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The result of
+10^x
+. Type:
+Float*
+.
+Example
+¶
+SELECT exp10(2)
+Result:
+┌─exp10(2)─┐
+│      100 │
+└──────────┘
+intExp10
+¶
+Calculates 10 raised to the power of the given argument, returning the result as an unsigned 64-bit integer.
+Syntax
+¶
+intExp10(x)
+Arguments
+¶
+x
+: The exponent. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The result of
+10^x
+. Type:
+UInt64
+.
+Example
+¶
+SELECT intExp10(3)
+Result:
+┌─intExp10(3)─┐
+│        1000 │
+└─────────────┘
+log10
+¶
+Computes the common logarithm (base 10) of a number.
+Syntax
+¶
+log10(x)
+Arguments
+¶
+x
+: The number for which to calculate the common logarithm. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The base 10 logarithm of
+x
+. Type:
+Float*
+.
+Example
+¶
+SELECT log10(100)
+Result:
+┌─log10(100)─┐
+│          2 │
+└────────────┘
+sqrt
+¶
+Calculates the square root of a non-negative number.
+Syntax
+¶
+sqrt(x)
+Arguments
+¶
+x
+: The number for which to calculate the square root. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The square root of
+x
+. Type:
+Float*
+.
+Example
+¶
+SELECT sqrt(25)
+Result:
+┌─sqrt(25)─┐
+│        5 │
+└──────────┘
+cbrt
+¶
+Calculates the cube root of a number.
+Syntax
+¶
+cbrt(x)
+Arguments
+¶
+x
+: The number for which to calculate the cube root. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The cube root of
+x
+. Type:
+Float*
+.
+Example
+¶
+SELECT cbrt(27)
+Result:
+┌─cbrt(27)─┐
+│        3 │
+└──────────┘
+erf
+¶
+Computes the error function of a given value. This function is often used in probability and statistics.
+Syntax
+¶
+erf(x)
+Arguments
+¶
+x
+: The input value. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The error function of
+x
+. Type:
+Float*
+.
+Example
+¶
+SELECT erf(3 / sqrt(2))
+Result:
+┌─erf(divide(3, sqrt(2)))─┐
+│      0.9973002039367398 │
+└─────────────────────────┘
+erfc
+¶
+Computes the complementary error function, which is
+1 - erf(x)
+. This function provides higher precision for large
+x
+values compared to directly calculating
+1 - erf(x)
+.
+Syntax
+¶
+erfc(x)
+Arguments
+¶
+x
+: The input value. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The complementary error function of
+x
+. Type:
+Float*
+.
+Example
+¶
+SELECT erfc(0)
+Result:
+┌─erfc(0)─┐
+│       1 │
+└─────────┘
+lgamma
+¶
+Calculates the natural logarithm of the absolute value of the gamma function.
+Syntax
+¶
+lgamma(x)
+Arguments
+¶
+x
+: The input value. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The natural logarithm of the gamma function of
+x
+. Type:
+Float*
+.
+Example
+¶
+SELECT lgamma(5)
+Result:
+┌─lgamma(5)──────────┐
+│ 3.1780538303479453 │
+└────────────────────┘
+tgamma
+¶
+Calculates the gamma function of a given value.
+Syntax
+¶
+gamma(x)
+Arguments
+¶
+x
+: The input value. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The gamma function of
+x
+. Type:
+Float*
+.
+Example
+¶
+SELECT gamma(5)
+Result:
+┌─gamma(5)─┐
+│       24 │
+└──────────┘
+sin
+¶
+Computes the sine of an angle given in radians.
+Syntax
+¶
+sin(x)
+Arguments
+¶
+x
+: The angle in radians. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The sine of
+x
+. Type:
+Float*
+.
+Example
+¶
+SELECT sin(pi() / 2)
+Result:
+┌─sin(divide(pi(), 2))─┐
+│                    1 │
+└──────────────────────┘
+cos
+¶
+Computes the cosine of an angle given in radians.
+Syntax
+¶
+cos(x)
+Arguments
+¶
+x
+: The angle in radians. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The cosine of
+x
+. Type:
+Float*
+.
+Example
+¶
+SELECT cos(pi())
+Result:
+┌─cos(pi())─┐
+│        -1 │
+└───────────┘
+tan
+¶
+Computes the tangent of an angle given in radians.
+Syntax
+¶
+tan(x)
+Arguments
+¶
+x
+: The angle in radians. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The tangent of
+x
+. Type:
+Float*
+.
+Example
+¶
+SELECT tan(pi() / 4)
+Result:
+┌─tan(divide(pi(), 4))─┐
+│                    1 │
+└──────────────────────┘
+asin
+¶
+Computes the arc sine (inverse sine) of a value, returning the angle in radians.
+Syntax
+¶
+asin(x)
+Arguments
+¶
+x
+: The value for which to calculate the arc sine (must be between -1 and 1). Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The arc sine of
+x
+in radians. Type:
+Float*
+.
+Example
+¶
+SELECT asin(1)
+Result:
+┌─asin(1)────────────┐
+│ 1.5707963267948966 │
+└────────────────────┘
+acos
+¶
+Computes the arc cosine (inverse cosine) of a value, returning the angle in radians.
+Syntax
+¶
+acos(x)
+Arguments
+¶
+x
+: The value for which to calculate the arc cosine (must be between -1 and 1). Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The arc cosine of
+x
+in radians. Type:
+Float*
+.
+Example
+¶
+SELECT acos(0)
+Result:
+┌─acos(0)────────────┐
+│ 1.5707963267948966 │
+└────────────────────┘
+atan
+¶
+Computes the arc tangent (inverse tangent) of a value, returning the angle in radians.
+Syntax
+¶
+atan(x)
+Arguments
+¶
+x
+: The value for which to calculate the arc tangent. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The arc tangent of
+x
+in radians. Type:
+Float*
+.
+Example
+¶
+SELECT atan(1)
+Result:
+┌─atan(1)────────────┐
+│ 0.7853981633974483 │
+└────────────────────┘
+pow
+¶
+Calculates the result of raising a base number to a specified exponent.
+Syntax
+¶
+pow(x, y)
+Alias:
+power(x, y)
+Arguments
+¶
+x
+: The base number. Type:
+(U)Int8/16/32/64
+,
+Float*
+or
+Decimal*
+.
+y
+: The exponent. Type:
+(U)Int8/16/32/64
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The value of
+x
+raised to the power of
+y
+. Type:
+Float64
+.
+Example
+¶
+SELECT pow(2, 4)
+Result:
+┌─pow(2, 4)─┐
+│        16 │
+└───────────┘
+cosh
+¶
+Computes the hyperbolic cosine of an angle.
+Syntax
+¶
+cosh(x)
+Arguments
+¶
+x
+: The angle, in radians. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The hyperbolic cosine of
+x
+. Type:
+Float64
+.
+Example
+¶
+SELECT cosh(0)
+Result:
+┌─cosh(0)──┐
+│        1 │
+└──────────┘
+acosh
+¶
+Computes the inverse hyperbolic cosine of a value.
+Syntax
+¶
+acosh(x)
+Arguments
+¶
+x
+: The value for which to calculate the inverse hyperbolic cosine (must be
+>= 1
+). Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The inverse hyperbolic cosine of
+x
+in radians. Type:
+Float64
+.
+Example
+¶
+SELECT acosh(1)
+Result:
+┌─acosh(1)─┐
+│        0 │
+└──────────┘
+sinh
+¶
+Computes the hyperbolic sine of an angle.
+Syntax
+¶
+sinh(x)
+Arguments
+¶
+x
+: The angle, in radians. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The hyperbolic sine of
+x
+. Type:
+Float64
+.
+Example
+¶
+SELECT sinh(0)
+Result:
+┌─sinh(0)──┐
+│        0 │
+└──────────┘
+asinh
+¶
+Computes the inverse hyperbolic sine of a value.
+Syntax
+¶
+asinh(x)
+Arguments
+¶
+x
+: The value for which to calculate the inverse hyperbolic sine. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The inverse hyperbolic sine of
+x
+in radians. Type:
+Float64
+.
+Example
+¶
+SELECT asinh(0)
+Result:
+┌─asinh(0)─┐
+│        0 │
+└──────────┘
+tanh
+¶
+Computes the hyperbolic tangent of an angle.
+Syntax
+¶
+tanh(x)
+Arguments
+¶
+x
+: The angle, in radians. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The hyperbolic tangent of
+x
+. Type:
+Float*
+.
+Example
+¶
+SELECT tanh(0)
+Result:
+┌─tanh(0)─┐
+│       0 │
+└─────────┘
+atanh
+¶
+Computes the inverse hyperbolic tangent of a value.
+Syntax
+¶
+atanh(x)
+Arguments
+¶
+x
+: The value for which to calculate the inverse hyperbolic tangent (must be between -1 and 1, exclusive). Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The inverse hyperbolic tangent of
+x
+in radians. Type:
+Float64
+.
+Example
+¶
+SELECT atanh(0)
+Result:
+┌─atanh(0)─┐
+│        0 │
+└──────────┘
+atan2
+¶
+Calculates the angle in radians between the positive x-axis and a point
+(x, y)
+in the Euclidean plane. This function correctly handles all four quadrants.
+Syntax
+¶
+atan2(y, x)
+Arguments
+¶
+y
+: The y-coordinate of the point. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+x
+: The x-coordinate of the point. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The angle
+θ
+in radians, where
+-π < θ <= π
+. Type:
+Float64
+.
+Example
+¶
+SELECT atan2(1, 1)
+Result:
+┌────────atan2(1, 1)─┐
+│ 0.7853981633974483 │
+└────────────────────┘
+hypot
+¶
+Calculates the length of the hypotenuse of a right-angled triangle given the lengths of its two shorter sides. This function is designed to avoid overflow or underflow issues with very large or small inputs.
+Syntax
+¶
+hypot(x, y)
+Arguments
+¶
+x
+: The length of the first side (cathetus). Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+y
+: The length of the second side (cathetus). Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The length of the hypotenuse. Type:
+Float64
+.
+Example
+¶
+SELECT hypot(3, 4)
+Result:
+┌─hypot(3, 4)─┐
+│           5 │
+└─────────────┘
+log1p
+¶
+Computes the natural logarithm of
+1 + x
+. This function offers improved precision for
+x
+values close to zero compared to
+log(1 + x)
+.
+Syntax
+¶
+log1p(x)
+Arguments
+¶
+x
+: The input value (must be
+> -1
+). Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The natural logarithm of
+1 + x
+. Type:
+Float64
+.
+Example
+¶
+SELECT log1p(0)
+Result:
+┌─log1p(0)─┐
+│        0 │
+└──────────┘
+sign
+¶
+Determines the sign of a numeric value.
+Syntax
+¶
+sign(x)
+Arguments
+¶
+x
+: Any numeric value. Type: All numeric types.
+Returns
+¶
+-1
+if
+x < 0
+0
+if
+x = 0
+1
+if
+x > 0
+Type:
+Int8
+.
+Example
+¶
+SELECT sign(-5)
+Result:
+┌─sign(-5)─┐
+│       -1 │
+└──────────┘
+sigmoid
+¶
+Applies the sigmoid activation function, which maps any real-valued number to a value between 0 and 1. This is commonly used in machine learning.
+Syntax
+¶
+sigmoid(x)
+Arguments
+¶
+x
+: The input value. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The sigmoid of
+x
+. Type:
+Float64
+.
+Example
+¶
+SELECT round(sigmoid(0), 5)
+Result:
+┌─round(sigmoid(0), 5)─┐
+│                  0.5 │
+└──────────────────────┘
+degrees
+¶
+Converts an angle from radians to degrees.
+Syntax
+¶
+degrees(x)
+Arguments
+¶
+x
+: The angle in radians. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The angle in degrees. Type:
+Float64
+.
+Example
+¶
+SELECT degrees(pi())
+Result:
+┌─degrees(pi())─┐
+│           180 │
+└───────────────┘
+radians
+¶
+Converts an angle from degrees to radians.
+Syntax
+¶
+radians(x)
+Arguments
+¶
+x
+: The angle in degrees. Type:
+(U)Int*
+,
+Float*
+or
+Decimal*
+.
+Returns
+¶
+The angle in radians. Type:
+Float64
+.
+Example
+¶
+SELECT radians(90)
+Result:
+┌─radians(90)────────┐
+│ 1.5707963267948966 │
+└────────────────────┘
+factorial
+¶
+Computes the factorial of a non-negative integer. The factorial of
+n
+is the product of all positive integers less than or equal to
+n
+.
+Syntax
+¶
+factorial(n)
+Arguments
+¶
+n
+: A non-negative integer. Type: Any integer type.
+Returns
+¶
+The factorial of
+n
+. Type:
+UInt64
+.
+Example
+¶
+SELECT factorial(5)
+Result:
+┌─factorial(5)─┐
+│          120 │
+└──────────────┘
+width_bucket
+¶
+Assigns a numeric value to a specific bucket within a defined range, dividing the range into equal-width intervals.
+Syntax
+¶
+widthBucket(operand, low, high, count)
+Alias:
+WIDTH_BUCKET
+Arguments
+¶
+operand
+: The value to be placed into a bucket. Type: Any numeric type.
+low
+: The lower bound of the range. Type: Any numeric type.
+high
+: The upper bound of the range. Type: Any numeric type.
+count
+: The number of equal-width buckets. Type:
+UInt*
+(must be non-zero).
+Returns
+¶
+The bucket number (1 to
+count
+),
+0
+if
+operand < low
+, or
+count + 1
+if
+operand >= high
+. Type:
+UInt64
+.
+Example
+¶
+SELECT widthBucket(5.5, 0, 10, 2)
+Result:
+┌─widthBucket(5.5, 0, 10, 2)─┐
+│                          2 │
+└────────────────────────────┘
+proportionsZTest
+¶
+Performs a two-proportion Z-test to compare the proportions of successes from two independent populations. It returns statistical metrics including the Z-statistic, p-value, and confidence interval.
+Syntax
+¶
+proportionsZTest(successes_x, successes_y, trials_x, trials_y, conf_level, pool_type)
+Arguments
+¶
+successes_x
+: Number of successes in population
+x
+. Type:
+UInt64
+.
+successes_y
+: Number of successes in population
+y
+. Type:
+UInt64
+.
+trials_x
+: Total number of trials in population
+x
+. Type:
+UInt64
+.
+trials_y
+: Total number of trials in population
+y
+. Type:
+UInt64
+.
+conf_level
+: The desired confidence level for the test (e.g., 0.95 for 95%). Type:
+Float64
+.
+pool_type
+: Specifies whether to use a 'pooled' or 'unpooled' estimate for the standard error. Type:
+String
+.
+For argument
+pool_type
+: In the pooled version, the two proportions are averaged, and only one proportion is used to estimate the standard error. In the unpooled version, the two proportions are used separately.
+Returns
+¶
+A tuple containing:
+z_stat
+: The calculated Z-statistic. Type:
+Float64
+.
+p_val
+: The p-value of the test. Type:
+Float64
+.
+ci_low
+: The lower bound of the confidence interval. Type:
+Float64
+.
+ci_high
+: The upper bound of the confidence interval. Type:
+Float64
+.
+Example
+¶
+SELECT proportionsZTest(10, 11, 100, 101, 0.95, 'unpooled')
+Result:
+┌─proportionsZTest(10, 11, 100, 101, 0.95, 'unpooled')───────────────────────────────┐
+│ (-0.20656724435948853,0.8363478437079654,-0.09345975390115283,0.07563797172293502) │
+└────────────────────────────────────────────────────────────────────────────────────┘
+Updated
+3 weeks ago
+On this page
+Mathematical functions
+e
+pi
+exp
+log
+exp2
+intExp2
+log2
+exp10
+intExp10
+log10
+sqrt
+cbrt
+erf
+erfc
+lgamma
+tgamma
+sin
+cos
+tan
+asin
+acos
+atan
+pow
+cosh
+acosh
+sinh
+asinh
+tanh
+atanh
+atan2
+hypot
+log1p
+sign
+sigmoid
+degrees
+radians
+factorial
+width_bucket
+proportionsZTest
+forward
+classic
+Ask AI

@@ -1,0 +1,187 @@
+Source: https://mariadb.com/docs/server/server-usage/views/inserting-and-updating-with-views
+
+Inserting and Updating with Views | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+ALTER VIEW
+CREATE VIEW
+DROP VIEW
+Information Schema VIEWS Table
+Inserting and Updating with Views
+View Algorithms
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Inserting and Updating with Views
+Covers the conditions under which a view is updatable, allowing INSERT, UPDATE, and DELETE operations to modify the underlying base tables.
+A
+view
+can be used for inserting or updating. However, there are certain limitations.
+Updating with Views
+A view cannot be used for updating if it uses any of the following:
+ALGORITHM=TEMPTABLE
+(see
+View Algorithms
+)
+HAVING
+GROUP BY
+DISTINCT
+UNION
+UNION ALL
+An aggregate function, such as
+MAX()
+,
+MIN()
+,
+SUM()
+or
+COUNT()
+Subquery in the
+SELECT
+list
+Subquery in the
+WHERE
+clause referring to a table in the
+FROM
+clause
+If it has no underlying table because it refers only to literal values
+The
+FROM
+clause contains a non-updatdable view.
+Multiple references to any base table column
+An outer join
+An inner join where more than one table in the view definition is being updated
+If there's a
+LIMIT
+clause, the view does not contain all primary or not null unique key columns from the underlying table and the
+updatable_views_with_limit
+system variable is set to
+0
+.
+Inserting with Views
+A view cannot be used for inserting if it fails any of the criteria for
+updating
+, and must also meet the following conditions:
+the view contains all base table columns that don't have default values
+no base table columns are present in view select list more than once
+the view columns are all simple columns, and not derived in any way. The following are examples of derived columns
+column_name + 25
+LOWER(column_name)
+(subquery)
+9.5
+column1 / column2
+Checking Whether a View is Updatable
+MariaDB stores an IS_UPDATABLE flag with each view, so it is always possible to see if MariaDB considers a view updatable (although not necessarily insertable) by querying the IS_UPDATABLE column in the INFORMATION_SCHEMA.VIEWS table.
+WITH CHECK OPTION
+The WITH CHECK OPTION clause is used to prevent updates or inserts to views unless the WHERE clause in the SELECT statement is true.
+There are two keywords that can be applied. WITH LOCAL CHECK OPTION restricts the CHECK OPTION to only the view being defined, while WITH CASCADED CHECK OPTION checks all underlying views as well. CASCADED is treated as default if neither keyword is given.
+If a row is rejected because of the CHECK OPTION, an error similar to the following is produced:
+A view with a WHERE which is always false (like
+WHERE 0
+) and WITH CHECK OPTION is similar to a
+BLACKHOLE
+table: no row is ever inserted and no row is ever returned. An insertable view with a WHERE which is always false but no CHECK OPTION is a view that accepts data but does not show them.
+Examples
+Checking whether the view is updateable:
+This query works, as the view is updateable:
+This query fails, since column
+y
+is a literal.
+Here are three views to demonstrate the WITH CHECK OPTION clause.
+This insert succeeds, as
+view_check2
+only checks the insert against
+view_check2
+, and the WHERE clause evaluates to true (
+150
+is
+>10
+).
+This insert fails, as
+view_check3
+checks the insert against both
+view_check3
+and the underlying views. The WHERE clause for
+view_check1
+evaluates as false (
+150
+is
+>10
+, but
+150
+is not
+<100
+), so the insert fails.
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+Information Schema VIEWS Table
+Next
+View Algorithms
+Last updated
+17 days ago
+Was this helpful?
+Updating with Views
+Inserting with Views
+Checking Whether a View is Updatable
+WITH CHECK OPTION
+Examples
+Was this helpful?
+Copy
+ERROR 1369 (HY000): CHECK OPTION failed 'db_name.view_name'
+Copy
+CREATE TABLE table1 (x INT);
+CREATE VIEW view1 AS SELECT x, 99 AS y FROM table1;
+Copy
+SELECT TABLE_NAME,IS_UPDATABLE FROM INFORMATION_SCHEMA.VIEWS;
++------------+--------------+
+| TABLE_NAME | IS_UPDATABLE |
++------------+--------------+
+| view1      | YES          |
++------------+--------------+
+Copy
+UPDATE view1 SET x = 5;
+Copy
+UPDATE view1 SET y = 5;
+ERROR 1348 (HY000): Column 'y' is not updatable
+Copy
+CREATE VIEW view_check1 AS SELECT * FROM table1 WHERE x < 100 WITH CHECK OPTION;
+CREATE VIEW view_check2 AS SELECT * FROM view_check1 WHERE x > 10 WITH LOCAL CHECK OPTION;
+CREATE VIEW view_check3 AS SELECT * FROM view_check1 WHERE x > 10 WITH CASCADED CHECK OPTION;
+Copy
+INSERT INTO view_check2 VALUES (150);
+Copy
+INSERT INTO view_check3 VALUES (150);
+ERROR 1369 (HY000): CHECK OPTION failed 'test.view_check3'

@@ -1,0 +1,124 @@
+Source: https://mariadb.com/docs/server/server-usage/storage-engines/spider/spider-faq
+
+Spider FAQ | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Basics
+Connecting
+Data Handling
+Backup & Restore
+Tables
+Partitioning Tables
+Stored Routines
+Storage Engines
+Storage Engines Overview
+Choosing the Right Storage Engine
+ARCHIVE
+ARIA
+BLACKHOLE
+CONNECT
+CSV
+DuckDB
+FederatedX
+InnoDB
+MEMORY
+MERGE
+Mroonga
+MyISAM
+MyRocks
+OQGRAPH
+PERFORMANCE_SCHEMA
+SEQUENCE Storage Engine
+S3 Storage Engine
+SphinxSE
+Spider
+Spider Storage Engine Overview
+Spider Storage Engine Introduction
+Spider Differences Between SpiderForMySQL and MariaDB
+Spider Feature Matrix
+Spider Use Cases
+Spider Installation
+Spider Cluster Management
+Spider Case Studies
+Spider Benchmarks
+Information Schema SPIDER_WRAPPER_PROTOCOLS Table
+Spider Storage Engine Core Concepts
+Spider System Variables
+Spider Table Parameters
+Spider Functions
+Spider FAQ
+VIDEX Storage Engine
+Converting Tables from MyISAM to InnoDB
+Machine Learning with MindsDB
+Legacy Storage Engines
+Triggers & Events
+User-Defined Functions
+Views
+Server Management
+Security
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Spider FAQ
+Frequently asked questions about Spider, covering troubleshooting common errors, configuration best practices, and architectural questions regarding HA and sharding.
+What does "[ERROR] mysqld: Can't find record in 'spider_tables'" mean?
+This happens when you have a Spider table defined that does not point to an existing table on a data node.
+Are there minimum Spider settings?
+Copy
+myisam-recover=FORCE,BACKUP
+What does "select spider_ping_table()" in the general log mean?
+This is used by Spider monitoring to ask other monitoring nodes the status of a table.
+Do I need a primary key on physical tables?
+Not having a primary key will generate errors for resynchronizing tables via spider_copy_table().
+Can I use Spider on top of Galera shards?
+Yes, XA transactions can be disabled from Spider. Until Galera 4.0 fully supports xa transactions, spider can point to a maxscale proxy that can manage transparent node election in case of failure inside a shard group. Note that disabling XA will break cross shard WRITES in case of transaction ROLLBACK.
+This architecture need to be used with care if you have a highly transactional workload that can generate cross shard deadlocks.
+What are the most used architectures for Spider HA?
+Delegation of shard node replication using asynchronous replication and slave election with GTID.
+Delegation of shard node replication via active passive HA solutions.
+Shard builds via replication into Spider tables is interesting when you can route READS to a pool of Spider nodes reattaching the shards.
+What are the most used architectures for Spider Map Reduce?
+Map reduce in Spider is limited to a single table. Building spider on top of some views can eliminate the need to use joins.
+Replication to universal tables to every shard is commonly used to enable the views on each shard.
+What about Grants on shards?
+When using MRR and BKA (and you do so with network storage), when Spider needs to create temporary tables on the backends, use the CREATE TEMPORARY TABLES privilege. Spider can still switch to a lower performance solution using
+spider_bka_mode=2
+, or Query push down or range predicate using
+spider_bka_mode=0
+This page is licensed: CC BY-SA / Gnu FDL
+spinner
+Previous
+SPIDER_FLUSH_TABLE_MON_CACHE
+Next
+VIDEX Storage Engine
+Last updated
+1 year ago
+Was this helpful?
+What does "[ERROR] mysqld: Can't find record in 'spider_tables'" mean?
+Are there minimum Spider settings?
+What does "select spider_ping_table()" in the general log mean?
+Do I need a primary key on physical tables?
+Can I use Spider on top of Galera shards?
+What are the most used architectures for Spider HA?
+What are the most used architectures for Spider Map Reduce?
+What about Grants on shards?
+Was this helpful?

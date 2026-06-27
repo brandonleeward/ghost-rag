@@ -1,0 +1,250 @@
+Source: https://www.tinybird.com/docs/sql-reference/clickhouse-errors/UNKNOWN_FUNCTION
+
+UNKNOWN_FUNCTION ClickHouse error · Tinybird Docs
+Sign In
+Sign Up
+UNKNOWN_FUNCTION ClickHouse error
+¶
+Copy as MD
+This error usually means you're calling a function that doesn't exist in ClickHouse. Check the function name spelling and verify it's available in your ClickHouse version.
+The
+UNKNOWN_FUNCTION
+error in ClickHouse (and Tinybird) happens when you try to use a function that doesn't exist in the ClickHouse function library. This can occur due to typos, using functions from other databases, or calling functions that aren't available in your ClickHouse version.
+What causes this error
+¶
+You'll typically see it when:
+Misspelling function names
+Using functions from other database systems (MySQL, PostgreSQL, etc.)
+Calling functions that don't exist in ClickHouse
+Using functions available in newer ClickHouse versions
+Using custom functions that haven't been created
+Example errors
+¶
+Fails: non-existent function
+SELECT magic_function(user_id) FROM events
+Fails: non-existent function
+SELECT nonexistent_function(user_id) FROM events
+Fails: non-existent function
+SELECT magic_function(user_id) FROM events
+Fails: non-existent function
+SELECT invalid_function(user_id) FROM events
+How to fix it
+¶
+Check function spelling
+¶
+Verify the correct function name:
+Fix: correct spelling
+SELECT substring('hello world', 1, 5)
+Use ClickHouse equivalents
+¶
+Find the ClickHouse equivalent for functions from other databases:
+Fix: use ClickHouse concat
+SELECT concat('a', ',', 'b', ',', 'c')
+Check function availability
+¶
+Verify the function exists in your ClickHouse version:
+Check available functions
+SELECT * FROM system.functions WHERE name LIKE '%string%'
+Use proper case
+¶
+ClickHouse functions are case-sensitive:
+Fix: correct case
+SELECT substring('hello world', 1, 5)
+Functions like
+substring()
+are case-sensitive. Always use lowercase function names in ClickHouse.
+Common patterns and solutions
+¶
+String functions
+¶
+Common string function equivalents:
+String function examples
+SELECT substring('hello world', 1, 5)  -- Extract substring
+SELECT replace('hello world', 'world', 'clickhouse')  -- Replace text
+SELECT concat('hello', ' ', 'world')  -- Concatenate strings
+SELECT trim('  hello  ')  -- Remove whitespace
+Date and time functions
+¶
+Date function equivalents:
+Date function examples
+SELECT toDate('2023-01-01')  -- Convert to date
+SELECT toDateTime('2023-01-01 12:00:00')  -- Convert to datetime
+SELECT now()  -- Current timestamp
+SELECT formatDateTime(now(), '%Y-%m-%d')  -- Format datetime
+Mathematical functions
+¶
+Math function equivalents:
+Math function examples
+SELECT abs(-10)  -- Absolute value
+SELECT round(3.14159, 2)  -- Round number
+SELECT power(2, 3)  -- Raise to power
+SELECT sqrt(16)  -- Square root
+Aggregate functions
+¶
+Aggregate function examples:
+Aggregate function examples
+SELECT count(*) FROM events  -- Count rows
+SELECT sum(value) FROM events  -- Sum values
+SELECT avg(value) FROM events  -- Average values
+SELECT max(timestamp) FROM events  -- Maximum value
+Function categories and equivalents
+¶
+String manipulation
+¶
+Other DB
+ClickHouse
+Description
+SUBSTR
+substring
+Extract substring
+CONCAT_WS
+concat
+Concatenate with separator
+TRIM
+trim
+Remove whitespace
+UPPER
+upper
+Convert to uppercase
+LOWER
+lower
+Convert to lowercase
+Date and time
+¶
+Other DB
+ClickHouse
+Description
+DATE_FORMAT
+formatDateTime
+Format datetime (use
+%Y-%m-%d
+format)
+DATEDIFF
+dateDiff
+Date difference
+DATE_ADD
+addDays
+Add days to date
+NOW()
+now()
+Current timestamp
+Mathematical
+¶
+Other DB
+ClickHouse
+Description
+ABS
+abs
+Absolute value
+ROUND
+round
+Round number
+POWER
+power
+Raise to power
+SQRT
+sqrt
+Square root
+Advanced solutions
+¶
+Using function aliases
+¶
+Some functions have multiple names:
+Function aliases
+SELECT substring('hello', 1, 3)  -- Same as substr
+SELECT concat('a', 'b')  -- Same as concat_ws with empty separator
+Custom functions
+¶
+Create custom functions if needed:
+Custom function example
+-- This would require creating a custom function
+-- SELECT custom_function(column) FROM table
+Function composition
+¶
+Combine multiple functions for complex operations:
+Function composition
+SELECT upper(trim(concat('  hello  ', ' world'))) as result
+Tinybird-specific notes
+¶
+In Tinybird, this error often occurs when:
+Using functions not available in Tinybird's ClickHouse version
+Calling custom functions that haven't been implemented
+Using functions from other database systems
+Working with Materialized Views that use unavailable functions
+To debug in Tinybird:
+Check the ClickHouse function documentation
+Test functions in the Query Builder first
+Verify function availability in your Tinybird environment
+Use alternative functions when needed
+Function discovery
+¶
+Use these commands to discover available functions:
+List all functions
+SELECT name FROM system.functions ORDER BY name
+Search for specific functions
+SELECT name FROM system.functions WHERE name LIKE '%string%'
+New functions may require enabling
+allow_experimental_*
+settings.
+Best practices
+¶
+Function verification
+¶
+Test functions with simple examples first
+Check function documentation before use
+Verify function availability in your environment
+Use function autocomplete in your IDE
+Error handling
+¶
+Implement proper error handling for function calls
+Use
+try()
+functions for potentially problematic operations
+Log function errors for debugging
+Have fallback functions ready
+Performance considerations
+¶
+Use built-in functions when possible
+Avoid complex function compositions
+Test function performance on large datasets
+Use appropriate function types for your data
+See also
+¶
+ClickHouse Functions
+String Functions
+Date and Time Functions
+Common function errors
+Updated
+7 months ago
+On this page
+UNKNOWN_FUNCTION ClickHouse error
+What causes this error
+Example errors
+How to fix it
+Check function spelling
+Use ClickHouse equivalents
+Check function availability
+Use proper case
+Common patterns and solutions
+String functions
+Date and time functions
+Mathematical functions
+Aggregate functions
+Function categories and equivalents
+String manipulation
+Date and time
+Mathematical
+Advanced solutions
+Using function aliases
+Custom functions
+Function composition
+Tinybird-specific notes
+Function discovery
+Best practices
+Function verification
+Error handling
+Performance considerations
+See also
+forward
+classic
+Ask AI

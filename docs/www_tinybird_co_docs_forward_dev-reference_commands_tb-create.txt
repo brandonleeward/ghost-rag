@@ -1,0 +1,59 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-create
+
+tb create (deprecated) · Tinybird Docs
+Sign In
+Sign Up
+tb create (deprecated)
+¶
+Copy as MD
+tb create
+is deprecated.
+Use
+tb init
+to scaffold projects.
+The command is kept only for backward compatibility and prints a deprecation warning.
+Replacement
+¶
+Use
+tb init
+instead:
+tb init --type cli
+Common equivalents:
+Choose project folder:
+tb init --folder tinybird
+Set development mode:
+tb init --dev-mode manual
+Generate CI/CD templates:
+tb init --cicd github
+or
+tb init --cicd gitlab
+Options
+¶
+Option
+Description
+-h, --help
+Shows the help message.
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✓ Yes (implicit)
+The deprecation notice is shown locally.
+--cloud
+✗ No
+Not supported.
+--branch=BRANCH_NAME
+✗ No
+Not supported.
+Updated
+3 months ago
+Looking for Classic docs?
+On this page
+tb create (deprecated)
+Replacement
+Options
+Environment support
+forward
+Ask AI

@@ -1,0 +1,44 @@
+Source: https://www.tinybird.com/docs/classic/work-with-data/organize-your-work
+
+Classic: Continuous Integration Introduction · Tinybird Docs
+Sign In
+Sign Up
+You are viewing Classic documentation.
+View the latest Forward docs →
+Prepare your data project for production
+¶
+Copy as MD
+Tinybird's Git integration transforms data pipeline management, aligning it with established software development practices. This ensures each Tinybird Workspace action relates to a specific Git commit, offering a robust, version-controlled environment for your real-time data deployments. In a nutshell, it brings your workflow closer to industry best practices.
+Why use version control?
+¶
+Version control, a standard in software development, is now integral to building real-time data products with Tinybird. If your Workspace uses Tinybird's integration with Git, it means you can build real-time data products like you build any software - not just benefiting from version control, but also isolated environments, CI/CD, and testing too.
+This approach allows you to treat and manage your real-time data in the
+same way you manage your code
+. You can take your existing software engineering knowledge and apply the same principles to real-time data products.
+When managing your Tinybird projects with version control, you can also:
+Sync Tinybird actions with your Git commits.
+Deploy semantically-versioned Data Sources, Pipes, and API Endpoints as code.
+Use Branches to attach production data to non-production Branches, and test your data pipelines safely with real data.
+If you're familiar with version control already, it should make testing, merging, and deploying your Tinybird data projects a familiar process.
+Data teams can use Tinybird in the same way that software engineering teams work: To enforce standardized agreements to use version control, code reviews, quality assurance, testing strategies, and continuous deployment.
+Next steps
+¶
+Get familiar with the core concepts:
+Branches
+and
+Workspaces
+.
+Follow the version control tutorial to connect your Tinybird Workspace to version control:
+Working with version control
+.
+Explore our
+repository of common use cases for iterating using version control
+to explore and try out how to iterate Tinybird projects with version control.
+Updated
+1 year ago
+On this page
+Prepare your data project for production
+Why use version control?
+Next steps
+classic
+Ask AI

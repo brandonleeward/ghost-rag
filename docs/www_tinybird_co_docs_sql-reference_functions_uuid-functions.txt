@@ -1,0 +1,730 @@
+Source: https://www.tinybird.com/docs/sql-reference/functions/uuid-functions
+
+UUID Functions reference · Tinybird Docs
+Sign In
+Sign Up
+Functions for working with UUIDs
+¶
+Copy as MD
+The following functions are available for working with UUIDs.
+generateUUIDv4
+¶
+Generates a universally unique identifier (UUID) following version 4 specifications, which are based on random numbers.
+Syntax
+¶
+generateUUIDv4([expr])
+Arguments
+¶
+expr
+: Type. An arbitrary expression. This argument is optional and its value does not affect the generated UUID. It can be used to prevent common subexpression elimination if the function is called multiple times within a single query and distinct UUIDs are desired for each call.
+Returns
+¶
+A value of type
+UUID
+.
+Example
+¶
+SELECT generateUUIDv4() AS uuid
+Result:
+┌─────────────────────────────────uuid─┐
+│ f4bf890f-f9dc-4332-ad5c-0c18e73f28e9 │
+└──────────────────────────────────────┘
+Example with multiple UUIDs generated per row
+¶
+SELECT generateUUIDv4(1), generateUUIDv4(2)
+Result:
+┌─generateUUIDv4(1)────────────────────┬─generateUUIDv4(2)────────────────────┐
+│ 2d49dc6e-ddce-4cd0-afb8-790956df54c1 │ 8abf8c13-7dea-4fdf-af3e-0e18767770e6 │
+└──────────────────────────────────────┴──────────────────────────────────────┘
+generateUUIDv7
+¶
+Generates a universally unique identifier (UUID) following version 7 specifications, which are time-ordered.
+The generated UUID includes a 48-bit Unix timestamp in milliseconds, a 4-bit version field (set to 7), a 42-bit counter to ensure uniqueness within the same millisecond, and a 32-bit random component. The counter starts at a random value for each timestamp and increments for subsequent UUIDs within that millisecond. If the counter overflows, the timestamp is advanced, and the counter resets. This function guarantees monotonically increasing counters for UUIDs generated within the same millisecond across concurrent operations.
+Syntax
+¶
+generateUUIDv7([expr])
+Arguments
+¶
+expr
+: Type. An arbitrary expression. This argument is optional and its value does not affect the generated UUID. It can be used to prevent common subexpression elimination if the function is called multiple times within a single query and distinct UUIDs are desired for each call.
+Returns
+¶
+A value of type
+UUID
+.
+Example
+¶
+SELECT generateUUIDv7() AS uuid
+Result:
+┌─────────────────────────────────uuid─┐
+│ 018f05af-f4a8-778f-beee-1bedbc95c93b │
+└──────────────────────────────────────┘
+Example with multiple UUIDs generated per row
+¶
+SELECT generateUUIDv7(1), generateUUIDv7(2)
+Result:
+┌─generateUUIDv7(1)────────────────────┬─generateUUIDv7(2)────────────────────┐
+│ 018f05c9-4ab8-7b86-b64e-c9f03fbd45d1 │ 018f05c9-4ab8-7b86-b64e-c9f12efb7e16 │
+└──────────────────────────────────────┴──────────────────────────────────────┘
+empty
+¶
+Checks if a given UUID is the "zero" UUID (all zeros).
+Syntax
+¶
+empty(UUID)
+Arguments
+¶
+x
+:
+UUID
+. The UUID to check.
+Returns
+¶
+1
+(true) if the UUID is
+00000000-0000-0000-0000-000000000000
+, otherwise
+0
+(false).
+UInt8
+.
+Example
+¶
+SELECT empty(generateUUIDv4())
+Result:
+┌─empty(generateUUIDv4())─┐
+│                       0 │
+└─────────────────────────┘
+notEmpty
+¶
+Checks if a given UUID is not the "zero" UUID (all zeros).
+Syntax
+¶
+notEmpty(UUID)
+Arguments
+¶
+x
+:
+UUID
+. The UUID to check.
+Returns
+¶
+1
+(true) if the UUID is not
+00000000-0000-0000-0000-000000000000
+, otherwise
+0
+(false).
+UInt8
+.
+Example
+¶
+SELECT notEmpty(generateUUIDv4())
+Result:
+┌─notEmpty(generateUUIDv4())─┐
+│                          1 │
+└────────────────────────────┘
+toUUID
+¶
+Converts a string representation into a UUID data type.
+Syntax
+¶
+toUUID(string)
+Arguments
+¶
+string
+:
+String
+. A string in UUID format (e.g.,
+xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+).
+Returns
+¶
+A
+UUID
+value.
+Example
+¶
+SELECT toUUID('61f0c404-5cb3-11e7-907b-a6006ad3dba0') AS uuid
+Result:
+┌─────────────────────────────────uuid─┐
+│ 61f0c404-5cb3-11e7-907b-a6006ad3dba0 │
+└──────────────────────────────────────┘
+toUUIDOrDefault
+¶
+Attempts to convert a string to a UUID. If the conversion fails, it returns a specified default UUID value instead of an error.
+Syntax
+¶
+toUUIDOrDefault(string, default)
+Arguments
+¶
+string
+:
+String
+. The string to attempt converting to a UUID.
+default
+:
+UUID
+. The UUID value to return if the conversion of
+string
+fails.
+Returns
+¶
+A
+UUID
+value.
+Example
+¶
+This example returns the first argument converted to a UUID type as it can be converted:
+SELECT toUUIDOrDefault('61f0c404-5cb3-11e7-907b-a6006ad3dba0', cast('59f0c404-5cb3-11e7-907b-a6006ad3dba0' as UUID))
+Result:
+┌─toUUIDOrDefault('61f0c404-5cb3-11e7-907b-a6006ad3dba0', CAST('59f0c404-5cb3-11e7-907b-a6006ad3dba0', 'UUID'))─┐
+│ 61f0c404-5cb3-11e7-907b-a6006ad3dba0                                                                          │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+This second example returns the second argument (the provided default UUID) as the first argument cannot be converted to a UUID type:
+SELECT toUUIDOrDefault('-----61f0c404-5cb3-11e7-907b-a6006ad3dba0', cast('59f0c404-5cb3-11e7-907b-a6006ad3dba0' as UUID))
+Result:
+┌─toUUIDOrDefault('-----61f0c404-5cb3-11e7-907b-a6006ad3dba0', CAST('59f0c404-5cb3-11e7-907b-a6006ad3dba0', 'UUID'))─┐
+│ 59f0c404-5cb3-11e7-907b-a6006ad3dba0                                                                               │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+toUUIDOrNull
+¶
+Attempts to convert a string to a UUID. If the conversion fails, it returns
+NULL
+.
+Syntax
+¶
+toUUIDOrNull(string)
+Arguments
+¶
+string
+:
+String
+. The string to attempt converting to a UUID.
+Returns
+¶
+A
+Nullable(UUID)
+value.
+Example
+¶
+SELECT toUUIDOrNull('61f0c404-5cb3-11e7-907b-a6006ad3dba0T') AS uuid
+Result:
+┌─uuid─┐
+│ ᴺᵁᴸᴸ │
+└──────┘
+toUUIDOrZero
+¶
+Attempts to convert a string to a UUID. If the conversion fails, it returns the "zero" UUID (
+00000000-0000-0000-0000-000000000000
+).
+Syntax
+¶
+toUUIDOrZero(string)
+Arguments
+¶
+string
+:
+String
+. The string to attempt converting to a UUID.
+Returns
+¶
+A
+UUID
+value.
+Example
+¶
+SELECT toUUIDOrZero('61f0c404-5cb3-11e7-907b-a6006ad3dba0T') AS uuid
+Result:
+┌─────────────────────────────────uuid─┐
+│ 00000000-0000-0000-0000-000000000000 │
+└──────────────────────────────────────┘
+UUIDStringToNum
+¶
+Converts a UUID string into its 16-byte binary representation.
+Syntax
+¶
+UUIDStringToNum(string[, variant = 1])
+Arguments
+¶
+string
+:
+String
+. A UUID string in the format
+xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+.
+variant
+:
+Int
+. An integer specifying the byte order.
+1
+(default) for Big-endian,
+2
+for Microsoft byte order.
+Returns
+¶
+A
+FixedString(16)
+representing the binary form of the UUID.
+Example
+¶
+SELECT
+    '612f3c40-5d3b-217e-707b-6a546a3d7b29' AS uuid,
+    UUIDStringToNum(uuid) AS bytes
+Result:
+┌─uuid─────────────────────────────────┬─bytes────────────┐
+│ 612f3c40-5d3b-217e-707b-6a546a3d7b29 │ a/<@];!~p{jTj={) │
+└──────────────────────────────────────┴──────────────────┘
+SELECT
+    '612f3c40-5d3b-217e-707b-6a546a3d7b29' AS uuid,
+    UUIDStringToNum(uuid, 2) AS bytes
+Result:
+┌─uuid─────────────────────────────────┬─bytes────────────┐
+│ 612f3c40-5d3b-217e-707b-6a546a3d7b29 │ @</a;]~!p{jTj={) │
+└──────────────────────────────────────┴──────────────────┘
+UUIDNumToString
+¶
+Converts a 16-byte binary representation of a UUID back into its standard string format.
+Syntax
+¶
+UUIDNumToString(binary[, variant = 1])
+Arguments
+¶
+binary
+:
+FixedString(16)
+. The binary representation of a UUID.
+variant
+:
+Int
+. An integer specifying the byte order used in the binary input.
+1
+(default) for Big-endian,
+2
+for Microsoft byte order.
+Returns
+¶
+A
+String
+containing the 36-character UUID.
+Example
+¶
+SELECT
+    'a/<@];!~p{jTj={)' AS bytes,
+    UUIDNumToString(toFixedString(bytes, 16)) AS uuid
+Result:
+┌─bytes────────────┬─uuid─────────────────────────────────┐
+│ a/<@];!~p{jTj={) │ 612f3c40-5d3b-217e-707b-6a546a3d7b29 │
+└──────────────────┴──────────────────────────────────────┘
+SELECT
+    '@</a;]~!p{jTj={)' AS bytes,
+    UUIDNumToString(toFixedString(bytes, 16), 2) AS uuid
+Result:
+┌─bytes────────────┬─uuid─────────────────────────────────┐
+│ @</a;]~!p{jTj={) │ 612f3c40-5d3b-217e-707b-6a546a3d7b29 │
+└──────────────────┴──────────────────────────────────────┘
+UUIDToNum
+¶
+Converts a UUID data type directly into its 16-byte binary representation. This function is more efficient than converting to a string first and then to binary.
+Syntax
+¶
+UUIDToNum(uuid[, variant = 1])
+Arguments
+¶
+uuid
+:
+UUID
+. The UUID value to convert.
+variant
+:
+Int
+. An integer specifying the desired byte order for the output.
+1
+(default) for Big-endian,
+2
+for Microsoft byte order.
+Returns
+¶
+A
+FixedString(16)
+representing the binary form of the UUID.
+Example
+¶
+SELECT
+    toUUID('612f3c40-5d3b-217e-707b-6a546a3d7b29') AS uuid,
+    UUIDToNum(uuid) AS bytes
+Result:
+┌─uuid─────────────────────────────────┬─bytes────────────┐
+│ 612f3c40-5d3b-217e-707b-6a546a3d7b29 │ a/<@];!~p{jTj={) │
+└──────────────────────────────────────┴──────────────────┘
+SELECT
+    toUUID('612f3c40-5d3b-217e-707b-6a546a3d7b29') AS uuid,
+    UUIDToNum(uuid, 2) AS bytes
+Result:
+┌─uuid─────────────────────────────────┬─bytes────────────┐
+│ 612f3c40-5d3b-217e-707b-6a546a3d7b29 │ @</a;]~!p{jTj={) │
+└──────────────────────────────────────┴──────────────────┘
+UUIDv7ToDateTime
+¶
+Extracts the timestamp component from a version 7 UUID and returns it as a
+DateTime64
+value.
+Syntax
+¶
+UUIDv7ToDateTime(uuid[, timezone])
+Arguments
+¶
+uuid
+:
+UUID
+. A version 7 UUID.
+timezone
+:
+String
+. An optional timezone name to apply to the returned timestamp.
+Returns
+¶
+A
+DateTime64(3)
+value representing the timestamp with millisecond precision. If the input is not a valid version 7 UUID, it returns
+1970-01-01 00:00:00.000
+.
+Example
+¶
+SELECT UUIDv7ToDateTime(toUUID('018f05c9-4ab8-7b86-b64e-c9f03fbd45d1'))
+Result:
+┌─UUIDv7ToDateTime(toUUID('018f05c9-4ab8-7b86-b64e-c9f03fbd45d1'))─┐
+│                                          2024-04-22 15:30:29.048 │
+└──────────────────────────────────────────────────────────────────┘
+SELECT UUIDv7ToDateTime(toUUID('018f05c9-4ab8-7b86-b64e-c9f03fbd45d1'), 'America/New_York')
+Result:
+┌─UUIDv7ToDateTime(toUUID('018f05c9-4ab8-7b86-b64e-c9f03fbd45d1'), 'America/New_York')─┐
+│                                                              2024-04-22 08:30:29.048 │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+generateSnowflakeID
+¶
+Generates a unique 64-bit Snowflake ID.
+A Snowflake ID combines a timestamp, a machine ID, and a sequence number. The generated ID includes the current Unix timestamp in milliseconds (41 bits), a machine ID (10 bits), and a counter (12 bits) to differentiate IDs created within the same millisecond. The counter starts at 0 for each millisecond and increments. If the counter overflows, the timestamp is advanced, and the counter resets to 0. This function ensures that the counter increments monotonically across concurrent operations for a given timestamp.
+The generated Snowflake IDs are based on the UNIX epoch 1970-01-01.
+While no standard or recommendation exists for the epoch of Snowflake IDs, implementations in other systems may use a different epoch, e.g. Twitter/X (2010-11-04) or Mastodon (2015-01-01).
+Syntax
+¶
+generateSnowflakeID([expr, [machine_id]])
+Arguments
+¶
+expr
+: Type. An arbitrary expression. This argument is optional and its value does not affect the generated ID. It can be used to prevent common subexpression elimination if the function is called multiple times within a single query and distinct IDs are desired for each call.
+machine_id
+:
+Int64
+. An optional machine identifier. Only the lowest 10 bits of this value are used.
+Returns
+¶
+A
+UInt64
+value representing the Snowflake ID.
+Example
+¶
+SELECT generateSnowflakeID() AS id
+Result:
+┌──────────────────id─┐
+│ 7199081390080409600 │
+└─────────────────────┘
+Example with multiple Snowflake IDs generated per row
+¶
+SELECT generateSnowflakeID(1), generateSnowflakeID(2)
+Result:
+┌─generateSnowflakeID(1)─┬─generateSnowflakeID(2)─┐
+│    7199081609652224000 │    7199081609652224001 │
+└────────────────────────┴────────────────────────┘
+Example with expression and a machine ID
+¶
+SELECT generateSnowflakeID('expr', 1)
+Result:
+┌─generateSnowflakeID('expr', 1)─┐
+│            7201148511606784002 │
+└────────────────────────────────┘
+snowflakeToDateTime
+¶
+This function is deprecated and can only be used if setting
+allow_deprecated_snowflake_conversion_functions
+is enabled.
+The function will be removed at some point in future.
+Extracts the timestamp component from a Snowflake ID and returns it as a
+DateTime
+value.
+Syntax
+¶
+snowflakeToDateTime(value[, time_zone])
+Arguments
+¶
+value
+:
+Int64
+. The Snowflake ID.
+time_zone
+:
+String
+. An optional timezone name to apply to the returned timestamp.
+Returns
+¶
+A
+DateTime
+value representing the timestamp component of the Snowflake ID.
+Example
+¶
+SELECT snowflakeToDateTime(CAST('1426860702823350272', 'Int64'), 'UTC')
+Result:
+┌─snowflakeToDateTime(CAST('1426860702823350272', 'Int64'), 'UTC')─┐
+│                                              2021-08-15 10:57:56 │
+└──────────────────────────────────────────────────────────────────┘
+snowflakeToDateTime64
+¶
+This function is deprecated and can only be used if setting
+allow_deprecated_snowflake_conversion_functions
+is enabled.
+The function will be removed at some point in future.
+Extracts the timestamp component from a Snowflake ID and returns it as a
+DateTime64
+value with millisecond precision.
+Syntax
+¶
+snowflakeToDateTime64(value[, time_zone])
+Arguments
+¶
+value
+:
+Int64
+. The Snowflake ID.
+time_zone
+:
+String
+. An optional timezone name to apply to the returned timestamp.
+Returns
+¶
+A
+DateTime64(3)
+value representing the timestamp component of the Snowflake ID with millisecond precision.
+Example
+¶
+SELECT snowflakeToDateTime64(CAST('1426860802823350272', 'Int64'), 'UTC')
+Result:
+┌─snowflakeToDateTime64(CAST('1426860802823350272', 'Int64'), 'UTC')─┐
+│                                            2021-08-15 10:58:19.841 │
+└────────────────────────────────────────────────────────────────────┘
+dateTimeToSnowflake
+¶
+This function is deprecated and can only be used if setting
+allow_deprecated_snowflake_conversion_functions
+is enabled.
+The function will be removed at some point in future.
+Converts a
+DateTime
+value into the earliest possible Snowflake ID for that specific time.
+Syntax
+¶
+dateTimeToSnowflake(value)
+Arguments
+¶
+value
+:
+DateTime
+. The date and time to convert.
+Returns
+¶
+An
+Int64
+value representing the first Snowflake ID that could be generated at the given time.
+Example
+¶
+WITH toDateTime('2021-08-15 18:57:56', 'Asia/Shanghai') AS dt SELECT dateTimeToSnowflake(dt)
+Result:
+┌─dateTimeToSnowflake(dt)─┐
+│     1426860702823350272 │
+└─────────────────────────┘
+dateTime64ToSnowflake
+¶
+This function is deprecated and can only be used if setting
+allow_deprecated_snowflake_conversion_functions
+is enabled.
+The function will be removed at some point in future.
+Converts a
+DateTime64
+value into the earliest possible Snowflake ID for that specific time.
+Syntax
+¶
+dateTime64ToSnowflake(value)
+Arguments
+¶
+value
+:
+DateTime64
+. The date and time to convert.
+Returns
+¶
+An
+Int64
+value representing the first Snowflake ID that could be generated at the given time.
+Example
+¶
+WITH toDateTime64('2021-08-15 18:57:56.492', 3, 'Asia/Shanghai') AS dt64 SELECT dateTime64ToSnowflake(dt64)
+Result:
+┌─dateTime64ToSnowflake(dt64)─┐
+│         1426860704886947840 │
+└─────────────────────────────┘
+snowflakeIDToDateTime
+¶
+Extracts the timestamp component from a Snowflake ID and returns it as a
+DateTime
+value.
+Syntax
+¶
+snowflakeIDToDateTime(value[, epoch[, time_zone]])
+Arguments
+¶
+value
+:
+UInt64
+. The Snowflake ID.
+epoch
+:
+UInt*
+. The epoch of the Snowflake ID in milliseconds since 1970-01-01. Defaults to 0 (1970-01-01). For the Twitter/X epoch (2015-01-01), provide 1288834974657. Optional.
+time_zone
+:
+String
+. An optional timezone name to apply to the returned timestamp.
+Returns
+¶
+A
+DateTime
+value representing the timestamp component of the Snowflake ID.
+Example
+¶
+SELECT snowflakeIDToDateTime(7204436857747984384) AS res
+Result:
+┌─────────────────res─┐
+│ 2024-06-06 10:59:58 │
+└─────────────────────┘
+snowflakeIDToDateTime64
+¶
+Extracts the timestamp component from a Snowflake ID and returns it as a
+DateTime64
+value with millisecond precision.
+Syntax
+¶
+snowflakeIDToDateTime64(value[, epoch[, time_zone]])
+Arguments
+¶
+value
+:
+UInt64
+. The Snowflake ID.
+epoch
+:
+UInt*
+. The epoch of the Snowflake ID in milliseconds since 1970-01-01. Defaults to 0 (1970-01-01). For the Twitter/X epoch (2015-01-01), provide 1288834974657. Optional.
+time_zone
+:
+String
+. An optional timezone name to apply to the returned timestamp.
+Returns
+¶
+A
+DateTime64(3)
+value representing the timestamp component of the Snowflake ID with millisecond precision.
+Example
+¶
+SELECT snowflakeIDToDateTime64(7204436857747984384) AS res
+Result:
+┌─────────────────res─┐
+│ 2024-06-06 10:59:58 │
+└─────────────────────┘
+dateTimeToSnowflakeID
+¶
+Converts a
+DateTime
+value into the earliest possible Snowflake ID for that specific time, optionally considering a custom epoch.
+Syntax
+¶
+dateTimeToSnowflakeID(value[, epoch])
+Arguments
+¶
+value
+:
+DateTime
+. The date and time to convert.
+epoch
+:
+UInt*
+. The epoch of the Snowflake ID in milliseconds since 1970-01-01. Defaults to 0 (1970-01-01). For the Twitter/X epoch (2015-01-01), provide 1288834974657. Optional.
+Returns
+¶
+A
+UInt64
+value representing the first Snowflake ID that could be generated at the given time.
+Example
+¶
+SELECT toDateTime('2021-08-15 18:57:56', 'Asia/Shanghai') AS dt, dateTimeToSnowflakeID(dt) AS res
+Result:
+┌──────────────────dt─┬─────────────────res─┐
+│ 2021-08-15 18:57:56 │ 6832626392367104000 │
+└─────────────────────┴─────────────────────┘
+dateTime64ToSnowflakeID
+¶
+Converts a
+DateTime64
+value into the earliest possible Snowflake ID for that specific time, optionally considering a custom epoch.
+Syntax
+¶
+dateTime64ToSnowflakeID(value[, epoch])
+Arguments
+¶
+value
+:
+DateTime64
+. The date and time to convert.
+epoch
+:
+UInt*
+. The epoch of the Snowflake ID in milliseconds since 1970-01-01. Defaults to 0 (1970-01-01). For the Twitter/X epoch (2015-01-01), provide 1288834974657. Optional.
+Returns
+¶
+A
+UInt64
+value representing the first Snowflake ID that could be generated at the given time.
+Example
+¶
+SELECT toDateTime('2021-08-15 18:57:56.493', 3, 'Asia/Shanghai') AS dt, dateTime64ToSnowflakeID(dt) AS res
+Result:
+┌──────────────────────dt─┬─────────────────res─┐
+│ 2021-08-15 18:57:56.493 │ 6832626394434895872 │
+└─────────────────────────┴─────────────────────┘
+Updated
+3 weeks ago
+On this page
+Functions for working with UUIDs
+generateUUIDv4
+generateUUIDv7
+empty
+notEmpty
+toUUID
+toUUIDOrDefault
+toUUIDOrNull
+toUUIDOrZero
+UUIDStringToNum
+UUIDNumToString
+UUIDToNum
+UUIDv7ToDateTime
+generateSnowflakeID
+snowflakeToDateTime
+snowflakeToDateTime64
+dateTimeToSnowflake
+dateTime64ToSnowflake
+snowflakeIDToDateTime
+snowflakeIDToDateTime64
+dateTimeToSnowflakeID
+dateTime64ToSnowflakeID
+forward
+classic
+Ask AI

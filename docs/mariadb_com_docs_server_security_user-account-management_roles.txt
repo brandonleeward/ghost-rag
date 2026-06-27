@@ -1,0 +1,61 @@
+Source: https://mariadb.com/docs/server/security/user-account-management/roles
+
+Roles | Server | MariaDB Documentation
+Webinar | Modernizing High-Volume Payment Systems: Real-Time Architecture and Demo
+Watch Now
+⌘
+Ctrl
+k
+Download MariaDB
+Contact Us
+More
+MariaDB Server Documentation
+Quickstart Guides
+Server Usage
+Server Management
+Security
+Securing MariaDB
+Encryption
+User Account Management
+Roles
+Roles Overview
+System Users, Roles, Privileges
+Account Locking
+Authentication
+Incrementing of the access_denied_errors Status Variable
+User Password Expiry
+Catalogs
+Authentication with Enterprise Server
+Limiting Size of Created Disk Temporary Files and Tables
+Security Vulnerabilities (CVE) Fixed in MariaDB
+Architecture
+Clients & Utilities
+HA & Performance
+Reference
+Powered by GitBook
+On this page
+For the complete documentation index, see
+llms.txt
+. This page is also available as
+Markdown
+.
+ChatGPT
+On this page
+Roles
+Manage roles in MariaDB Server for streamlined user access control. This section explains how to create, assign, and manage roles to simplify privilege management and enhance security.
+Roles Overview
+System Users, Roles, Privileges
+CREATE ROLE
+DROP ROLE
+CURRENT_ROLE
+SET ROLE
+SET DEFAULT ROLE
+GRANT
+REVOKE
+mysql.roles_mapping Table
+Information Schema APPLICABLE_ROLES Table
+Information Schema ENABLED_ROLES Table
+Last updated
+4 months ago
+Was this helpful?
+Was this helpful?

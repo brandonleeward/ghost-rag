@@ -1,0 +1,52 @@
+Source: https://www.tinybird.com/docs/forward/dev-reference/commands/tb-sink
+
+tb sink · Tinybird Docs
+Sign In
+Sign Up
+tb sink
+¶
+Copy as MD
+Manages sink pipes. Global options apply to this command. See
+Global options
+.
+The following subcommands are available:
+Subcommand
+Description
+ls
+Lists all the sink pipes.
+run [OPTIONS] PIPE_NAME_OR_ID
+Runs a sink job.
+tb sink run
+¶
+Runs a sink job.
+Option
+Description
+--wait / --no-wait
+Waits for the sink job to finish.
+--mode [append|replace]
+Defines the sink strategy.
+--param TEXT
+Key and value of the params you want the sink pipe to be called with. For example: tb sink run <my_sink_pipe> --param foo=bar
+Environment support
+¶
+Environment
+Supported
+Description
+--local
+✓ Yes (default)
+Manages sink pipes locally.
+--cloud
+✓ Yes
+Manages sink pipes in Tinybird Cloud.
+--branch=BRANCH_NAME
+✓ Yes
+Manages sink pipes in a branch.
+Updated
+6 months ago
+Looking for Classic docs?
+On this page
+tb sink
+tb sink run
+Environment support
+forward
+Ask AI
