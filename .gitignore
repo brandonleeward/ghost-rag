@@ -5,3 +5,5 @@ __pycache__/
 docs/
 chroma_db/
 .DS_Store
+docs/
+chroma_db/
