@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
-from langchain_community.embeddings import SentenceTransformerEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 
 load_dotenv()
 
@@ -45,7 +45,7 @@ def ingest():
     chunks, metadatas = chunk_documents(documents)
     
     print("Creating embeddings and storing in ChromaDB...")
-    embeddings = SentenceTransformerEmbeddings(
+    embeddings = HuggingFaceEmbeddings(
         model_name="all-MiniLM-L6-v2"
     )
     
